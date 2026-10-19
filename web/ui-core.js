@@ -209,7 +209,31 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     window.scrollTo(0, 0);
   };
   Z.paintChrome = function (view) { paintRail(view); paintTop(); };
-  Z.setMain = function (html) { document.getElementById('main').innerHTML = html; };
+  Z.setMain = function (html) { document.getElementById('main').innerHTML = html; Z.fitTabs(); };
+  // Keeps every tab strip on one row. Tabs that do not fit move, from the end,
+  // into a "More" menu; the open tab always stays visible.
+  Z.fitTabs = function () {
+    document.querySelectorAll('#main nav.tabs').forEach(function (nav) {
+      var more = nav.querySelector('details.more');
+      if (more) { more.querySelectorAll('.menu a').forEach(function (a) { nav.insertBefore(a, more); }); more.remove(); }
+      if (nav.scrollWidth <= nav.clientWidth + 1) return;
+      more = document.createElement('details'); more.className = 'more';
+      more.innerHTML = '<summary>' + t('More') + ' <i class="ph ph-caret-down" aria-hidden="true"></i></summary><div class="menu" role="menu"></div>';
+      nav.appendChild(more);
+      var menu = more.querySelector('.menu'), links = [].slice.call(nav.querySelectorAll(':scope > a'));
+      for (var i = links.length - 1; i > 0 && nav.scrollWidth > nav.clientWidth + 1; i--) {
+        if (links[i].getAttribute('aria-current') === 'page') continue;
+        menu.insertBefore(links[i], menu.firstChild);
+      }
+      var hidden = menu.querySelectorAll('a'), bad = 0;
+      if (!hidden.length) { more.remove(); return; }
+      hidden.forEach(function (a) { a.setAttribute('role', 'menuitem'); var c = a.querySelector('.count'); if (c) bad += +c.textContent || 0; });
+      if (bad) more.querySelector('summary').insertAdjacentHTML('beforeend', '<span class="count">' + bad + '</span>');
+    });
+  };
+  var fitT;
+  window.addEventListener('resize', function () { clearTimeout(fitT); fitT = setTimeout(Z.fitTabs, 120); });
+  document.addEventListener('click', function (e) { document.querySelectorAll('details.more[open]').forEach(function (d) { if (!d.contains(e.target) || e.target.closest('.menu a')) d.open = false; }); });
 
   function shell() {
     document.body.innerHTML = '<div class="shell"><header class="top"></header><nav class="rail" aria-label="' + t('Main') + '"></nav><div class="col">' +
@@ -249,7 +273,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       '<div class="brand">' + logo() + '<div><b>Inspection Ready</b><span>' + esc(S.tenant ? S.tenant.name : '') + '</span></div></div>' +
       '<nav class="switch" aria-label="' + t('Tax') + '">' + sw('vat', '<span class="lg">' + t('VAT') + '</span><span class="sh">' + (S.lang === 'ar' ? 'القيمة المضافة' : 'VAT') + '</span>') + sw('wht', '<span class="lg">' + t('Withholding tax') + '</span><span class="sh">' + (S.lang === 'ar' ? 'الاستقطاع' : 'WHT') + '</span>') + '</nav>' +
       '<span class="grow"></span>' +
-      (S.entities.length ? '<select data-chg="entity" aria-label="' + t('Entity') + '">' + opts + '</select>' : '') +
+      (S.entities.length ? '<label class="ent-pick" title="' + esc(t('Entity')) + '">' + Z.icon('buildings') + '<select data-chg="entity" aria-label="' + t('Entity') + '">' + opts + '</select></label>' : '') +
       (S.api.mode === 'cloud' && S.tenant && S.tenant.spreadsheetUrl ? '<a class="btn small sheet-btn" href="' + esc(S.tenant.spreadsheetUrl) + '" target="_blank" rel="noopener noreferrer" title="' + esc(t('Open Google Sheet')) + '">' + Z.icon('microsoft-excel-logo') + '<span class="so-lbl">' + t('Google Sheet') + '</span></a>' : '') +
       '<button class="btn ghost small" data-act="theme" aria-label="' + t('Switch light/dark') + '">' + Z.icon('circle-half') + '</button><button class="btn ghost small lang-btn" data-act="lang">' + (S.lang === 'ar' ? 'English' : 'العربية') + '</button>' +
       Z.exitButton('btn small exit-btn');
@@ -259,10 +283,34 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   Z.entName = function (e) { return e ? (S.lang === 'ar' && e.nameAr ? e.nameAr : e.name) : ''; };
 
   // ---------------------------------------------------------------- dashboard
+  // Three steps from an empty account to a signed-off month. Shown until the
+  // first exercise is signed off, or until the person hides it.
+  Z.getStarted = function () {
+    var hidden = false; try { hidden = localStorage.getItem('zr_gs_hide') === '1'; } catch (e) {}
+    var e0 = S.entities[0], hasEx = S.exercises.length > 0, closed = S.exercises.some(function (x) { return x.status === 'closed'; });
+    if (closed || (hidden && S.entities.length)) return '';
+    var open = S.exercises.filter(function (x) { return x.status !== 'closed'; })[0];
+    var steps = [
+      { done: S.entities.length > 0, icon: 'buildings', title: t('Add your legal entity'), text: t('Its TRN, VAT filing frequency, whether it pays non-residents, and which GL accounts hold revenue and VAT.'),
+        btn: S.entities.length ? '' : (Z.can('manager') ? '<a class="btn primary small" href="#/entities/new">' + t('Add entity') + '</a>' : '') + (S.api.mode === 'local' ? '<button class="btn small" data-act="loaddemo">' + t('Load demo company') + '</button>' : '') },
+      { done: hasEx, icon: 'upload-simple', title: t('Start a month and load the data'), text: t('Pick the month on the dashboard, then load the filed return, the ERP tax report, TB and GL, bank statements and the e-invoicing export.'),
+        btn: !hasEx && e0 ? '<a class="btn primary small" href="#/entity/' + e0.id + '">' + t('Start an exercise') + '</a>' : '' },
+      { done: closed, icon: 'seal-check', title: t('Clear the checks and sign off'), text: t('Explain or correct every red check, test the samples, link the documents, then a manager signs the month off.'),
+        btn: open ? '<a class="btn primary small" href="#/ex/' + open.id + '/overview">' + t('Open the exercise') + '</a>' : '' }
+    ];
+    var cur = steps.findIndex(function (s) { return !s.done; });
+    return '<section class="paper getstarted"><header><div><h2>' + t('Get started in three steps') + '</h2><p>' + t('About an hour for the first month; less every month after.') + '</p></div>' +
+      '<div class="row"><a class="btn ghost small" href="https://besgasksa.github.io/Zatca/Inspection-Ready-Guide.pdf" target="_blank" rel="noopener noreferrer">' + Z.icon('book-open-text') + ' ' + t('User guide (PDF)') + '</a>' +
+      (S.entities.length ? '<button class="btn ghost small" data-act="gshide" aria-label="' + esc(t('Hide')) + '">' + Z.icon('x') + '</button>' : '') + '</div></header><ol class="gs">' +
+      steps.map(function (s, i) {
+        return '<li class="' + (s.done ? 'done' : i === cur ? 'now' : '') + '"><span class="dot">' + (s.done ? Z.icon('check') : i + 1) + '</span><div><h3>' + Z.icon(s.icon) + ' ' + s.title + '</h3><p>' + s.text + '</p>' + (i === cur && s.btn ? '<div class="row">' + s.btn + '</div>' : '') + '</div></li>';
+      }).join('') + '</ol></section>';
+  };
+  Z.ACT.gshide = function () { try { localStorage.setItem('zr_gs_hide', '1'); } catch (e) {} Z.route(); };
+
   Z.views.dashboard = function () {
     if (!S.entities.length) {
-      return Z.setMain('<div class="paper empty"><h2>' + t('Start with your first legal entity') + '</h2><p style="margin:0 auto 18px">' + t('Add each company or branch registered for VAT. Every month you run an inspection exercise for it.') + '</p>' +
-        '<div class="row" style="justify-content:center"><a class="btn primary" href="#/entities/new">' + t('Add entity') + '</a>' + (S.api.mode === 'local' ? '<button class="btn" data-act="loaddemo">' + t('Load demo company') + '</button>' : '') + '</div></div>');
+      return Z.setMain('<div class="pagehead"><div><p class="eyebrow">' + t('Welcome') + '</p><h1>' + t('Inspection readiness, every month') + '</h1><p>' + t('Each month you run an inspection exercise per entity: the system compares your return with the ledger, the bank and e-invoicing, and tells you what an inspector would find.') + '</p></div></div>' + Z.getStarted());
     }
     var wht = Z.isWht(), months = [], cur = E.periodOf(Z.today(), 'monthly');
     for (var i = 0; i < 12; i++) { cur = E.prevPeriod(cur); months.unshift(cur); }
@@ -306,7 +354,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       '<div class="stack"><div class="kpis">' + kpi('buildings', ents.length, t('Entities')) + kpi('hourglass-medium', open.length, t('Exercises not signed off')) +
       kpi('gauge', avg == null ? '—' : avg + '%', t('Average readiness, last 12 months')) + kpi('x-circle', fails, t('Failed checks in latest exercises'), fails) +
       kpi('coins', Z.fmt(exposure, 0), wht ? t('WHT exposure (SAR)') : t('VAT exposure (SAR)'), exposure) + '</div>' +
-      dataStrip() + '<div id="reqalert"></div>' +
+      Z.getStarted() + dataStrip() + '<div id="reqalert"></div>' +
       (ents.length ? '' : '<section class="paper empty"><i class="ph ph-info big" aria-hidden="true"></i><p>' + t('No entity is registered for withholding tax. Turn it on in the entity settings.') + '</p></section>') +
       '<section class="paper"><header><div><h2>' + t('Readiness by month') + '</h2><p>' + t('Green is ready, amber at risk, red not ready. A dark underline means signed off.') + '</p></div></header><div class="tbl-wrap">' + heat + '</div></section>' +
       '<section class="paper"><header><div><h2>' + t('Filing deadlines') + '</h2><p>' + (wht ? t('WHT is due by the 10th of the month after the payment.') : t('VAT is due by the last day of the month after the period.')) + '</p></div></header><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Entity') + '</th><th>' + t('Period') + '</th><th>' + (wht ? t('WHT return due') : t('VAT return due')) + '</th></tr></thead><tbody>' + dl + '</tbody></table></div></section></div>');

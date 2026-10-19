@@ -373,3 +373,50 @@ table.matrix td.bl { border-inline-start: 1px solid var(--line); }
 .exit-btn i { font-size: 17px; }
 .rail .foot .exit-btn.wide { width: 100%; justify-content: center; margin-top: 10px; padding: 8px 10px; color: var(--fail); border-color: color-mix(in srgb, var(--fail) 40%, transparent); }
 @media (max-width: 420px) { .top .switch a { padding: 6px 8px; } }
+
+/* ---- polish pass ---- */
+/* tabs: one row, overflow goes to the More menu */
+.tabs { overflow: visible; flex-wrap: nowrap; position: relative; }
+.tabs details.more { position: relative; margin-inline-start: auto; }
+.tabs details.more > summary { list-style: none; cursor: pointer; padding: 10px 12px; font-weight: 650; font-size: 13.5px; color: var(--ink-2); display: inline-flex; gap: 6px; align-items: center; white-space: nowrap; border-radius: var(--r-s); }
+.tabs details.more > summary::-webkit-details-marker { display: none; }
+.tabs details.more > summary:hover, .tabs details.more[open] > summary { color: var(--ink); background: var(--surface-2); }
+.tabs details.more .menu { position: absolute; inset-inline-end: 0; top: calc(100% + 4px); z-index: 25; min-width: 220px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-m); box-shadow: var(--shadow-2); padding: 6px; display: grid; }
+.tabs details.more .menu a { border-bottom: 0; margin: 0; border-radius: var(--r-s); justify-content: space-between; }
+.tabs details.more .menu a:hover { background: var(--surface-2); }
+.tabs details.more .menu a[aria-current="page"] { background: var(--accent-soft); }
+
+/* sidebar: pinned under the top bar however long the page is */
+.shell { align-items: start; }
+.rail { position: sticky; top: 60px; height: calc(100vh - 60px); height: calc(100dvh - 60px); align-self: start; }
+.rail .foot { position: sticky; bottom: 0; background: var(--surface); padding-bottom: 4px; }
+
+/* compact entity picker */
+.top .ent-pick { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); border-radius: var(--r-s); padding: 0 4px 0 10px; background: var(--surface); height: 36px; max-width: 250px; }
+.top .ent-pick i { color: var(--ink-3); font-size: 16px; flex: none; }
+.top .ent-pick select { border: 0; background: transparent; min-width: 0; min-height: 0; height: 34px; padding: 0 22px 0 2px; max-width: 210px; font-weight: 650; text-overflow: ellipsis; box-shadow: none; }
+.top .ent-pick select:focus { outline: none; }
+.top .ent-pick:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+@media (max-width: 640px) { .top .ent-pick { display: none; } }
+
+/* get started */
+.getstarted { border-top: 3px solid var(--accent); }
+.getstarted ol.gs { list-style: none; margin: 4px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.getstarted li { display: grid; grid-template-columns: 30px 1fr; gap: 12px; padding: 14px; border: 1px solid var(--line); border-radius: var(--r-m); background: var(--surface); }
+.getstarted li .dot { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; background: var(--surface-2); color: var(--ink-3); }
+.getstarted li.now { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.getstarted li.now .dot { background: var(--accent); color: var(--accent-ink); }
+.getstarted li.done .dot { background: var(--pass-soft, #e3f4e8); color: var(--pass, #166534); }
+.getstarted li.done h3, .getstarted li.done p { color: var(--ink-3); }
+.getstarted h3 { font-size: 14.5px; margin: 4px 0 4px; display: flex; gap: 6px; align-items: center; }
+.getstarted h3 i { color: var(--accent); }
+.getstarted p { font-size: 13px; color: var(--ink-2); margin: 0 0 10px; }
+@media (max-width: 960px) { .getstarted ol.gs { grid-template-columns: 1fr; } }
+
+.ready-row { gap: 28px; align-items: center; flex-wrap: nowrap; }
+/* readiness card: ring above the bars on narrow screens */
+@media (max-width: 640px) {
+  .ready-row { flex-wrap: wrap; justify-content: center; gap: 16px; }
+  .ready-row > .parts { flex: 1 1 100% !important; min-width: 0; }
+  .parts .p { grid-template-columns: minmax(0, 1fr) 90px 44px; }
+}

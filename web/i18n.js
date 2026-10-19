@@ -363,3 +363,11 @@ Object.assign(window.ZI18N, { 'Google Sheet': 'Google Sheet' });
 Object.assign(window.ZI18N, { 'Keep me signed in on this device': 'تذكرني على هذا الجهاز' });
 Object.assign(window.ZI18N, { 'User guide (PDF)': 'دليل المستخدم (PDF)' });
 Object.assign(window.ZI18N, { 'Exit demo': 'الخروج من العرض التجريبي' });
+Object.assign(window.ZI18N, {
+  'More': 'المزيد', 'Welcome': 'مرحباً', 'Inspection readiness, every month': 'جاهزية الفحص، كل شهر',
+  'Each month you run an inspection exercise per entity: the system compares your return with the ledger, the bank and e-invoicing, and tells you what an inspector would find.': 'كل شهر تُعدّ تمرين فحص لكل منشأة: يقارن النظام إقرارك بالدفاتر والبنك والفوترة الإلكترونية، ويخبرك بما سيجده الفاحص.',
+  'Add your legal entity': 'أضف منشأتك', 'Its TRN, VAT filing frequency, whether it pays non-residents, and which GL accounts hold revenue and VAT.': 'رقمها الضريبي، ودورية إقرار القيمة المضافة، وهل تدفع لغير مقيمين، وحسابات الإيرادات والضريبة في الأستاذ العام.',
+  'Start a month and load the data': 'ابدأ شهراً وحمّل البيانات', 'Pick the month on the dashboard, then load the filed return, the ERP tax report, TB and GL, bank statements and the e-invoicing export.': 'اختر الشهر من لوحة المتابعة، ثم حمّل الإقرار المقدم وتقرير الضريبة من النظام وميزان المراجعة والأستاذ العام وكشوف البنك وملف الفوترة الإلكترونية.',
+  'Start an exercise': 'ابدأ تمريناً', 'Clear the checks and sign off': 'عالج الفحوصات واعتمد', 'Explain or correct every red check, test the samples, link the documents, then a manager signs the month off.': 'فسّر أو صحّح كل فحص أحمر، واختبر العينات، واربط المستندات، ثم يعتمد المدير الشهر.',
+  'Open the exercise': 'فتح التمرين', 'Get started in three steps': 'ابدأ في ثلاث خطوات', 'About an hour for the first month; less every month after.': 'نحو ساعة للشهر الأول، وأقل في كل شهر بعده.', 'Hide': 'إخفاء'
+});
