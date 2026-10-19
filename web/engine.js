@@ -75,6 +75,7 @@
       intl_telecom: 0.05, dividends: 0.05, loan_returns: 0.05, insurance: 0.05,
       royalties: 0.15, head_office_services: 0.15, management_fees: 0.20, other: 0.15
     },
+    inspectionHorizonMonths: 12,  // action plan: cost if an inspector finds it this many months from now
     weights: { recon: 30, bank: 10, einv: 10, filing: 10, other: 5, analytics: 10, sampling: 12, checklist: 10, findings: 8 }
   };
 
@@ -2043,6 +2044,232 @@
     return { score: sc, parts: parts, grade: sc >= 85 ? 'ready' : sc >= 70 ? 'mostly' : sc >= 50 ? 'risk' : 'not' };
   };
 
+  // ------------------------------------------------------------------ remediation
+  // For every failed or flagged check: what to do, in which order, by when, and
+  // what it costs to act now versus leaving it for an inspector to find.
+  // Steps are written for the person doing the work; [en, ar] pairs.
+  // kind: amend (correct a return) · pay · book (ledger entry) · doc (evidence) ·
+  //       einv (e-invoicing) · process (fix the cause so it does not recur).
+  var PB = function (kind, tax, match, en, ar) { return { kind: kind, tax: tax, match: match, en: en, ar: ar }; };
+  E.PLAYBOOKS = {
+    V1: PB('amend', 'VAT', ['Return', 'System report'],
+      ['Export the ERP tax report again for the period and compare it box by box with the filed return.', 'For each box that differs, list the invoices behind the difference (late postings, manual journals, credit notes after filing).', 'Decide which figure is right; if the return is wrong, correct it (amend or next return, see the route).', 'Lock the period in the ERP after filing so the report cannot move again.'],
+      ['أعد استخراج تقرير الضريبة من النظام للفترة وقارنه بالإقرار المقدم بنداً بنداً.', 'لكل بند مختلف، حدد الفواتير المسببة للفرق (ترحيل متأخر، قيود يدوية، إشعارات دائنة بعد التقديم).', 'حدد الرقم الصحيح؛ وإذا كان الإقرار خاطئاً فصححه (تعديل أو الإقرار التالي حسب المسار).', 'أقفل الفترة في النظام بعد التقديم حتى لا يتغير التقرير.']),
+    V2: PB('book', 'VAT', ['Return', 'Excel workings'],
+      ['Open the Excel file used to prepare the return and trace each box to the filed figure.', 'Find manual adjustments, copy-paste or formula errors and document each one.', 'Keep one final, signed version of the workings with the filed return.'],
+      ['افتح ملف Excel المستخدم لإعداد الإقرار وتتبع كل بند إلى الرقم المقدم.', 'حدد التعديلات اليدوية وأخطاء النسخ والمعادلات ووثق كل منها.', 'احتفظ بنسخة نهائية معتمدة واحدة من أوراق العمل مع الإقرار المقدم.']),
+    V3: PB('book', 'VAT', ['System report', 'Excel workings'],
+      ['Rebuild the workings directly from the ERP report export, not from an older copy.', 'Explain every manual line in the workings with a reference.'],
+      ['أعد بناء أوراق العمل مباشرة من تقرير النظام وليس من نسخة قديمة.', 'وثق كل سطر يدوي في أوراق العمل بمرجع.']),
+    V4: PB('amend', 'VAT', ['Return', 'General ledger'],
+      ['Reconcile output VAT on the return with the movement on the output VAT accounts.', 'Look for VAT posted to the wrong account, unposted invoices and reversals after filing.', 'Post correcting journals; if the return was wrong, correct it through the route shown.'],
+      ['طابق ضريبة المخرجات في الإقرار مع حركة حسابات ضريبة المخرجات.', 'ابحث عن ضريبة مرحلة لحساب خاطئ أو فواتير غير مرحلة أو عكس قيود بعد التقديم.', 'سجل قيود التصحيح؛ وإذا كان الإقرار خاطئاً فصححه حسب المسار.']),
+    V5: PB('amend', 'VAT', ['Return', 'General ledger'],
+      ['Reconcile input VAT on the return with the input VAT accounts.', 'Check every claim has a valid tax invoice in the company name and VAT number.', 'Reverse input VAT without a valid invoice; correct the return if it was claimed.'],
+      ['طابق ضريبة المدخلات في الإقرار مع حسابات ضريبة المدخلات.', 'تحقق من وجود فاتورة ضريبية صحيحة باسم المنشأة ورقمها الضريبي لكل مطالبة.', 'اعكس ضريبة المدخلات غير المؤيدة بفاتورة صحيحة وصحح الإقرار إذا طولب بها.']),
+    V6: PB('book', 'VAT', ['Trial balance revenue', 'Return box 6'],
+      ['List every reconciling item between revenue in the TB and box 6 (non-taxable income, deferrals, intercompany, FX).', 'Record each item on the VAT reconciliation tab with its amount and evidence.', 'Anything left unexplained is treated by an inspector as undeclared sales: correct the return for it.'],
+      ['اذكر كل بند تسوية بين الإيرادات في ميزان المراجعة والبند 6 (إيرادات غير خاضعة، إيرادات مؤجلة، بين الشركات، فروق عملة).', 'سجل كل بند في تبويب مطابقة القيمة المضافة مع مبلغه ومستنده.', 'أي فرق غير مفسر يعامله الفاحص كمبيعات غير مقرة: صحح الإقرار به.']),
+    V7: PB('amend', 'VAT', ['Return box 16', 'VAT accounts in GL'],
+      ['Agree the net VAT due with the net balance of all VAT accounts for the period.', 'Post the VAT settlement journal if it is missing; clear old balances with evidence.'],
+      ['طابق صافي الضريبة المستحقة مع صافي رصيد جميع حسابات الضريبة للفترة.', 'سجل قيد تسوية الضريبة إن كان مفقوداً، وأقفل الأرصدة القديمة بمستندات.']),
+    V8: PB('amend', 'VAT', ['Return box 8', 'Customs declarations'],
+      ['Download the customs declarations (Bayan) for the period and match them to box 8.', 'Claim import VAT only where the company is the importer of record and has the declaration.', 'Correct box 8 for unmatched or missing declarations.'],
+      ['حمّل البيانات الجمركية للفترة وطابقها مع البند 8.', 'لا تطالب بضريبة الاستيراد إلا إذا كانت المنشأة هي المستورد ولديها البيان.', 'صحح البند 8 للبيانات غير المطابقة أو المفقودة.']),
+    V9: PB('einv', 'VAT', ['Fatoora', 'System sales'],
+      ['Match every invoice in Fatoora to the ERP and the other way round.', 'Report or clear invoices that never reached ZATCA; cancel duplicates with credit notes.'],
+      ['طابق كل فاتورة في منصة فاتورة مع النظام والعكس.', 'أبلغ أو اعتمد الفواتير التي لم تصل للهيئة، وألغِ المكرر بإشعارات دائنة.']),
+    V10: PB('amend', 'VAT', ['Input VAT', 'VAT Law Art. 50'],
+      ['Reverse input VAT claimed on entertainment, hospitality, personal use and restricted vehicles.', 'Correct the return for the amount claimed.', 'Add a rule in the ERP that blocks these expense codes from VAT recovery.'],
+      ['اعكس ضريبة المدخلات المطالب بها على الضيافة والترفيه والاستخدام الشخصي والسيارات غير المسموح بها.', 'صحح الإقرار بالمبلغ المطالب به.', 'أضف قاعدة في النظام تمنع استرداد الضريبة على رموز هذه المصروفات.']),
+    V11: PB('amend', 'VAT', ['Input VAT', 'Apportionment ratio']),
+    V12: PB('amend', 'VAT', ['Output VAT', 'Deemed supplies']),
+    V13: PB('amend', 'VAT', ['Return box 14', 'VAT IR Art. 63'],
+      ['Move corrections of SAR 15,000 or more out of box 14 into an amended return for the original period.', 'Notify ZATCA within 20 days of discovering the error.'],
+      ['انقل التصحيحات البالغة 15,000 ريال فأكثر من البند 14 إلى إقرار معدل للفترة الأصلية.', 'أبلغ الهيئة خلال 20 يوماً من اكتشاف الخطأ.']),
+    V14: PB('book', 'VAT', ['Return box 15', 'Previous return']),
+    B1: PB('amend', 'VAT', ['Bank receipts', 'Declared sales'],
+      ['Classify every bank receipt: customer, loan, owner funding, transfer between own accounts, refund.', 'Trace customer receipts above materiality to sales invoices.', 'Receipts that are sales but not in the return are undeclared sales: correct the return for the VAT.', 'Keep the classification file: inspectors start with the bank.'],
+      ['صنف كل مقبوض بنكي: عميل، قرض، تمويل الملاك، تحويل بين حسابات المنشأة، استرداد.', 'تتبع مقبوضات العملاء التي تتجاوز الأهمية النسبية إلى فواتير المبيعات.', 'المقبوضات التي هي مبيعات وغير واردة في الإقرار مبيعات غير مقرة: صحح الإقرار بضريبتها.', 'احتفظ بملف التصنيف: الفاحص يبدأ بالبنك.']),
+    B2: PB('book', 'VAT', ['Bank payments', 'Declared purchases']),
+    B3: PB('pay', 'VAT', ['Bank', 'Previous VAT return'],
+      ['Find the SADAD payment for the previous return and compare it with box 16.', 'Pay any shortfall now: the 5% monthly fine keeps running until it is paid.'],
+      ['ابحث عن سداد الإقرار السابق وقارنه بالبند 16.', 'سدد أي نقص فوراً: غرامة 5% الشهرية مستمرة حتى السداد.']),
+    B4: PB('pay', 'WHT', ['Bank', 'Previous WHT return'],
+      ['Find the WHT payment for the previous month and compare it with the WHT return.', 'Pay any shortfall now and keep the SADAD receipt.'],
+      ['ابحث عن سداد الاستقطاع للشهر السابق وقارنه بالإقرار.', 'سدد أي نقص فوراً واحتفظ بإيصال السداد.']),
+    B5: PB('amend', 'WHT', ['Foreign transfers', 'WHT register'],
+      ['List every transfer abroad and match it to a WHT register line.', 'For each unmatched transfer, decide: subject to WHT (add it and pay) or not (record why, e.g. purchase of goods).', 'File a corrected WHT return for missing payments.'],
+      ['اذكر كل تحويل للخارج وطابقه مع سطر في سجل الاستقطاع.', 'لكل تحويل غير مطابق حدد: خاضع للاستقطاع (أضفه وسدد) أم لا (وثق السبب، مثل شراء بضائع).', 'قدم إقرار استقطاع معدلاً للمدفوعات المفقودة.']),
+    B6: PB('doc', 'VAT', ['Bank receipts', 'Sales invoices']),
+    B7: PB('book', 'VAT', ['Bank statement', 'Trial balance']),
+    P1: PB('amend', 'VAT', ['Card takings (POS / mada)', 'B2C sales declared'],
+      ['Reconcile POS settlement reports with simplified (B2C) sales in the ERP by day.', 'Card takings above declared sales are undeclared sales: correct the return.'],
+      ['طابق تقارير تسوية نقاط البيع مع المبيعات المبسطة في النظام يومياً.', 'المقبوضات بالبطاقات الزائدة عن المبيعات المقرة مبيعات غير مقرة: صحح الإقرار.']),
+    P2: PB('book', 'VAT', ['POS settlements', 'Bank']),
+    E1: PB('einv', 'VAT', ['ERP', 'E-invoicing provider'],
+      ['Send every missing invoice to the provider now so it is cleared or reported.', 'Find why it was skipped (integration error, manual invoice) and fix the interface.'],
+      ['أرسل كل فاتورة مفقودة إلى المزود الآن لاعتمادها أو الإبلاغ عنها.', 'حدد سبب تخطيها (خطأ ربط، فاتورة يدوية) وأصلح الربط.']),
+    E2: PB('einv', 'VAT', ['E-invoicing provider', 'ERP'],
+      ['Book every invoice issued outside the ERP and include it in the return.', 'Stop issuing invoices from any tool that is not connected to the books.'],
+      ['سجل كل فاتورة صدرت خارج النظام وأدرجها في الإقرار.', 'أوقف إصدار الفواتير من أي أداة غير مرتبطة بالدفاتر.']),
+    E3: PB('einv', 'VAT', ['ERP', 'ZATCA (Fatoora)'],
+      ['Fix and resubmit rejected invoices; chase pending ones with the provider.', 'A standard (B2B) invoice is not valid until ZATCA clears it.'],
+      ['صحح الفواتير المرفوضة وأعد إرسالها؛ وتابع المعلقة مع المزود.', 'الفاتورة الضريبية (B2B) غير صالحة حتى تعتمدها الهيئة.']),
+    E4: PB('einv', 'VAT', ['ERP', 'Provider', 'ZATCA']),
+    E5: PB('einv', 'VAT', ['Provider', 'ZATCA']),
+    E6: PB('einv', 'VAT', ['Provider', 'ZATCA']),
+    E7: PB('einv', 'VAT', ['Credit notes', 'Original invoices']),
+    E8: PB('einv', 'VAT', ['Customers', 'Invoice type']),
+    E9: PB('einv', 'VAT', ['Provider', 'ZATCA']),
+    E10: PB('process', 'VAT', ['Fatoora integration', 'Wave deadline']),
+    E11: PB('einv', 'VAT', ['QR code', 'Invoice']),
+    C1: PB('pay', 'VAT', ['Filing date', 'Deadline'],
+      ['File the return now if it is still outstanding.', 'Set a reminder five working days before the last day of the following month.'],
+      ['قدم الإقرار فوراً إن لم يقدم بعد.', 'اضبط تذكيراً قبل خمسة أيام عمل من آخر يوم في الشهر التالي.']),
+    C2: PB('pay', 'VAT', ['Payment', 'Box 16'],
+      ['Pay the unpaid VAT through SADAD today.', 'Each month or part of a month adds 5% of the unpaid amount.'],
+      ['سدد الضريبة غير المسددة عبر سداد اليوم.', 'كل شهر أو جزء منه يضيف 5% من المبلغ غير المسدد.']),
+    C3: PB('pay', 'WHT', ['WHT payment', '10th of the month'],
+      ['File and pay the WHT return now.', 'Each 30 days of delay adds 1% of the unpaid tax.'],
+      ['قدم إقرار الاستقطاع وسدده فوراً.', 'كل 30 يوم تأخير تضيف 1% من الضريبة غير المسددة.']),
+    W1: PB('amend', 'WHT', ['WHT return', 'WHT register'],
+      ['Compare the WHT return with the payments register by payment type.', 'Add missing payments to a corrected return and pay the difference.'],
+      ['قارن إقرار الاستقطاع مع سجل المدفوعات حسب نوع الدفعة.', 'أضف المدفوعات المفقودة إلى إقرار معدل وسدد الفرق.']),
+    W2: PB('book', 'WHT', ['WHT return', 'Excel workings']),
+    W3: PB('amend', 'WHT', ['WHT return', 'Gross paid']),
+    W4: PB('book', 'WHT', ['WHT return', 'WHT payable account']),
+    W5: PB('amend', 'WHT', ['Rate applied', 'Statutory rate'],
+      ['Apply the statutory rate for each payment type.', 'Treaty relief needs a valid residency certificate before payment; without it, pay the difference.'],
+      ['طبق النسبة النظامية لكل نوع دفعة.', 'الإعفاء الاتفاقي يتطلب شهادة إقامة ضريبية سارية قبل الدفع؛ وإلا فسدد الفرق.']),
+    W6: PB('pay', 'WHT', ['WHT paid', '10th of the month']),
+    W7: PB('doc', 'WHT', ['Register', 'Certificates'],
+      ['Issue the WHT certificate to every beneficiary paid in the month.', 'Keep a copy with the payment file.'],
+      ['أصدر شهادة الاستقطاع لكل مستفيد تم الدفع له خلال الشهر.', 'احتفظ بنسخة مع ملف الدفع.']),
+    W8: PB('amend', 'WHT', ['GL non-resident expenses', 'WHT register']),
+    X1: PB('amend', 'WHT', ['Reverse-charge purchases', 'WHT register'],
+      ['Imported services under reverse charge are usually subject to WHT too: add each one to the register.', 'Pay the WHT with a corrected return.'],
+      ['الخدمات المستوردة بالاحتساب العكسي تخضع غالباً للاستقطاع أيضاً: أضف كلاً منها للسجل.', 'سدد الاستقطاع بإقرار معدل.']),
+    X2: PB('amend', 'VAT', ['WHT payments', 'Reverse-charge VAT'],
+      ['Self-assess reverse-charge VAT (box 9) on every imported service in the WHT register.', 'Correct the VAT return; the VAT is also recoverable in box 12 if the service is for taxable supplies.'],
+      ['احتسب ضريبة الاحتساب العكسي (البند 9) على كل خدمة مستوردة في سجل الاستقطاع.', 'صحح إقرار القيمة المضافة؛ ويمكن استردادها في البند 12 إذا كانت الخدمة لتوريدات خاضعة.'])
+  };
+  // generic steps per kind, for checks without their own steps
+  E.KIND_STEPS = {
+    amend: [['Quantify the difference and confirm the cause with evidence.', 'Correct it through the route shown (amended return or the next return).', 'Fix the cause in the ERP or process so it does not recur.'],
+            ['حدد مبلغ الفرق وأكد سببه بالمستندات.', 'صححه عبر المسار الموضح (إقرار معدل أو الإقرار التالي).', 'عالج السبب في النظام أو الإجراء حتى لا يتكرر.']],
+    pay: [['Pay the outstanding amount now.', 'Keep the payment receipt in the inspection file.'], ['سدد المبلغ المستحق فوراً.', 'احتفظ بإيصال السداد في ملف الفحص.']],
+    book: [['Find the entries causing the difference.', 'Post the correcting journal or write the explanation on the check.'], ['حدد القيود المسببة للفرق.', 'سجل قيد التصحيح أو اكتب التفسير على الفحص.']],
+    doc: [['Collect the missing evidence and link it to the item.', 'Keep it in the inspection file.'], ['اجمع المستندات الناقصة واربطها بالبند.', 'احفظها في ملف الفحص.']],
+    einv: [['Fix the invoices listed under the check and resubmit them through the provider.', 'Correct the setting or interface that caused it.'], ['صحح الفواتير المدرجة تحت الفحص وأعد إرسالها عبر المزود.', 'صحح الإعداد أو الربط المسبب.']],
+    process: [['Agree an owner and a date.', 'Track it to completion.'], ['حدد مسؤولاً وتاريخاً.', 'تابعه حتى الإنجاز.']]
+  };
+
+  // Checks in one family look at the same underlying difference from different
+  // angles (e.g. the SAR 3,510 under-declaration shows in V1, V4 and V7). Totals
+  // count each family once, at its largest amount.
+  E.ACTION_FAMILIES = {
+    returnDiff: ['V1', 'V2', 'V3', 'V4', 'V5', 'V7'],
+    undeclaredSales: ['V6', 'B1', 'P1', 'V9', 'B6'],
+    whtReturnDiff: ['W1', 'W2', 'W4'],
+    missingWht: ['W3', 'W8', 'B5', 'X1'],
+    rett: ['R1', 'R2', 'R3']
+  };
+  var familyOf = function (id) { var f = null; Object.keys(E.ACTION_FAMILIES).forEach(function (k) { if (E.ACTION_FAMILIES[k].indexOf(id) >= 0) f = k; }); return f; };
+  var taxOfOther = function (id) { return /^R/.test(id) ? 'RETT' : /^K/.test(id) ? 'EXCISE' : 'VAT'; };
+
+  // the tax at stake in a check (same rules as raising a finding)
+  E.checkImpact = function (c, S) {
+    if (c.exposure) return r2(c.exposure);
+    var r = (S || E.DEFAULT_SETTINGS).vatRate, d = Math.abs(c.diff || 0);
+    if (c.group === 'bank') return r2(d * r / (1 + r));          // bank amounts include VAT
+    if (c.group === 'vat') return r2(c.id === 'V6' ? d * r : d);  // V6 compares revenue; the others compare VAT
+    if (c.group === 'wht') return r2(/tax|WHT/i.test(c.aLabel || '') ? d : 0); // gross amounts are not tax
+    return 0;
+  };
+
+  // ctx: settings (merged), periodKey, today, entity. Returns a prioritised plan.
+  E.remediate = function (res, ctx) {
+    var S = ctx.settings, P = S.penalties, today = ctx.today || new Date().toISOString().slice(0, 10);
+    var th = S.vatCorrectionThreshold || 15000, horizon = S.inspectionHorizonMonths || 12;
+    var dl = E.deadlines(ctx.periodKey) || {}, freq = (ctx.entity && ctx.entity.vatFreq) || 'monthly';
+    var nextReturnDue = (E.deadlines(E.periodOf(today, freq)) || {}).vat;
+    var monthsSince = function (d) { if (!d || today <= d) return 0; return Math.ceil(daysBetween(d, today) / 30); };
+    var hasWht = !(ctx.entity && ctx.entity.whtRegistered === false);
+    var list = [].concat(res.filing.checks, res.vat.checks, res.bank.checks, res.einv.checks, hasWht ? res.wht.checks : [], res.other.checks);
+    var actions = list.filter(function (c) { return c.status === 'fail' || c.status === 'warn'; }).map(function (c) {
+      var pb = E.PLAYBOOKS[c.id] || PB(c.group === 'einv' ? 'einv' : c.group === 'wht' ? 'amend' : c.group === 'other' ? 'amend' : 'book', c.group === 'wht' || c.id === 'C3' ? 'WHT' : c.group === 'other' ? taxOfOther(c.id) : 'VAT', []);
+      var tax = c.group === 'other' ? taxOfOther(c.id) : pb.tax, impact = E.checkImpact(c, S), signed = c.diff || 0;
+      var a = { id: 'ACT-' + c.id, checkId: c.id, group: c.group, tax: tax, kind: pb.kind, status: c.status, title: c.title, titleAr: c.titleAr, diff: c.diff == null ? null : r2(c.diff), impact: impact, match: pb.match };
+      var steps = pb.en ? [pb.en, pb.ar] : E.KIND_STEPS[pb.kind];
+      a.steps = steps[0].map(function (en, i) { return { en: en, ar: steps[1][i] || en }; });
+      // a return above the other source means tax was over-declared: reclaim it, no penalty
+      // only where A is output or net tax due; a higher input figure (V5, V8) is over-claimed, i.e. tax due
+      var over = signed > 0 && ['V1', 'V4', 'V7'].indexOf(c.id) >= 0;
+      // route and deadline
+      if (over) { a.route = 'reclaim'; a.deadline = nextReturnDue; a.recover = impact; }
+      else if (pb.kind === 'pay') { a.route = 'pay'; a.deadline = today; }
+      else if (tax === 'VAT' && pb.kind === 'amend' && impact > 0) {
+        a.route = impact >= th ? 'amend' : 'next';
+        a.deadline = impact >= th ? addDays(today, S.correctionNotifyDays || 20) : nextReturnDue;
+      } else if ((tax === 'WHT' || tax === 'RETT') && pb.kind === 'amend' && impact > 0) { a.route = 'pay'; a.deadline = today; }
+      else if (pb.kind === 'einv') { a.route = 'einv'; a.deadline = addDays(today, 7); }
+      else { a.route = pb.kind === 'doc' ? 'doc' : 'book'; a.deadline = nextReturnDue && nextReturnDue > today ? nextReturnDue : addDays(today, 14); }
+      a.daysLeft = daysBetween(today, a.deadline);
+      // what it costs: act now vs an inspector finding it within the horizon
+      var due = tax === 'WHT' ? dl.wht : dl.vat, late = monthsSince(due);
+      if (over) { a.costNow = 0; a.costLater = 0; }
+      else if (tax === 'VAT' && (pb.kind === 'amend' || pb.kind === 'pay') && impact > 0) {
+        var err = pb.kind === 'pay' ? 0 : impact * P.vatErrorPct;
+        a.costNow = r2(err + impact * P.vatLatePaymentPctPerMonth * late);
+        a.costLater = r2(err + impact * P.vatLatePaymentPctPerMonth * (late + horizon));
+      } else if (tax === 'WHT' && impact > 0) {
+        var d30 = function (days) { return days < 30 ? 0 : Math.floor(days / 30); };
+        var daysLate = due && today > due ? daysBetween(due, today) : 0;
+        a.costNow = r2(impact * P.whtLatePctPer30Days * d30(daysLate));
+        a.costLater = r2(impact * P.whtLatePctPer30Days * d30(daysLate + horizon * 30));
+      } else if (tax === 'RETT' && impact > 0) {
+        var rl = (S.rett && S.rett.latePctPerMonth) || 0.02;
+        a.costNow = r2(impact * rl * late); a.costLater = r2(impact * rl * (late + horizon));
+      } else if (pb.kind === 'einv' && c.status === 'fail') { a.costNow = 0; a.costLater = 0; a.upTo = P.invoiceViolationMax || 0; }
+      else { a.costNow = 0; a.costLater = 0; }
+      a.avoided = r2(Math.max(0, a.costLater - a.costNow));
+      var overdue = a.daysLeft < 0 || a.route === 'pay';
+      a.family = familyOf(c.id);
+      a.level = over ? 'medium' : c.status === 'fail' && pb.kind !== 'einv' && (overdue || impact >= th || a.costLater >= th) ? 'critical' : c.status === 'fail' ? 'high' : impact > 0 ? 'medium' : 'low';
+      a.rank = { critical: 0, high: 1, medium: 2, low: 3 }[a.level] * 1e12 - (a.avoided + impact);
+      return a;
+    });
+    // analytics: one action per failing test
+    (res.analytics.tests || []).filter(function (x) { return x.status === 'fail'; }).forEach(function (x) {
+      var st = E.KIND_STEPS.doc;
+      actions.push({ id: 'ACT-' + x.id, checkId: x.id, group: 'analytics', tax: 'VAT', kind: 'doc', status: x.status, title: x.title, titleAr: x.titleAr, diff: null, impact: 0, count: x.count, amount: x.amount || 0,
+        match: ['ERP invoices', 'Evidence'], route: 'doc', deadline: nextReturnDue && nextReturnDue > today ? nextReturnDue : addDays(today, 14),
+        steps: [{ en: 'Open the ' + x.count + ' items flagged by the test and check each against its invoice.', ar: 'افتح البنود الـ ' + x.count + ' التي رصدها الاختبار وراجع كلاً منها مع فاتورته.' }].concat(st[0].slice(1).map(function (en, i) { return { en: en, ar: st[1][i + 1] }; })),
+        costNow: 0, costLater: 0, avoided: 0, level: x.severity === 'high' ? 'high' : 'medium' });
+      var last = actions[actions.length - 1]; last.daysLeft = daysBetween(today, last.deadline); last.rank = (last.level === 'high' ? 1 : 2) * 1e12;
+    });
+    actions.sort(function (a, b) { return a.rank - b.rank; });
+    // within a family only the largest action counts in the totals; the rest point to it
+    var lead = {};
+    // the lead is the action that carries a cost (a real correction route), then the largest
+    var better = function (a, l) { return (a.costLater > 0) !== (l.costLater > 0) ? a.costLater > 0 : a.impact > l.impact; };
+    actions.forEach(function (a) { if (!a.family) { a.counted = true; return; } var l = lead[a.family]; if (!l || better(a, l)) lead[a.family] = a; });
+    actions.forEach(function (a) { if (a.family) { a.counted = lead[a.family] === a; if (!a.counted) a.sameAs = lead[a.family].checkId; } });
+    var sum = function (k, f) { return r2(actions.filter(function (a) { return a.counted && (!f || f(a)); }).reduce(function (s, a) { return s + (a[k] || 0); }, 0)); };
+    var byTax = function (t) { return function (a) { return a.tax === t; }; };
+    return {
+      actions: actions,
+      totals: {
+        count: actions.length, mustFix: actions.filter(function (a) { return a.status === 'fail'; }).length, critical: actions.filter(function (a) { return a.level === 'critical'; }).length,
+        impact: sum('impact'), costNow: sum('costNow'), costLater: sum('costLater'), avoided: sum('avoided'), recover: sum('recover'),
+        vat: { count: actions.filter(byTax('VAT')).length, impact: sum('impact', byTax('VAT')), avoided: sum('avoided', byTax('VAT')), costLater: sum('costLater', byTax('VAT')) },
+        wht: { count: actions.filter(byTax('WHT')).length, impact: sum('impact', byTax('WHT')), avoided: sum('avoided', byTax('WHT')), costLater: sum('costLater', byTax('WHT')) }
+      },
+      horizonMonths: horizon
+    };
+  };
+
   // One call that runs everything for an exercise.
   E.runAll = function (ctx) {
     ctx.settings = E.mergeSettings(ctx.settings);
@@ -2081,6 +2308,7 @@
     var exp = 0;
     vat.checks.concat(hasWht ? wht.checks : [], bank.checks, einv.checks, filing.checks, other.checks).forEach(function (c) { if (c.exposure) exp += c.exposure; });
     res.exposure = r2(exp);
+    res.plan = E.remediate(res, ctx);
     return res;
   };
 

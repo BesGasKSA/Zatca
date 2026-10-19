@@ -383,3 +383,39 @@ Object.assign(window.ZI18N, {
   'Company': 'الشركة', 'People': 'الأشخاص', 'Preparers': 'المعدون', 'Access updated': 'تم تحديث الصلاحيات', 'Role updated': 'تم تحديث الدور',
   'Company access': 'صلاحية الشركات', 'All companies, including future ones': 'كل الشركات، بما فيها المضافة لاحقاً', 'Tick nothing to keep the person without access until you choose.': 'اترك الكل دون علامة ليبقى الشخص بلا صلاحية حتى تختار.'
 });
+
+// Company 360 and the action plan
+Object.assign(window.ZI18N, {
+  'Company 360': 'نظرة شاملة على الشركة', 'Overdue by': 'متأخر', 'Due today': 'مستحق اليوم', 'days left': 'يوماً متبقياً', 'Readiness over time': 'الجاهزية عبر الزمن',
+  'Tax to reclaim': 'ضريبة قابلة للاسترداد', 'If you act now': 'إذا صححت الآن', 'If an inspector finds it': 'إذا اكتشفه الفاحص',
+  'E-invoicing violations: fines up to SAR': 'مخالفات الفوترة الإلكترونية: غرامات تصل إلى', 'each, usually after a warning': 'ريال لكل مخالفة، عادة بعد إنذار',
+  'Counted once with': 'محسوب مرة واحدة مع', 'Same difference as': 'نفس الفرق في', 'Tax at stake': 'الضريبة المعرضة', 'How to fix it': 'طريقة المعالجة',
+  'Open the check': 'فتح الفحص', 'Mark as done': 'تم الإنجاز', 'Marked as done': 'سُجّل كمنجز', 'Reopened': 'أعيد فتحه', 'Progress': 'التقدم', 'actions done': 'إجراءات منجزة',
+  'Open actions': 'الإجراءات المفتوحة', 'Done': 'المنجزة', 'All actions': 'كل الإجراءات', 'Priority': 'الأولوية', 'All priorities': 'كل الأولويات',
+  'Nothing at this priority': 'لا شيء بهذه الأولوية', 'Every action is done': 'أُنجزت كل الإجراءات', 'Run the checks again after each correction to confirm the sources now agree.': 'أعد تشغيل الفحوصات بعد كل تصحيح للتأكد من تطابق المصادر.',
+  'Fix the critical items first.': 'ابدأ بالبنود الحرجة.', 'Acting now instead of waiting for an inspection avoids about SAR': 'التصحيح الآن بدلاً من انتظار الفحص يوفر نحو', 'in penalties': 'ريال من الغرامات',
+  'next deadline': 'الموعد التالي', 'No open actions in this section.': 'لا توجد إجراءات مفتوحة في هذا القسم.', 'Critical actions': 'إجراءات حرجة',
+  'Penalties if fixed now (SAR)': 'الغرامات إذا صُحح الآن (ريال)', 'If found at inspection (SAR)': 'إذا اكتُشف عند الفحص (ريال)', 'Saved by acting now (SAR)': 'الوفر بالتصحيح الآن (ريال)', 'Tax to reclaim (SAR)': 'ضريبة قابلة للاسترداد (ريال)',
+  'Estimates from the penalty rates in Settings: the error fine on the difference plus late-payment fines to date, versus the same if an inspector finds it': 'تقديرات وفق نسب الغرامات في الإعدادات: غرامة الخطأ على الفرق وغرامات التأخير حتى اليوم، مقارنة بنفسها إذا اكتشفها الفاحص بعد',
+  'months from now. Not legal advice.': 'شهراً من الآن. ليست استشارة قانونية.', 'Agrees': 'متطابق', 'No exercise yet for this company': 'لا يوجد تمرين لهذه الشركة بعد',
+  'Start one to see its returns, results and action plan here.': 'ابدأ تمريناً لترى هنا إقراراتها ونتائجها وخطة العمل.', 'Penalties if left to an inspector (SAR)': 'الغرامات إذا تُرك للفاحص (ريال)', 'critical': 'حرجة',
+  'To the next deadline': 'حتى الموعد التالي', 'WHT returns, last 12 months': 'إقرارات الاستقطاع، آخر 12 شهراً', 'VAT returns, last 12 months': 'إقرارات القيمة المضافة، آخر 12 شهراً',
+  "Gross paid to non-residents and WHT declared, from each month's exercise.": 'إجمالي المدفوع لغير المقيمين والاستقطاع المقر، من تمرين كل شهر.',
+  "Output and input VAT with the net VAT due, from each month's exercise.": 'ضريبة المخرجات والمدخلات مع صافي الضريبة المستحقة، من تمرين كل شهر.',
+  'Green band: ready for an inspection.': 'المنطقة الخضراء: جاهز للفحص.', 'Do the reports agree?': 'هل تتطابق التقارير؟',
+  'Each line compares two sources an inspector puts side by side. Click one to open its check.': 'كل سطر يقارن مصدرين يضعهما الفاحص جنباً إلى جنب. انقر لفتح الفحص.', 'agree': 'متطابقة',
+  'Where the tax is at stake': 'أين تقع الضريبة المعرضة', 'Open actions by area, each difference counted once.': 'الإجراءات المفتوحة حسب المجال، وكل فرق محسوب مرة واحدة.', 'Nothing at stake.': 'لا شيء معرض.',
+  'open findings': 'ملاحظات مفتوحة', 'What to do next': 'ما يجب عمله الآن', 'Highest risk first. Each action says how to fix it, by when, and what acting now saves.': 'الأعلى خطراً أولاً. كل إجراء يوضح طريقة المعالجة وموعدها وما يوفره التصحيح الآن.',
+  'Full action plan': 'خطة العمل كاملة', 'Action plan': 'خطة العمل',
+  // sources and routes
+  'Trial balance revenue': 'إيرادات ميزان المراجعة', 'VAT accounts in GL': 'حسابات الضريبة في الأستاذ', 'Return box 8': 'البند 8 في الإقرار', 'Fatoora': 'فاتورة', 'System sales': 'مبيعات النظام',
+  'VAT Law Art. 50': 'المادة 50 من نظام الضريبة', 'Apportionment ratio': 'نسبة التخصيص', 'Deemed supplies': 'التوريدات الاعتبارية', 'Return box 14': 'البند 14 في الإقرار', 'VAT IR Art. 63': 'المادة 63 من اللائحة',
+  'Return box 15': 'البند 15 في الإقرار', 'Previous return': 'الإقرار السابق', 'Bank receipts': 'المقبوضات البنكية', 'Declared sales': 'المبيعات المقرة', 'Bank payments': 'المدفوعات البنكية', 'Declared purchases': 'المشتريات المقرة',
+  'Previous VAT return': 'إقرار القيمة المضافة السابق', 'Bank statement': 'كشف الحساب البنكي', 'Card takings (POS / mada)': 'مقبوضات البطاقات (نقاط البيع / مدى)', 'B2C sales declared': 'المبيعات المبسطة المقرة',
+  'POS settlements': 'تسويات نقاط البيع', 'ERP': 'النظام المحاسبي', 'ZATCA (Fatoora)': 'الهيئة (فاتورة)', 'Provider': 'المزود', 'ZATCA': 'الهيئة', 'Credit notes': 'الإشعارات الدائنة', 'Original invoices': 'الفواتير الأصلية',
+  'Customers': 'العملاء', 'Fatoora integration': 'الربط مع فاتورة', 'Wave deadline': 'موعد الموجة', 'QR code': 'رمز الاستجابة السريعة', 'Invoice': 'الفاتورة', 'Payment': 'السداد', 'Box 16': 'البند 16',
+  'WHT payment': 'سداد الاستقطاع', '10th of the month': 'اليوم العاشر من الشهر', 'WHT paid': 'الاستقطاع المسدد', 'Register': 'السجل', 'Certificates': 'الشهادات',
+  'Amend the original return': 'تعديل الإقرار الأصلي', 'Correct in the next return': 'التصحيح في الإقرار التالي', 'Pay now': 'السداد فوراً', 'Reclaim in a later return': 'الاسترداد في إقرار لاحق',
+  'Fix on Fatoora': 'المعالجة في فاتورة', 'Correct the books': 'تصحيح الدفاتر', 'Collect the evidence': 'جمع المستندات', 'Revenue (TB)': 'الإيرادات (ميزان المراجعة)', 'ERP invoices': 'فواتير النظام', 'Evidence': 'المستندات'
+});
+Object.assign(window.ZI18N, { 'Today': 'اليوم' });

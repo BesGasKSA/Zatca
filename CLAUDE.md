@@ -91,6 +91,25 @@ confusion during development; don't go back to it).
   password change bumps `epoch` and ends every session.
 - The PDF guide (`guide/`) is rebuilt once per release, not after every change.
 
+## Action plan and Company 360
+
+- `E.remediate(res, ctx)` (run by `runAll` as `R.plan`) turns every failed or
+  flagged check into an action: playbook steps [en, ar] from `E.PLAYBOOKS`
+  (fallback `E.KIND_STEPS`), route (amend ≥ SAR 15,000 within 20 days / next
+  return / pay / reclaim / einv / book / doc), deadline, and cost now vs if an
+  inspector finds it `inspectionHorizonMonths` (12) later.
+- Never sum actions naively: `E.ACTION_FAMILIES` group checks that measure the
+  same difference (the SAR 3,510 shows in V1, V4, V7); only the family lead
+  (`counted`) enters totals, the rest carry `sameAs`. `E.checkImpact`: VAT
+  comparison checks are already VAT (V6 revenue × rate), bank × r/(1+r), WHT
+  gross differences are not tax. A higher return than ledger on V1/V4/V7 is a
+  reclaim; on input checks (V5, V8) it is tax due. E-invoicing fines are shown
+  as a ceiling (`upTo`), never added to totals. RETT/excise are their own taxes.
+- `web/ui-insights.js`: Company 360 (`#/<tax>/insights/<entityId>`) and the
+  exercise tab `plan`; done actions live in `exercise.actionsDone`. Charts are
+  plain SVG; motion is CSS only and off under prefers-reduced-motion. SVG rects
+  use class `cbar` — `.bar` and `.acts` are taken by older components.
+
 ## Deployment (backend live since 2026-10-19)
 
 The ids and URLs live in `deploy.json` (read by `build.js`). The Google

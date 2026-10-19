@@ -92,8 +92,8 @@
   Z.changed = function () { Z.recompute(); Z.saveSummary(); Z.route(); };
 
   // ---------------------------------------------------------------- exercise view
-  var VAT_TABS = [['overview', 'Overview'], ['data', 'Data'], ['filing', 'Filing & payment'], ['vat', 'VAT reconciliation'], ['einv', 'E-invoicing'], ['bank', 'Bank'], ['other', 'Other taxes'], ['analytics', 'Analytics'], ['sampling', 'Sampling'], ['checklist', 'Documents'], ['findings', 'Findings'], ['report', 'Report & sign-off']];
-  var WHT_TABS = [['overview', 'Overview'], ['data', 'Data'], ['filing', 'Filing & payment'], ['wht', 'WHT reconciliation'], ['sampling', 'Sampling'], ['checklist', 'Documents'], ['findings', 'Findings'], ['report', 'Report & sign-off']];
+  var VAT_TABS = [['overview', 'Overview'], ['plan', 'Action plan'], ['data', 'Data'], ['filing', 'Filing & payment'], ['vat', 'VAT reconciliation'], ['einv', 'E-invoicing'], ['bank', 'Bank'], ['other', 'Other taxes'], ['analytics', 'Analytics'], ['sampling', 'Sampling'], ['checklist', 'Documents'], ['findings', 'Findings'], ['report', 'Report & sign-off']];
+  var WHT_TABS = [['overview', 'Overview'], ['plan', 'Action plan'], ['data', 'Data'], ['filing', 'Filing & payment'], ['wht', 'WHT reconciliation'], ['sampling', 'Sampling'], ['checklist', 'Documents'], ['findings', 'Findings'], ['report', 'Report & sign-off']];
   // the readiness of the section on screen
   Z.secScore = function () { var R = S.R; return (Z.isWht() ? R.whtScore : R.vatScore) || R.score; };
   Z.secExposure = function () { return Z.isWht() ? S.R.whtExposure || 0 : S.R.vatExposure || 0; };
@@ -106,7 +106,7 @@
       Z.paintChrome('ex');
       var count = function (list) { return list.filter(function (c) { return c.status === 'fail'; }).length; };
       var isW = function (f) { return f.tax === 'WHT'; };
-      var badges = { vat: count(R.vat.checks), bank: count(R.bank.checks), einv: count(R.einv.checks), filing: count(R.filing.checks.filter(function (c) { return (c.id === 'C3') === wht; })), other: count(R.other.checks), wht: ent.whtRegistered === false ? 0 : count(R.wht.checks), analytics: R.analytics.tests.filter(function (x) { return x.status === 'fail'; }).length, findings: S.findings.filter(function (f) { return f.status !== 'closed' && isW(f) === wht; }).length };
+      var badges = { vat: count(R.vat.checks), bank: count(R.bank.checks), einv: count(R.einv.checks), filing: count(R.filing.checks.filter(function (c) { return (c.id === 'C3') === wht; })), other: count(R.other.checks), wht: ent.whtRegistered === false ? 0 : count(R.wht.checks), analytics: R.analytics.tests.filter(function (x) { return x.status === 'fail'; }).length, findings: S.findings.filter(function (f) { return f.status !== 'closed' && isW(f) === wht; }).length, plan: Z.planFor ? Z.planFor().critical : 0 };
       var sc = Z.secScore();
       if (wht && ent.whtRegistered === false) {
         Z.setMain('<div class="pagehead"><div><p class="eyebrow">' + Z.taxName() + '</p><h1>' + esc(Z.entName(ent)) + ' · ' + Z.ltr(ex.period) + '</h1></div></div><section class="paper empty"><i class="ph ph-info big" aria-hidden="true"></i><h2>' + t('This entity is not registered for withholding tax') + '</h2><p>' + t('Turn it on in the entity settings if it pays non-residents.') + '</p><a class="btn primary" href="#/vat/ex/' + ex.id + '/overview">' + t('Open the VAT exercise') + '</a></section>');

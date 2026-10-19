@@ -268,4 +268,37 @@ console.log('scoring');
 t('readiness is low for the demo with nothing tested', function () { assert.ok(R.score.score < 60, String(R.score.score)); });
 t('exposure includes WHT under-withholding', function () { assert.ok(R.exposure >= 6000); });
 
+console.log('action plan');
+var plan = E.remediate(R, Object.assign({}, ctx, { settings: E.mergeSettings(ctx.settings), today: '2026-10-19' }));
+var act = function (id) { return plan.actions.filter(function (a) { return a.checkId === id; })[0]; };
+t('every failed check gets an action with steps in both languages', function () {
+  [].concat(R.vat.checks, R.bank.checks, R.einv.checks, R.wht.checks, R.other.checks, R.filing.checks).filter(function (c) { return c.status === 'fail'; }).forEach(function (c) {
+    var a = act(c.id); assert.ok(a, 'no action for ' + c.id);
+    assert.ok(a.steps.length >= 2 && a.steps.every(function (s) { return s.en && s.ar; }), c.id + ' steps');
+    assert.ok(/^\d{4}-\d{2}-\d{2}$/.test(a.deadline), c.id + ' deadline');
+  });
+});
+t('the SAR 3,510 under-declaration counts once across V1, V4 and V7', function () {
+  var fam = ['V1', 'V2', 'V3', 'V4', 'V5', 'V7'].map(act).filter(Boolean), counted = fam.filter(function (a) { return a.counted; });
+  assert.strictEqual(counted.length, 1); assert.strictEqual(counted[0].impact, 3510);
+  assert.ok(fam.filter(function (a) { return !a.counted; }).every(function (a) { return a.sameAs === counted[0].checkId; }));
+});
+t('below SAR 15,000 the correction goes in the next return; at or above, amend within 20 days', function () {
+  assert.strictEqual(act('V1').route, 'next'); assert.strictEqual(act('V1').deadline, '2026-11-30');
+  assert.strictEqual(act('V11').route, 'amend'); assert.strictEqual(act('V11').deadline, '2026-11-08');
+});
+t('acting now costs less than leaving it for an inspector (5% a month keeps running)', function () {
+  var a = act('V11'); assert.ok(a.costLater > a.costNow && a.avoided === Math.round((a.costLater - a.costNow) * 100) / 100);
+  assert.ok(plan.totals.avoided > 0 && plan.totals.costLater > plan.totals.costNow);
+});
+t('input VAT over-claimed (box 8 above customs) is tax due, not a refund', function () { assert.strictEqual(act('V8').route, 'amend'); assert.ok(!act('V8').recover); });
+t('WHT gross differences are not counted as tax; RETT and excise are their own taxes', function () {
+  assert.strictEqual(act('W3').impact, 0);
+  assert.strictEqual(act('R1').tax, 'RETT'); assert.strictEqual(act('K1').tax, 'EXCISE');
+});
+t('e-invoicing fines are shown as a ceiling, not added to the totals', function () {
+  var e = act('E1'); assert.ok(e.upTo > 0); assert.strictEqual(e.costLater, 0);
+});
+t('critical actions come first', function () { assert.strictEqual(plan.actions[0].level, 'critical'); });
+
 console.log('\n' + passed + ' passed' + (process.exitCode ? ', some FAILED' : ''));

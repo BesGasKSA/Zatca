@@ -84,7 +84,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     var r = 52, c = 2 * Math.PI * r, v = Math.max(0, Math.min(100, +score || 0));
     return '<svg class="seal ' + (grade || 'not') + (small ? ' small' : '') + '" viewBox="0 0 120 120" role="img" aria-label="' + esc(t('Readiness') + ' ' + (score == null ? '—' : score + '%') + ', ' + Z.gradeText(grade)) + '">' +
       '<circle class="track" cx="60" cy="60" r="' + r + '" fill="none" stroke-width="9"/>' +
-      '<circle class="arc" cx="60" cy="60" r="' + r + '" fill="none" stroke-width="9" stroke-linecap="round" stroke-dasharray="' + c.toFixed(1) + '" stroke-dashoffset="' + (c * (1 - v / 100)).toFixed(1) + '" transform="rotate(-90 60 60)"/>' +
+      '<circle class="arc" style="--c:' + c.toFixed(1) + '" cx="60" cy="60" r="' + r + '" fill="none" stroke-width="9" stroke-linecap="round" stroke-dasharray="' + c.toFixed(1) + '" stroke-dashoffset="' + (c * (1 - v / 100)).toFixed(1) + '" transform="rotate(-90 60 60)"/>' +
       '<text x="60" y="' + (small ? 69 : 66) + '" text-anchor="middle" font-size="' + (small ? 28 : 30) + '" font-weight="800">' + (score == null ? '—' : score) + '<tspan font-size="14" dx="1" dy="-10">%</tspan></text>' +
       (small ? '' : '<text class="lbl" x="60" y="84" text-anchor="middle" font-size="10" font-weight="600">' + esc(t('Readiness')) + '</text>') + '</svg>';
   };
@@ -251,6 +251,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     var nav = function (href, label, icon, on) { return '<a class="nav" href="' + href + '"' + (on ? ' aria-current="page"' : '') + '>' + Z.icon(icon) + '<span>' + label + '</span></a>'; };
     var h = '<div class="group">' + Z.taxName() + '</div>';
     h += nav('#/' + tx + '/dashboard', t('Dashboard'), 'squares-four', view === 'dashboard');
+    h += nav('#/' + tx + '/insights', t('Company 360'), 'chart-line-up', view === 'insights');
     h += nav('#/' + tx + '/reports', t('Reports'), 'chart-bar', view === 'reports');
     if (ex) {
       var ent = Z.entity(ex.entityId) || {};
@@ -284,7 +285,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       '<button class="btn ghost small" data-act="theme" aria-label="' + t('Switch light/dark') + '">' + Z.icon('circle-half') + '</button><button class="btn ghost small lang-btn" data-act="lang">' + (S.lang === 'ar' ? 'English' : 'العربية') + '</button>' +
       Z.exitButton('btn small exit-btn');
   }
-  Z.CHG.entity = function (el) { S.entityId = el.value; localStorage.setItem('zr_entity', el.value); location.hash = '#/' + S.tax + '/entity/' + el.value; };
+  Z.CHG.entity = function (el) { S.entityId = el.value; localStorage.setItem('zr_entity', el.value); location.hash = '#/' + S.tax + '/' + ((S.route || [])[0] === 'insights' ? 'insights' : 'entity') + '/' + el.value; };
   Z.entity = function (id) { return S.entities.filter(function (e) { return e.id === id; })[0]; };
   Z.entName = function (e) { return e ? (S.lang === 'ar' && e.nameAr ? e.nameAr : e.name) : ''; };
 
@@ -334,7 +335,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
 
     var heat = '<table class="heat"><thead><tr><th></th>' + months.map(function (m) { return '<th scope="col">' + Z.ltr(m.slice(2).replace('-', '/')) + '</th>'; }).join('') + '</tr></thead><tbody>' +
       ents.map(function (e) {
-        return '<tr><th class="ent" scope="row"><a href="#/entity/' + e.id + '">' + esc(Z.entName(e)) + '</a></th>' + months.map(function (m) {
+        return '<tr><th class="ent" scope="row"><a href="#/insights/' + e.id + '" title="' + esc(t('Company 360')) + '">' + esc(Z.entName(e)) + '</a></th>' + months.map(function (m) {
           var key = e.vatFreq === 'quarterly' ? m.slice(0, 4) + '-Q' + Math.ceil(+m.slice(5) / 3) : m;
           var x = Z.exFor(e, m);
           if (!x) return '<td data-act="newex" data-e="' + e.id + '" data-p="' + key + '" title="' + esc(t('Start exercise') + ' ' + key) + '"><i class="ph ph-plus" aria-hidden="true"></i></td>';

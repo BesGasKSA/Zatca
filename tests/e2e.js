@@ -204,12 +204,13 @@ async function audit(label) {
   for (let i = 0; i < 60 && !(await ev("return Z.S.entities.some(function (e) { return e.demo; }) && location.hash.indexOf('/ex/') >= 0 && !!Z.S.R")); i++) await sleep(500);
   ok(await ev('return Z.S.entities.length === 3'), 'demo company (two entities) added next to ours');
   const demo = await ev("var ids = Z.S.entities.filter(function (x) { return x.demo; }).map(function (x) { return x.id; }); var x = Z.S.exercises.filter(function (y) { return ids.indexOf(y.entityId) >= 0 && y.status !== 'closed'; })[0]; return { e: x.entityId, x: x.id };");
-  const VAT = ['overview', 'data', 'filing', 'vat', 'einv', 'bank', 'other', 'analytics', 'sampling', 'checklist', 'findings', 'report'];
-  const WHT = ['overview', 'data', 'filing', 'wht', 'sampling', 'checklist', 'findings', 'report'];
+  const VAT = ['overview', 'plan', 'data', 'filing', 'vat', 'einv', 'bank', 'other', 'analytics', 'sampling', 'checklist', 'findings', 'report'];
+  const WHT = ['overview', 'plan', 'data', 'filing', 'wht', 'sampling', 'checklist', 'findings', 'report'];
   const RV = ['summary', 'portfolio', 'aging', 'exposure', 'corrections', 'calendar'], RW = ['summary', 'beneficiaries', 'portfolio', 'aging', 'exposure', 'calendar'];
   async function sweep(tag) {
     for (const s of ['vat', 'wht']) {
       await go('#/' + s + '/dashboard'); await audit(tag + ' ' + s + ' dashboard');
+      await go('#/' + s + '/insights/' + demo.e, 3000); await audit(tag + ' ' + s + ' company 360');
       for (const tab of (s === 'vat' ? VAT : WHT)) { await go('#/' + s + '/ex/' + demo.x + '/' + tab, 1100); await audit(tag + ' ' + s + ' ex ' + tab); }
       for (const r of (s === 'vat' ? RV : RW)) { await go('#/' + s + '/reports/' + r, r === 'beneficiaries' || r === 'aging' ? 2200 : 1000); await audit(tag + ' ' + s + ' report ' + r); }
       for (const v of ['entities', 'entity/' + demo.e, 'annual/' + demo.e + '/2025', 'requests', 'settings', 'users', 'audit']) { await go('#/' + s + '/' + v, 1200); await audit(tag + ' ' + s + ' ' + v); }
@@ -221,6 +222,14 @@ async function audit(label) {
   await go('#/vat/ex/' + demo.x + '/overview', 1500);
   ok(await ev("return Z.S.R.vatScore.score === Z.S.ex.summary.vatScore && Z.S.R.whtScore.score === Z.S.ex.summary.whtScore"), 'saved summary matches the engine for both sections');
   ok(await ev("return !!document.querySelector('details.more') || document.querySelector('nav.tabs').scrollWidth <= document.querySelector('nav.tabs').clientWidth"), 'tabs fit with a More menu');
+  step = 'company 360';
+  await go('#/vat/insights/' + demo.e, 3000);
+  ok(await ev("return document.querySelectorAll('.pair').length === 9 && document.querySelectorAll('.act').length >= 3 && !!document.querySelector('.chart svg .cbar')"), '360 shows the match map, actions and the returns chart');
+  ok(await ev("var p = Z.planFor(); return p.avoided > 0 && p.costLater > p.costNow"), 'acting now saves money');
+  await go('#/vat/ex/' + demo.x + '/plan', 1500);
+  const firstAct = await ev("var b = document.querySelector('[data-act=\"actdone\"]'); return b ? b.dataset.id : null");
+  await click('[data-act="actdone"]', 1500);
+  ok(await ev("return !!(Z.S.ex.actionsDone || {})['" + firstAct + "']"), 'an action can be marked done and is saved');
   await go('#/wht/entity/' + demo.e, 1200);
   ok(await ev("var w = Z.S.ex.summary.whtScore, v = Z.S.ex.summary.vatScore; var t = document.querySelector('#main').innerText; return w !== v && t.indexOf(w + '% ') >= 0 && t.indexOf(v + '% ') < 0"), 'entity page shows the WHT score in the WHT section');
   await go('#/vat/reports/summary', 1200); await click('[data-act="rexport"]', 2000);

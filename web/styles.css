@@ -433,3 +433,155 @@ table.matrix td.bl { border-inline-start: 1px solid var(--line); }
 .access-pick legend { padding: 0 6px; font-weight: 700; }
 .access-pick .all, .access-pick small { grid-column: 1 / -1; }
 .access-pick input { width: auto; margin-inline-end: 6px; }
+
+/* ================================================================ form controls, refined
+   One height (40px), one radius, a drawn chevron for every dropdown and a
+   tidy calendar button for every date field, in both themes and directions. */
+input[type=text], input[type=email], input[type=password], input[type=number], input[type=date], input[type=url], input[type=month], select {
+  min-height: 40px; border: 1px solid var(--line-2); border-radius: var(--r-s); background-color: var(--surface);
+  transition: border-color .15s, box-shadow .15s, background-color .15s;
+}
+input:hover:not(:disabled):not(:focus), select:hover:not(:disabled):not(:focus) { border-color: var(--ink-3); }
+select {
+  -webkit-appearance: none; appearance: none; cursor: pointer; font-weight: 600; text-overflow: ellipsis;
+  padding: 8px 36px 8px 12px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2374829a' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center; background-size: 12px;
+}
+[dir="rtl"] select { padding: 8px 12px 8px 36px; background-position: left 12px center; }
+select:focus { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%230f766e' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 15l6-6 6 6'/%3E%3C/svg%3E"); }
+:root[data-tax="wht"] select:focus { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%231d4ed8' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 15l6-6 6 6'/%3E%3C/svg%3E"); }
+select option { font-weight: 500; background: var(--surface); color: var(--ink); }
+table.t select { min-height: 32px; padding-top: 4px; padding-bottom: 4px; background-position: right 8px center; }
+[dir="rtl"] table.t select { background-position: left 8px center; }
+.top .ent-pick select { padding-inline-end: 26px; background-position: right 6px center; }
+[dir="rtl"] .top .ent-pick select { background-position: left 6px center; }
+
+input[type=date], input[type=month] { font-variant-numeric: tabular-nums; font-weight: 600; padding-inline: 12px 8px; cursor: pointer; }
+input[type=date]::-webkit-calendar-picker-indicator, input[type=month]::-webkit-calendar-picker-indicator {
+  cursor: pointer; opacity: .55; padding: 5px; margin-inline-start: 6px; border-radius: 6px; transition: opacity .15s, background-color .15s;
+}
+input[type=date]:hover::-webkit-calendar-picker-indicator, input[type=month]:hover::-webkit-calendar-picker-indicator { opacity: 1; background-color: var(--accent-soft); }
+input[type=date]::-webkit-datetime-edit-fields-wrapper, input[type=month]::-webkit-datetime-edit-fields-wrapper { padding: 0; }
+input[type=date]:invalid, input[type=month]:invalid { color: var(--ink-3); }
+input[type=checkbox], input[type=radio] { accent-color: var(--accent); width: 17px; height: 17px; }
+
+/* ================================================================ Company 360 */
+.i360 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; align-items: start; }
+.i360 > .span2 { grid-column: span 2; }
+.i360 > .span3, .i360 > .hero360 { grid-column: 1 / -1; }
+@media (max-width: 1180px) { .i360 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .i360 > .span2 { grid-column: 1 / -1; } }
+@media (max-width: 760px) { .i360 { grid-template-columns: minmax(0, 1fr); } }
+.pagehead .ent-pick.big { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line-2); border-radius: var(--r-s); padding-inline-start: 12px; background: var(--surface); }
+.pagehead .ent-pick.big select { border: 0; min-width: 220px; box-shadow: none; }
+.pagehead .ent-pick.big i { color: var(--accent); font-size: 18px; }
+
+.hero360 { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 26px; align-items: center; background:
+  radial-gradient(120% 140% at 0% 0%, var(--accent-soft), transparent 55%), var(--surface); }
+.hero360 .ringbox { display: flex; gap: 16px; align-items: center; }
+.hero360 .ringbox .seal { width: 128px; height: 128px; }
+.hero360 .ringbox > div { display: grid; gap: 2px; }
+.hero360 .grade { font-size: 22px; font-weight: 800; letter-spacing: -.01em; }
+.grade.g-ready { color: var(--pass); } .grade.g-mostly { color: var(--warn); } .grade.g-risk, .grade.g-not { color: var(--fail); }
+.hero360 .kpis { box-shadow: none; grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)); }
+.pair .link .tk { display: grid; place-items: center; line-height: 1; }
+@media (max-width: 900px) { .hero360 { grid-template-columns: 1fr; } }
+.kpis .good b, b.good { color: var(--pass); }
+.kpis .good i { color: var(--pass); }
+
+/* charts */
+.chart svg { width: 100%; height: auto; display: block; overflow: visible; }
+.chart .gl { stroke: var(--line); stroke-width: 1; }
+.chart .ax { fill: var(--ink-3); font-size: 11px; font-weight: 600; font-family: var(--font); }
+.chart .cbar.s0 { fill: var(--accent); } .chart .cbar.s1 { fill: var(--accent-line); }
+.chart .ln { fill: none; stroke: var(--ink); stroke-width: 2.4; stroke-linejoin: round; stroke-linecap: round; }
+.chart .dot { fill: var(--surface); stroke: var(--ink); stroke-width: 2; }
+.chart .area { fill: var(--accent); opacity: .10; }
+.chart .band.ok { fill: var(--pass-soft); } .chart .band.mid { fill: var(--warn-soft); opacity: .6; } .chart .band.low { fill: var(--fail-soft); opacity: .45; }
+.chart .legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12.5px; color: var(--ink-2); font-weight: 600; margin-top: 6px; }
+.chart .legend span { display: inline-flex; gap: 6px; align-items: center; }
+.chart .sw { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.chart .sw.s0 { background: var(--accent); } .chart .sw.s1 { background: var(--accent-line); } .chart .sw.ln { height: 3px; background: var(--ink); border-radius: 2px; }
+
+/* do the reports agree */
+.score-chip { font-weight: 800; font-size: 13px; padding: 5px 11px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); white-space: nowrap; }
+.pairs { display: grid; gap: 6px; }
+.pair { display: grid; grid-template-columns: minmax(0, 1fr) 110px minmax(0, 1fr) 110px; gap: 10px; align-items: center; padding: 9px 12px; border-radius: var(--r-s); text-decoration: none; color: var(--ink); border: 1px solid var(--line); background: var(--surface); transition: border-color .15s, transform .15s; }
+.pair:hover { border-color: var(--accent-line); transform: translateY(-1px); }
+.pair .node { font-weight: 650; font-size: 13.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pair .node:nth-of-type(3) { text-align: end; }
+.pair .link { position: relative; display: grid; place-items: center; height: 24px; }
+.pair .link i { position: absolute; inset-inline: 0; top: 50%; height: 2px; background: var(--line-2); }
+.pair .link .tk { position: relative; background: var(--surface); padding: 0 4px; }
+.pair.st-pass .link i { background: var(--pass); } .pair.st-fail .link i { background: var(--fail); background: repeating-linear-gradient(90deg, var(--fail) 0 6px, transparent 6px 10px); } .pair.st-warn .link i { background: var(--warn); }
+.pair .gap { text-align: end; font-weight: 700; font-size: 13px; }
+.pair.st-fail .gap { color: var(--fail); } .pair.st-pass .gap { color: var(--pass); } .pair.st-na .gap { color: var(--ink-3); font-weight: 600; }
+@media (max-width: 640px) { .pair { grid-template-columns: minmax(0, 1fr) 54px minmax(0, 1fr); } .pair .gap { grid-column: 1 / -1; text-align: start; } }
+
+/* stake by area */
+.hbars { display: grid; gap: 10px; }
+.hb { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.4fr) auto; gap: 10px; align-items: center; font-size: 13px; font-weight: 600; color: var(--ink-2); }
+.hb .track, .cb .track, .progress { height: 8px; border-radius: 99px; background: var(--surface-3); overflow: hidden; }
+.hb .track i, .cb .track i, .progress i { display: block; height: 100%; width: var(--w); border-radius: 99px; background: var(--accent); transform-origin: left center; }
+[dir="rtl"] .hb .track i, [dir="rtl"] .cb .track i, [dir="rtl"] .progress i { transform-origin: right center; }
+.hb b { color: var(--ink); }
+.mini { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 13px; }
+.mini a { display: inline-flex; gap: 6px; align-items: center; color: var(--ink-2); text-decoration: none; font-weight: 600; }
+.mini a:hover { color: var(--accent); }
+
+/* action plan */
+.hero-plan .headline { display: flex; gap: 12px; align-items: flex-start; font-size: 15.5px; font-weight: 600; margin-bottom: 14px; }
+.hero-plan .headline i { font-size: 24px; color: var(--accent); flex: none; margin-top: 1px; }
+.hero-plan .headline p { margin: 0; }
+.hero-plan .fine { font-size: 12px; margin: 10px 0 0; }
+.progress { margin-top: 4px; height: 10px; } .progress i { background: var(--pass); }
+.actgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 14px; margin-top: 16px; }
+@media (max-width: 640px) { .actgrid { grid-template-columns: 1fr; } }
+.act { position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-m); padding: 14px 16px 12px; box-shadow: var(--shadow-1); display: flex; flex-direction: column; gap: 9px; overflow: hidden; }
+.act::before { content: ''; position: absolute; inset-block: 0; inset-inline-start: 0; width: 4px; background: var(--line-2); }
+.act.lv-critical::before { background: var(--fail); } .act.lv-high::before { background: #ea580c; } .act.lv-medium::before { background: var(--warn); }
+.act.done { opacity: .62; } .act.done h3 { text-decoration: line-through; }
+.act header { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; font-size: 12px; }
+.act .route { display: inline-flex; gap: 5px; align-items: center; font-weight: 700; color: var(--ink-2); }
+.act .cd { display: inline-flex; gap: 4px; align-items: center; font-weight: 700; padding: 2px 8px; border-radius: 99px; background: var(--surface-2); color: var(--ink-2); margin-inline-start: auto; }
+.act .cd.warn { background: var(--warn-soft); color: var(--warn); } .act .cd.fail { background: var(--fail-soft); color: var(--fail); }
+.act .same { flex-basis: 100%; color: var(--ink-3); display: inline-flex; gap: 4px; align-items: center; }
+.act h3 { margin: 0; font-size: 15px; line-height: 1.35; }
+.act .cid { font-size: 11.5px; font-weight: 800; color: var(--ink-3); background: var(--surface-2); padding: 1px 6px; border-radius: 5px; vertical-align: 1px; }
+.act .facts { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12.5px; color: var(--ink-2); }
+.act .facts b { color: var(--ink); }
+.act .match { display: inline-flex; gap: 5px; align-items: center; color: var(--ink-3); }
+.act .cost { display: grid; gap: 5px; font-size: 12px; color: var(--ink-2); }
+.act .cost.good { display: flex; gap: 6px; align-items: center; color: var(--pass); font-weight: 700; }
+.cb { display: grid; grid-template-columns: 150px minmax(0, 1fr) 80px; gap: 8px; align-items: center; }
+.cb b { text-align: end; color: var(--ink); }
+.cb .track i.now { background: var(--warn); } .cb .track i.later { background: var(--fail); }
+.act details { border-top: 1px dashed var(--line); padding-top: 8px; }
+.act details summary { cursor: pointer; font-weight: 700; font-size: 13px; color: var(--accent); }
+.act details ol { margin: 8px 0 0; padding-inline-start: 20px; display: grid; gap: 5px; font-size: 13px; color: var(--ink-2); }
+.act footer { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; margin-top: auto; }
+
+/* ================================================================ motion
+   Things appear in reading order, numbers count up, bars grow and lines draw.
+   All of it switches off for people who ask for reduced motion. */
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes grow-x { from { transform: scaleX(0); } }
+@keyframes grow-y { from { transform: scaleY(0); } }
+@keyframes draw { from { stroke-dashoffset: var(--len, 2000); } }
+@keyframes ring { from { stroke-dashoffset: var(--c); } }
+@keyframes pop { from { opacity: 0; transform: scale(.4); } }
+.reveal, .act, .pair { animation: rise .55s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(var(--i, 0) * 70ms); }
+.act { animation-delay: calc(var(--i, 0) * 55ms + 200ms); }
+.pair { animation-delay: calc(var(--i, 0) * 45ms + 150ms); }
+.hb .track i, .cb .track i, .progress i { animation: grow-x .9s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(var(--i, 0) * 80ms + 250ms); }
+.chart .cbar { transform-box: fill-box; transform-origin: center bottom; animation: grow-y .7s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(var(--i, 0) * 45ms + 150ms); }
+.chart .ln.draw { stroke-dasharray: 2000; animation: draw 1.4s ease-out both .35s; }
+.chart .dot { transform-box: fill-box; transform-origin: center; animation: pop .35s ease-out both; animation-delay: calc(var(--i, 0) * 50ms + 700ms); }
+.seal .arc { animation: ring 1.1s cubic-bezier(.2, .7, .2, 1) both .15s; }
+@media (prefers-reduced-motion: reduce) {
+  .reveal, .act, .pair, .hb .track i, .cb .track i, .progress i, .chart .cbar, .chart .ln.draw, .chart .dot, .seal .arc { animation: none !important; }
+  .chart .ln.draw { stroke-dasharray: none; }
+}
+@media print { .reveal, .act, .pair, .chart .cbar, .chart .ln.draw, .seal .arc { animation: none !important; } }
+.kpis b.num { text-align: start; display: block; }
+.pair .link .tk { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
