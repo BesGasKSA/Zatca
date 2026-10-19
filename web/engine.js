@@ -2019,13 +2019,13 @@
     parts.filing = r.filing ? score(r.filing) : null;
     parts.other = r.other && r.other.length ? score(r.other) : null;
     var tests = (r.analytics || []).filter(function (t) { return t.status !== 'na'; });
-    parts.analytics = tests.length ? tests.reduce(function (a, t) { return a + (t.status === 'pass' ? 1 : t.status === 'warn' ? (t.severity === 'low' ? 0.85 : 0.6) : 0.2); }, 0) / tests.length : 0;
+    parts.analytics = !r.analytics ? null : tests.length ? tests.reduce(function (a, t) { return a + (t.status === 'pass' ? 1 : t.status === 'warn' ? (t.severity === 'low' ? 0.85 : 0.6) : 0.2); }, 0) / tests.length : 0;
     var samples = r.samples || [];
     if (!samples.length) parts.sampling = 0;
     else {
-      var flows = { S: 0, P: 0, W: 0 };
+      var flows = { S: 0, P: 0, W: 0 }, need = r.requiredFlows || (r.hasWht ? ['S', 'P', 'W'] : ['S', 'P']);
       samples.forEach(function (s) { flows[s.flow] = 1; });
-      var cov = (flows.S + flows.P + (r.hasWht ? flows.W : 1)) / 3;
+      var cov = need.reduce(function (a, f) { return a + flows[f]; }, 0) / need.length;
       var ev = samples.map(function (s) { return s.eval || E.evaluateSample(s); });
       var done = ev.reduce(function (a, e) { return a + (e.total ? e.tested / e.total : 0); }, 0) / ev.length;
       var dev = ev.reduce(function (a, e) { return a + (e.rate || 0); }, 0) / ev.length / 100;
@@ -2065,6 +2065,19 @@
       einv: einv.checks, filing: filing.checks, other: other.checks,
       samples: ctx.samples, checklist: ctx.checklist, findings: ctx.findings, hasWht: hasWht
     });
+    // VAT and WHT are separate disciplines with separate readiness and exposure
+    var isWhtFiling = function (c) { return c.id === 'C3'; };
+    var vatFiling = filing.checks.filter(function (c) { return !isWhtFiling(c); }), whtFiling = filing.checks.filter(isWhtFiling);
+    var byFlow = function (fl) { return (ctx.samples || []).filter(function (s) { return fl.indexOf(s.flow) >= 0; }); };
+    var clArea = function (yes) { return (ctx.checklist || []).filter(function (c) { return yes(c.area); }); };
+    var fTax = function (yes) { return (ctx.findings || []).filter(function (f) { return yes(f.tax || 'VAT'); }); };
+    res.vatScore = E.readiness({ settings: ctx.settings, vat: vat.checks, wht: [], bank: bank.checks, analytics: an.tests, einv: einv.checks, filing: vatFiling, other: other.checks,
+      samples: byFlow(['S', 'P']), requiredFlows: ['S', 'P'], checklist: clArea(function (a) { return a !== 'WHT'; }), findings: fTax(function (t) { return t !== 'WHT'; }) });
+    res.whtScore = hasWht ? E.readiness({ settings: ctx.settings, vat: [], wht: wht.checks, bank: [], filing: whtFiling,
+      samples: byFlow(['W']), requiredFlows: ['W'], checklist: clArea(function (a) { return a === 'WHT'; }), findings: fTax(function (t) { return t === 'WHT'; }) }) : null;
+    var sumExp = function (list) { return r2(list.reduce(function (a, c) { return a + (c.exposure || 0); }, 0)); };
+    res.vatExposure = sumExp(vat.checks.concat(bank.checks, einv.checks, vatFiling, other.checks));
+    res.whtExposure = hasWht ? sumExp(wht.checks.concat(whtFiling)) : 0;
     var exp = 0;
     vat.checks.concat(hasWht ? wht.checks : [], bank.checks, einv.checks, filing.checks, other.checks).forEach(function (c) { if (c.exposure) exp += c.exposure; });
     res.exposure = r2(exp);

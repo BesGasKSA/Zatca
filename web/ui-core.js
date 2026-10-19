@@ -24,10 +24,21 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   Z.ltr = function (s) { return '<bdi dir="ltr">' + esc(s) + '</bdi>'; };
   Z.pct = function (x) { return x == null ? '—' : Math.round(x * 100) + '%'; };
   Z.tick = function (st, title) {
-    var ch = { pass: '✓', warn: '!', fail: '✕', na: '–' }[st] || '–';
+    var ic = { pass: 'ph-check-circle', warn: 'ph-warning-circle', fail: 'ph-x-circle', na: 'ph-minus-circle' }[st] || 'ph-minus-circle';
     var lab = { pass: t('Passed'), warn: t('Needs explanation'), fail: t('Failed'), na: t('No data') }[st];
-    return '<span class="tk ' + (st || 'na') + '" role="img" aria-label="' + esc(title || lab) + '" title="' + esc(title || lab) + '">' + ch + '</span>';
+    return '<span class="tk ' + (st || 'na') + '" role="img" aria-label="' + esc(title || lab) + '" title="' + esc(title || lab) + '"><i class="ph ' + ic + '" aria-hidden="true"></i></span>';
   };
+  Z.icon = function (name) { return '<i class="ph ph-' + name + '" aria-hidden="true"></i>'; };
+  // the active tax section: 'vat' or 'wht'
+  Z.isWht = function () { return S.tax === 'wht'; };
+  Z.taxScore = function (sm) {
+    sm = sm || {};
+    var sc = Z.isWht() ? sm.whtScore : sm.vatScore, g = Z.isWht() ? sm.whtGrade : sm.vatGrade;
+    // summaries saved before the split carry only the combined score
+    if (sc === undefined) { sc = sm.score; g = sm.grade; }
+    return { score: sc == null ? null : sc, grade: g || 'not' };
+  };
+  Z.taxName = function () { return Z.isWht() ? t('Withholding tax') : t('VAT'); };
   Z.pill = function (cls, text) { return '<span class="pill ' + esc(cls) + '">' + esc(text) + '</span>'; };
   Z.toast = function (msg, err) {
     var el = document.createElement('div'); el.className = 'toast' + (err ? ' err' : ''); el.setAttribute('role', 'status'); el.textContent = msg;
@@ -59,18 +70,13 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   Z.get = function (table, id) { return Z.call('get', { table: table, id: id }).then(function (r) { return r.doc; }); };
 
   // ---------------------------------------------------------------- seal
-  Z.seal = function (score, grade, small, animate) {
-    var id = 'sp' + Math.random().toString(36).slice(2, 7);
-    var top = S.lang === 'ar' ? 'جاهزية الفحص الضريبي' : 'TAX INSPECTION READINESS';
-    var bottom = S.lang === 'ar' ? 'ضريبة القيمة المضافة · الاستقطاع' : 'VAT · WITHHOLDING TAX';
-    return '<svg class="seal ' + (grade || 'not') + (small ? ' small' : '') + (animate ? ' seal-in' : '') + '" viewBox="0 0 200 200" role="img" aria-label="' + esc(t('Readiness') + ' ' + score + '% — ' + Z.gradeText(grade)) + '">' +
-      '<defs><path id="' + id + 'a" d="M 30 100 A 70 70 0 0 1 170 100"/><path id="' + id + 'b" d="M 28 100 A 72 72 0 0 0 172 100"/></defs>' +
-      '<circle class="ring" cx="100" cy="100" r="94" stroke-width="3"/><circle class="ring" cx="100" cy="100" r="86" stroke-width="1"/><circle class="ring" cx="100" cy="100" r="56" stroke-width="1.5"/>' +
-      '<text font-size="12.5" font-weight="600" letter-spacing="2.2"><textPath href="#' + id + 'a" startOffset="50%" text-anchor="middle">' + top + '</textPath></text>' +
-      '<text font-size="10.5" font-weight="500" letter-spacing="1.6" dy="9"><textPath href="#' + id + 'b" startOffset="50%" text-anchor="middle">' + bottom + '</textPath></text>' +
-      '<text x="100" y="108" text-anchor="middle" font-size="40" font-weight="700">' + (score == null ? '—' : score) + '<tspan font-size="18" dy="-14">%</tspan></text>' +
-      '<text x="100" y="132" text-anchor="middle" font-size="11" font-weight="600">' + esc(Z.gradeText(grade)) + '</text>' +
-      '<text x="27" y="104" font-size="12">★</text><text x="163" y="104" font-size="12">★</text></svg>';
+  Z.seal = function (score, grade, small) {
+    var r = 52, c = 2 * Math.PI * r, v = Math.max(0, Math.min(100, +score || 0));
+    return '<svg class="seal ' + (grade || 'not') + (small ? ' small' : '') + '" viewBox="0 0 120 120" role="img" aria-label="' + esc(t('Readiness') + ' ' + (score == null ? '—' : score + '%') + ', ' + Z.gradeText(grade)) + '">' +
+      '<circle class="track" cx="60" cy="60" r="' + r + '" fill="none" stroke-width="9"/>' +
+      '<circle class="arc" cx="60" cy="60" r="' + r + '" fill="none" stroke-width="9" stroke-linecap="round" stroke-dasharray="' + c.toFixed(1) + '" stroke-dashoffset="' + (c * (1 - v / 100)).toFixed(1) + '" transform="rotate(-90 60 60)"/>' +
+      '<text x="60" y="' + (small ? 69 : 66) + '" text-anchor="middle" font-size="' + (small ? 28 : 30) + '" font-weight="800">' + (score == null ? '—' : score) + '<tspan font-size="14" dx="1" dy="-10">%</tspan></text>' +
+      (small ? '' : '<text class="lbl" x="60" y="84" text-anchor="middle" font-size="10" font-weight="600">' + esc(t('Readiness')) + '</text>') + '</svg>';
   };
 
   // ---------------------------------------------------------------- boot
@@ -151,9 +157,9 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       t('Reproducible statistical samples of sales, purchases and WHT payments, tested attribute by attribute'),
       t('Every entity, every month, one readiness score — stored in your own Google Sheets')
     ];
-    document.body.innerHTML = '<div class="auth"><section class="side"><div class="brand">' + logo(36) + '<div><b>Inspection Ready</b><span>' + t('VAT & WHT inspection readiness') + '</span></div></div>' +
+    document.body.innerHTML = '<div class="auth"><section class="side"><div class="brand">' + logo() + '<div><b>Inspection Ready</b><span>' + t('VAT & WHT inspection readiness') + '</span></div></div>' +
       '<div><h1>' + t('Be ready the day ZATCA asks.') + '</h1><p style="margin-top:12px;color:#cfe5dc">' + t('A monthly inspection exercise for every legal entity: reconcile, sample, document, sign off.') + '</p></div>' +
-      '<ul>' + pts.map(function (p) { return '<li>' + Z.tick('pass') + '<span>' + esc(p) + '</span></li>'; }).join('') + '</ul></section>' +
+      '<ul>' + pts.map(function (p) { return '<li>' + Z.icon('check-circle') + '<span>' + esc(p) + '</span></li>'; }).join('') + '</ul></section>' +
       '<section class="form"><div><div class="spread" style="margin-bottom:22px"><h2>' + (mode === 'login' ? t('Sign in') : t('Create your organisation')) + '</h2><button class="btn ghost small" data-act="lang">' + (S.lang === 'ar' ? 'English' : 'العربية') + '</button></div>' +
       '<form id="authf" class="grid">' +
       (mode === 'signup' ? '<label class="f"><span>' + t('Organisation name') + '</span><input type="text" name="orgName" required autocomplete="organization"></label><label class="f"><span>' + t('Your name') + '</span><input type="text" name="name" required autocomplete="name"></label>' : '') +
@@ -172,14 +178,16 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   Z.ACT.localmode = function () { try { sessionStorage.setItem('zr_local', '1'); } catch (e) {} S.api = new ZApi.LocalBackend(); start({}); };
   Z.ACT.logout = function () { S.api.logout(); S.user = null; location.hash = ''; Z.renderAuth(); };
 
-  function logo(sz) {
-    return '<svg width="' + sz + '" height="' + sz + '" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18" fill="none" stroke="#9fe0c6" stroke-width="2"/><circle cx="20" cy="20" r="13.5" fill="none" stroke="#9fe0c6" stroke-width="1"/><path d="M13 20.5l4.6 4.6L27.5 15" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-  }
+  function logo() { return '<span class="mark" aria-hidden="true"><i class="ph ph-seal-check"></i></span>'; }
 
   // ---------------------------------------------------------------- shell & routing
   Z.route = function () {
     if (!S.user) return;
     var h = location.hash.replace(/^#\/?/, '').split('/');
+    if (h[0] === 'vat' || h[0] === 'wht') { S.tax = h[0]; h = h.slice(1); try { localStorage.setItem('zr_tax', S.tax); } catch (e) {} }
+    if (!S.tax) { try { S.tax = localStorage.getItem('zr_tax'); } catch (e) {} }
+    if (S.tax !== 'wht') S.tax = 'vat';
+    document.documentElement.dataset.tax = S.tax;
     S.route = h;
     var view = h[0] || 'dashboard';
     if (!document.querySelector('.shell')) shell();
@@ -196,37 +204,46 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   Z.setMain = function (html) { document.getElementById('main').innerHTML = html; };
 
   function shell() {
-    document.body.innerHTML = '<div class="shell"><nav class="rail" aria-label="' + t('Main') + '"></nav><div><div class="top"></div>' +
+    document.body.innerHTML = '<div class="shell"><header class="top"></header><nav class="rail" aria-label="' + t('Main') + '"></nav><div class="col">' +
       (S.api.mode === 'local' ? '<div class="banner">' + t('Demo mode: data stays in this browser only.') + ' <a href="#/settings">' + t('Connect your Google Sheets backend') + '</a></div>' : '') +
       '<main id="main" class="main" tabindex="-1"></main></div></div>';
   }
   function paintRail(view) {
-    var ex = S.exId && S.ex ? S.ex : null;
-    var items = [['dashboard', t('Dashboard'), '▦'], ['entities', t('Entities'), '▤'], ['requests', t('ZATCA requests'), '✉'], ['reports', t('Reports'), '▥']];
-    var h = '<div class="brand">' + logo(30) + '<div><b>Inspection Ready</b><span>' + esc(S.tenant ? S.tenant.name : '') + '</span></div></div>';
-    items.forEach(function (i) { h += '<a class="nav" href="#/' + i[0] + '"' + (view === i[0] ? ' aria-current="page"' : '') + '><span aria-hidden="true">' + i[2] + '</span>' + i[1] + '</a>'; });
+    var ex = S.exId && S.ex ? S.ex : null, tx = S.tax;
+    var nav = function (href, label, icon, on) { return '<a class="nav" href="' + href + '"' + (on ? ' aria-current="page"' : '') + '>' + Z.icon(icon) + '<span>' + label + '</span></a>'; };
+    var h = '<div class="group">' + Z.taxName() + '</div>';
+    h += nav('#/' + tx + '/dashboard', t('Dashboard'), 'squares-four', view === 'dashboard');
+    h += nav('#/' + tx + '/reports', t('Reports'), 'chart-bar', view === 'reports');
     if (ex) {
       var ent = Z.entity(ex.entityId) || {};
-      h += '<div class="sep"></div><a class="nav" href="#/ex/' + ex.id + '/overview"' + (view === 'ex' ? ' aria-current="page"' : '') + '><span aria-hidden="true">◉</span>' + esc(ent.name || '') + ' · ' + esc(ex.period) + '</a>';
+      h += '<div class="current">' + '<span class="faint">' + t('Open exercise') + '</span><a href="#/' + tx + '/ex/' + ex.id + '/overview">' + esc(Z.entName(ent)) + ' · ' + Z.ltr(ex.period) + '</a></div>';
     }
-    h += '<div class="sep"></div>';
-    [['settings', t('Settings'), '⚙', 'manager'], ['users', t('Users'), '◍', 'owner'], ['audit', t('Audit trail'), '≡', 'manager']].forEach(function (i) {
-      if (Z.can(i[3])) h += '<a class="nav" href="#/' + i[0] + '"' + (view === i[0] ? ' aria-current="page"' : '') + '><span aria-hidden="true">' + i[2] + '</span>' + i[1] + '</a>';
+    h += '<div class="group">' + t('Organisation') + '</div>';
+    h += nav('#/' + tx + '/entities', t('Entities'), 'buildings', view === 'entities' || view === 'entity' || view === 'annual');
+    h += nav('#/' + tx + '/requests', t('ZATCA requests'), 'envelope-simple', view === 'requests');
+    [['settings', t('Settings'), 'gear-six', 'manager'], ['users', t('Users'), 'users-three', 'owner'], ['audit', t('Audit trail'), 'list-checks', 'manager']].forEach(function (i) {
+      if (Z.can(i[3])) h += nav('#/' + tx + '/' + i[0], i[1], i[2], view === i[0]);
     });
-    if (S.api.mode === 'cloud') h += '<a class="nav" href="#/platform"' + (view === 'platform' ? ' aria-current="page"' : '') + '><span aria-hidden="true">⌂</span>' + t('Platform') + '</a>';
-    if (S.api.mode === 'cloud' && S.tenant && S.tenant.spreadsheetUrl) h += '<a class="nav" href="' + esc(S.tenant.spreadsheetUrl) + '" target="_blank" rel="noopener noreferrer"><span aria-hidden="true">▦</span>' + t('Google Sheet (your data)') + ' ↗</a>';
-    h += '<div class="foot">' + esc(S.user.name) + ' — ' + esc(t(cap(S.user.role))) + '<br>' + (S.api.mode === 'cloud' ? '<button data-act="logout">' + t('Sign out') + '</button>' : t('Stored on this device')) + '</div>';
+    if (S.api.mode === 'cloud') h += nav('#/' + tx + '/platform', t('Platform'), 'globe-hemisphere-east', view === 'platform');
+    if (S.api.mode === 'cloud' && S.tenant && S.tenant.spreadsheetUrl) h += '<a class="nav" href="' + esc(S.tenant.spreadsheetUrl) + '" target="_blank" rel="noopener noreferrer">' + Z.icon('table') + '<span>' + t('Google Sheet (your data)') + '</span></a>';
+    h += '<div class="foot"><b>' + esc(S.user.name) + '</b>' + esc(t(cap(S.user.role))) + (S.tenant ? ', ' + esc(S.tenant.name) : '') + '<br>' + (S.api.mode === 'cloud' ? '<button data-act="logout">' + t('Sign out') + '</button> ' : t('Stored on this device') + '<br>') + '<button data-act="lang">' + (S.lang === 'ar' ? 'English' : 'العربية') + '</button></div>';
     document.querySelector('.rail').innerHTML = h;
   }
   function cap(s) { return s ? s[0].toUpperCase() + s.slice(1) : ''; }
   Z.cap = cap;
   function paintTop() {
     var opts = S.entities.map(function (e) { return '<option value="' + e.id + '"' + (e.id === S.entityId ? ' selected' : '') + '>' + esc(S.lang === 'ar' && e.nameAr ? e.nameAr : e.name) + '</option>'; }).join('');
-    document.querySelector('.top').innerHTML = '<button class="btn ghost menu-btn" data-act="menu" aria-label="' + t('Menu') + '">☰</button>' +
-      (S.entities.length ? '<label class="row" style="gap:8px"><span class="muted">' + t('Entity') + '</span><select data-chg="entity" aria-label="' + t('Entity') + '">' + opts + '</select></label>' : '') +
-      '<span class="grow"></span><button class="btn ghost small" data-act="theme" aria-label="' + t('Switch light/dark') + '">◐</button><button class="btn ghost small" data-act="lang">' + (S.lang === 'ar' ? 'English' : 'العربية') + '</button>';
+    // the section switch keeps the person where they are (same exercise, overview tab)
+    var rest = (S.route || []).slice(), here = rest[0] === 'ex' ? ['ex', rest[1], 'overview'] : rest;
+    var sw = function (tx, label) { return '<a href="#/' + tx + '/' + here.join('/') + '"' + (S.tax === tx ? ' aria-current="page"' : '') + '>' + label + '</a>'; };
+    document.querySelector('.top').innerHTML = '<button class="btn ghost menu-btn" data-act="menu" aria-label="' + t('Menu') + '">' + Z.icon('list') + '</button>' +
+      '<div class="brand">' + logo() + '<div><b>Inspection Ready</b><span>' + esc(S.tenant ? S.tenant.name : '') + '</span></div></div>' +
+      '<nav class="switch" aria-label="' + t('Tax') + '">' + sw('vat', '<span class="lg">' + t('VAT') + '</span><span class="sh">' + (S.lang === 'ar' ? 'القيمة المضافة' : 'VAT') + '</span>') + sw('wht', '<span class="lg">' + t('Withholding tax') + '</span><span class="sh">' + (S.lang === 'ar' ? 'الاستقطاع' : 'WHT') + '</span>') + '</nav>' +
+      '<span class="grow"></span>' +
+      (S.entities.length ? '<select data-chg="entity" aria-label="' + t('Entity') + '">' + opts + '</select>' : '') +
+      '<button class="btn ghost small" data-act="theme" aria-label="' + t('Switch light/dark') + '">' + Z.icon('circle-half') + '</button><button class="btn ghost small lang-btn" data-act="lang">' + (S.lang === 'ar' ? 'English' : 'العربية') + '</button>';
   }
-  Z.CHG.entity = function (el) { S.entityId = el.value; localStorage.setItem('zr_entity', el.value); location.hash = '#/entity/' + el.value; };
+  Z.CHG.entity = function (el) { S.entityId = el.value; localStorage.setItem('zr_entity', el.value); location.hash = '#/' + S.tax + '/entity/' + el.value; };
   Z.entity = function (id) { return S.entities.filter(function (e) { return e.id === id; })[0]; };
   Z.entName = function (e) { return e ? (S.lang === 'ar' && e.nameAr ? e.nameAr : e.name) : ''; };
 
@@ -236,41 +253,52 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       return Z.setMain('<div class="paper empty"><h2>' + t('Start with your first legal entity') + '</h2><p style="margin:0 auto 18px">' + t('Add each company or branch registered for VAT. Every month you run an inspection exercise for it.') + '</p>' +
         '<div class="row" style="justify-content:center"><a class="btn primary" href="#/entities/new">' + t('Add entity') + '</a>' + (S.api.mode === 'local' ? '<button class="btn" data-act="loaddemo">' + t('Load demo company') + '</button>' : '') + '</div></div>');
     }
-    var months = [], cur = E.periodOf(Z.today(), 'monthly');
+    var wht = Z.isWht(), months = [], cur = E.periodOf(Z.today(), 'monthly');
     for (var i = 0; i < 12; i++) { cur = E.prevPeriod(cur); months.unshift(cur); }
-    var exs = S.exercises, open = exs.filter(function (x) { return x.status !== 'closed'; });
-    var scores = exs.filter(function (x) { return x.summary && x.summary.score != null && months.indexOf(x.period) >= 0 || /Q/.test(x.period); }).map(function (x) { return x.summary ? x.summary.score : null; }).filter(function (x) { return x != null; });
+    var ents = S.entities.filter(function (e) { return e.active !== false && (!wht || e.whtRegistered !== false); });
+    var ids = ents.map(function (e) { return e.id; });
+    var exs = S.exercises.filter(function (x) { return ids.indexOf(x.entityId) >= 0; }), open = exs.filter(function (x) { return x.status !== 'closed'; });
+    var inWindow = function (x) { return months.indexOf(x.period) >= 0 || (/Q/.test(x.period) && months.some(function (m) { return E.periodOf(m + '-01', 'quarterly') === x.period; })); };
+    var scores = exs.filter(inWindow).map(function (x) { return Z.taxScore(x.summary).score; }).filter(function (x) { return x != null; });
     var avg = scores.length ? Math.round(scores.reduce(function (a, b) { return a + b; }, 0) / scores.length) : null;
     var latest = {};
     exs.forEach(function (x) { if (!latest[x.entityId] || x.period > latest[x.entityId].period) latest[x.entityId] = x; });
-    var exposure = Object.keys(latest).reduce(function (a, k) { return a + ((latest[k].summary || {}).exposure || 0); }, 0);
-    var fails = Object.keys(latest).reduce(function (a, k) { return a + ((latest[k].summary || {}).fails || 0); }, 0);
+    var pick = function (sm, v, w, all) { sm = sm || {}; var k = wht ? w : v; return sm[k] != null ? sm[k] : (wht ? 0 : sm[all] || 0); };
+    var exposure = Object.keys(latest).reduce(function (a, k) { return a + pick(latest[k].summary, 'vatExposure', 'whtExposure', 'exposure'); }, 0);
+    var fails = Object.keys(latest).reduce(function (a, k) { return a + pick(latest[k].summary, 'vatFails', 'whtFails', 'fails'); }, 0);
 
-    var heat = '<table class="heat"><thead><tr><th></th>' + months.map(function (m) { return '<th scope="col">' + m.slice(2).replace('-', '/') + '</th>'; }).join('') + '</tr></thead><tbody>' +
-      S.entities.filter(function (e) { return e.active !== false; }).map(function (e) {
+    var heat = '<table class="heat"><thead><tr><th></th>' + months.map(function (m) { return '<th scope="col">' + Z.ltr(m.slice(2).replace('-', '/')) + '</th>'; }).join('') + '</tr></thead><tbody>' +
+      ents.map(function (e) {
         return '<tr><th class="ent" scope="row"><a href="#/entity/' + e.id + '">' + esc(Z.entName(e)) + '</a></th>' + months.map(function (m) {
           var key = e.vatFreq === 'quarterly' ? m.slice(0, 4) + '-Q' + Math.ceil(+m.slice(5) / 3) : m;
           var x = Z.exFor(e, m);
-          if (!x) return '<td data-act="newex" data-e="' + e.id + '" data-p="' + key + '" title="' + esc(t('Start exercise') + ' ' + key) + '">+</td>';
-          var sm = x.summary || {}, g = sm.grade || 'not';
-          return '<td class="s-' + g + (x.status === 'closed' ? ' closed' : '') + '" data-act="openex" data-id="' + x.id + '" title="' + esc(key + ' — ' + (sm.score != null ? sm.score + '% ' : '') + Z.gradeText(g) + (x.status === 'closed' ? ' — ' + t('signed off') : '')) + '">' + (sm.score != null ? sm.score : '·') + '</td>';
+          if (!x) return '<td data-act="newex" data-e="' + e.id + '" data-p="' + key + '" title="' + esc(t('Start exercise') + ' ' + key) + '"><i class="ph ph-plus" aria-hidden="true"></i></td>';
+          var ts = Z.taxScore(x.summary), g = ts.grade;
+          return '<td class="s-' + g + (x.status === 'closed' ? ' closed' : '') + '" data-act="openex" data-id="' + x.id + '" title="' + esc(key + ' — ' + (ts.score != null ? ts.score + '% ' : '') + Z.gradeText(g) + (x.status === 'closed' ? ' — ' + t('signed off') : '')) + '">' + (ts.score != null ? ts.score : '·') + '</td>';
         }).join('') + '</tr>';
       }).join('') + '</tbody></table>';
 
-    var dl = S.entities.filter(function (e) { return e.active !== false; }).map(function (e) {
-      var p = E.periodOf(Z.today(), e.vatFreq || 'monthly'), prev = E.prevPeriod(p), d = E.deadlines(prev), w = E.deadlines(E.prevPeriod(E.periodOf(Z.today(), 'monthly')));
-      var left = E.daysBetween(Z.today(), d.vat), lw = E.daysBetween(Z.today(), w.wht);
-      return '<tr><td>' + esc(Z.entName(e)) + '</td><td>' + esc(prev) + '</td><td class="nowrap">' + d.vat + ' <span class="' + (left < 7 ? 'diff-bad' : 'faint') + '">(' + left + ' ' + t('days') + ')</span></td><td class="nowrap">' + (e.whtRegistered === false ? '—' : w.wht + ' <span class="' + (lw < 4 ? 'diff-bad' : 'faint') + '">(' + lw + ' ' + t('days') + ')</span>') + '</td></tr>';
+    var dl = ents.map(function (e) {
+      var row = '<tr><td>' + esc(Z.entName(e)) + '</td>';
+      if (wht) {
+        var mp = E.prevPeriod(E.periodOf(Z.today(), 'monthly')), w = E.deadlines(mp), lw = E.daysBetween(Z.today(), w.wht);
+        return row + '<td>' + Z.ltr(mp) + '</td><td class="nowrap">' + Z.ltr(w.wht) + ' <span class="' + (lw < 4 ? 'diff-bad' : 'faint') + '">(' + lw + ' ' + t('days') + ')</span></td></tr>';
+      }
+      var prev = E.prevPeriod(E.periodOf(Z.today(), e.vatFreq || 'monthly')), d = E.deadlines(prev), left = E.daysBetween(Z.today(), d.vat);
+      return row + '<td>' + Z.ltr(prev) + '</td><td class="nowrap">' + Z.ltr(d.vat) + ' <span class="' + (left < 7 ? 'diff-bad' : 'faint') + '">(' + left + ' ' + t('days') + ')</span></td></tr>';
     }).join('');
 
-    Z.setMain('<div class="pagehead"><div><h1>' + t('Inspection readiness across your entities') + '</h1><p>' + t('Each square is one month\'s inspection exercise. Click an empty square to start one.') + '</p></div>' +
+    var kpi = function (icon, val, label, bad) { return '<div class="' + (bad ? 'bad' : '') + '">' + Z.icon(icon) + '<b>' + val + '</b><span>' + label + '</span></div>'; };
+    Z.setMain('<div class="pagehead"><div><p class="eyebrow">' + Z.taxName() + '</p><h1>' + (wht ? t('Withholding tax readiness') : t('VAT inspection readiness')) + '</h1><p>' +
+      (wht ? t('Payments to non-residents, WHT returns, certificates and treaty relief. Each square is one exercise; the score counts the WHT checks only.') : t('Returns, ledgers, e-invoicing, bank and samples. Each square is one exercise; the score counts the VAT checks only.')) + '</p></div>' +
       (S.api.mode === 'local' && !S.entities.some(function (e) { return e.demo; }) ? '<button class="btn" data-act="loaddemo">' + t('Load demo company') + '</button>' : '') + '</div>' +
-      '<div class="stack"><div class="kpis"><div><b>' + S.entities.length + '</b><span>' + t('Entities') + '</span></div><div><b>' + open.length + '</b><span>' + t('Exercises not signed off') + '</span></div>' +
-      '<div><b>' + (avg == null ? '—' : avg + '%') + '</b><span>' + t('Average readiness, last 12 months') + '</span></div><div class="' + (fails ? 'bad' : '') + '"><b>' + fails + '</b><span>' + t('Failed checks in latest exercises') + '</span></div>' +
-      '<div class="' + (exposure ? 'bad' : '') + '"><b>' + Z.fmt(exposure, 0) + '</b><span>' + t('Quantified tax exposure (SAR)') + '</span></div></div>' +
+      '<div class="stack"><div class="kpis">' + kpi('buildings', ents.length, t('Entities')) + kpi('hourglass-medium', open.length, t('Exercises not signed off')) +
+      kpi('gauge', avg == null ? '—' : avg + '%', t('Average readiness, last 12 months')) + kpi('x-circle', fails, t('Failed checks in latest exercises'), fails) +
+      kpi('coins', Z.fmt(exposure, 0), wht ? t('WHT exposure (SAR)') : t('VAT exposure (SAR)'), exposure) + '</div>' +
       dataStrip() + '<div id="reqalert"></div>' +
+      (ents.length ? '' : '<section class="paper empty"><i class="ph ph-info big" aria-hidden="true"></i><p>' + t('No entity is registered for withholding tax. Turn it on in the entity settings.') + '</p></section>') +
       '<section class="paper"><header><div><h2>' + t('Readiness by month') + '</h2><p>' + t('Green is ready, amber at risk, red not ready. A dark underline means signed off.') + '</p></div></header><div class="tbl-wrap">' + heat + '</div></section>' +
-      '<section class="paper"><header><div><h2>' + t('Filing deadlines') + '</h2><p>' + t('VAT is due by the last day of the month after the period; WHT by the 10th of the following month.') + '</p></div></header><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Entity') + '</th><th>' + t('Period') + '</th><th>' + t('VAT return due') + '</th><th>' + t('WHT return due') + '</th></tr></thead><tbody>' + dl + '</tbody></table></div></section></div>');
+      '<section class="paper"><header><div><h2>' + t('Filing deadlines') + '</h2><p>' + (wht ? t('WHT is due by the 10th of the month after the payment.') : t('VAT is due by the last day of the month after the period.')) + '</p></div></header><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Entity') + '</th><th>' + t('Period') + '</th><th>' + (wht ? t('WHT return due') : t('VAT return due')) + '</th></tr></thead><tbody>' + dl + '</tbody></table></div></section></div>');
   };
 
   function dataStrip() {
@@ -592,7 +620,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   Z.bankClassName = function (k) {
     return { customer_receipt: 'Customer receipts', supplier_payment: 'Supplier payments', zatca_vat: 'VAT paid to ZATCA', zatca_wht: 'WHT paid to ZATCA', zakat: 'Zakat', foreign_transfer: 'Foreign transfers', payroll: 'Payroll', internal_transfer: 'Internal transfers', financing: 'Financing / loans', other_in: 'Other receipts', other_out: 'Other payments' }[k] || k;
   };
-  Z.partName = function (k) { return { recon: 'Return & ledger reconciliation', bank: 'Bank reconciliation', einv: 'E-invoicing chain', filing: 'Filing & payment', analytics: 'Data analytics', sampling: 'Sample testing', checklist: 'Documents on file', findings: 'Open findings' }[k] || k; };
+  Z.partName = function (k) { return { recon: 'Return & ledger reconciliation', bank: 'Bank reconciliation', einv: 'E-invoicing chain', filing: 'Filing & payment', other: 'Other taxes', analytics: 'Data analytics', sampling: 'Sample testing', checklist: 'Documents on file', findings: 'Open findings' }[k] || k; };
 
   // apply saved theme before first paint
   try { var th = localStorage.getItem('zr_theme'); if (th) document.documentElement.dataset.theme = th; } catch (e) {}

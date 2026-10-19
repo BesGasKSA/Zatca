@@ -5,7 +5,7 @@ var E = require('../web/engine.js');
 global.ZEngine = E;
 var demo = require('../web/demo.js').gen();
 
-var passed = 0;
+var passed = 0, r2 = E.r2;
 function t(name, fn) { try { fn(); passed++; console.log('  ok  ' + name); } catch (e) { console.error('  FAIL ' + name + '\n       ' + e.message); process.exitCode = 1; } }
 function byId(list, id) { return list.filter(function (c) { return c.id === id; })[0]; }
 
@@ -217,6 +217,14 @@ t('corrections register: amend within 20 days at or above SAR 15,000', function 
 t('requests: objection window 60 days after an assessment', function () {
   var a = E.requestDue(demo.requests[1], {}, '2026-10-19'); assert.strictEqual(a.due, '2026-10-24'); assert.strictEqual(a.state, 'urgent');
   var i = E.requestDue(demo.requests[0], {}, '2026-10-19'); assert.strictEqual(i.due, '2026-10-22'); assert.strictEqual(i.daysLeft, 3);
+});
+
+t('separate VAT and WHT readiness and exposure', function () {
+  assert.ok(R4.vatScore.score >= 0 && R4.whtScore.score >= 0);
+  assert.notStrictEqual(R4.vatScore.score, R4.whtScore.score);
+  assert.ok(R4.whtExposure > 0 && R4.vatExposure > R4.whtExposure);
+  assert.strictEqual(r2(R4.vatExposure + R4.whtExposure), R4.exposure);
+  assert.ok(!('bank' in R4.whtScore.parts) || R4.whtScore.parts.bank == null);
 });
 
 console.log('regulatory rules');

@@ -7,7 +7,14 @@
   var E = window.ZEngine, S = Z.S, t = Z.t, esc = Z.esc, fmt = Z.fmt;
 
   // ---------------------------------------------------------------- reports centre
-  var RTABS = [['summary', 'Tax summary'], ['portfolio', 'Portfolio readiness'], ['aging', 'Findings aging'], ['exposure', 'Exposure by entity'], ['corrections', 'Corrections register'], ['calendar', 'Filing compliance']];
+  var VAT_RTABS = [['summary', 'VAT summary'], ['portfolio', 'Portfolio readiness'], ['aging', 'Findings aging'], ['exposure', 'Exposure by entity'], ['corrections', 'Corrections register'], ['calendar', 'Filing compliance']];
+  var WHT_RTABS = [['summary', 'WHT summary'], ['beneficiaries', 'WHT by beneficiary'], ['portfolio', 'Portfolio readiness'], ['aging', 'Findings aging'], ['exposure', 'Exposure by entity'], ['calendar', 'Filing compliance']];
+  // what belongs to the section on screen
+  var W = function () { return Z.isWht(); };
+  var mineF = function (f) { return (f.tax === 'WHT') === W(); };
+  var sc = function (sm) { return Z.taxScore(sm); };
+  var expo = function (sm) { sm = sm || {}; return W() ? sm.whtExposure || 0 : sm.vatExposure != null ? sm.vatExposure : sm.exposure || 0; };
+  var fails = function (sm) { sm = sm || {}; return W() ? sm.whtFails || 0 : sm.vatFails != null ? sm.vatFails : sm.fails || 0; };
 
   // ---- the date range every report follows (months, inclusive)
   function nextMonth(p) { var y = +p.slice(0, 4), m = +p.slice(5) + 1; if (m > 12) { y++; m = 1; } return y + '-' + (m < 10 ? '0' : '') + m; }
@@ -46,11 +53,16 @@
   }
 
   Z.views.reports = function (h) {
-    var tab = h[1] || 'summary';
+    var RTABS = W() ? WHT_RTABS : VAT_RTABS, tab = h[1] || 'summary';
+    if (!RTABS.some(function (x) { return x[0] === tab; })) tab = 'summary';
     var nav = '<nav class="tabs" aria-label="' + t('Reports') + '">' + RTABS.map(function (x) { return '<a href="#/reports/' + x[0] + '"' + (tab === x[0] ? ' aria-current="page"' : '') + '>' + t(x[1]) + '</a>'; }).join('') + '</nav>';
-    var head = '<div class="pagehead"><div><h1>' + t('Reports') + '</h1><p>' + t('Across every entity you can see, for the months you choose. Each report exports to Excel.') + '</p></div><button class="btn" data-act="rexport" data-r="' + tab + '">' + t('Export to Excel') + '</button></div>';
+    var head = '<div class="pagehead"><div><p class="eyebrow">' + Z.taxName() + '</p><h1>' + (W() ? t('Withholding tax reports') : t('VAT reports')) + '</h1><p>' + t('Across every entity you can see, for the months you choose. Each report exports to Excel.') + '</p></div><button class="btn" data-act="rexport" data-r="' + tab + '">' + Z.icon('microsoft-excel-logo') + ' ' + t('Export to Excel') + '</button></div>';
     if (tab === 'aging' || tab === 'exposure' || tab === 'corrections') {
-      return Z.list('findings').then(function (fs) { S.allFindings = fs; Z.setMain(head + rangeBar() + nav + (tab === 'aging' ? aging(fs) : tab === 'corrections' ? corrections(fs) : exposure(fs))); });
+      return Z.list('findings').then(function (fs) { fs = fs.filter(mineF); S.allFindings = fs; Z.setMain(head + rangeBar() + nav + (tab === 'aging' ? aging(fs) : tab === 'corrections' ? corrections(fs) : exposure(fs))); });
+    }
+    if (tab === 'beneficiaries') {
+      Z.setMain(head + rangeBar() + nav + '<section class="paper"><p class="muted">' + t('Loading the WHT registers…') + '</p></section>');
+      return beneficiaryRows().then(function (rows) { S.benef = rows; Z.setMain(head + rangeBar() + nav + beneficiaries(rows)); });
     }
     Z.setMain(head + rangeBar() + nav + (tab === 'calendar' ? calendar() : tab === 'portfolio' ? portfolio() : summary()));
   };
@@ -62,28 +74,70 @@
   function summaryRows() {
     return ents().map(function (e) {
       var xs = exercisesInRange(e).filter(function (x) { return x.summary; }), sum = function (k) { return xs.reduce(function (a, x) { return a + (+x.summary[k] || 0); }, 0); };
-      var scored = xs.filter(function (x) { return x.summary.score != null; });
-      return { e: e, n: xs.length, sales: sum('sales'), outputVat: sum('outputVat'), inputVat: sum('inputVat'), netVat: sum('netVat'), whtTax: sum('whtTax'), exposure: sum('exposure'), fails: sum('fails'),
-        avg: scored.length ? Math.round(scored.reduce(function (a, x) { return a + x.summary.score; }, 0) / scored.length) : null, signed: xs.filter(function (x) { return x.status === 'closed'; }).length };
+      var scored = xs.map(function (x) { return sc(x.summary).score; }).filter(function (v) { return v != null; });
+      return { e: e, n: xs.length, sales: sum('sales'), outputVat: sum('outputVat'), inputVat: sum('inputVat'), netVat: sum('netVat'), whtTax: sum('whtTax'), whtGross: sum('whtGross'), lateDays: sum('whtLateDays'),
+        exposure: xs.reduce(function (a, x) { return a + expo(x.summary); }, 0), fails: xs.reduce(function (a, x) { return a + fails(x.summary); }, 0),
+        avg: scored.length ? Math.round(scored.reduce(function (a, v) { return a + v; }, 0) / scored.length) : null, signed: xs.filter(function (x) { return x.status === 'closed'; }).length };
     });
   }
   function summary() {
+    if (W()) return whtSummary();
     var rows = summaryRows(), tot = rows.reduce(function (a, r) { ['n', 'sales', 'outputVat', 'inputVat', 'netVat', 'whtTax', 'exposure', 'fails', 'signed'].forEach(function (k) { a[k] = (a[k] || 0) + r[k]; }); return a; }, {});
-    return '<section class="paper flush"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Entity') + '</th><th class="num">' + t('Exercises') + '</th><th class="num">' + t('Signed off') + '</th><th class="num">' + t('Sales (box 6)') + '</th><th class="num">' + t('Output VAT') + '</th><th class="num">' + t('Input VAT') + '</th><th class="num">' + t('Net VAT due') + '</th><th class="num">' + t('WHT') + '</th><th class="num">' + t('Failed checks') + '</th><th class="num">' + t('Quantified exposure (SAR)') + '</th><th class="num">' + t('Average readiness') + '</th></tr></thead><tbody>' +
-      rows.map(function (r) { return '<tr><td><a href="#/entity/' + r.e.id + '">' + esc(Z.entName(r.e)) + '</a></td><td class="num">' + r.n + '</td><td class="num">' + r.signed + '</td><td class="num">' + fmt(r.sales) + '</td><td class="num">' + fmt(r.outputVat) + '</td><td class="num">' + fmt(r.inputVat) + '</td><td class="num">' + fmt(r.netVat) + '</td><td class="num">' + fmt(r.whtTax) + '</td><td class="num">' + r.fails + '</td><td class="num">' + fmt(r.exposure) + '</td><td class="num">' + (r.avg == null ? '—' : r.avg + '%') + '</td></tr>'; }).join('') +
-      '<tr class="total"><td>' + t('Total') + '</td><td class="num">' + (tot.n || 0) + '</td><td class="num">' + (tot.signed || 0) + '</td><td class="num">' + fmt(tot.sales || 0) + '</td><td class="num">' + fmt(tot.outputVat || 0) + '</td><td class="num">' + fmt(tot.inputVat || 0) + '</td><td class="num">' + fmt(tot.netVat || 0) + '</td><td class="num">' + fmt(tot.whtTax || 0) + '</td><td class="num">' + (tot.fails || 0) + '</td><td class="num">' + fmt(tot.exposure || 0) + '</td><td></td></tr></tbody></table></div></section>' +
+    return '<section class="paper flush"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Entity') + '</th><th class="num">' + t('Exercises') + '</th><th class="num">' + t('Signed off') + '</th><th class="num">' + t('Sales (box 6)') + '</th><th class="num">' + t('Output VAT') + '</th><th class="num">' + t('Input VAT') + '</th><th class="num">' + t('Net VAT due') + '</th><th class="num">' + t('Failed checks') + '</th><th class="num">' + t('VAT exposure (SAR)') + '</th><th class="num">' + t('Average readiness') + '</th></tr></thead><tbody>' +
+      rows.map(function (r) { return '<tr><td><a href="#/entity/' + r.e.id + '">' + esc(Z.entName(r.e)) + '</a></td><td class="num">' + r.n + '</td><td class="num">' + r.signed + '</td><td class="num">' + fmt(r.sales) + '</td><td class="num">' + fmt(r.outputVat) + '</td><td class="num">' + fmt(r.inputVat) + '</td><td class="num">' + fmt(r.netVat) + '</td><td class="num">' + r.fails + '</td><td class="num">' + fmt(r.exposure) + '</td><td class="num">' + (r.avg == null ? '—' : r.avg + '%') + '</td></tr>'; }).join('') +
+      '<tr class="total"><td>' + t('Total') + '</td><td class="num">' + (tot.n || 0) + '</td><td class="num">' + (tot.signed || 0) + '</td><td class="num">' + fmt(tot.sales || 0) + '</td><td class="num">' + fmt(tot.outputVat || 0) + '</td><td class="num">' + fmt(tot.inputVat || 0) + '</td><td class="num">' + fmt(tot.netVat || 0) + '</td><td class="num">' + (tot.fails || 0) + '</td><td class="num">' + fmt(tot.exposure || 0) + '</td><td></td></tr></tbody></table></div></section>' +
       '<p class="faint" style="font-size:12.5px">' + t('Totals come from each exercise\'s saved figures. An exercise counts when its period overlaps the range; quarterly filers count in full.') + '</p>';
   }
+  function whtSummary() {
+    var rows = summaryRows(), tot = rows.reduce(function (a, r) { ['n', 'signed', 'whtGross', 'whtTax', 'lateDays', 'fails', 'exposure'].forEach(function (k) { a[k] = (a[k] || 0) + r[k]; }); return a; }, {});
+    var cells = function (r) { return '<td class="num">' + (r.n || 0) + '</td><td class="num">' + (r.signed || 0) + '</td><td class="num">' + fmt(r.whtGross || 0) + '</td><td class="num">' + fmt(r.whtTax || 0) + '</td><td class="num">' + (r.whtGross ? Z.r((r.whtTax || 0) / r.whtGross * 100) + '%' : '—') + '</td><td class="num">' + (r.lateDays || 0) + '</td><td class="num">' + (r.fails || 0) + '</td><td class="num">' + fmt(r.exposure || 0) + '</td>'; };
+    return '<section class="paper flush"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Entity') + '</th><th class="num">' + t('Exercises') + '</th><th class="num">' + t('Signed off') + '</th><th class="num">' + t('Paid to non-residents') + '</th><th class="num">' + t('WHT declared') + '</th><th class="num">' + t('Effective rate') + '</th><th class="num">' + t('Days late, total') + '</th><th class="num">' + t('Failed checks') + '</th><th class="num">' + t('WHT exposure (SAR)') + '</th><th class="num">' + t('Average readiness') + '</th></tr></thead><tbody>' +
+      rows.map(function (r) { return '<tr><td><a href="#/entity/' + r.e.id + '">' + esc(Z.entName(r.e)) + '</a></td>' + cells(r) + '<td class="num">' + (r.avg == null ? '—' : r.avg + '%') + '</td></tr>'; }).join('') +
+      '<tr class="total"><td>' + t('Total') + '</td>' + cells(tot) + '<td></td></tr></tbody></table></div></section>' +
+      '<p class="faint" style="font-size:12.5px">' + t('From the WHT return figures each exercise saved. WHT is monthly; a quarterly VAT exercise carries the three months of WHT inside it.') + '</p>';
+  }
+
+  // ---- WHT by beneficiary: every non-resident paid in the range, once
+  function beneficiaryRows() {
+    var xs = exercisesInRange();
+    return Promise.all(xs.map(function (x) { return Z.list('datasets', x.id).then(function (ds) { return ds.filter(function (d) { return d.kind === 'wht_reg'; }); }); })).then(function (lists) {
+      var ds = [].concat.apply([], lists);
+      return Promise.all(ds.map(function (d) { return Z.get('rows', d.id); })).then(function (rs) {
+        var by = {};
+        rs.forEach(function (r, i) {
+          var x = xs.filter(function (e) { return e.id === ds[i].parentId; })[0] || {};
+          E.unpackRows(r).forEach(function (w) {
+            if (w.date && (String(w.date).slice(0, 7) < range().from || String(w.date).slice(0, 7) > range().to)) return;
+            var k = x.entityId + '|' + String(w.party || '').trim().toLowerCase();
+            var b = by[k] = by[k] || { entityId: x.entityId, party: w.party, country: w.country || '', types: {}, n: 0, gross: 0, wht: 0, missingCert: 0, treaty: 0 };
+            b.n++; b.gross += +w.gross || 0; b.wht += +w.wht || 0; b.types[w.paymentType || 'other'] = 1;
+            if (!w.certificate) b.missingCert++;
+            if (w.dtt) b.treaty++;
+            if (!b.country && w.country) b.country = w.country;
+          });
+        });
+        return Object.keys(by).map(function (k) { return by[k]; }).sort(function (a, b) { return b.gross - a.gross; });
+      });
+    });
+  }
+  function beneficiaries(rows) {
+    var tot = rows.reduce(function (a, r) { return { g: a.g + r.gross, w: a.w + r.wht, m: a.m + r.missingCert }; }, { g: 0, w: 0, m: 0 });
+    return '<div class="kpis"><div><b>' + rows.length + '</b><span>' + t('Beneficiaries') + '</span></div><div><b>' + fmt(tot.g, 0) + '</b><span>' + t('Paid to non-residents') + '</span></div><div><b>' + fmt(tot.w, 0) + '</b><span>' + t('WHT withheld') + '</span></div><div class="' + (tot.m ? 'bad' : '') + '"><b>' + tot.m + '</b><span>' + t('Payments without a certificate') + '</span></div></div>' +
+      '<p class="muted" style="margin-top:12px">' + t('Use it to check certificates and the annual WHT figures; every beneficiary paid during the year appears once.') + '</p>' +
+      '<section class="paper flush"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Beneficiary') + '</th><th>' + t('Entity') + '</th><th>' + t('Country') + '</th><th>' + t('Payment types') + '</th><th class="num">' + t('Payments') + '</th><th class="num">' + t('Gross paid') + '</th><th class="num">' + t('WHT') + '</th><th class="num">' + t('Effective rate') + '</th><th class="num">' + t('Treaty relief') + '</th><th class="num">' + t('No certificate') + '</th></tr></thead><tbody>' +
+      (rows.map(function (r) { return '<tr><td><b>' + esc(r.party || '—') + '</b></td><td>' + esc(Z.entName(Z.entity(r.entityId))) + '</td><td>' + esc(r.country) + '</td><td style="font-size:12.5px">' + esc(Object.keys(r.types).join(', ')) + '</td><td class="num">' + r.n + '</td><td class="num">' + fmt(r.gross) + '</td><td class="num">' + fmt(r.wht) + '</td><td class="num">' + (r.gross ? Z.r(r.wht / r.gross * 100) + '%' : '—') + '</td><td class="num">' + (r.treaty || '') + '</td><td class="num ' + (r.missingCert ? 'diff-bad' : '') + '">' + (r.missingCert || '') + '</td></tr>'; }).join('') || '<tr><td colspan="10" class="empty">' + t('No WHT registers loaded for this range.') + '</td></tr>') + '</tbody></table></div></section>';
+  }
+
   function keyFor(e, m) { return e.vatFreq === 'quarterly' ? m.slice(0, 4) + '-Q' + Math.ceil(+m.slice(5) / 3) : m; }
   function exOf(e, p) { return /Q/.test(p) || p.length !== 7 ? S.exercises.filter(function (x) { return x.entityId === e.id && x.period === p; })[0] : Z.exFor(e, p); }
-  function ents() { return S.entities.filter(function (e) { return e.active !== false; }); }
+  function ents() { return S.entities.filter(function (e) { return e.active !== false && (!W() || e.whtRegistered !== false); }); }
 
   function portfolio() {
     var ms = months12();
     var rows = ents().map(function (e) {
       return '<tr><th scope="row" style="text-align:start"><a href="#/entity/' + e.id + '">' + esc(Z.entName(e)) + '</a></th>' + ms.map(function (m) {
-        var x = exOf(e, keyFor(e, m)), sm = x && x.summary;
-        return '<td class="num">' + (sm && sm.score != null ? Z.pill(sm.grade, sm.score + '%') : '<span class="faint">—</span>') + '</td>';
+        var x = exOf(e, keyFor(e, m)), s2 = x && sc(x.summary);
+        return '<td class="num">' + (s2 && s2.score != null ? Z.pill(s2.grade, s2.score + '%') : '<span class="faint">—</span>') + '</td>';
       }).join('') + '</tr>';
     }).join('');
     return '<section class="paper flush"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Entity') + '</th>' + ms.map(function (m) { return '<th class="num">' + Z.ltr(m) + '</th>'; }).join('') + '</tr></thead><tbody>' + rows + '</tbody></table></div></section>';
@@ -163,9 +217,9 @@
       var tax = open.reduce(function (a, f) { return a + (+f.taxImpact || 0); }, 0), pen = open.reduce(function (a, f) { return a + (+f.penalty || 0); }, 0);
       return { e: e, latest: latest, sm: sm, open: open.length, tax: tax, pen: pen };
     });
-    var tot = rows.reduce(function (a, r) { return { q: a.q + (r.sm.exposure || 0), tax: a.tax + r.tax, pen: a.pen + r.pen }; }, { q: 0, tax: 0, pen: 0 });
-    return '<section class="paper flush"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Entity') + '</th><th>' + t('Latest exercise') + '</th><th class="num">' + t('Readiness') + '</th><th class="num">' + t('Quantified exposure (SAR)') + '</th><th class="num">' + t('Open findings') + '</th><th class="num">' + t('Tax at stake (SAR)') + '</th><th class="num">' + t('Estimated penalties (SAR)') + '</th></tr></thead><tbody>' +
-      rows.map(function (r) { return '<tr><td><a href="#/entity/' + r.e.id + '">' + esc(Z.entName(r.e)) + '</a></td><td>' + (r.latest ? Z.ltr(r.latest.period) : '—') + '</td><td class="num">' + (r.sm.score != null ? Z.pill(r.sm.grade, r.sm.score + '%') : '—') + '</td><td class="num">' + fmt(r.sm.exposure || 0) + '</td><td class="num">' + r.open + '</td><td class="num">' + fmt(r.tax) + '</td><td class="num">' + fmt(r.pen) + '</td></tr>'; }).join('') +
+    var tot = rows.reduce(function (a, r) { return { q: a.q + expo(r.sm), tax: a.tax + r.tax, pen: a.pen + r.pen }; }, { q: 0, tax: 0, pen: 0 });
+    return '<section class="paper flush"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Entity') + '</th><th>' + t('Latest exercise') + '</th><th class="num">' + t('Readiness') + '</th><th class="num">' + (W() ? t('WHT exposure (SAR)') : t('VAT exposure (SAR)')) + '</th><th class="num">' + t('Open findings') + '</th><th class="num">' + t('Tax at stake (SAR)') + '</th><th class="num">' + t('Estimated penalties (SAR)') + '</th></tr></thead><tbody>' +
+      rows.map(function (r) { return '<tr><td><a href="#/entity/' + r.e.id + '">' + esc(Z.entName(r.e)) + '</a></td><td>' + (r.latest ? Z.ltr(r.latest.period) : '—') + '</td><td class="num">' + (sc(r.sm).score != null ? Z.pill(sc(r.sm).grade, sc(r.sm).score + '%') : '—') + '</td><td class="num">' + fmt(expo(r.sm)) + '</td><td class="num">' + r.open + '</td><td class="num">' + fmt(r.tax) + '</td><td class="num">' + fmt(r.pen) + '</td></tr>'; }).join('') +
       '<tr class="total"><td colspan="3">' + t('Total') + '</td><td class="num">' + fmt(tot.q) + '</td><td></td><td class="num">' + fmt(tot.tax) + '</td><td class="num">' + fmt(tot.pen) + '</td></tr></tbody></table></div></section>';
   }
 
@@ -178,25 +232,27 @@
       var late = E.daysBetween(due, filed);
       return '<td class="num">' + Z.tick(late > 0 ? (kind === 'wht' && late < 30 ? 'warn' : 'fail') : 'pass', late > 0 ? late + ' ' + t('days late') : t('On time')) + '</td>';
     };
-    return '<p class="muted">' + t('Each mark is one return: ✓ on time, ! late with no fine (WHT under 30 days), ✕ late or missing past the deadline. Dates come from each exercise\'s Filing & payment tab.') + '</p>' +
+    return '<p class="muted">' + (W() ? t('Each mark is one WHT return: on time, late with no fine (under 30 days), or late or missing past the 10th. Dates come from each exercise\'s Filing & payment tab.') : t('Each mark is one VAT return: on time, or late or missing past the deadline. Dates come from each exercise\'s Filing & payment tab.')) + '</p>' +
       '<section class="paper flush"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Entity') + '</th><th>' + t('Return') + '</th>' + ms.map(function (m) { return '<th class="num">' + Z.ltr(m.slice(2)) + '</th>'; }).join('') + '</tr></thead><tbody>' +
       ents().map(function (e) {
-        var vat = '<tr><td rowspan="' + (e.whtRegistered === false ? 1 : 2) + '"><a href="#/entity/' + e.id + '">' + esc(Z.entName(e)) + '</a></td><td>' + t('VAT') + '</td>' + ms.map(function (m) {
+        var name = '<td><a href="#/entity/' + e.id + '">' + esc(Z.entName(e)) + '</a></td>';
+        if (W()) return '<tr>' + name + '<td>' + t('WHT') + '</td>' + ms.map(function (m) { return cell(S.exercises.filter(function (x) { return x.entityId === e.id && (x.period === m || x.period === keyFor(e, m) && +m.slice(5) % 3 === 0); })[0], 'wht'); }).join('') + '</tr>';
+        return '<tr>' + name + '<td>' + t('VAT') + '</td>' + ms.map(function (m) {
           var k = keyFor(e, m); if (e.vatFreq === 'quarterly' && +m.slice(5) % 3 !== 0) return '<td class="num faint">·</td>'; return cell(exOf(e, k), 'vat');
         }).join('') + '</tr>';
-        var wht = e.whtRegistered === false ? '' : '<tr><td>' + t('WHT') + '</td>' + ms.map(function (m) { return cell(S.exercises.filter(function (x) { return x.entityId === e.id && (x.period === m || x.period === keyFor(e, m) && +m.slice(5) % 3 === 0); })[0], 'wht'); }).join('') + '</tr>';
-        return vat + wht;
       }).join('') + '</tbody></table></div></section>';
   }
 
   Z.ACT.rexport = function (el) {
     var wb = XLSX.utils.book_new(), add = function (n, aoa) { XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa), n); }, ms = months12(), r = el.dataset.r;
-    if (r === 'portfolio') add('Portfolio', [['Entity'].concat(ms)].concat(ents().map(function (e) { return [e.name].concat(ms.map(function (m) { var x = exOf(e, keyFor(e, m)); return x && x.summary && x.summary.score != null ? x.summary.score : ''; })); })));
-    if (r === 'summary') add('Tax summary', [['Range', range().from + ' to ' + range().to], [], ['Entity', 'Exercises', 'Signed off', 'Sales', 'Output VAT', 'Input VAT', 'Net VAT', 'WHT', 'Failed checks', 'Exposure', 'Average readiness']].concat(summaryRows().map(function (x) { return [x.e.name, x.n, x.signed, x.sales, x.outputVat, x.inputVat, x.netVat, x.whtTax, x.fails, x.exposure, x.avg]; })));
+    if (r === 'portfolio') add('Portfolio', [['Entity'].concat(ms)].concat(ents().map(function (e) { return [e.name].concat(ms.map(function (m) { var x = exOf(e, keyFor(e, m)), v = x && sc(x.summary).score; return v == null ? '' : v; })); })));
+    if (r === 'summary' && W()) add('WHT summary', [['Range', range().from + ' to ' + range().to], [], ['Entity', 'Exercises', 'Signed off', 'Paid to non-residents', 'WHT declared', 'Days late', 'Failed checks', 'WHT exposure', 'Average readiness']].concat(summaryRows().map(function (x) { return [x.e.name, x.n, x.signed, x.whtGross, x.whtTax, x.lateDays, x.fails, x.exposure, x.avg]; })));
+    if (r === 'beneficiaries') add('WHT by beneficiary', [['Range', range().from + ' to ' + range().to], [], ['Beneficiary', 'Entity', 'Country', 'Payment types', 'Payments', 'Gross paid', 'WHT', 'Treaty relief', 'No certificate']].concat((S.benef || []).map(function (b) { return [b.party, (Z.entity(b.entityId) || {}).name, b.country, Object.keys(b.types).join(', '), b.n, E.r2(b.gross), E.r2(b.wht), b.treaty, b.missingCert]; })));
+    if (r === 'summary' && !W()) add('VAT summary', [['Range', range().from + ' to ' + range().to], [], ['Entity', 'Exercises', 'Signed off', 'Sales', 'Output VAT', 'Input VAT', 'Net VAT', 'Failed checks', 'VAT exposure', 'Average readiness']].concat(summaryRows().map(function (x) { return [x.e.name, x.n, x.signed, x.sales, x.outputVat, x.inputVat, x.netVat, x.fails, x.exposure, x.avg]; })));
     if (r === 'aging') { var b = E.aging(findingsInRange(S.allFindings || []), asOf()), rows = [['Bucket', 'Severity', 'Finding', 'Exercise', 'Tax impact', 'Penalty', 'Owner', 'Due', 'Days overdue']]; BUCKETS.forEach(function (k) { b[k[0]].forEach(function (f) { rows.push([k[1], f.severity, f.title, exName(f.parentId), f.taxImpact, f.penalty, f.owner, f.due, f.overdue || '']); }); }); add('Findings aging', rows); }
-    if (r === 'exposure') add('Exposure', [['Entity', 'Latest period', 'Readiness', 'Quantified exposure', 'Open findings']].concat(ents().map(function (e) { var x = exercisesInRange(e).sort(function (a, b) { return a.period < b.period ? 1 : -1; })[0]; var sm = (x && x.summary) || {}; return [e.name, x ? x.period : '', sm.score, sm.exposure, (S.allFindings || []).filter(function (f) { return f.status !== 'closed' && x && f.parentId === x.id; }).length]; })));
-    if (r === 'calendar') add('Filing', [['Entity', 'Period', 'VAT due', 'VAT filed', 'VAT paid', 'WHT due', 'WHT filed', 'WHT paid']].concat(exercisesInRange().map(function (x) { var F = x.filing || {}, dl = E.deadlines(x.period), e = Z.entity(x.entityId) || {}; return [e.name, x.period, dl.vat, F.vatFiledOn || '', F.vatPaidOn || '', dl.wht, F.whtFiledOn || '', F.whtPaidOn || '']; })));
-    XLSX.writeFile(wb, 'report-' + r + '-' + range().from + '-to-' + range().to + '.xlsx');
+    if (r === 'exposure') add('Exposure', [['Entity', 'Latest period', 'Readiness', 'Quantified exposure', 'Open findings']].concat(ents().map(function (e) { var x = exercisesInRange(e).sort(function (a, b) { return a.period < b.period ? 1 : -1; })[0]; var sm = (x && x.summary) || {}; return [e.name, x ? x.period : '', sc(sm).score, expo(sm), (S.allFindings || []).filter(function (f) { return f.status !== 'closed' && x && f.parentId === x.id; }).length]; })));
+    if (r === 'calendar') add('Filing', [['Entity', 'Period'].concat(W() ? ['WHT due', 'WHT filed', 'WHT paid'] : ['VAT due', 'VAT filed', 'VAT paid'])].concat(exercisesInRange().map(function (x) { var F = x.filing || {}, dl = E.deadlines(x.period), e = Z.entity(x.entityId) || {}; return [e.name, x.period].concat(W() ? [dl.wht, F.whtFiledOn || '', F.whtPaidOn || ''] : [dl.vat, F.vatFiledOn || '', F.vatPaidOn || '']); })));
+    XLSX.writeFile(wb, (W() ? 'wht' : 'vat') + '-report-' + r + '-' + range().from + '-to-' + range().to + '.xlsx');
   };
 
   // ---------------------------------------------------------------- annual reconciliation
