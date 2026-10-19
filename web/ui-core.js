@@ -28,6 +28,13 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     var lab = { pass: t('Passed'), warn: t('Needs explanation'), fail: t('Failed'), na: t('No data') }[st];
     return '<span class="tk ' + (st || 'na') + '" role="img" aria-label="' + esc(title || lab) + '" title="' + esc(title || lab) + '"><i class="ph ' + ic + '" aria-hidden="true"></i></span>';
   };
+  Z.canExitDemo = function () { return S.api && S.api.mode === 'local' && !!(window.ZR_API_URL || localStorage.getItem('zr_api_url')); };
+  Z.exitButton = function (cls) {
+    if (S.api && S.api.mode === 'cloud') return '<button class="' + cls + '" data-act="logout">' + Z.icon('sign-out') + '<span>' + t('Sign out') + '</span></button>';
+    if (Z.canExitDemo()) return '<button class="' + cls + '" data-act="exitdemo">' + Z.icon('sign-out') + '<span>' + t('Exit demo') + '</span></button>';
+    return '';
+  };
+  Z.ACT.exitdemo = function () { try { sessionStorage.removeItem('zr_local'); } catch (e) {} location.hash = ''; location.reload(); };
   Z.icon = function (name) { return '<i class="ph ph-' + name + '" aria-hidden="true"></i>'; };
   // the active tax section: 'vat' or 'wht'
   Z.isWht = function () { return S.tax === 'wht'; };
@@ -228,7 +235,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     if (S.api.mode === 'cloud') h += nav('#/' + tx + '/platform', t('Platform'), 'globe-hemisphere-east', view === 'platform');
     if (S.api.mode === 'cloud' && S.tenant && S.tenant.spreadsheetUrl) h += '<a class="nav" href="' + esc(S.tenant.spreadsheetUrl) + '" target="_blank" rel="noopener noreferrer">' + Z.icon('table') + '<span>' + t('Google Sheet (your data)') + '</span></a>';
     h += '<a class="nav" href="https://besgasksa.github.io/Zatca/Inspection-Ready-Guide.pdf" target="_blank" rel="noopener noreferrer">' + Z.icon('book-open-text') + '<span>' + t('User guide (PDF)') + '</span></a>';
-    h += '<div class="foot"><b>' + esc(S.user.name) + '</b>' + esc(t(cap(S.user.role))) + (S.tenant ? ', ' + esc(S.tenant.name) : '') + '<br>' + (S.api.mode === 'cloud' ? '<button data-act="logout">' + t('Sign out') + '</button> ' : t('Stored on this device') + '<br>') + '<button data-act="lang">' + (S.lang === 'ar' ? 'English' : 'العربية') + '</button></div>';
+    h += '<div class="foot"><b>' + esc(S.user.name) + '</b>' + esc(t(cap(S.user.role))) + (S.tenant ? ', ' + esc(S.tenant.name) : '') + '<br>' + (S.api.mode === 'cloud' ? '' : t('Stored on this device') + '<br>') + Z.exitButton('btn small exit-btn wide') + ' ' + '<button data-act="lang">' + (S.lang === 'ar' ? 'English' : 'العربية') + '</button></div>';
     document.querySelector('.rail').innerHTML = h;
   }
   function cap(s) { return s ? s[0].toUpperCase() + s.slice(1) : ''; }
@@ -245,7 +252,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       (S.entities.length ? '<select data-chg="entity" aria-label="' + t('Entity') + '">' + opts + '</select>' : '') +
       (S.api.mode === 'cloud' && S.tenant && S.tenant.spreadsheetUrl ? '<a class="btn small sheet-btn" href="' + esc(S.tenant.spreadsheetUrl) + '" target="_blank" rel="noopener noreferrer" title="' + esc(t('Open Google Sheet')) + '">' + Z.icon('microsoft-excel-logo') + '<span class="so-lbl">' + t('Google Sheet') + '</span></a>' : '') +
       '<button class="btn ghost small" data-act="theme" aria-label="' + t('Switch light/dark') + '">' + Z.icon('circle-half') + '</button><button class="btn ghost small lang-btn" data-act="lang">' + (S.lang === 'ar' ? 'English' : 'العربية') + '</button>' +
-      (S.api.mode === 'cloud' ? '<button class="btn ghost small" data-act="logout" title="' + esc(t('Sign out')) + '" aria-label="' + esc(t('Sign out')) + '">' + Z.icon('sign-out') + '<span class="so-lbl">' + t('Sign out') + '</span></button>' : '');
+      Z.exitButton('btn small exit-btn');
   }
   Z.CHG.entity = function (el) { S.entityId = el.value; localStorage.setItem('zr_entity', el.value); location.hash = '#/' + S.tax + '/entity/' + el.value; };
   Z.entity = function (id) { return S.entities.filter(function (e) { return e.id === id; })[0]; };

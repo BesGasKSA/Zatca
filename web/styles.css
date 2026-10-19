@@ -141,6 +141,7 @@ p { margin: 0 0 .6em; max-width: 75ch; }
 @media (max-width: 640px) {
   .top { gap: 6px; padding: 0 8px; }
   .top select, .top .lang-btn, .top .so-lbl { display: none; }
+  .top .exit-btn span { display: none; }
   .switch a { padding: 6px 10px; font-size: 13px; }
   .switch .lg { display: none; }
   .switch .sh { display: inline; }
@@ -365,3 +366,10 @@ table.matrix td.bl { border-inline-start: 1px solid var(--line); }
 
 .top .so-lbl { margin-inline-start: 6px; }
 .top .sheet-btn { color: var(--accent); border-color: var(--accent); }
+
+/* Sign out / Exit demo: always visible, never mistaken for a decoration */
+.exit-btn { display: inline-flex; align-items: center; gap: 6px; color: var(--fail); border: 1px solid color-mix(in srgb, var(--fail) 40%, transparent); background: var(--surface); font-weight: 700; }
+.exit-btn:hover { background: color-mix(in srgb, var(--fail) 8%, var(--surface)); }
+.exit-btn i { font-size: 17px; }
+.rail .foot .exit-btn.wide { width: 100%; justify-content: center; margin-top: 10px; padding: 8px 10px; color: var(--fail); border-color: color-mix(in srgb, var(--fail) 40%, transparent); }
+@media (max-width: 420px) { .top .switch a { padding: 6px 8px; } }
