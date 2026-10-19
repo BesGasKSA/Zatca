@@ -7,21 +7,75 @@
   var E = window.ZEngine, S = Z.S, t = Z.t, esc = Z.esc, fmt = Z.fmt;
 
   // ---------------------------------------------------------------- reports centre
-  var RTABS = [['portfolio', 'Portfolio readiness'], ['aging', 'Findings aging'], ['exposure', 'Exposure by entity'], ['calendar', 'Filing compliance']];
+  var RTABS = [['summary', 'Tax summary'], ['portfolio', 'Portfolio readiness'], ['aging', 'Findings aging'], ['exposure', 'Exposure by entity'], ['calendar', 'Filing compliance']];
+
+  // ---- the date range every report follows (months, inclusive)
+  function nextMonth(p) { var y = +p.slice(0, 4), m = +p.slice(5) + 1; if (m > 12) { y++; m = 1; } return y + '-' + (m < 10 ? '0' : '') + m; }
+  function defaultRange() { var to = E.prevPeriod(E.periodOf(Z.today(), 'monthly')), from = to; for (var i = 0; i < 11; i++) from = E.prevPeriod(from); return { from: from, to: to }; }
+  function range() {
+    if (!S.rf) { try { S.rf = JSON.parse(localStorage.getItem('zr_rf') || 'null'); } catch (e) {} }
+    if (!S.rf || !/^\d{4}-\d{2}$/.test(S.rf.from) || !/^\d{4}-\d{2}$/.test(S.rf.to)) S.rf = defaultRange();
+    return S.rf;
+  }
+  function setRange(from, to) {
+    if (from > to) { var x = from; from = to; to = x; }
+    S.rf = { from: from, to: to };
+    try { localStorage.setItem('zr_rf', JSON.stringify(S.rf)); } catch (e) {}
+    Z.route();
+  }
+  function inRange(period) { var r = E.periodRange(period), R = range(); return !!r && r.end.slice(0, 7) >= R.from && r.start.slice(0, 7) <= R.to; }
+  function asOf() { var end = E.periodRange(range().to).end; return end < Z.today() ? end : Z.today(); }
+  function exercisesInRange(e) { return S.exercises.filter(function (x) { return (!e || x.entityId === e.id) && inRange(x.period); }); }
+  Z.CHG.rfrom = function (el) { if (el.value) setRange(el.value, range().to); };
+  Z.CHG.rto = function (el) { if (el.value) setRange(range().from, el.value); };
+  Z.ACT.rquick = function (el) {
+    var q = el.dataset.q, y = +Z.today().slice(0, 4), cur = E.periodOf(Z.today(), 'monthly');
+    if (q === '12m') { var d = defaultRange(); setRange(d.from, d.to); }
+    else if (q === 'ytd') setRange(y + '-01', cur);
+    else if (q === 'last') setRange((y - 1) + '-01', (y - 1) + '-12');
+    else if (q === 'all') setRange(Z.FIRST_YEAR + '-01', cur);
+    else if (q === 'q') { var qs = Math.floor((+cur.slice(5) - 1) / 3) * 3 + 1, from = y + '-' + (qs < 10 ? '0' : '') + qs; setRange(from, cur); }
+  };
+  function rangeBar() {
+    var R = range(), n = months12().length;
+    return '<section class="paper" style="display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;margin-bottom:16px">' +
+      '<label class="f" style="width:170px"><span>' + t('From') + '</span><input type="month" min="' + Z.FIRST_YEAR + '-01" value="' + R.from + '" data-chg="rfrom"></label>' +
+      '<label class="f" style="width:170px"><span>' + t('To') + '</span><input type="month" min="' + Z.FIRST_YEAR + '-01" value="' + R.to + '" data-chg="rto"></label>' +
+      '<div class="row">' + [['12m', 'Last 12 months'], ['q', 'This quarter'], ['ytd', 'This year'], ['last', 'Last year'], ['all', 'Since 2018']].map(function (b) { return '<button class="btn small" data-act="rquick" data-q="' + b[0] + '">' + t(b[1]) + '</button>'; }).join('') + '</div>' +
+      '<p class="faint" style="margin:0;font-size:12.5px;flex-basis:100%">' + n + ' ' + t('months') + ' · ' + t('findings aged as of') + ' ' + Z.ltr(asOf()) + '</p></section>';
+  }
 
   Z.views.reports = function (h) {
-    var tab = h[1] || 'portfolio';
+    var tab = h[1] || 'summary';
     var nav = '<nav class="tabs" aria-label="' + t('Reports') + '">' + RTABS.map(function (x) { return '<a href="#/reports/' + x[0] + '"' + (tab === x[0] ? ' aria-current="page"' : '') + '>' + t(x[1]) + '</a>'; }).join('') + '</nav>';
-    var head = '<div class="pagehead"><div><h1>' + t('Reports') + '</h1><p>' + t('Across every entity you can see. Each report exports to Excel.') + '</p></div><button class="btn" data-act="rexport" data-r="' + tab + '">' + t('Export to Excel') + '</button></div>';
+    var head = '<div class="pagehead"><div><h1>' + t('Reports') + '</h1><p>' + t('Across every entity you can see, for the months you choose. Each report exports to Excel.') + '</p></div><button class="btn" data-act="rexport" data-r="' + tab + '">' + t('Export to Excel') + '</button></div>';
     if (tab === 'aging' || tab === 'exposure') {
-      return Z.list('findings').then(function (fs) { S.allFindings = fs; Z.setMain(head + nav + (tab === 'aging' ? aging(fs) : exposure(fs))); });
+      return Z.list('findings').then(function (fs) { S.allFindings = fs; Z.setMain(head + rangeBar() + nav + (tab === 'aging' ? aging(fs) : exposure(fs))); });
     }
-    Z.setMain(head + nav + (tab === 'calendar' ? calendar() : portfolio()));
+    Z.setMain(head + rangeBar() + nav + (tab === 'calendar' ? calendar() : tab === 'portfolio' ? portfolio() : summary()));
   };
 
-  function months12() { var out = [], cur = E.periodOf(Z.today(), 'monthly'); for (var i = 0; i < 12; i++) { cur = E.prevPeriod(cur); out.unshift(cur); } return out; }
+  function months12() { var out = [], R = range(), cur = R.from; while (cur <= R.to && out.length < 240) { out.push(cur); cur = nextMonth(cur); } return out; }
+  function findingsInRange(fs) { var ids = {}; exercisesInRange().forEach(function (x) { ids[x.id] = 1; }); return fs.filter(function (f) { return ids[f.parentId]; }); }
+
+  // ---- tax summary: totals per entity over the range
+  function summaryRows() {
+    return ents().map(function (e) {
+      var xs = exercisesInRange(e).filter(function (x) { return x.summary; }), sum = function (k) { return xs.reduce(function (a, x) { return a + (+x.summary[k] || 0); }, 0); };
+      var scored = xs.filter(function (x) { return x.summary.score != null; });
+      return { e: e, n: xs.length, sales: sum('sales'), outputVat: sum('outputVat'), inputVat: sum('inputVat'), netVat: sum('netVat'), whtTax: sum('whtTax'), exposure: sum('exposure'), fails: sum('fails'),
+        avg: scored.length ? Math.round(scored.reduce(function (a, x) { return a + x.summary.score; }, 0) / scored.length) : null, signed: xs.filter(function (x) { return x.status === 'closed'; }).length };
+    });
+  }
+  function summary() {
+    var rows = summaryRows(), tot = rows.reduce(function (a, r) { ['n', 'sales', 'outputVat', 'inputVat', 'netVat', 'whtTax', 'exposure', 'fails', 'signed'].forEach(function (k) { a[k] = (a[k] || 0) + r[k]; }); return a; }, {});
+    return '<section class="paper flush"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Entity') + '</th><th class="num">' + t('Exercises') + '</th><th class="num">' + t('Signed off') + '</th><th class="num">' + t('Sales (box 6)') + '</th><th class="num">' + t('Output VAT') + '</th><th class="num">' + t('Input VAT') + '</th><th class="num">' + t('Net VAT due') + '</th><th class="num">' + t('WHT') + '</th><th class="num">' + t('Failed checks') + '</th><th class="num">' + t('Quantified exposure (SAR)') + '</th><th class="num">' + t('Average readiness') + '</th></tr></thead><tbody>' +
+      rows.map(function (r) { return '<tr><td><a href="#/entity/' + r.e.id + '">' + esc(Z.entName(r.e)) + '</a></td><td class="num">' + r.n + '</td><td class="num">' + r.signed + '</td><td class="num">' + fmt(r.sales) + '</td><td class="num">' + fmt(r.outputVat) + '</td><td class="num">' + fmt(r.inputVat) + '</td><td class="num">' + fmt(r.netVat) + '</td><td class="num">' + fmt(r.whtTax) + '</td><td class="num">' + r.fails + '</td><td class="num">' + fmt(r.exposure) + '</td><td class="num">' + (r.avg == null ? '—' : r.avg + '%') + '</td></tr>'; }).join('') +
+      '<tr class="total"><td>' + t('Total') + '</td><td class="num">' + (tot.n || 0) + '</td><td class="num">' + (tot.signed || 0) + '</td><td class="num">' + fmt(tot.sales || 0) + '</td><td class="num">' + fmt(tot.outputVat || 0) + '</td><td class="num">' + fmt(tot.inputVat || 0) + '</td><td class="num">' + fmt(tot.netVat || 0) + '</td><td class="num">' + fmt(tot.whtTax || 0) + '</td><td class="num">' + (tot.fails || 0) + '</td><td class="num">' + fmt(tot.exposure || 0) + '</td><td></td></tr></tbody></table></div></section>' +
+      '<p class="faint" style="font-size:12.5px">' + t('Totals come from each exercise\'s saved figures. An exercise counts when its period overlaps the range; quarterly filers count in full.') + '</p>';
+  }
   function keyFor(e, m) { return e.vatFreq === 'quarterly' ? m.slice(0, 4) + '-Q' + Math.ceil(+m.slice(5) / 3) : m; }
-  function exOf(e, p) { return S.exercises.filter(function (x) { return x.entityId === e.id && x.period === p; })[0]; }
+  function exOf(e, p) { return /Q/.test(p) || p.length !== 7 ? S.exercises.filter(function (x) { return x.entityId === e.id && x.period === p; })[0] : Z.exFor(e, p); }
   function ents() { return S.entities.filter(function (e) { return e.active !== false; }); }
 
   function portfolio() {
@@ -38,7 +92,7 @@
   var BUCKETS = [['over90', 'Over 90 days overdue', 'fail'], ['d90', '61–90 days overdue', 'fail'], ['d60', '31–60 days overdue', 'warn'], ['d30', '1–30 days overdue', 'warn'], ['notDue', 'Not yet due', 'pass'], ['noDate', 'No due date', 'na']];
   function exName(id) { var x = S.exercises.filter(function (e) { return e.id === id; })[0]; return x ? Z.entName(Z.entity(x.entityId)) + ' · ' + x.period : ''; }
   function aging(fs) {
-    var b = E.aging(fs, Z.today());
+    var b = E.aging(findingsInRange(fs), asOf());
     var strip = '<div class="kpis">' + BUCKETS.map(function (k) { return '<div class="' + (k[2] === 'fail' && b[k[0]].length ? 'bad' : '') + '"><b>' + b[k[0]].length + '</b><span>' + t(k[1]) + '</span></div>'; }).join('') + '</div>';
     var rows = [];
     BUCKETS.forEach(function (k) { b[k[0]].forEach(function (f) { rows.push('<tr class="clickable" data-act="gofinding" data-ex="' + f.parentId + '"><td>' + Z.pill(k[2], t(k[1])) + '</td><td>' + Z.pill(f.severity, t(Z.cap(f.severity))) + '</td><td><b>' + esc(f.title) + '</b><div class="faint" style="font-size:12.5px">' + esc(exName(f.parentId)) + '</div></td><td class="num">' + fmt(f.taxImpact) + '</td><td class="num">' + fmt(f.penalty) + '</td><td>' + esc(f.owner || '—') + '</td><td class="nowrap">' + esc(f.due || '') + '</td></tr>'); }); });
@@ -49,7 +103,7 @@
 
   function exposure(fs) {
     var rows = ents().map(function (e) {
-      var xs = S.exercises.filter(function (x) { return x.entityId === e.id; }).sort(function (a, b) { return a.period < b.period ? 1 : -1; });
+      var xs = exercisesInRange(e).sort(function (a, b) { return a.period < b.period ? 1 : -1; });
       var latest = xs[0], sm = (latest && latest.summary) || {};
       var open = fs.filter(function (f) { return f.status !== 'closed' && xs.some(function (x) { return x.id === f.parentId; }); });
       var tax = open.reduce(function (a, f) { return a + (+f.taxImpact || 0); }, 0), pen = open.reduce(function (a, f) { return a + (+f.penalty || 0); }, 0);
@@ -84,10 +138,11 @@
   Z.ACT.rexport = function (el) {
     var wb = XLSX.utils.book_new(), add = function (n, aoa) { XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa), n); }, ms = months12(), r = el.dataset.r;
     if (r === 'portfolio') add('Portfolio', [['Entity'].concat(ms)].concat(ents().map(function (e) { return [e.name].concat(ms.map(function (m) { var x = exOf(e, keyFor(e, m)); return x && x.summary && x.summary.score != null ? x.summary.score : ''; })); })));
-    if (r === 'aging') { var b = E.aging(S.allFindings || [], Z.today()), rows = [['Bucket', 'Severity', 'Finding', 'Exercise', 'Tax impact', 'Penalty', 'Owner', 'Due', 'Days overdue']]; BUCKETS.forEach(function (k) { b[k[0]].forEach(function (f) { rows.push([k[1], f.severity, f.title, exName(f.parentId), f.taxImpact, f.penalty, f.owner, f.due, f.overdue || '']); }); }); add('Findings aging', rows); }
-    if (r === 'exposure') add('Exposure', [['Entity', 'Latest period', 'Readiness', 'Quantified exposure', 'Open findings']].concat(ents().map(function (e) { var x = S.exercises.filter(function (z) { return z.entityId === e.id; }).sort(function (a, b) { return a.period < b.period ? 1 : -1; })[0]; var sm = (x && x.summary) || {}; return [e.name, x ? x.period : '', sm.score, sm.exposure, (S.allFindings || []).filter(function (f) { return f.status !== 'closed' && x && f.parentId === x.id; }).length]; })));
-    if (r === 'calendar') add('Filing', [['Entity', 'Period', 'VAT due', 'VAT filed', 'VAT paid', 'WHT due', 'WHT filed', 'WHT paid']].concat(S.exercises.map(function (x) { var F = x.filing || {}, dl = E.deadlines(x.period), e = Z.entity(x.entityId) || {}; return [e.name, x.period, dl.vat, F.vatFiledOn || '', F.vatPaidOn || '', dl.wht, F.whtFiledOn || '', F.whtPaidOn || '']; })));
-    XLSX.writeFile(wb, 'report-' + r + '-' + Z.today() + '.xlsx');
+    if (r === 'summary') add('Tax summary', [['Range', range().from + ' to ' + range().to], [], ['Entity', 'Exercises', 'Signed off', 'Sales', 'Output VAT', 'Input VAT', 'Net VAT', 'WHT', 'Failed checks', 'Exposure', 'Average readiness']].concat(summaryRows().map(function (x) { return [x.e.name, x.n, x.signed, x.sales, x.outputVat, x.inputVat, x.netVat, x.whtTax, x.fails, x.exposure, x.avg]; })));
+    if (r === 'aging') { var b = E.aging(findingsInRange(S.allFindings || []), asOf()), rows = [['Bucket', 'Severity', 'Finding', 'Exercise', 'Tax impact', 'Penalty', 'Owner', 'Due', 'Days overdue']]; BUCKETS.forEach(function (k) { b[k[0]].forEach(function (f) { rows.push([k[1], f.severity, f.title, exName(f.parentId), f.taxImpact, f.penalty, f.owner, f.due, f.overdue || '']); }); }); add('Findings aging', rows); }
+    if (r === 'exposure') add('Exposure', [['Entity', 'Latest period', 'Readiness', 'Quantified exposure', 'Open findings']].concat(ents().map(function (e) { var x = exercisesInRange(e).sort(function (a, b) { return a.period < b.period ? 1 : -1; })[0]; var sm = (x && x.summary) || {}; return [e.name, x ? x.period : '', sm.score, sm.exposure, (S.allFindings || []).filter(function (f) { return f.status !== 'closed' && x && f.parentId === x.id; }).length]; })));
+    if (r === 'calendar') add('Filing', [['Entity', 'Period', 'VAT due', 'VAT filed', 'VAT paid', 'WHT due', 'WHT filed', 'WHT paid']].concat(exercisesInRange().map(function (x) { var F = x.filing || {}, dl = E.deadlines(x.period), e = Z.entity(x.entityId) || {}; return [e.name, x.period, dl.vat, F.vatFiledOn || '', F.vatPaidOn || '', dl.wht, F.whtFiledOn || '', F.whtPaidOn || '']; })));
+    XLSX.writeFile(wb, 'report-' + r + '-' + range().from + '-to-' + range().to + '.xlsx');
   };
 
   // ---------------------------------------------------------------- annual reconciliation
@@ -110,7 +165,7 @@
     var A = S.annual, rows = annualRows(e, year), expected = closedPeriods(e, year);
     var rec = E.annualRecon(rows, A, S.settingsDoc ? S.settingsDoc.values : {}, expected), can = Z.can('preparer');
     var f = function (k, label, hint) { return Z.fld(k, label, A[k], 'number', 'step="0.01" data-chg="annual" data-f="' + k + '"' + (can ? '' : ' disabled'), hint); };
-    var years = []; for (var y = +Z.today().slice(0, 4); y >= +Z.today().slice(0, 4) - 4; y--) years.push(y);
+    var years = []; for (var y = +Z.today().slice(0, 4); y >= Z.FIRST_YEAR; y--) years.push(y);
     Z.setMain('<div class="pagehead"><div><p class="muted" style="margin:0"><a href="#/entity/' + e.id + '">' + esc(Z.entName(e)) + '</a></p><h1>' + t('Annual reconciliation') + ' ' + year + '</h1><p>' + t('ZATCA cross-checks a year of VAT returns against the audited financial statements and the Zakat / income tax return. Differences need a documented explanation.') + '</p></div>' +
       '<div class="row"><select data-chg="annyear" data-e="' + e.id + '" aria-label="' + t('Year') + '" style="width:auto">' + years.map(function (y) { return '<option' + (y === year ? ' selected' : '') + '>' + y + '</option>'; }).join('') + '</select><button class="btn" data-act="annxl" data-e="' + e.id + '" data-y="' + year + '">' + t('Export to Excel') + '</button></div></div>' +
       '<div class="stack"><section class="paper area-vat"><header><div><h2>' + t('Reconciliation') + '</h2><p>' + (rec.missing.length ? '<span class="diff-bad">' + rec.missing.length + ' ' + t('periods have no exercise yet:') + '</span> ' + rec.missing.map(function (p) { return Z.ltr(p); }).join(', ') : t('Every period of the year has an exercise.')) + '</p></div>' + Z.pill(rec.status, rec.status === 'pass' ? t('Reconciled') : rec.status === 'na' ? t('No data') : t('Differences to explain')) + '</header>' +
@@ -140,7 +195,11 @@
   function zakatSection(e) {
     var z = S.annual.zakat || {}, can = Z.can('preparer'), dis = can ? '' : ' disabled';
     var res = E.zakat(Object.assign({ today: Z.today() }, z), S.settingsDoc ? S.settingsDoc.values : {});
-    var f = function (row) { return Z.fld('z_' + row[1], t(row[2]), z[row[1]], 'number', 'step="0.01" data-chg="zak" data-f="' + row[1] + '"' + dis); };
+    var zm = S.annual.zakatMap || {};
+    var f = function (row) {
+      return '<div class="grid" style="grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:8px;align-items:end">' + Z.fld('z_' + row[1], t(row[2]), z[row[1]], 'number', 'step="0.01" data-chg="zak" data-f="' + row[1] + '"' + dis) +
+        (row[1] === 'adjustedNetProfit' ? '<span></span>' : Z.fld('zm_' + row[1], t('TB accounts'), zm[row[1]], 'text', 'placeholder="31*" data-chg="zmap" data-f="' + row[1] + '"' + dis)) + '</div>';
+    };
     return '<section class="paper area-ledger"><header><div><h2>' + t('Zakat worksheet') + ' ' + S.annual.year + '</h2><p>' + t('Classify each balance as your Zakat adviser does; the worksheet adds them up, applies the floor of adjusted net profit and the rate for the length of the year.') + '</p></div></header>' +
       '<div class="grid g2"><div><h3 style="margin-bottom:8px">' + t('Additions') + '</h3><div class="grid">' + ZF.filter(function (r) { return r[0] === 'add'; }).map(f).join('') + '</div></div>' +
       '<div><h3 style="margin-bottom:8px">' + t('Deductions') + '</h3><div class="grid">' + ZF.filter(function (r) { return r[0] === 'ded'; }).map(f).join('') + '</div>' +
@@ -148,10 +207,30 @@
       '<label class="f"><span>' + t('Financial year') + '</span><select data-chg="zak" data-f="yearType"' + dis + '><option value="gregorian"' + (z.yearType !== 'hijri' ? ' selected' : '') + '>' + t('Gregorian (365 days)') + '</option><option value="hijri"' + (z.yearType === 'hijri' ? ' selected' : '') + '>' + t('Hijri (354 days)') + '</option></select></label>' +
       Z.fld('z_fyEnd', t('Year end'), z.fyEnd, 'date', 'data-chg="zak" data-f="fyEnd"' + dis) + Z.fld('z_filedOn', t('Filed and paid on'), z.filedOn, 'date', 'data-chg="zak" data-f="filedOn"' + dis) +
       Z.fld('z_declared', t('Zakat declared in the return'), z.declared, 'number', 'step="0.01" data-chg="zak" data-f="declared"' + dis) + '</div></div></div>' +
+      (can ? '<div class="row" style="margin-top:12px"><button class="btn" data-act="zakfill" data-e="' + e.id + '">' + t('Fill from trial balance') + '</button><span class="faint" style="font-size:12.5px">' + t('Uses the TB of the last exercise of the year. Adjusted net profit stays manual: it needs your tax adjustments.') + '</span></div>' : '') +
       '<div class="kpis" style="margin-top:16px"><div><b>' + fmt(res.base, 0) + '</b><span>' + t('Computed Zakat base') + '</span></div><div><b>' + fmt(res.baseUsed, 0) + '</b><span>' + t('Base used (not below adjusted net profit)') + '</span></div>' +
       '<div><b>' + Z.r(res.rate * 100) + '%</b><span>' + t('Rate applied') + '</span></div><div><b>' + fmt(res.zakat) + '</b><span>' + t('Zakat due (SAR)') + '</span></div>' + (res.dueDate ? '<div><b>' + Z.ltr(res.dueDate) + '</b><span>' + t('Return due') + '</span></div>' : '') + '</div>' +
       '<div style="margin-top:12px">' + res.checks.map(function (c) { return '<div class="row" style="flex-wrap:nowrap;padding:7px 0;border-top:1px solid var(--rule-2)">' + Z.tick(c.status) + '<span style="flex:1">' + esc(c.id) + ' · ' + esc(Z.tt(c, 'title')) + (c.note ? '<span class="faint" style="display:block;font-size:12.5px">' + esc(t(c.note)) + '</span>' : '') + '</span>' + (c.diff != null && c.bLabel ? '<b class="num ' + (c.status === 'fail' ? 'diff-bad' : '') + '">' + fmt(c.diff) + '</b>' : '') + '</div>'; }).join('') + '</div></section>';
   }
+  Z.CHG.zmap = function (el) { S.annual.zakatMap = S.annual.zakatMap || {}; S.annual.zakatMap[el.dataset.f] = el.value.trim(); saveAnnual(); };
+  Z.ACT.zakfill = function (el) {
+    var e = Z.entity(el.dataset.e), year = String(S.annual.year), map = S.annual.zakatMap || {};
+    if (!Object.keys(map).some(function (k) { return map[k]; })) return Z.toast(t('Enter the TB accounts for at least one line first.'), true);
+    var ex = S.exercises.filter(function (x) { return x.entityId === e.id && String(x.period).slice(0, 4) === year; }).sort(function (a, b) { return a.period < b.period ? 1 : -1; })[0];
+    if (!ex) return Z.toast(t('No exercise in this year has a trial balance. Start one for the last period of the year.'), true);
+    Z.list('datasets', ex.id).then(function (ds) {
+      var tbs = ds.filter(function (d) { return d.kind === 'tb'; });
+      if (!tbs.length) throw new Error(t('The exercise for') + ' ' + ex.period + ' ' + t('has no trial balance loaded.'));
+      return Promise.all(tbs.map(function (d) { return Z.get('rows', d.id); })).then(function (docs) {
+        var rows = [];
+        docs.forEach(function (doc) { (doc && doc.data || []).forEach(function (a) { var o = {}; doc.cols.forEach(function (c, i) { o[c] = a[i]; }); rows.push(o); }); });
+        var vals = E.zakatFromTb(rows, map);
+        S.annual.zakat = Object.assign(S.annual.zakat || {}, vals);
+        Z.toast(t('Filled from the trial balance of') + ' ' + ex.period);
+        return saveAnnual();
+      });
+    }).catch(function (err) { Z.toast(err.message, true); });
+  };
   Z.CHG.zak = function (el) {
     S.annual.zakat = S.annual.zakat || {};
     var f = el.dataset.f; S.annual.zakat[f] = /yearType|fyEnd|filedOn/.test(f) ? el.value : (el.value === '' ? null : +el.value);

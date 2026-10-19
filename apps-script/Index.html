@@ -615,6 +615,36 @@ Object.assign(window.ZI18N, {
   'Exposure = shortfall plus the late-payment rate for each month or part (editable in Settings; verify against the current RETT regulations). Exempt disposals need the exemption reference recorded.': 'التعرض = النقص مضافاً إليه نسبة غرامة التأخير عن كل شهر أو جزء منه (قابلة للتعديل في الإعدادات؛ تحقق من اللائحة الحالية لضريبة التصرفات العقارية). يجب تسجيل مرجع الإعفاء للتصرفات المعفاة.'
 });
 
+/* Date-range reports, older periods, marketplace exception test, excise tiers and stock, Zakat prefill. */
+Object.assign(window.ZI18N, {
+  'Across every entity you can see, for the months you choose. Each report exports to Excel.': 'عبر كل الكيانات المتاحة لك وللأشهر التي تختارها. كل تقرير قابل للتصدير إلى Excel.',
+  'All done': 'اكتملت كل الفترات', 'An exercise for that period already exists.': 'يوجد تمرين لهذه الفترة بالفعل.', 'Average readiness': 'متوسط الجاهزية',
+  'Connect this app to the backend at': 'ربط التطبيق بالخادم على العنوان', 'Only continue if your administrator gave you this address.': 'تابع فقط إذا زودك مسؤول النظام بهذا العنوان.',
+  'Contracts, tax invoices and receipts name the seller as the supplier': 'العقود والفواتير والإيصالات تذكر البائع بصفته المورد',
+  'Due within 120 days of the year end (Zakat IR Art. 17). Late fine estimated at 1% per 30 days up to 25% (editable; verify).': 'يستحق خلال 120 يوماً من نهاية السنة (المادة 17 من لائحة الزكاة). الغرامة التقديرية 1% لكل 30 يوماً بحد أقصى 25% (قابلة للتعديل؛ تحقق).',
+  'Enter the TB accounts for at least one line first.': 'أدخل حسابات الميزان لسطر واحد على الأقل أولاً.', 'Every period of that year already has an exercise.': 'كل فترات تلك السنة لها تمارين.',
+  'Excise: sweetened drinks % (before 2026)': 'الانتقائية: المشروبات المحلاة % (قبل 2026)', 'Exercises': 'التمارين', 'Exported': 'المصدر', 'Failed checks': 'الفحوصات الفاشلة',
+  'Filing frequency': 'دورية التقديم', 'Fill from trial balance': 'تعبئة من ميزان المراجعة', 'Filled from the trial balance of': 'تمت التعبئة من ميزان المراجعة لفترة', 'From': 'من',
+  'If you operate a marketplace: deemed-supplier exception test': 'إن كنت تشغل منصة: اختبار استثناء المورد الاعتباري', 'Last year': 'السنة الماضية', 'Litres': 'لترات',
+  'No exercise in this year has a trial balance. Start one for the last period of the year.': 'لا يوجد تمرين بميزان مراجعة في هذه السنة. ابدأ تمريناً لآخر فترة في السنة.',
+  'Opening + received − released − exported must equal the count. Losses not approved by ZATCA are taxed as releases (exposure shown for price-based categories).': 'أول المدة + الوارد − المفرج عنه − المصدر يجب أن يساوي الجرد. الفاقد غير المعتمد من الهيئة يخضع للضريبة كإفراج (التعرض للفئات المحتسبة على السعر).',
+  'Per-litre tiers since 1 Jan 2026; under 5 g and sugar-free pay nothing.': 'شرائح لكل لتر منذ 1 يناير 2026؛ أقل من 5 غرام والخالية من السكر بدون ضريبة.',
+  'Questions answered (of 6)': 'الأسئلة المجابة (من 6)', 'RETT due within (days of the transaction)': 'سداد ضريبة التصرفات خلال (أيام من التصرف)', 'Received': 'الوارد', 'Released': 'المفرج عنه',
+  'Since 2018': 'منذ 2018', 'Sugar g/100 ml': 'السكر غ/100 مل', 'Sugar per 100 ml and litres needed (per-litre tiers since 1 Jan 2026)': 'يلزم السكر لكل 100 مل واللترات (شرائح لكل لتر منذ 1 يناير 2026)',
+  'Sweetened drinks 5–7.99 g sugar: SAR per litre': 'المشروبات المحلاة 5–7.99 غ سكر: ريال لكل لتر', 'Sweetened drinks 8 g sugar or more: SAR per litre': 'المشروبات المحلاة 8 غ سكر فأكثر: ريال لكل لتر',
+  'TB accounts': 'حسابات الميزان', 'Tax summary': 'الملخص الضريبي', 'The exercise for': 'تمرين فترة', 'has no trial balance loaded.': 'لا يحتوي على ميزان مراجعة محمل.',
+  'The platform does not collect payment from customers': 'المنصة لا تحصّل المدفوعات من العملاء', 'The platform does not handle customer complaints': 'المنصة لا تتولى شكاوى العملاء',
+  'The platform does not set the price': 'المنصة لا تحدد السعر', 'The platform does not set the terms and conditions of the supply': 'المنصة لا تحدد شروط وأحكام التوريد',
+  'The platform offers no promotions or compensation to customers': 'المنصة لا تقدم عروضاً أو تعويضات للعملاء',
+  'The platform is not the deemed supplier only if every answer is yes (VAT IR Art. 47, ZATCA guide of 25 Dec 2025). Sources differ on payment collection; this test treats it as disqualifying.': 'لا تعد المنصة مورداً اعتبارياً إلا إذا كانت كل الإجابات نعم (المادة 47 من اللائحة، دليل الهيئة 25 ديسمبر 2025). تختلف المصادر بشأن تحصيل المدفوعات؛ هذا الاختبار يعتبره مانعاً.',
+  'This quarter': 'هذا الربع', 'This year': 'هذه السنة', 'To': 'إلى',
+  "Tobacco, energy drinks and e-cigarettes: quantity × price × rate ÷ (1 + rate) on the higher of the retail price (excl. VAT) and ZATCA's standard price. Sweetened and carbonated drinks from 1 Jan 2026: litres × SAR 0 / 0.79 / 1.09 by sugar per 100 ml (under 5 g / 5–7.99 g / 8 g or more).": 'التبغ ومشروبات الطاقة والسجائر الإلكترونية: الكمية × السعر × النسبة ÷ (1 + النسبة) على الأعلى من سعر التجزئة (بدون القيمة المضافة) والسعر المعياري. المشروبات المحلاة والغازية من 1 يناير 2026: اللترات × 0 / 0.79 / 1.09 ريال حسب السكر لكل 100 مل (أقل من 5 غ / 5–7.99 غ / 8 غ فأكثر).',
+  "Totals come from each exercise's saved figures. An exercise counts when its period overlaps the range; quarterly filers count in full.": 'الإجماليات من الأرقام المحفوظة لكل تمرين. يُحتسب التمرين إذا تقاطعت فترته مع النطاق؛ الإقرارات الربعية تحتسب كاملة.',
+  'Under the RETT Law effective April 2025 the tax is due within 30 days of the transaction date, and ZATCA can hold the deed registration until it is paid.': 'بموجب نظام ضريبة التصرفات العقارية النافذ من أبريل 2025 تستحق الضريبة خلال 30 يوماً من تاريخ التصرف، ويمكن للهيئة تعليق تسجيل الصك حتى السداد.',
+  'Uses the TB of the last exercise of the year. Adjusted net profit stays manual: it needs your tax adjustments.': 'يستخدم ميزان آخر تمرين في السنة. صافي الربح المعدل يبقى يدوياً لأنه يحتاج تعديلاتك الضريبية.',
+  'Zakat late fine % per 30 days (estimate)': 'غرامة تأخر الزكاة % لكل 30 يوماً (تقديرية)', 'findings aged as of': 'أعمار الملاحظات حتى', 'Opening': 'أول المدة'
+});
+
 </script>
 <script>
 /**
@@ -655,9 +685,15 @@ Object.assign(window.ZI18N, {
     // Electronic marketplaces as deemed supplier (VAT IR Art. 47, amended 2025)
     marketplace: { nonResidentFrom: '2025-04-18', residentUnregisteredFrom: '2026-01-01',
       payoutKeywords: 'noon,amazon,salla,zid,jahez,hungerstation,careem,talabat,mrsool,the chefz,keeta,toyou,نون,أمازون,سلة,زد,جاهز,هنقرستيشن' },
-    rett: { rate: 0.05, latePctPerMonth: 0.02 },
+    // RETT Law (Royal Decree M/84) and Implementing Regulations, effective April 2025:
+    // 5%, due within 30 days of the transaction date.
+    rett: { rate: 0.05, latePctPerMonth: 0.02, dueDays: 30 },
     exciseRates: { tobacco: 1, energy: 1, ecig: 1, sweetened: 0.5 },
-    zakat: { rate: 0.025, gregorianDays: 365, dueDays: 120 },
+    // Excise IR amended 29 Dec 2025: from 1 Jan 2026 sweetened (incl. carbonated)
+    // drinks pay a fixed SAR per litre by sugar per 100 ml instead of 50%.
+    sugarTiers: { from: '2026-01-01', tiers: [[0, 5, 0], [5, 8, 0.79], [8, 1000, 1.09]] },
+    // Zakat IR Art. 17: return and payment within 120 days of the year end.
+    zakat: { rate: 0.025, gregorianDays: 365, dueDays: 120, latePctPer30Days: 0.01, lateCap: 0.25 },
     materiality: 50000,
     benfordMin: 300,
     glBasis: 'movement',  // movement | gross — how TB VAT accounts are read when no GL is given
@@ -842,7 +878,22 @@ Object.assign(window.ZI18N, {
         { k: 'retailPrice', t: 'n', req: 1, syn: ['retail price', 'retail selling price', 'unit price', 'سعر التجزئة'] },
         { k: 'standardPrice', t: 'n', syn: ['standard price', 'zatca price', 'السعر المعياري'] },
         { k: 'rate', t: 'n', syn: ['rate', 'excise rate', 'النسبة'] },
+        { k: 'litres', t: 'n', syn: ['litres', 'liters', 'volume', 'total litres', 'لتر', 'الحجم'] },
+        { k: 'sugar', t: 'n', syn: ['sugar', 'sugar g/100ml', 'sugar per 100 ml', 'السكر'] },
         { k: 'excise', t: 'n', req: 1, syn: ['excise', 'excise declared', 'excise amount', 'الضريبة الانتقائية'] }
+      ]
+    },
+    excise_stock: {
+      en: 'Excise designated-zone stock movements', ar: 'حركة مخزون السلع الانتقائية في المستودع المحدد', group: 'other',
+      fields: [
+        { k: 'product', t: 's', req: 1, syn: ['product', 'item', 'sku', 'المنتج', 'الصنف'] },
+        { k: 'category', t: 's', syn: ['category', 'excise category', 'الفئة'] },
+        { k: 'opening', t: 'n', syn: ['opening', 'opening stock', 'رصيد أول المدة'] },
+        { k: 'received', t: 'n', syn: ['received', 'imported', 'produced', 'in', 'الوارد'] },
+        { k: 'released', t: 'n', syn: ['released', 'released for consumption', 'out', 'المفرج عنه'] },
+        { k: 'exported', t: 'n', syn: ['exported', 'transferred', 'المصدر'] },
+        { k: 'closing', t: 'n', syn: ['closing', 'counted', 'closing stock', 'الجرد', 'رصيد آخر المدة'] },
+        { k: 'retailPrice', t: 'n', syn: ['retail price', 'unit price', 'سعر التجزئة'] }
       ]
     },
     einv_provider: {
@@ -2182,7 +2233,18 @@ Object.assign(window.ZI18N, {
     var C = function (o) { o.group = 'other'; return o; };
 
     // M1 — platform operators: deemed-supplier supplies with no VAT accounted
-    var mk = D.mkt_sales || [];
+    var mk = D.mkt_sales || [], q = ctx.mktException || {};
+    // The platform escapes deemed-supplier status only if ALL hold: the real
+    // seller is named as supplier (contract, invoice, receipt) and the platform
+    // sets no terms or price, collects no payment, handles no complaints and
+    // offers no promotions or compensation.
+    var QK = ['named', 'noTerms', 'noPrice', 'noPayment', 'noComplaints', 'noPromos'];
+    var answered = QK.filter(function (k) { return q[k] === 'yes' || q[k] === 'no'; }).length;
+    var exceptionMet = answered === QK.length && QK.every(function (k) { return q[k] === 'yes'; });
+    if (mk.length) checks.push(C({ id: 'M3', title: 'Deemed-supplier exception test (platform operators)', titleAr: 'اختبار استثناء المورد الاعتباري (مشغلو المنصات)', status: answered < QK.length ? 'warn' : 'pass',
+      a: answered, aLabel: 'Questions answered (of 6)', b: null, bLabel: '', diff: null,
+      note: answered < QK.length ? 'Answer the six questions on the Other taxes tab.' : exceptionMet ? 'All conditions met: the sellers, not the platform, account for VAT. Keep the contracts, invoices and receipts that show it.' : 'At least one condition fails: the platform is the deemed supplier for the supplies in scope.' }));
+    if (mk.length && exceptionMet) mk = [];
     if (mk.length) {
       var deemed = mk.filter(function (x) {
         var nonRes = /^(n|no|false|0|non|غير)/i.test(String(x.sellerResident || '')), registered = E.validVatNo(x.sellerVat);
@@ -2221,16 +2283,18 @@ Object.assign(window.ZI18N, {
         var exempt = String(x.exemption || '').trim() !== '';
         var expected = exempt ? 0 : r2((+x.value || 0) * (rr.rate || 0.05)), short = r2(expected - (+x.rett || 0));
         if (short > S.tolAbs) { bad.push(Object.assign({}, x, { expected: expected, shortfall: short, reason: 'RETT paid ' + (+x.rett || 0) + ' of ' + expected })); due += short; }
-        if (!exempt && x.paidOn && x.date && x.paidOn > x.date) late.push(Object.assign({}, x, { daysLate: daysBetween(x.date, x.paidOn), reason: 'Paid after the deed transfer date' }));
+        var dueBy = x.date ? new Date(Date.parse(x.date + 'T00:00:00Z') + (rr.dueDays || 30) * 86400000).toISOString().slice(0, 10) : '';
+        if (!exempt && x.paidOn && dueBy && x.paidOn > dueBy) late.push(Object.assign({}, x, { due: dueBy, daysLate: daysBetween(dueBy, x.paidOn), reason: 'Paid ' + daysBetween(x.date, x.paidOn) + ' days after the transaction (limit ' + (rr.dueDays || 30) + ')' }));
       });
       var today = ctx.today || new Date().toISOString().slice(0, 10);
       var pen = r2(bad.reduce(function (s, x) { return s + x.shortfall * (rr.latePctPerMonth || 0.02) * Math.max(1, Math.ceil(daysBetween(x.date, today) / 30)); }, 0));
       checks.push(C({ id: 'R1', title: 'Real estate transaction tax: 5% paid on every taxable disposal', titleAr: 'ضريبة التصرفات العقارية: سداد 5% عن كل تصرف خاضع', status: bad.length ? 'fail' : 'pass',
         a: r2(due), aLabel: 'RETT unpaid', b: 0, bLabel: '', diff: r2(due), exposure: r2(due + pen), exceptions: { list: bad }, counts: { list: bad.length },
         note: 'Exposure = shortfall plus the late-payment rate for each month or part (editable in Settings; verify against the current RETT regulations). Exempt disposals need the exemption reference recorded.' }));
-      checks.push(C({ id: 'R2', title: 'RETT paid before the deed transfer', titleAr: 'سداد الضريبة العقارية قبل نقل الصك', status: late.length ? 'fail' : 'pass',
-        a: late.length, aLabel: 'Exceptions', b: 0, bLabel: '', diff: late.length, exceptions: { list: late }, counts: { list: late.length },
-        note: 'The notary transfers the deed only after RETT is paid; a later payment date points at a missing or wrong record.' }));
+      var latePen = r2(late.reduce(function (s, x) { return s + (+x.rett || 0) * (rr.latePctPerMonth || 0.02) * Math.ceil(x.daysLate / 30); }, 0));
+      checks.push(C({ id: 'R2', title: 'RETT paid within 30 days of the transaction', titleAr: 'سداد ضريبة التصرفات العقارية خلال 30 يوماً من التصرف', status: late.length ? 'fail' : 'pass',
+        a: late.length, aLabel: 'Exceptions', b: 0, bLabel: '', diff: late.length, exposure: latePen, exceptions: { list: late }, counts: { list: late.length },
+        note: 'Under the RETT Law effective April 2025 the tax is due within 30 days of the transaction date, and ZATCA can hold the deed registration until it is paid.' }));
     }
     var reVat = (D.sys_vat || []).filter(function (x) { return x.flow === 'S' && (+x.vat || 0) > 0 && RE_WORDS.test(String(x.description || '') + ' ' + String(x.category || '')); })
       .map(function (x) { return Object.assign({}, x, { reason: 'Looks like a real estate disposal: exempt from VAT and subject to RETT' }); });
@@ -2242,7 +2306,15 @@ Object.assign(window.ZI18N, {
     var ek = D.excise || [];
     if (ek.length) {
       var rates = S.exciseRates || {}, diffs = [];
+      var st = S.sugarTiers || {}, pe = ctx.periodKey ? E.periodRange(ctx.periodKey).end : '';
       ek.forEach(function (x) {
+        if (E.exciseCat(x.category) === 'sweetened' && (x.date || pe) >= (st.from || '2026-01-01')) {
+          if (x.sugar === '' || x.sugar == null || !(+x.litres)) { diffs.push(Object.assign({}, x, { reason: 'Sugar per 100 ml and litres needed (per-litre tiers since 1 Jan 2026)' })); return; }
+          var tier = (st.tiers || []).filter(function (t) { return +x.sugar >= t[0] && +x.sugar < t[1]; })[0] || [0, 0, 0];
+          var expL = r2(+x.litres * tier[2]);
+          if (Math.abs(expL - (+x.excise || 0)) > Math.max(S.tolAbs, expL * 0.005)) diffs.push(Object.assign({}, x, { expected: expL, shortfall: r2(expL - (+x.excise || 0)), reason: 'Expected SAR ' + tier[2] + ' per litre for ' + x.sugar + ' g sugar / 100 ml' }));
+          return;
+        }
         var rate = x.rate ? +x.rate : rates[E.exciseCat(x.category)];
         if (rate == null) { diffs.push(Object.assign({}, x, { reason: 'Unknown excise category' })); return; }
         var base = Math.max(+x.retailPrice || 0, +x.standardPrice || 0);
@@ -2252,15 +2324,39 @@ Object.assign(window.ZI18N, {
       var under = r2(diffs.reduce(function (s, x) { return s + Math.max(0, x.shortfall || 0); }, 0));
       checks.push(C({ id: 'K1', title: 'Excise recomputed per product line', titleAr: 'إعادة احتساب الضريبة الانتقائية لكل منتج', status: diffs.length ? 'fail' : 'pass',
         a: under, aLabel: 'Excise under-declared', b: 0, bLabel: '', diff: under, exposure: under, exceptions: { list: diffs }, counts: { list: diffs.length },
-        note: 'Excise = quantity × price × rate ÷ (1 + rate), on the higher of the retail selling price (excl. VAT) and ZATCA\'s standard price. Sweetened drinks may carry a sugar-based tier: put the line\'s own rate in the Rate column.' }));
+        note: 'Tobacco, energy drinks and e-cigarettes: quantity × price × rate ÷ (1 + rate) on the higher of the retail price (excl. VAT) and ZATCA\'s standard price. Sweetened and carbonated drinks from 1 Jan 2026: litres × SAR 0 / 0.79 / 1.09 by sugar per 100 ml (under 5 g / 5–7.99 g / 8 g or more).' }));
       var decl = ctx.exciseReturn;
       if (decl != null && decl !== '') {
         var reg = r2(ek.reduce(function (s, x) { return s + (+x.excise || 0); }, 0));
         checks.push(C(check('K2', 'other', 'Excise return vs excise register', 'إقرار الضريبة الانتقائية مقابل السجل', +decl, 'Excise return', reg, 'Register total', S)));
       }
     }
+    // K3 — designated-zone stock: what is missing was released without excise
+    var sk = D.excise_stock || [];
+    if (sk.length) {
+      var miss = [], relBy = {};
+      sk.forEach(function (x) {
+        var expected = (+x.opening || 0) + (+x.received || 0) - (+x.released || 0) - (+x.exported || 0), gap = r2(expected - (+x.closing || 0));
+        if (gap > 0.0001) {
+          var rate = rates_(S, x.category), unit = rate ? (+x.retailPrice || 0) * rate / (1 + rate) : 0;
+          miss.push(Object.assign({}, x, { expected: r2(expected), shortfall: gap, excise: r2(gap * unit), reason: gap + ' units unaccounted for: treated as released for consumption' }));
+        }
+        relBy[String(x.product).toLowerCase()] = (+x.released || 0);
+      });
+      checks.push(C({ id: 'K3', title: 'Designated-zone stock reconciliation', titleAr: 'مطابقة مخزون المستودع المحدد', status: miss.length ? 'fail' : 'pass',
+        a: miss.length, aLabel: 'Exceptions', b: 0, bLabel: '', diff: miss.length, exposure: r2(miss.reduce(function (s, x) { return s + x.excise; }, 0)),
+        exceptions: { list: miss }, counts: { list: miss.length }, note: 'Opening + received − released − exported must equal the count. Losses not approved by ZATCA are taxed as releases (exposure shown for price-based categories).' }));
+      if (ek.length) {
+        var regQ = {}, gaps = [];
+        ek.forEach(function (x) { var k = String(x.product).toLowerCase(); regQ[k] = (regQ[k] || 0) + (+x.qty || 0); });
+        Object.keys(relBy).forEach(function (k) { if (regQ[k] != null && Math.abs(regQ[k] - relBy[k]) > 0.0001) gaps.push({ product: k, qty: regQ[k], expected: relBy[k], reason: 'Released ' + relBy[k] + ' but excise declared on ' + regQ[k] }); });
+        checks.push(C({ id: 'K4', title: 'Quantities released vs quantities taxed', titleAr: 'الكميات المفرج عنها مقابل الكميات الخاضعة', status: gaps.length ? 'fail' : 'pass',
+          a: gaps.length, aLabel: 'Exceptions', b: 0, bLabel: '', diff: gaps.length, exceptions: { list: gaps }, counts: { list: gaps.length } }));
+      }
+    }
     return { checks: checks };
   };
+  function rates_(S, cat) { var c = E.exciseCat(cat); return c === 'sweetened' ? 0 : (S.exciseRates || {})[c] || 0; }
   E.exciseCat = function (v) {
     var s = String(v || '').toLowerCase();
     if (/tobacco|cigar|shisha|تبغ|دخان|سجائر|معسل/.test(s)) return 'tobacco';
@@ -2288,11 +2384,28 @@ Object.assign(window.ZI18N, {
       var due = new Date(Date.parse(z.fyEnd + 'T00:00:00Z') + (S.zakat.dueDays || 120) * 86400000).toISOString().slice(0, 10);
       res.dueDate = due;
       var filed = z.filedOn, late = filed ? daysBetween(due, filed) : daysBetween(due, z.today || new Date().toISOString().slice(0, 10));
+      var zl = S.zakat, fine = late >= 30 ? r2(Math.min(res.zakat * (zl.latePctPer30Days || 0.01) * Math.floor(late / 30), res.zakat * (zl.lateCap || 0.25))) : 0;
       res.checks.push({ id: 'Z2', group: 'zakat', title: 'Zakat return filed and paid by ' + due, titleAr: 'تقديم وسداد إقرار الزكاة قبل ' + due, status: filed ? (late > 0 ? 'fail' : 'pass') : (late > 0 ? 'fail' : 'na'),
-        a: late > 0 ? late : 0, aLabel: 'Days late', b: null, bLabel: '', diff: null, missing: filed ? '' : 'Filing date', note: 'Due ' + (S.zakat.dueDays || 120) + ' days after the financial year end (editable).' });
+        a: late > 0 ? late : 0, aLabel: 'Days late', b: null, bLabel: '', diff: null, missing: filed ? '' : 'Filing date', exposure: fine,
+        note: 'Due within 120 days of the year end (Zakat IR Art. 17). Late fine estimated at 1% per 30 days up to 25% (editable; verify).' });
     }
     if (z.declared != null && z.declared !== '') res.checks.push(check('Z3', 'zakat', 'Zakat declared vs worksheet', 'الزكاة المقرة مقابل ورقة العمل', +z.declared, 'Declared in the return', res.zakat, 'Worksheet', S));
     return res;
+  };
+
+  // Year-end TB balances for the worksheet. map: { line: 'account patterns' }.
+  // Additions are credit balances (equity, provisions, financing); deductions
+  // are debit balances (fixed assets, investments, losses).
+  var ZAKAT_DEDUCT = { netFixedAssets: 1, longTermInvestments: 1, accumulatedLosses: 1, otherDeductions: 1 };
+  E.zakatFromTb = function (tb, map) {
+    var out = {};
+    Object.keys(map || {}).forEach(function (k) {
+      if (!map[k]) return;
+      var b = E.tbBalance(tb, map[k], 'closing');
+      if (b == null) return;
+      out[k] = r2(ZAKAT_DEDUCT[k] ? b : -b);
+    });
+    return out;
   };
 
   // ------------------------------------------------------------------ penalties & readiness
@@ -2592,10 +2705,11 @@ Object.assign(window.ZI18N, {
  *   - WHT filed and paid 2 days late (late, but under 30 days: no fine)
  *   - input VAT about 65% above the average of the last three months
  *   - a SAR 48,000 Noon marketplace payout with no Noon sales booked
- *   - a warehouse sold with RETT paid at 4% instead of 5%, and paid after the
- *     deed transfer (an exempt land transfer next to it must not be flagged)
+ *   - a warehouse sold with RETT paid at 4% instead of 5%, and paid 36 days
+ *     after the transaction (limit 30); an exempt land transfer must not be flagged
  *   - cigarettes' excise computed on the retail price although ZATCA's
- *     standard price is higher
+ *     standard price is higher; 200 packs missing from the designated-zone count
+ *   - sweetened juice at 9 g sugar / 100 ml declared at SAR 1.09 per litre (correct)
  *   - Zakat for 2025 declared at SAR 380,000 against a worksheet of 386,652.54
  */
 (function (root) {
@@ -2787,7 +2901,7 @@ Object.assign(window.ZI18N, {
       prevWhtTax: 9840,
       filing: { vatFiledOn: '2026-10-28', vatPaidOn: '2026-10-29', vatPaidAmount: '', whtFiledOn: '2026-10-12', whtPaidOn: '2026-10-12' },
       recovery: { method: 'none' },
-      exciseReturn: 195000,
+      exciseReturn: 195900,
       zakat2025: { capital: 10000000, reserves: 2000000, retainedEarnings: 6500000, provisions: 800000, longTermFinancing: 3000000, adjustedNetProfit: 4200000,
         netFixedAssets: 9500000, longTermInvestments: 2000000, yearType: 'gregorian', fyEnd: '2025-12-31', filedOn: '2026-04-28', declared: 380000 },
       history: (function () {
@@ -2799,13 +2913,17 @@ Object.assign(window.ZI18N, {
       reconItems: [{ check: 'V6', description: 'Other income — scrap sales and insurance claims (out of scope)', amount: 12000 }],
       datasets: { tb: tb, gl: gl, sys_vat: sys, xls_vat: xls, einv: einv, einv_provider: prov, customs: customs,
         rett: [
-          { date: '2026-09-14', deed: '4301928', property: 'Warehouse — Al Sulay, Riyadh', buyer: 'Gulf Logistics Parks', value: 3200000, rett: 128000, paidOn: '2026-09-16', exemption: '' },
+          { date: '2026-09-14', deed: '4301928', property: 'Warehouse — Al Sulay, Riyadh', buyer: 'Gulf Logistics Parks', value: 3200000, rett: 128000, paidOn: '2026-10-20', exemption: '' },
           { date: '2026-09-22', deed: '4302277', property: 'Land plot — Dammam 2nd Industrial', buyer: 'Al Noor Logistics LLC', value: 900000, rett: 0, paidOn: '', exemption: 'Transfer to a wholly owned subsidiary' }
         ],
         excise: [
           { date: '2026-09-30', product: 'Energy drink 250 ml (24-pack)', category: 'Energy drinks', qty: 24000, retailPrice: 10, standardPrice: 0, rate: 0, excise: 120000 },
           { date: '2026-09-30', product: 'Cigarettes (pack of 20)', category: 'Tobacco', qty: 5000, retailPrice: 26, standardPrice: 28, rate: 0, excise: 65000 },
-          { date: '2026-09-30', product: 'Sweetened juice 1 L', category: 'Sweetened drinks', qty: 10000, retailPrice: 3, standardPrice: 0, rate: 0, excise: 10000 }
+          { date: '2026-09-30', product: 'Sweetened juice 1 L', category: 'Sweetened drinks', qty: 10000, retailPrice: 3, standardPrice: 0, rate: 0, litres: 10000, sugar: 9, excise: 10900 }
+        ],
+        excise_stock: [
+          { product: 'Energy drink 250 ml (24-pack)', category: 'Energy drinks', opening: 1000, received: 24000, released: 24000, exported: 0, closing: 1000, retailPrice: 10 },
+          { product: 'Cigarettes (pack of 20)', category: 'Tobacco', opening: 2000, received: 6000, released: 5000, exported: 0, closing: 2800, retailPrice: 26 }
         ], bank: bank, wht_reg: reg, ret_wht: retWht, xls_wht: xlsWht }
     };
   }
@@ -2892,16 +3010,26 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   };
 
   // ---------------------------------------------------------------- boot
+  Z.validApi = function (u) { return /^https:\/\/script\.google\.com\/macros\/s\/[\w-]{20,}\/exec$/.test(String(u || '')); };
   Z.boot = function () {
     S.lang = localStorage.getItem('zr_lang') || 'en';
     applyLang();
-    var q = new URLSearchParams(location.search);
-    if (q.get('api')) localStorage.setItem('zr_api_url', q.get('api'));
-    // A hosted copy (GitHub Pages) has its backend URL baked in by build.js;
-    // "try it on this device" opts out of it for the rest of the browser session.
+    // A hosted copy (GitHub Pages) has its backend URL baked in by build.js and
+    // talks to nothing else: a link carrying ?api= (or a stored address) could
+    // otherwise send sign-ins to someone else's server (found by the REA audit).
+    // The generic build accepts only an Apps Script /exec address, and only
+    // after the person confirms it.
+    var q = new URLSearchParams(location.search), asked = q.get('api');
+    if (asked && !window.ZR_API_URL) {
+      if (Z.validApi(asked) && confirm(t('Connect this app to the backend at') + '\n' + asked + '\n\n' + t('Only continue if your administrator gave you this address.'))) localStorage.setItem('zr_api_url', asked);
+      history.replaceState(null, '', location.pathname + location.hash);
+    }
+    // "try it on this device" opts out of the backend for the rest of the browser session.
     var demo = false;
     try { demo = sessionStorage.getItem('zr_local') === '1'; } catch (e) {}
-    var url = demo ? '' : localStorage.getItem('zr_api_url') || window.ZR_API_URL || '';
+    var stored = localStorage.getItem('zr_api_url');
+    if (stored && !Z.validApi(stored)) { localStorage.removeItem('zr_api_url'); stored = ''; }
+    var url = demo ? '' : window.ZR_API_URL || stored || '';
     var hosted = !!(window.google && google.script && google.script.run);
     S.api = hosted || url ? new ZApi.CloudBackend(url) : new ZApi.LocalBackend();
     document.addEventListener('click', function (e) {
@@ -3058,7 +3186,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       S.entities.filter(function (e) { return e.active !== false; }).map(function (e) {
         return '<tr><th class="ent" scope="row"><a href="#/entity/' + e.id + '">' + esc(Z.entName(e)) + '</a></th>' + months.map(function (m) {
           var key = e.vatFreq === 'quarterly' ? m.slice(0, 4) + '-Q' + Math.ceil(+m.slice(5) / 3) : m;
-          var x = exs.filter(function (z) { return z.entityId === e.id && z.period === key; })[0];
+          var x = Z.exFor(e, m);
           if (!x) return '<td data-act="newex" data-e="' + e.id + '" data-p="' + key + '" title="' + esc(t('Start exercise') + ' ' + key) + '">+</td>';
           var sm = x.summary || {}, g = sm.grade || 'not';
           return '<td class="s-' + g + (x.status === 'closed' ? ' closed' : '') + '" data-act="openex" data-id="' + x.id + '" title="' + esc(key + ' — ' + (sm.score != null ? sm.score + '% ' : '') + Z.gradeText(g) + (x.status === 'closed' ? ' — ' + t('signed off') : '')) + '">' + (sm.score != null ? sm.score : '·') + '</td>';
@@ -3166,13 +3294,13 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     if (h[2] === 'edit') return entityForm(e);
     S.entityId = e.id; localStorage.setItem('zr_entity', e.id);
     var exs = S.exercises.filter(function (x) { return x.entityId === e.id; }).sort(function (a, b) { return a.period < b.period ? 1 : -1; });
-    var periods = E.recentPeriods(e.vatFreq || 'monthly', 12, Z.today()).filter(function (p) { return !exs.some(function (x) { return x.period === p; }); });
+    var periods = [1];
     var trend = exs.slice(0, 12).reverse();
     var chart = trend.length > 1 ? trendChart(trend) : '';
     var unmapped = Z.MAP_FIELDS.filter(function (f) { return ['outputVat', 'inputVat', 'revenue', 'receivables', 'whtPayable'].indexOf(f[0]) >= 0 && !(e.mapping || {})[f[0]]; });
     Z.setMain('<div class="pagehead"><div><h1>' + esc(Z.entName(e)) + '</h1><p>' + t('TRN') + ' ' + esc(e.trn || '—') + ' · ' + t(cap(e.vatFreq || 'monthly')) + ' ' + t('VAT filer') + (e.erp ? ' · ' + esc(e.erp) : '') + '</p></div>' +
       '<div class="row">' + (Z.can('manager') ? '<a class="btn" href="#/entity/' + e.id + '/edit">' + t('Edit entity') + '</a>' : '') +
-      (Z.can('preparer') && periods.length ? '<select id="newp" aria-label="' + t('Period') + '" style="width:auto">' + periods.map(function (p) { return '<option>' + p + '</option>'; }).join('') + '</select><button class="btn primary" data-act="newexsel" data-e="' + e.id + '">' + t('Start inspection exercise') + '</button>' : '') + '<a class="btn" href="#/annual/' + e.id + '/' + Z.today().slice(0, 4) + '">' + t('Annual reconciliation') + '</a></div></div>' +
+      (Z.can('preparer') && periods.length ? '<span id="pp">' + periodPicker(e) + '</span><button class="btn primary" data-act="newexsel" data-e="' + e.id + '">' + t('Start inspection exercise') + '</button>' : '') + '<a class="btn" href="#/annual/' + e.id + '/' + Z.today().slice(0, 4) + '">' + t('Annual reconciliation') + '</a></div></div>' +
       (unmapped.length ? '<div class="paper" style="margin-bottom:18px;border-color:var(--amber)"><b>' + t('Account mapping incomplete:') + '</b> ' + unmapped.map(function (f) { return esc(t(f[1])); }).join(', ') + '. ' + t('Ledger checks for these will show as no data.') + '</div>' : '') +
       '<div class="stack">' + (chart ? '<section class="paper"><header><div><h2>' + t('Readiness and VAT due over time') + '</h2></div></header>' + chart + '</section>' : '') +
       '<section class="paper flush"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Period') + '</th><th>' + t('Status') + '</th><th>' + t('Readiness') + '</th><th class="num">' + t('Net VAT due') + '</th><th class="num">' + t('WHT') + '</th><th class="num">' + t('Exposure') + '</th><th>' + t('Signed off') + '</th></tr></thead><tbody>' +
@@ -3181,7 +3309,34 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
         return '<tr class="clickable" data-act="openex" data-id="' + x.id + '"><td><b>' + Z.ltr(x.period) + '</b></td><td>' + Z.statusPill(x.status) + '</td><td>' + (s.score != null ? Z.pill(s.grade, s.score + '% — ' + Z.gradeText(s.grade)) : '—') + '</td><td class="num">' + Z.fmt(s.netVat) + '</td><td class="num">' + Z.fmt(s.whtTax) + '</td><td class="num">' + Z.fmt(s.exposure) + '</td><td>' + esc(x.signedOffBy ? x.signedOffBy + ' ' + String(x.signedOffAt).slice(0, 10) : '') + '</td></tr>';
       }).join('') || '<tr><td colspan="7" class="empty">' + t('No exercises yet. Pick a period and start one.') + '</td></tr>') + '</tbody></table></div></section></div>');
   };
-  Z.ACT.newexsel = function (el) { Z.createExercise(el.dataset.e, document.getElementById('newp').value); };
+  Z.ACT.newexsel = function (el) {
+    var p = document.getElementById('newp').value;
+    if (!p) return Z.toast(t('Every period of that year already has an exercise.'), true);
+    if (S.exercises.some(function (x) { return x.entityId === el.dataset.e && x.period === p; })) return Z.toast(t('An exercise for that period already exists.'), true);
+    Z.createExercise(el.dataset.e, p);
+  };
+
+  // Any period since VAT began (Jan 2018), monthly or quarterly. A company can
+  // change frequency over the years, so the choice is per exercise.
+  var FIRST_YEAR = 2018;
+  Z.FIRST_YEAR = FIRST_YEAR;
+  Z.exFor = function (e, month) {
+    var q = month.slice(0, 4) + '-Q' + Math.ceil(+month.slice(5) / 3);
+    return S.exercises.filter(function (x) { return x.entityId === e.id && x.period === month; })[0] || S.exercises.filter(function (x) { return x.entityId === e.id && x.period === q; })[0];
+  };
+  function periodPicker(e, freq, year) {
+    freq = freq || S.ppFreq || e.vatFreq || 'monthly';
+    var cy = +Z.today().slice(0, 4), cur = E.periodOf(Z.today(), freq);
+    year = +(year || S.ppYear || E.prevPeriod(cur).slice(0, 4));
+    var years = []; for (var y = cy; y >= FIRST_YEAR; y--) years.push(y);
+    var opts = E.periodsOfYear(year, freq).filter(function (p) { return p <= cur && !S.exercises.some(function (x) { return x.entityId === e.id && x.period === p; }); });
+    var name = function (p) { if (/Q/.test(p)) return 'Q' + p.slice(-1); var d = new Date(Date.UTC(+p.slice(0, 4), +p.slice(5) - 1, 1)); return d.toLocaleString(S.lang === 'ar' ? 'ar-SA-u-ca-gregory' : 'en-GB', { month: 'long', timeZone: 'UTC' }); };
+    return '<select data-chg="ppfreq" data-e="' + e.id + '" aria-label="' + t('Filing frequency') + '" style="width:auto"><option value="monthly"' + (freq === 'monthly' ? ' selected' : '') + '>' + t('Monthly') + '</option><option value="quarterly"' + (freq === 'quarterly' ? ' selected' : '') + '>' + t('Quarterly') + '</option></select>' +
+      '<select data-chg="ppyear" data-e="' + e.id + '" aria-label="' + t('Year') + '" style="width:auto">' + years.map(function (y) { return '<option' + (y === year ? ' selected' : '') + '>' + y + '</option>'; }).join('') + '</select>' +
+      '<select id="newp" aria-label="' + t('Period') + '" style="width:auto">' + (opts.length ? opts.slice().reverse().map(function (p) { return '<option value="' + p + '">' + esc(name(p)) + ' ' + year + '</option>'; }).join('') : '<option value="">' + t('All done') + '</option>') + '</select>';
+  }
+  Z.CHG.ppfreq = function (el) { S.ppFreq = el.value; document.getElementById('pp').innerHTML = periodPicker(Z.entity(el.dataset.e)); };
+  Z.CHG.ppyear = function (el) { S.ppYear = +el.value; document.getElementById('pp').innerHTML = periodPicker(Z.entity(el.dataset.e)); };
   Z.statusPill = function (st) {
     var m = { in_progress: t('In progress'), review: t('Under review'), closed: t('Signed off') };
     return Z.pill(st || 'in_progress', m[st] || m.in_progress);
@@ -3230,9 +3385,13 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       fld('trend_salesDropPct', t('Flag a sales drop above (%)'), V.trend.salesDropPct, 'number', 'step="1"') +
       fld('trend_inputJumpPct', t('Flag an input VAT rise above (%)'), V.trend.inputJumpPct, 'number', 'step="1"') +
       fld('rett_rate', t('RETT rate %'), Z.r(V.rett.rate * 100), 'number', 'step="0.01"') + fld('rett_latePctPerMonth', t('RETT late payment % per month'), Z.r(V.rett.latePctPerMonth * 100), 'number', 'step="0.01"', t('Sources report 2% under the current law; verify.')) +
+      fld('rettd_dueDays', t('RETT due within (days of the transaction)'), V.rett.dueDays, 'number', 'step="1"') +
       fld('zakat_dueDays', t('Zakat return due (days after year end)'), V.zakat.dueDays, 'number', 'step="1"') +
+      fld('zakatp_latePctPer30Days', t('Zakat late fine % per 30 days (estimate)'), Z.r(V.zakat.latePctPer30Days * 100), 'number', 'step="0.01"') +
+      fld('sugar_mid', t('Sweetened drinks 5–7.99 g sugar: SAR per litre'), V.sugarTiers.tiers[1][2], 'number', 'step="0.01"') +
+      fld('sugar_high', t('Sweetened drinks 8 g sugar or more: SAR per litre'), V.sugarTiers.tiers[2][2], 'number', 'step="0.01"', t('Per-litre tiers since 1 Jan 2026; under 5 g and sugar-free pay nothing.')) +
       fld('exc_tobacco', t('Excise: tobacco %'), Z.r(V.exciseRates.tobacco * 100), 'number', 'step="1"') + fld('exc_energy', t('Excise: energy drinks %'), Z.r(V.exciseRates.energy * 100), 'number', 'step="1"') +
-      fld('exc_ecig', t('Excise: e-cigarettes and liquids %'), Z.r(V.exciseRates.ecig * 100), 'number', 'step="1"') + fld('exc_sweetened', t('Excise: sweetened drinks %'), Z.r(V.exciseRates.sweetened * 100), 'number', 'step="1"', t('Use the Rate column per line if your drinks fall under sugar-based tiers.')) + '</div>' +
+      fld('exc_ecig', t('Excise: e-cigarettes and liquids %'), Z.r(V.exciseRates.ecig * 100), 'number', 'step="1"') + fld('exc_sweetened', t('Excise: sweetened drinks % (before 2026)'), Z.r(V.exciseRates.sweetened * 100), 'number', 'step="1"') + '</div>' +
       '<label class="f" style="margin-top:12px"><span>' + t('Marketplace payout keywords (bank descriptions)') + '</span><input type="text" name="marketplaceKeywords" value="' + esc(V.marketplace.payoutKeywords) + '"></label>' +
       '<label class="f" style="margin-top:12px"><span>' + t('Blocked input VAT keywords') + '</span><textarea name="blockedKeywords">' + esc(V.blockedKeywords) + '</textarea><small>' + t('Matched against purchase descriptions, accounts and supplier names (VAT IR Art. 50).') + '</small></label></section>' +
       '<section class="paper area-wht"><h2>' + t('Withholding tax rates') + '</h2><p class="muted">' + t('Statutory rates for payments to non-residents. Lower treaty rates are accepted when the line is marked as treaty relief with a certificate.') + '</p><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Payment type') + '</th><th>%</th></tr></thead><tbody>' + whtRows + '</tbody></table></div></section>' +
@@ -3259,6 +3418,9 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
         else if (k.indexOf('gift_') === 0) { v.giftRelief = v.giftRelief || {}; v.giftRelief[k.slice(5)] = +val; }
         else if (k.indexOf('trend_') === 0) { v.trend = v.trend || {}; v.trend[k.slice(6)] = +val; }
         else if (k.indexOf('rett_') === 0) { v.rett = v.rett || {}; v.rett[k.slice(5)] = +val / 100; }
+        else if (k.indexOf('rettd_') === 0) { v.rett = v.rett || {}; v.rett[k.slice(6)] = +val; }
+        else if (k.indexOf('zakatp_') === 0) { v.zakat = v.zakat || {}; v.zakat[k.slice(7)] = +val / 100; }
+        else if (k.indexOf('sugar_') === 0) { v.sugarTiers = v.sugarTiers || { tiers: [[0, 5, 0], [5, 8, 0.79], [8, 1000, 1.09]] }; v.sugarTiers.tiers[k === 'sugar_mid' ? 1 : 2][2] = +val; }
         else if (k.indexOf('zakat_') === 0) { v.zakat = v.zakat || {}; v.zakat[k.slice(6)] = +val; }
         else if (k.indexOf('exc_') === 0) { v.exciseRates = v.exciseRates || {}; v.exciseRates[k.slice(4)] = +val / 100; }
         else if (k === 'marketplaceKeywords') { v.marketplace = { payoutKeywords: val }; }
@@ -3280,7 +3442,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   }
   Z.ACT.connect = function () {
     var u = document.getElementById('apiurl').value.trim();
-    if (!/^https:\/\/script\.google(usercontent)?\.com\//.test(u)) return Z.toast(t('Paste the web app URL that ends in /exec.'), true);
+    if (!Z.validApi(u)) return Z.toast(t('Paste the web app URL that ends in /exec.'), true);
     localStorage.setItem('zr_api_url', u); try { sessionStorage.removeItem('zr_local'); } catch (e) {} location.hash = ''; location.reload();
   };
   Z.ACT.disconnect = function () { localStorage.removeItem('zr_api_url'); try { sessionStorage.setItem('zr_local', '1'); } catch (e) {} location.reload(); };
@@ -3425,7 +3587,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       entity: ent, periodKey: S.ex.period, settings: S.settingsDoc ? S.settingsDoc.values : {}, data: S.data,
       returnBoxes: S.ex.returnBoxes, reconItems: S.ex.reconItems, bankOverrides: S.ex.bankOverrides,
       prevNetVat: pn, prevWhtTax: pw, samples: S.samples, checklist: S.checklist.items, findings: S.findings,
-      filing: S.ex.filing || {}, recovery: S.ex.recovery || {}, today: Z.today(), exciseReturn: S.ex.exciseReturn,
+      filing: S.ex.filing || {}, recovery: S.ex.recovery || {}, today: Z.today(), exciseReturn: S.ex.exciseReturn, mktException: S.ex.mktException || {},
       // the same entity's earlier periods, newest first, for the risk-engine trends
       history: S.exercises.filter(function (x) { return x.entityId === S.ex.entityId && x.period < S.ex.period && x.summary; })
         .sort(function (a, b) { return a.period < b.period ? 1 : -1; }).map(function (x) { return Object.assign({ period: x.period }, x.summary); })
@@ -3653,7 +3815,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   var FIELD_LABELS = { account: 'Account', name: 'Account name', opening: 'Opening', debit: 'Debit', credit: 'Credit', closing: 'Closing', date: 'Date', doc: 'Document', description: 'Description', party: 'Counterparty', country: 'Country', flow: 'Sales / purchase', invoice: 'Invoice no.', vatNo: 'VAT no.', category: 'Tax category', docType: 'Document type', net: 'Net', vat: 'VAT', total: 'Total', box: 'Box', amount: 'Amount', adj: 'Adjustment', uuid: 'UUID', status: 'Status', declaration: 'Declaration no.', value: 'Customs value', reference: 'Reference', balance: 'Balance', paymentType: 'Payment type', gross: 'Gross', rate: 'Rate', wht: 'WHT', dtt: 'Treaty relief', certificate: 'Certificate', paidDate: 'Paid to ZATCA', tax: 'Tax', cls: 'Class', reason: 'Why', expected: 'Expected', statutory: 'Statutory rate', applied: 'Applied rate', shortfall: 'Shortfall', due: 'Due', daysLate: 'Days late', penalty: 'Fine', missing: 'Missing',
     type: 'Invoice type', issuedAt: 'Issued', submittedAt: 'Sent to ZATCA', egs: 'EGS unit', icv: 'Counter', buyerVat: 'Buyer VAT no.', ref: 'Original invoice', message: 'ZATCA message',
     property: 'Property', deed: 'Deed no.', buyer: 'Buyer', paidOn: 'Paid on', exemption: 'Exemption', product: 'Product', qty: 'Quantity', retailPrice: 'Retail price', standardPrice: 'Standard price',
-    excise: 'Excise', seller: 'Seller', sellerVat: 'Seller VAT no.', sellerResident: 'Resident', order: 'Order', channel: 'Channel',
+    excise: 'Excise', litres: 'Litres', sugar: 'Sugar g/100 ml', opening: 'Opening', received: 'Received', released: 'Released', exported: 'Exported', seller: 'Seller', sellerVat: 'Seller VAT no.', sellerResident: 'Resident', order: 'Order', channel: 'Channel',
     other: 'Compared with', otherNet: 'Their net', otherVat: 'Their VAT', exportRef: 'Export declaration', period: 'Period', average: 'Average', overdue: 'Days overdue', owner: 'Owner', title: 'Finding', severity: 'Severity', taxImpact: 'Tax impact', entity: 'Entity' };
   function fieldLabel(k) { return t(FIELD_LABELS[k] || k); }
   Z.fieldLabel = fieldLabel;
@@ -3690,7 +3852,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     if (r.icv !== undefined || r.egs !== undefined || r.submittedAt !== undefined) return pickCols(['invoice', 'type', 'docType', 'issuedAt', 'submittedAt', 'status', 'egs', 'icv', 'ref', 'net', 'vat', 'message']);
     if (r.otherVat !== undefined) return ['invoice', 'date', 'party', 'vat', 'other', 'otherVat', 'reason'];
     if (r.property !== undefined) return pickCols(['date', 'deed', 'property', 'buyer', 'value', 'rett', 'expected', 'shortfall', 'paidOn', 'daysLate']);
-    if (r.product !== undefined) return pickCols(['product', 'category', 'qty', 'retailPrice', 'standardPrice', 'excise', 'expected', 'shortfall']);
+    if (r.product !== undefined) return pickCols(['product', 'category', 'opening', 'received', 'released', 'exported', 'closing', 'qty', 'litres', 'sugar', 'retailPrice', 'standardPrice', 'excise', 'expected', 'shortfall']);
     if (r.seller !== undefined) return pickCols(['date', 'order', 'seller', 'sellerVat', 'sellerResident', 'category', 'gross', 'vat']);
     if (r.party !== undefined && r.total !== undefined && r.gross !== undefined && r.flow === undefined) return ['party', 'gross', 'total', 'reason'];
     if (r.flow !== undefined) return pickCols(['invoice', 'date', 'party', 'vatNo', 'country', 'category', 'description', 'net', 'vat']);
@@ -3759,10 +3921,22 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     var lk = locked(), O = S.R.other;
     return '<section class="paper area-ledger"><header><div><h2>' + t('Marketplaces, real estate and excise') + '</h2><p>' + t('Load the registers that apply to this entity on the Data tab: marketplace sales if you run a platform, property disposals, excise goods. Marketplace payouts are found in the bank statements automatically.') + '</p></div>' +
       '<a class="btn small" href="#/annual/' + S.ex.entityId + '/' + (+S.ex.period.slice(0, 4) - 1) + '">' + t('Zakat worksheet') + '</a></header>' +
-      '<div class="grid g3">' + Z.fld('exciseReturn', t('Excise declared in the excise return'), S.ex.exciseReturn, 'number', 'step="0.01" data-chg="exnum"' + (lk ? ' disabled' : '')) + '</div></section>' +
+      '<div class="grid g3">' + Z.fld('exciseReturn', t('Excise declared in the excise return'), S.ex.exciseReturn, 'number', 'step="0.01" data-chg="exnum"' + (lk ? ' disabled' : '')) + '</div>' +
+      mktQuestions(lk) + '</section>' +
       '<section class="paper" style="margin-top:18px"><header><div><h2>' + t('Checks') + '</h2></div></header>' +
       (O.checks.length ? O.checks.map(function (c) { return Z.checkHtml(c, Z.exceptionsHtml(c)); }).join('') : '<p class="muted">' + t('Nothing to check yet: no marketplace payouts in the bank, and no marketplace, RETT or excise registers loaded.') + '</p>') + '</section>';
   };
+
+  var MQ = [['named', 'Contracts, tax invoices and receipts name the seller as the supplier'], ['noTerms', 'The platform does not set the terms and conditions of the supply'],
+    ['noPrice', 'The platform does not set the price'], ['noPayment', 'The platform does not collect payment from customers'],
+    ['noComplaints', 'The platform does not handle customer complaints'], ['noPromos', 'The platform offers no promotions or compensation to customers']];
+  function mktQuestions(lk) {
+    var q = S.ex.mktException || {}, opt = function (k, v, l) { return '<option value="' + v + '"' + (q[k] === v ? ' selected' : '') + '>' + t(l) + '</option>'; };
+    return '<details style="margin-top:12px"' + ((S.data.mkt_sales || []).length ? ' open' : '') + '><summary>' + t('If you operate a marketplace: deemed-supplier exception test') + '</summary>' +
+      '<p class="faint" style="font-size:12.5px;margin:8px 0">' + t('The platform is not the deemed supplier only if every answer is yes (VAT IR Art. 47, ZATCA guide of 25 Dec 2025). Sources differ on payment collection; this test treats it as disqualifying.') + '</p><div class="grid g2">' +
+      MQ.map(function (m) { return '<label class="f"><span>' + t(m[1]) + '</span><select data-chg="mktq" data-k="' + m[0] + '"' + (lk ? ' disabled' : '') + '>' + opt(m[0], '', '—') + opt(m[0], 'yes', 'Yes') + opt(m[0], 'no', 'No') + '</select></label>'; }).join('') + '</div></details>';
+  }
+  Z.CHG.mktq = function (el) { S.ex.mktException = S.ex.mktException || {}; S.ex.mktException[el.dataset.k] = el.value; Z.saveEx().then(Z.changed); };
 
   // ---------------------------------------------------------------- e-invoicing (ERP ↔ provider ↔ ZATCA)
   var EST = { CLEARED: 'Cleared by ZATCA', REPORTED: 'Reported to ZATCA', REJECTED: 'Rejected', PENDING: 'Pending at provider', WARNING: 'Accepted with warnings', NOT_SUBMITTED: 'Not sent' };
@@ -4166,7 +4340,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     }).then(function () {
       return Z.save('exercises', { entityId: entId, period: d.period, status: 'in_progress', label: ent.name + ' ' + d.period, returnBoxes: d.returnBoxes, reconItems: d.reconItems.map(function (r) { return Object.assign({ id: Z.uid('RI') }, r); }), checkNotes: {}, bankOverrides: {}, filing: d.filing, recovery: d.recovery, exciseReturn: d.exciseReturn });
     }).then(function (ex) {
-      var files = { tb: 'TB_Sep2026.xlsx', gl: 'GL_foreign_services.xlsx', sys_vat: 'NetSuite_VAT_Report_Sep2026.xlsx', xls_vat: 'VAT_workings_Sep2026.xlsx', einv: 'Fatoora_export_Sep2026.csv', einv_provider: 'EInvoicing_provider_log_Sep2026.xlsx', rett: 'RETT_register_2026.xlsx', excise: 'Excise_register_Sep2026.xlsx', customs: 'Customs_Bayan_Sep2026.xlsx', bank: 'SNB_statement_Sep2026.xlsx', wht_reg: 'WHT_register_Sep2026.xlsx', ret_wht: 'WHT_return_Sep2026.xlsx', xls_wht: 'WHT_workings_Sep2026.xlsx' };
+      var files = { tb: 'TB_Sep2026.xlsx', gl: 'GL_foreign_services.xlsx', sys_vat: 'NetSuite_VAT_Report_Sep2026.xlsx', xls_vat: 'VAT_workings_Sep2026.xlsx', einv: 'Fatoora_export_Sep2026.csv', einv_provider: 'EInvoicing_provider_log_Sep2026.xlsx', rett: 'RETT_register_2026.xlsx', excise: 'Excise_register_Sep2026.xlsx', excise_stock: 'Excise_stock_Sep2026.xlsx', customs: 'Customs_Bayan_Sep2026.xlsx', bank: 'SNB_statement_Sep2026.xlsx', wht_reg: 'WHT_register_Sep2026.xlsx', ret_wht: 'WHT_return_Sep2026.xlsx', xls_wht: 'WHT_workings_Sep2026.xlsx' };
       var jobs = Object.keys(d.datasets).map(function (k) {
         var rows = d.datasets[k].map(function (r, i) { return Object.assign({ _r: i + 2 }, r); });
         return Z.save('datasets', { parentId: ex.id, kind: k, fileName: files[k], rowCount: rows.length, errors: 0, uploadedAt: new Date().toISOString(), label: files[k] })
@@ -4198,21 +4372,75 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   var E = window.ZEngine, S = Z.S, t = Z.t, esc = Z.esc, fmt = Z.fmt;
 
   // ---------------------------------------------------------------- reports centre
-  var RTABS = [['portfolio', 'Portfolio readiness'], ['aging', 'Findings aging'], ['exposure', 'Exposure by entity'], ['calendar', 'Filing compliance']];
+  var RTABS = [['summary', 'Tax summary'], ['portfolio', 'Portfolio readiness'], ['aging', 'Findings aging'], ['exposure', 'Exposure by entity'], ['calendar', 'Filing compliance']];
+
+  // ---- the date range every report follows (months, inclusive)
+  function nextMonth(p) { var y = +p.slice(0, 4), m = +p.slice(5) + 1; if (m > 12) { y++; m = 1; } return y + '-' + (m < 10 ? '0' : '') + m; }
+  function defaultRange() { var to = E.prevPeriod(E.periodOf(Z.today(), 'monthly')), from = to; for (var i = 0; i < 11; i++) from = E.prevPeriod(from); return { from: from, to: to }; }
+  function range() {
+    if (!S.rf) { try { S.rf = JSON.parse(localStorage.getItem('zr_rf') || 'null'); } catch (e) {} }
+    if (!S.rf || !/^\d{4}-\d{2}$/.test(S.rf.from) || !/^\d{4}-\d{2}$/.test(S.rf.to)) S.rf = defaultRange();
+    return S.rf;
+  }
+  function setRange(from, to) {
+    if (from > to) { var x = from; from = to; to = x; }
+    S.rf = { from: from, to: to };
+    try { localStorage.setItem('zr_rf', JSON.stringify(S.rf)); } catch (e) {}
+    Z.route();
+  }
+  function inRange(period) { var r = E.periodRange(period), R = range(); return !!r && r.end.slice(0, 7) >= R.from && r.start.slice(0, 7) <= R.to; }
+  function asOf() { var end = E.periodRange(range().to).end; return end < Z.today() ? end : Z.today(); }
+  function exercisesInRange(e) { return S.exercises.filter(function (x) { return (!e || x.entityId === e.id) && inRange(x.period); }); }
+  Z.CHG.rfrom = function (el) { if (el.value) setRange(el.value, range().to); };
+  Z.CHG.rto = function (el) { if (el.value) setRange(range().from, el.value); };
+  Z.ACT.rquick = function (el) {
+    var q = el.dataset.q, y = +Z.today().slice(0, 4), cur = E.periodOf(Z.today(), 'monthly');
+    if (q === '12m') { var d = defaultRange(); setRange(d.from, d.to); }
+    else if (q === 'ytd') setRange(y + '-01', cur);
+    else if (q === 'last') setRange((y - 1) + '-01', (y - 1) + '-12');
+    else if (q === 'all') setRange(Z.FIRST_YEAR + '-01', cur);
+    else if (q === 'q') { var qs = Math.floor((+cur.slice(5) - 1) / 3) * 3 + 1, from = y + '-' + (qs < 10 ? '0' : '') + qs; setRange(from, cur); }
+  };
+  function rangeBar() {
+    var R = range(), n = months12().length;
+    return '<section class="paper" style="display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;margin-bottom:16px">' +
+      '<label class="f" style="width:170px"><span>' + t('From') + '</span><input type="month" min="' + Z.FIRST_YEAR + '-01" value="' + R.from + '" data-chg="rfrom"></label>' +
+      '<label class="f" style="width:170px"><span>' + t('To') + '</span><input type="month" min="' + Z.FIRST_YEAR + '-01" value="' + R.to + '" data-chg="rto"></label>' +
+      '<div class="row">' + [['12m', 'Last 12 months'], ['q', 'This quarter'], ['ytd', 'This year'], ['last', 'Last year'], ['all', 'Since 2018']].map(function (b) { return '<button class="btn small" data-act="rquick" data-q="' + b[0] + '">' + t(b[1]) + '</button>'; }).join('') + '</div>' +
+      '<p class="faint" style="margin:0;font-size:12.5px;flex-basis:100%">' + n + ' ' + t('months') + ' · ' + t('findings aged as of') + ' ' + Z.ltr(asOf()) + '</p></section>';
+  }
 
   Z.views.reports = function (h) {
-    var tab = h[1] || 'portfolio';
+    var tab = h[1] || 'summary';
     var nav = '<nav class="tabs" aria-label="' + t('Reports') + '">' + RTABS.map(function (x) { return '<a href="#/reports/' + x[0] + '"' + (tab === x[0] ? ' aria-current="page"' : '') + '>' + t(x[1]) + '</a>'; }).join('') + '</nav>';
-    var head = '<div class="pagehead"><div><h1>' + t('Reports') + '</h1><p>' + t('Across every entity you can see. Each report exports to Excel.') + '</p></div><button class="btn" data-act="rexport" data-r="' + tab + '">' + t('Export to Excel') + '</button></div>';
+    var head = '<div class="pagehead"><div><h1>' + t('Reports') + '</h1><p>' + t('Across every entity you can see, for the months you choose. Each report exports to Excel.') + '</p></div><button class="btn" data-act="rexport" data-r="' + tab + '">' + t('Export to Excel') + '</button></div>';
     if (tab === 'aging' || tab === 'exposure') {
-      return Z.list('findings').then(function (fs) { S.allFindings = fs; Z.setMain(head + nav + (tab === 'aging' ? aging(fs) : exposure(fs))); });
+      return Z.list('findings').then(function (fs) { S.allFindings = fs; Z.setMain(head + rangeBar() + nav + (tab === 'aging' ? aging(fs) : exposure(fs))); });
     }
-    Z.setMain(head + nav + (tab === 'calendar' ? calendar() : portfolio()));
+    Z.setMain(head + rangeBar() + nav + (tab === 'calendar' ? calendar() : tab === 'portfolio' ? portfolio() : summary()));
   };
 
-  function months12() { var out = [], cur = E.periodOf(Z.today(), 'monthly'); for (var i = 0; i < 12; i++) { cur = E.prevPeriod(cur); out.unshift(cur); } return out; }
+  function months12() { var out = [], R = range(), cur = R.from; while (cur <= R.to && out.length < 240) { out.push(cur); cur = nextMonth(cur); } return out; }
+  function findingsInRange(fs) { var ids = {}; exercisesInRange().forEach(function (x) { ids[x.id] = 1; }); return fs.filter(function (f) { return ids[f.parentId]; }); }
+
+  // ---- tax summary: totals per entity over the range
+  function summaryRows() {
+    return ents().map(function (e) {
+      var xs = exercisesInRange(e).filter(function (x) { return x.summary; }), sum = function (k) { return xs.reduce(function (a, x) { return a + (+x.summary[k] || 0); }, 0); };
+      var scored = xs.filter(function (x) { return x.summary.score != null; });
+      return { e: e, n: xs.length, sales: sum('sales'), outputVat: sum('outputVat'), inputVat: sum('inputVat'), netVat: sum('netVat'), whtTax: sum('whtTax'), exposure: sum('exposure'), fails: sum('fails'),
+        avg: scored.length ? Math.round(scored.reduce(function (a, x) { return a + x.summary.score; }, 0) / scored.length) : null, signed: xs.filter(function (x) { return x.status === 'closed'; }).length };
+    });
+  }
+  function summary() {
+    var rows = summaryRows(), tot = rows.reduce(function (a, r) { ['n', 'sales', 'outputVat', 'inputVat', 'netVat', 'whtTax', 'exposure', 'fails', 'signed'].forEach(function (k) { a[k] = (a[k] || 0) + r[k]; }); return a; }, {});
+    return '<section class="paper flush"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Entity') + '</th><th class="num">' + t('Exercises') + '</th><th class="num">' + t('Signed off') + '</th><th class="num">' + t('Sales (box 6)') + '</th><th class="num">' + t('Output VAT') + '</th><th class="num">' + t('Input VAT') + '</th><th class="num">' + t('Net VAT due') + '</th><th class="num">' + t('WHT') + '</th><th class="num">' + t('Failed checks') + '</th><th class="num">' + t('Quantified exposure (SAR)') + '</th><th class="num">' + t('Average readiness') + '</th></tr></thead><tbody>' +
+      rows.map(function (r) { return '<tr><td><a href="#/entity/' + r.e.id + '">' + esc(Z.entName(r.e)) + '</a></td><td class="num">' + r.n + '</td><td class="num">' + r.signed + '</td><td class="num">' + fmt(r.sales) + '</td><td class="num">' + fmt(r.outputVat) + '</td><td class="num">' + fmt(r.inputVat) + '</td><td class="num">' + fmt(r.netVat) + '</td><td class="num">' + fmt(r.whtTax) + '</td><td class="num">' + r.fails + '</td><td class="num">' + fmt(r.exposure) + '</td><td class="num">' + (r.avg == null ? '—' : r.avg + '%') + '</td></tr>'; }).join('') +
+      '<tr class="total"><td>' + t('Total') + '</td><td class="num">' + (tot.n || 0) + '</td><td class="num">' + (tot.signed || 0) + '</td><td class="num">' + fmt(tot.sales || 0) + '</td><td class="num">' + fmt(tot.outputVat || 0) + '</td><td class="num">' + fmt(tot.inputVat || 0) + '</td><td class="num">' + fmt(tot.netVat || 0) + '</td><td class="num">' + fmt(tot.whtTax || 0) + '</td><td class="num">' + (tot.fails || 0) + '</td><td class="num">' + fmt(tot.exposure || 0) + '</td><td></td></tr></tbody></table></div></section>' +
+      '<p class="faint" style="font-size:12.5px">' + t('Totals come from each exercise\'s saved figures. An exercise counts when its period overlaps the range; quarterly filers count in full.') + '</p>';
+  }
   function keyFor(e, m) { return e.vatFreq === 'quarterly' ? m.slice(0, 4) + '-Q' + Math.ceil(+m.slice(5) / 3) : m; }
-  function exOf(e, p) { return S.exercises.filter(function (x) { return x.entityId === e.id && x.period === p; })[0]; }
+  function exOf(e, p) { return /Q/.test(p) || p.length !== 7 ? S.exercises.filter(function (x) { return x.entityId === e.id && x.period === p; })[0] : Z.exFor(e, p); }
   function ents() { return S.entities.filter(function (e) { return e.active !== false; }); }
 
   function portfolio() {
@@ -4229,7 +4457,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   var BUCKETS = [['over90', 'Over 90 days overdue', 'fail'], ['d90', '61–90 days overdue', 'fail'], ['d60', '31–60 days overdue', 'warn'], ['d30', '1–30 days overdue', 'warn'], ['notDue', 'Not yet due', 'pass'], ['noDate', 'No due date', 'na']];
   function exName(id) { var x = S.exercises.filter(function (e) { return e.id === id; })[0]; return x ? Z.entName(Z.entity(x.entityId)) + ' · ' + x.period : ''; }
   function aging(fs) {
-    var b = E.aging(fs, Z.today());
+    var b = E.aging(findingsInRange(fs), asOf());
     var strip = '<div class="kpis">' + BUCKETS.map(function (k) { return '<div class="' + (k[2] === 'fail' && b[k[0]].length ? 'bad' : '') + '"><b>' + b[k[0]].length + '</b><span>' + t(k[1]) + '</span></div>'; }).join('') + '</div>';
     var rows = [];
     BUCKETS.forEach(function (k) { b[k[0]].forEach(function (f) { rows.push('<tr class="clickable" data-act="gofinding" data-ex="' + f.parentId + '"><td>' + Z.pill(k[2], t(k[1])) + '</td><td>' + Z.pill(f.severity, t(Z.cap(f.severity))) + '</td><td><b>' + esc(f.title) + '</b><div class="faint" style="font-size:12.5px">' + esc(exName(f.parentId)) + '</div></td><td class="num">' + fmt(f.taxImpact) + '</td><td class="num">' + fmt(f.penalty) + '</td><td>' + esc(f.owner || '—') + '</td><td class="nowrap">' + esc(f.due || '') + '</td></tr>'); }); });
@@ -4240,7 +4468,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
 
   function exposure(fs) {
     var rows = ents().map(function (e) {
-      var xs = S.exercises.filter(function (x) { return x.entityId === e.id; }).sort(function (a, b) { return a.period < b.period ? 1 : -1; });
+      var xs = exercisesInRange(e).sort(function (a, b) { return a.period < b.period ? 1 : -1; });
       var latest = xs[0], sm = (latest && latest.summary) || {};
       var open = fs.filter(function (f) { return f.status !== 'closed' && xs.some(function (x) { return x.id === f.parentId; }); });
       var tax = open.reduce(function (a, f) { return a + (+f.taxImpact || 0); }, 0), pen = open.reduce(function (a, f) { return a + (+f.penalty || 0); }, 0);
@@ -4275,10 +4503,11 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   Z.ACT.rexport = function (el) {
     var wb = XLSX.utils.book_new(), add = function (n, aoa) { XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa), n); }, ms = months12(), r = el.dataset.r;
     if (r === 'portfolio') add('Portfolio', [['Entity'].concat(ms)].concat(ents().map(function (e) { return [e.name].concat(ms.map(function (m) { var x = exOf(e, keyFor(e, m)); return x && x.summary && x.summary.score != null ? x.summary.score : ''; })); })));
-    if (r === 'aging') { var b = E.aging(S.allFindings || [], Z.today()), rows = [['Bucket', 'Severity', 'Finding', 'Exercise', 'Tax impact', 'Penalty', 'Owner', 'Due', 'Days overdue']]; BUCKETS.forEach(function (k) { b[k[0]].forEach(function (f) { rows.push([k[1], f.severity, f.title, exName(f.parentId), f.taxImpact, f.penalty, f.owner, f.due, f.overdue || '']); }); }); add('Findings aging', rows); }
-    if (r === 'exposure') add('Exposure', [['Entity', 'Latest period', 'Readiness', 'Quantified exposure', 'Open findings']].concat(ents().map(function (e) { var x = S.exercises.filter(function (z) { return z.entityId === e.id; }).sort(function (a, b) { return a.period < b.period ? 1 : -1; })[0]; var sm = (x && x.summary) || {}; return [e.name, x ? x.period : '', sm.score, sm.exposure, (S.allFindings || []).filter(function (f) { return f.status !== 'closed' && x && f.parentId === x.id; }).length]; })));
-    if (r === 'calendar') add('Filing', [['Entity', 'Period', 'VAT due', 'VAT filed', 'VAT paid', 'WHT due', 'WHT filed', 'WHT paid']].concat(S.exercises.map(function (x) { var F = x.filing || {}, dl = E.deadlines(x.period), e = Z.entity(x.entityId) || {}; return [e.name, x.period, dl.vat, F.vatFiledOn || '', F.vatPaidOn || '', dl.wht, F.whtFiledOn || '', F.whtPaidOn || '']; })));
-    XLSX.writeFile(wb, 'report-' + r + '-' + Z.today() + '.xlsx');
+    if (r === 'summary') add('Tax summary', [['Range', range().from + ' to ' + range().to], [], ['Entity', 'Exercises', 'Signed off', 'Sales', 'Output VAT', 'Input VAT', 'Net VAT', 'WHT', 'Failed checks', 'Exposure', 'Average readiness']].concat(summaryRows().map(function (x) { return [x.e.name, x.n, x.signed, x.sales, x.outputVat, x.inputVat, x.netVat, x.whtTax, x.fails, x.exposure, x.avg]; })));
+    if (r === 'aging') { var b = E.aging(findingsInRange(S.allFindings || []), asOf()), rows = [['Bucket', 'Severity', 'Finding', 'Exercise', 'Tax impact', 'Penalty', 'Owner', 'Due', 'Days overdue']]; BUCKETS.forEach(function (k) { b[k[0]].forEach(function (f) { rows.push([k[1], f.severity, f.title, exName(f.parentId), f.taxImpact, f.penalty, f.owner, f.due, f.overdue || '']); }); }); add('Findings aging', rows); }
+    if (r === 'exposure') add('Exposure', [['Entity', 'Latest period', 'Readiness', 'Quantified exposure', 'Open findings']].concat(ents().map(function (e) { var x = exercisesInRange(e).sort(function (a, b) { return a.period < b.period ? 1 : -1; })[0]; var sm = (x && x.summary) || {}; return [e.name, x ? x.period : '', sm.score, sm.exposure, (S.allFindings || []).filter(function (f) { return f.status !== 'closed' && x && f.parentId === x.id; }).length]; })));
+    if (r === 'calendar') add('Filing', [['Entity', 'Period', 'VAT due', 'VAT filed', 'VAT paid', 'WHT due', 'WHT filed', 'WHT paid']].concat(exercisesInRange().map(function (x) { var F = x.filing || {}, dl = E.deadlines(x.period), e = Z.entity(x.entityId) || {}; return [e.name, x.period, dl.vat, F.vatFiledOn || '', F.vatPaidOn || '', dl.wht, F.whtFiledOn || '', F.whtPaidOn || '']; })));
+    XLSX.writeFile(wb, 'report-' + r + '-' + range().from + '-to-' + range().to + '.xlsx');
   };
 
   // ---------------------------------------------------------------- annual reconciliation
@@ -4301,7 +4530,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     var A = S.annual, rows = annualRows(e, year), expected = closedPeriods(e, year);
     var rec = E.annualRecon(rows, A, S.settingsDoc ? S.settingsDoc.values : {}, expected), can = Z.can('preparer');
     var f = function (k, label, hint) { return Z.fld(k, label, A[k], 'number', 'step="0.01" data-chg="annual" data-f="' + k + '"' + (can ? '' : ' disabled'), hint); };
-    var years = []; for (var y = +Z.today().slice(0, 4); y >= +Z.today().slice(0, 4) - 4; y--) years.push(y);
+    var years = []; for (var y = +Z.today().slice(0, 4); y >= Z.FIRST_YEAR; y--) years.push(y);
     Z.setMain('<div class="pagehead"><div><p class="muted" style="margin:0"><a href="#/entity/' + e.id + '">' + esc(Z.entName(e)) + '</a></p><h1>' + t('Annual reconciliation') + ' ' + year + '</h1><p>' + t('ZATCA cross-checks a year of VAT returns against the audited financial statements and the Zakat / income tax return. Differences need a documented explanation.') + '</p></div>' +
       '<div class="row"><select data-chg="annyear" data-e="' + e.id + '" aria-label="' + t('Year') + '" style="width:auto">' + years.map(function (y) { return '<option' + (y === year ? ' selected' : '') + '>' + y + '</option>'; }).join('') + '</select><button class="btn" data-act="annxl" data-e="' + e.id + '" data-y="' + year + '">' + t('Export to Excel') + '</button></div></div>' +
       '<div class="stack"><section class="paper area-vat"><header><div><h2>' + t('Reconciliation') + '</h2><p>' + (rec.missing.length ? '<span class="diff-bad">' + rec.missing.length + ' ' + t('periods have no exercise yet:') + '</span> ' + rec.missing.map(function (p) { return Z.ltr(p); }).join(', ') : t('Every period of the year has an exercise.')) + '</p></div>' + Z.pill(rec.status, rec.status === 'pass' ? t('Reconciled') : rec.status === 'na' ? t('No data') : t('Differences to explain')) + '</header>' +
@@ -4331,7 +4560,11 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   function zakatSection(e) {
     var z = S.annual.zakat || {}, can = Z.can('preparer'), dis = can ? '' : ' disabled';
     var res = E.zakat(Object.assign({ today: Z.today() }, z), S.settingsDoc ? S.settingsDoc.values : {});
-    var f = function (row) { return Z.fld('z_' + row[1], t(row[2]), z[row[1]], 'number', 'step="0.01" data-chg="zak" data-f="' + row[1] + '"' + dis); };
+    var zm = S.annual.zakatMap || {};
+    var f = function (row) {
+      return '<div class="grid" style="grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:8px;align-items:end">' + Z.fld('z_' + row[1], t(row[2]), z[row[1]], 'number', 'step="0.01" data-chg="zak" data-f="' + row[1] + '"' + dis) +
+        (row[1] === 'adjustedNetProfit' ? '<span></span>' : Z.fld('zm_' + row[1], t('TB accounts'), zm[row[1]], 'text', 'placeholder="31*" data-chg="zmap" data-f="' + row[1] + '"' + dis)) + '</div>';
+    };
     return '<section class="paper area-ledger"><header><div><h2>' + t('Zakat worksheet') + ' ' + S.annual.year + '</h2><p>' + t('Classify each balance as your Zakat adviser does; the worksheet adds them up, applies the floor of adjusted net profit and the rate for the length of the year.') + '</p></div></header>' +
       '<div class="grid g2"><div><h3 style="margin-bottom:8px">' + t('Additions') + '</h3><div class="grid">' + ZF.filter(function (r) { return r[0] === 'add'; }).map(f).join('') + '</div></div>' +
       '<div><h3 style="margin-bottom:8px">' + t('Deductions') + '</h3><div class="grid">' + ZF.filter(function (r) { return r[0] === 'ded'; }).map(f).join('') + '</div>' +
@@ -4339,10 +4572,30 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       '<label class="f"><span>' + t('Financial year') + '</span><select data-chg="zak" data-f="yearType"' + dis + '><option value="gregorian"' + (z.yearType !== 'hijri' ? ' selected' : '') + '>' + t('Gregorian (365 days)') + '</option><option value="hijri"' + (z.yearType === 'hijri' ? ' selected' : '') + '>' + t('Hijri (354 days)') + '</option></select></label>' +
       Z.fld('z_fyEnd', t('Year end'), z.fyEnd, 'date', 'data-chg="zak" data-f="fyEnd"' + dis) + Z.fld('z_filedOn', t('Filed and paid on'), z.filedOn, 'date', 'data-chg="zak" data-f="filedOn"' + dis) +
       Z.fld('z_declared', t('Zakat declared in the return'), z.declared, 'number', 'step="0.01" data-chg="zak" data-f="declared"' + dis) + '</div></div></div>' +
+      (can ? '<div class="row" style="margin-top:12px"><button class="btn" data-act="zakfill" data-e="' + e.id + '">' + t('Fill from trial balance') + '</button><span class="faint" style="font-size:12.5px">' + t('Uses the TB of the last exercise of the year. Adjusted net profit stays manual: it needs your tax adjustments.') + '</span></div>' : '') +
       '<div class="kpis" style="margin-top:16px"><div><b>' + fmt(res.base, 0) + '</b><span>' + t('Computed Zakat base') + '</span></div><div><b>' + fmt(res.baseUsed, 0) + '</b><span>' + t('Base used (not below adjusted net profit)') + '</span></div>' +
       '<div><b>' + Z.r(res.rate * 100) + '%</b><span>' + t('Rate applied') + '</span></div><div><b>' + fmt(res.zakat) + '</b><span>' + t('Zakat due (SAR)') + '</span></div>' + (res.dueDate ? '<div><b>' + Z.ltr(res.dueDate) + '</b><span>' + t('Return due') + '</span></div>' : '') + '</div>' +
       '<div style="margin-top:12px">' + res.checks.map(function (c) { return '<div class="row" style="flex-wrap:nowrap;padding:7px 0;border-top:1px solid var(--rule-2)">' + Z.tick(c.status) + '<span style="flex:1">' + esc(c.id) + ' · ' + esc(Z.tt(c, 'title')) + (c.note ? '<span class="faint" style="display:block;font-size:12.5px">' + esc(t(c.note)) + '</span>' : '') + '</span>' + (c.diff != null && c.bLabel ? '<b class="num ' + (c.status === 'fail' ? 'diff-bad' : '') + '">' + fmt(c.diff) + '</b>' : '') + '</div>'; }).join('') + '</div></section>';
   }
+  Z.CHG.zmap = function (el) { S.annual.zakatMap = S.annual.zakatMap || {}; S.annual.zakatMap[el.dataset.f] = el.value.trim(); saveAnnual(); };
+  Z.ACT.zakfill = function (el) {
+    var e = Z.entity(el.dataset.e), year = String(S.annual.year), map = S.annual.zakatMap || {};
+    if (!Object.keys(map).some(function (k) { return map[k]; })) return Z.toast(t('Enter the TB accounts for at least one line first.'), true);
+    var ex = S.exercises.filter(function (x) { return x.entityId === e.id && String(x.period).slice(0, 4) === year; }).sort(function (a, b) { return a.period < b.period ? 1 : -1; })[0];
+    if (!ex) return Z.toast(t('No exercise in this year has a trial balance. Start one for the last period of the year.'), true);
+    Z.list('datasets', ex.id).then(function (ds) {
+      var tbs = ds.filter(function (d) { return d.kind === 'tb'; });
+      if (!tbs.length) throw new Error(t('The exercise for') + ' ' + ex.period + ' ' + t('has no trial balance loaded.'));
+      return Promise.all(tbs.map(function (d) { return Z.get('rows', d.id); })).then(function (docs) {
+        var rows = [];
+        docs.forEach(function (doc) { (doc && doc.data || []).forEach(function (a) { var o = {}; doc.cols.forEach(function (c, i) { o[c] = a[i]; }); rows.push(o); }); });
+        var vals = E.zakatFromTb(rows, map);
+        S.annual.zakat = Object.assign(S.annual.zakat || {}, vals);
+        Z.toast(t('Filled from the trial balance of') + ' ' + ex.period);
+        return saveAnnual();
+      });
+    }).catch(function (err) { Z.toast(err.message, true); });
+  };
   Z.CHG.zak = function (el) {
     S.annual.zakat = S.annual.zakat || {};
     var f = el.dataset.f; S.annual.zakat[f] = /yearType|fyEnd|filedOn/.test(f) ? el.value : (el.value === '' ? null : +el.value);

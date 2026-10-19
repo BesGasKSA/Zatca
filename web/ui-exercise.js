@@ -52,7 +52,7 @@
       entity: ent, periodKey: S.ex.period, settings: S.settingsDoc ? S.settingsDoc.values : {}, data: S.data,
       returnBoxes: S.ex.returnBoxes, reconItems: S.ex.reconItems, bankOverrides: S.ex.bankOverrides,
       prevNetVat: pn, prevWhtTax: pw, samples: S.samples, checklist: S.checklist.items, findings: S.findings,
-      filing: S.ex.filing || {}, recovery: S.ex.recovery || {}, today: Z.today(), exciseReturn: S.ex.exciseReturn,
+      filing: S.ex.filing || {}, recovery: S.ex.recovery || {}, today: Z.today(), exciseReturn: S.ex.exciseReturn, mktException: S.ex.mktException || {},
       // the same entity's earlier periods, newest first, for the risk-engine trends
       history: S.exercises.filter(function (x) { return x.entityId === S.ex.entityId && x.period < S.ex.period && x.summary; })
         .sort(function (a, b) { return a.period < b.period ? 1 : -1; }).map(function (x) { return Object.assign({ period: x.period }, x.summary); })
@@ -280,7 +280,7 @@
   var FIELD_LABELS = { account: 'Account', name: 'Account name', opening: 'Opening', debit: 'Debit', credit: 'Credit', closing: 'Closing', date: 'Date', doc: 'Document', description: 'Description', party: 'Counterparty', country: 'Country', flow: 'Sales / purchase', invoice: 'Invoice no.', vatNo: 'VAT no.', category: 'Tax category', docType: 'Document type', net: 'Net', vat: 'VAT', total: 'Total', box: 'Box', amount: 'Amount', adj: 'Adjustment', uuid: 'UUID', status: 'Status', declaration: 'Declaration no.', value: 'Customs value', reference: 'Reference', balance: 'Balance', paymentType: 'Payment type', gross: 'Gross', rate: 'Rate', wht: 'WHT', dtt: 'Treaty relief', certificate: 'Certificate', paidDate: 'Paid to ZATCA', tax: 'Tax', cls: 'Class', reason: 'Why', expected: 'Expected', statutory: 'Statutory rate', applied: 'Applied rate', shortfall: 'Shortfall', due: 'Due', daysLate: 'Days late', penalty: 'Fine', missing: 'Missing',
     type: 'Invoice type', issuedAt: 'Issued', submittedAt: 'Sent to ZATCA', egs: 'EGS unit', icv: 'Counter', buyerVat: 'Buyer VAT no.', ref: 'Original invoice', message: 'ZATCA message',
     property: 'Property', deed: 'Deed no.', buyer: 'Buyer', paidOn: 'Paid on', exemption: 'Exemption', product: 'Product', qty: 'Quantity', retailPrice: 'Retail price', standardPrice: 'Standard price',
-    excise: 'Excise', seller: 'Seller', sellerVat: 'Seller VAT no.', sellerResident: 'Resident', order: 'Order', channel: 'Channel',
+    excise: 'Excise', litres: 'Litres', sugar: 'Sugar g/100 ml', opening: 'Opening', received: 'Received', released: 'Released', exported: 'Exported', seller: 'Seller', sellerVat: 'Seller VAT no.', sellerResident: 'Resident', order: 'Order', channel: 'Channel',
     other: 'Compared with', otherNet: 'Their net', otherVat: 'Their VAT', exportRef: 'Export declaration', period: 'Period', average: 'Average', overdue: 'Days overdue', owner: 'Owner', title: 'Finding', severity: 'Severity', taxImpact: 'Tax impact', entity: 'Entity' };
   function fieldLabel(k) { return t(FIELD_LABELS[k] || k); }
   Z.fieldLabel = fieldLabel;
@@ -317,7 +317,7 @@
     if (r.icv !== undefined || r.egs !== undefined || r.submittedAt !== undefined) return pickCols(['invoice', 'type', 'docType', 'issuedAt', 'submittedAt', 'status', 'egs', 'icv', 'ref', 'net', 'vat', 'message']);
     if (r.otherVat !== undefined) return ['invoice', 'date', 'party', 'vat', 'other', 'otherVat', 'reason'];
     if (r.property !== undefined) return pickCols(['date', 'deed', 'property', 'buyer', 'value', 'rett', 'expected', 'shortfall', 'paidOn', 'daysLate']);
-    if (r.product !== undefined) return pickCols(['product', 'category', 'qty', 'retailPrice', 'standardPrice', 'excise', 'expected', 'shortfall']);
+    if (r.product !== undefined) return pickCols(['product', 'category', 'opening', 'received', 'released', 'exported', 'closing', 'qty', 'litres', 'sugar', 'retailPrice', 'standardPrice', 'excise', 'expected', 'shortfall']);
     if (r.seller !== undefined) return pickCols(['date', 'order', 'seller', 'sellerVat', 'sellerResident', 'category', 'gross', 'vat']);
     if (r.party !== undefined && r.total !== undefined && r.gross !== undefined && r.flow === undefined) return ['party', 'gross', 'total', 'reason'];
     if (r.flow !== undefined) return pickCols(['invoice', 'date', 'party', 'vatNo', 'country', 'category', 'description', 'net', 'vat']);
@@ -386,10 +386,22 @@
     var lk = locked(), O = S.R.other;
     return '<section class="paper area-ledger"><header><div><h2>' + t('Marketplaces, real estate and excise') + '</h2><p>' + t('Load the registers that apply to this entity on the Data tab: marketplace sales if you run a platform, property disposals, excise goods. Marketplace payouts are found in the bank statements automatically.') + '</p></div>' +
       '<a class="btn small" href="#/annual/' + S.ex.entityId + '/' + (+S.ex.period.slice(0, 4) - 1) + '">' + t('Zakat worksheet') + '</a></header>' +
-      '<div class="grid g3">' + Z.fld('exciseReturn', t('Excise declared in the excise return'), S.ex.exciseReturn, 'number', 'step="0.01" data-chg="exnum"' + (lk ? ' disabled' : '')) + '</div></section>' +
+      '<div class="grid g3">' + Z.fld('exciseReturn', t('Excise declared in the excise return'), S.ex.exciseReturn, 'number', 'step="0.01" data-chg="exnum"' + (lk ? ' disabled' : '')) + '</div>' +
+      mktQuestions(lk) + '</section>' +
       '<section class="paper" style="margin-top:18px"><header><div><h2>' + t('Checks') + '</h2></div></header>' +
       (O.checks.length ? O.checks.map(function (c) { return Z.checkHtml(c, Z.exceptionsHtml(c)); }).join('') : '<p class="muted">' + t('Nothing to check yet: no marketplace payouts in the bank, and no marketplace, RETT or excise registers loaded.') + '</p>') + '</section>';
   };
+
+  var MQ = [['named', 'Contracts, tax invoices and receipts name the seller as the supplier'], ['noTerms', 'The platform does not set the terms and conditions of the supply'],
+    ['noPrice', 'The platform does not set the price'], ['noPayment', 'The platform does not collect payment from customers'],
+    ['noComplaints', 'The platform does not handle customer complaints'], ['noPromos', 'The platform offers no promotions or compensation to customers']];
+  function mktQuestions(lk) {
+    var q = S.ex.mktException || {}, opt = function (k, v, l) { return '<option value="' + v + '"' + (q[k] === v ? ' selected' : '') + '>' + t(l) + '</option>'; };
+    return '<details style="margin-top:12px"' + ((S.data.mkt_sales || []).length ? ' open' : '') + '><summary>' + t('If you operate a marketplace: deemed-supplier exception test') + '</summary>' +
+      '<p class="faint" style="font-size:12.5px;margin:8px 0">' + t('The platform is not the deemed supplier only if every answer is yes (VAT IR Art. 47, ZATCA guide of 25 Dec 2025). Sources differ on payment collection; this test treats it as disqualifying.') + '</p><div class="grid g2">' +
+      MQ.map(function (m) { return '<label class="f"><span>' + t(m[1]) + '</span><select data-chg="mktq" data-k="' + m[0] + '"' + (lk ? ' disabled' : '') + '>' + opt(m[0], '', '—') + opt(m[0], 'yes', 'Yes') + opt(m[0], 'no', 'No') + '</select></label>'; }).join('') + '</div></details>';
+  }
+  Z.CHG.mktq = function (el) { S.ex.mktException = S.ex.mktException || {}; S.ex.mktException[el.dataset.k] = el.value; Z.saveEx().then(Z.changed); };
 
   // ---------------------------------------------------------------- e-invoicing (ERP ↔ provider ↔ ZATCA)
   var EST = { CLEARED: 'Cleared by ZATCA', REPORTED: 'Reported to ZATCA', REJECTED: 'Rejected', PENDING: 'Pending at provider', WARNING: 'Accepted with warnings', NOT_SUBMITTED: 'Not sent' };

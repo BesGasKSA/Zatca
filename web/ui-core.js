@@ -74,16 +74,26 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   };
 
   // ---------------------------------------------------------------- boot
+  Z.validApi = function (u) { return /^https:\/\/script\.google\.com\/macros\/s\/[\w-]{20,}\/exec$/.test(String(u || '')); };
   Z.boot = function () {
     S.lang = localStorage.getItem('zr_lang') || 'en';
     applyLang();
-    var q = new URLSearchParams(location.search);
-    if (q.get('api')) localStorage.setItem('zr_api_url', q.get('api'));
-    // A hosted copy (GitHub Pages) has its backend URL baked in by build.js;
-    // "try it on this device" opts out of it for the rest of the browser session.
+    // A hosted copy (GitHub Pages) has its backend URL baked in by build.js and
+    // talks to nothing else: a link carrying ?api= (or a stored address) could
+    // otherwise send sign-ins to someone else's server (found by the REA audit).
+    // The generic build accepts only an Apps Script /exec address, and only
+    // after the person confirms it.
+    var q = new URLSearchParams(location.search), asked = q.get('api');
+    if (asked && !window.ZR_API_URL) {
+      if (Z.validApi(asked) && confirm(t('Connect this app to the backend at') + '\n' + asked + '\n\n' + t('Only continue if your administrator gave you this address.'))) localStorage.setItem('zr_api_url', asked);
+      history.replaceState(null, '', location.pathname + location.hash);
+    }
+    // "try it on this device" opts out of the backend for the rest of the browser session.
     var demo = false;
     try { demo = sessionStorage.getItem('zr_local') === '1'; } catch (e) {}
-    var url = demo ? '' : localStorage.getItem('zr_api_url') || window.ZR_API_URL || '';
+    var stored = localStorage.getItem('zr_api_url');
+    if (stored && !Z.validApi(stored)) { localStorage.removeItem('zr_api_url'); stored = ''; }
+    var url = demo ? '' : window.ZR_API_URL || stored || '';
     var hosted = !!(window.google && google.script && google.script.run);
     S.api = hosted || url ? new ZApi.CloudBackend(url) : new ZApi.LocalBackend();
     document.addEventListener('click', function (e) {
@@ -240,7 +250,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       S.entities.filter(function (e) { return e.active !== false; }).map(function (e) {
         return '<tr><th class="ent" scope="row"><a href="#/entity/' + e.id + '">' + esc(Z.entName(e)) + '</a></th>' + months.map(function (m) {
           var key = e.vatFreq === 'quarterly' ? m.slice(0, 4) + '-Q' + Math.ceil(+m.slice(5) / 3) : m;
-          var x = exs.filter(function (z) { return z.entityId === e.id && z.period === key; })[0];
+          var x = Z.exFor(e, m);
           if (!x) return '<td data-act="newex" data-e="' + e.id + '" data-p="' + key + '" title="' + esc(t('Start exercise') + ' ' + key) + '">+</td>';
           var sm = x.summary || {}, g = sm.grade || 'not';
           return '<td class="s-' + g + (x.status === 'closed' ? ' closed' : '') + '" data-act="openex" data-id="' + x.id + '" title="' + esc(key + ' — ' + (sm.score != null ? sm.score + '% ' : '') + Z.gradeText(g) + (x.status === 'closed' ? ' — ' + t('signed off') : '')) + '">' + (sm.score != null ? sm.score : '·') + '</td>';
@@ -348,13 +358,13 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     if (h[2] === 'edit') return entityForm(e);
     S.entityId = e.id; localStorage.setItem('zr_entity', e.id);
     var exs = S.exercises.filter(function (x) { return x.entityId === e.id; }).sort(function (a, b) { return a.period < b.period ? 1 : -1; });
-    var periods = E.recentPeriods(e.vatFreq || 'monthly', 12, Z.today()).filter(function (p) { return !exs.some(function (x) { return x.period === p; }); });
+    var periods = [1];
     var trend = exs.slice(0, 12).reverse();
     var chart = trend.length > 1 ? trendChart(trend) : '';
     var unmapped = Z.MAP_FIELDS.filter(function (f) { return ['outputVat', 'inputVat', 'revenue', 'receivables', 'whtPayable'].indexOf(f[0]) >= 0 && !(e.mapping || {})[f[0]]; });
     Z.setMain('<div class="pagehead"><div><h1>' + esc(Z.entName(e)) + '</h1><p>' + t('TRN') + ' ' + esc(e.trn || '—') + ' · ' + t(cap(e.vatFreq || 'monthly')) + ' ' + t('VAT filer') + (e.erp ? ' · ' + esc(e.erp) : '') + '</p></div>' +
       '<div class="row">' + (Z.can('manager') ? '<a class="btn" href="#/entity/' + e.id + '/edit">' + t('Edit entity') + '</a>' : '') +
-      (Z.can('preparer') && periods.length ? '<select id="newp" aria-label="' + t('Period') + '" style="width:auto">' + periods.map(function (p) { return '<option>' + p + '</option>'; }).join('') + '</select><button class="btn primary" data-act="newexsel" data-e="' + e.id + '">' + t('Start inspection exercise') + '</button>' : '') + '<a class="btn" href="#/annual/' + e.id + '/' + Z.today().slice(0, 4) + '">' + t('Annual reconciliation') + '</a></div></div>' +
+      (Z.can('preparer') && periods.length ? '<span id="pp">' + periodPicker(e) + '</span><button class="btn primary" data-act="newexsel" data-e="' + e.id + '">' + t('Start inspection exercise') + '</button>' : '') + '<a class="btn" href="#/annual/' + e.id + '/' + Z.today().slice(0, 4) + '">' + t('Annual reconciliation') + '</a></div></div>' +
       (unmapped.length ? '<div class="paper" style="margin-bottom:18px;border-color:var(--amber)"><b>' + t('Account mapping incomplete:') + '</b> ' + unmapped.map(function (f) { return esc(t(f[1])); }).join(', ') + '. ' + t('Ledger checks for these will show as no data.') + '</div>' : '') +
       '<div class="stack">' + (chart ? '<section class="paper"><header><div><h2>' + t('Readiness and VAT due over time') + '</h2></div></header>' + chart + '</section>' : '') +
       '<section class="paper flush"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Period') + '</th><th>' + t('Status') + '</th><th>' + t('Readiness') + '</th><th class="num">' + t('Net VAT due') + '</th><th class="num">' + t('WHT') + '</th><th class="num">' + t('Exposure') + '</th><th>' + t('Signed off') + '</th></tr></thead><tbody>' +
@@ -363,7 +373,34 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
         return '<tr class="clickable" data-act="openex" data-id="' + x.id + '"><td><b>' + Z.ltr(x.period) + '</b></td><td>' + Z.statusPill(x.status) + '</td><td>' + (s.score != null ? Z.pill(s.grade, s.score + '% — ' + Z.gradeText(s.grade)) : '—') + '</td><td class="num">' + Z.fmt(s.netVat) + '</td><td class="num">' + Z.fmt(s.whtTax) + '</td><td class="num">' + Z.fmt(s.exposure) + '</td><td>' + esc(x.signedOffBy ? x.signedOffBy + ' ' + String(x.signedOffAt).slice(0, 10) : '') + '</td></tr>';
       }).join('') || '<tr><td colspan="7" class="empty">' + t('No exercises yet. Pick a period and start one.') + '</td></tr>') + '</tbody></table></div></section></div>');
   };
-  Z.ACT.newexsel = function (el) { Z.createExercise(el.dataset.e, document.getElementById('newp').value); };
+  Z.ACT.newexsel = function (el) {
+    var p = document.getElementById('newp').value;
+    if (!p) return Z.toast(t('Every period of that year already has an exercise.'), true);
+    if (S.exercises.some(function (x) { return x.entityId === el.dataset.e && x.period === p; })) return Z.toast(t('An exercise for that period already exists.'), true);
+    Z.createExercise(el.dataset.e, p);
+  };
+
+  // Any period since VAT began (Jan 2018), monthly or quarterly. A company can
+  // change frequency over the years, so the choice is per exercise.
+  var FIRST_YEAR = 2018;
+  Z.FIRST_YEAR = FIRST_YEAR;
+  Z.exFor = function (e, month) {
+    var q = month.slice(0, 4) + '-Q' + Math.ceil(+month.slice(5) / 3);
+    return S.exercises.filter(function (x) { return x.entityId === e.id && x.period === month; })[0] || S.exercises.filter(function (x) { return x.entityId === e.id && x.period === q; })[0];
+  };
+  function periodPicker(e, freq, year) {
+    freq = freq || S.ppFreq || e.vatFreq || 'monthly';
+    var cy = +Z.today().slice(0, 4), cur = E.periodOf(Z.today(), freq);
+    year = +(year || S.ppYear || E.prevPeriod(cur).slice(0, 4));
+    var years = []; for (var y = cy; y >= FIRST_YEAR; y--) years.push(y);
+    var opts = E.periodsOfYear(year, freq).filter(function (p) { return p <= cur && !S.exercises.some(function (x) { return x.entityId === e.id && x.period === p; }); });
+    var name = function (p) { if (/Q/.test(p)) return 'Q' + p.slice(-1); var d = new Date(Date.UTC(+p.slice(0, 4), +p.slice(5) - 1, 1)); return d.toLocaleString(S.lang === 'ar' ? 'ar-SA-u-ca-gregory' : 'en-GB', { month: 'long', timeZone: 'UTC' }); };
+    return '<select data-chg="ppfreq" data-e="' + e.id + '" aria-label="' + t('Filing frequency') + '" style="width:auto"><option value="monthly"' + (freq === 'monthly' ? ' selected' : '') + '>' + t('Monthly') + '</option><option value="quarterly"' + (freq === 'quarterly' ? ' selected' : '') + '>' + t('Quarterly') + '</option></select>' +
+      '<select data-chg="ppyear" data-e="' + e.id + '" aria-label="' + t('Year') + '" style="width:auto">' + years.map(function (y) { return '<option' + (y === year ? ' selected' : '') + '>' + y + '</option>'; }).join('') + '</select>' +
+      '<select id="newp" aria-label="' + t('Period') + '" style="width:auto">' + (opts.length ? opts.slice().reverse().map(function (p) { return '<option value="' + p + '">' + esc(name(p)) + ' ' + year + '</option>'; }).join('') : '<option value="">' + t('All done') + '</option>') + '</select>';
+  }
+  Z.CHG.ppfreq = function (el) { S.ppFreq = el.value; document.getElementById('pp').innerHTML = periodPicker(Z.entity(el.dataset.e)); };
+  Z.CHG.ppyear = function (el) { S.ppYear = +el.value; document.getElementById('pp').innerHTML = periodPicker(Z.entity(el.dataset.e)); };
   Z.statusPill = function (st) {
     var m = { in_progress: t('In progress'), review: t('Under review'), closed: t('Signed off') };
     return Z.pill(st || 'in_progress', m[st] || m.in_progress);
@@ -412,9 +449,13 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       fld('trend_salesDropPct', t('Flag a sales drop above (%)'), V.trend.salesDropPct, 'number', 'step="1"') +
       fld('trend_inputJumpPct', t('Flag an input VAT rise above (%)'), V.trend.inputJumpPct, 'number', 'step="1"') +
       fld('rett_rate', t('RETT rate %'), Z.r(V.rett.rate * 100), 'number', 'step="0.01"') + fld('rett_latePctPerMonth', t('RETT late payment % per month'), Z.r(V.rett.latePctPerMonth * 100), 'number', 'step="0.01"', t('Sources report 2% under the current law; verify.')) +
+      fld('rettd_dueDays', t('RETT due within (days of the transaction)'), V.rett.dueDays, 'number', 'step="1"') +
       fld('zakat_dueDays', t('Zakat return due (days after year end)'), V.zakat.dueDays, 'number', 'step="1"') +
+      fld('zakatp_latePctPer30Days', t('Zakat late fine % per 30 days (estimate)'), Z.r(V.zakat.latePctPer30Days * 100), 'number', 'step="0.01"') +
+      fld('sugar_mid', t('Sweetened drinks 5–7.99 g sugar: SAR per litre'), V.sugarTiers.tiers[1][2], 'number', 'step="0.01"') +
+      fld('sugar_high', t('Sweetened drinks 8 g sugar or more: SAR per litre'), V.sugarTiers.tiers[2][2], 'number', 'step="0.01"', t('Per-litre tiers since 1 Jan 2026; under 5 g and sugar-free pay nothing.')) +
       fld('exc_tobacco', t('Excise: tobacco %'), Z.r(V.exciseRates.tobacco * 100), 'number', 'step="1"') + fld('exc_energy', t('Excise: energy drinks %'), Z.r(V.exciseRates.energy * 100), 'number', 'step="1"') +
-      fld('exc_ecig', t('Excise: e-cigarettes and liquids %'), Z.r(V.exciseRates.ecig * 100), 'number', 'step="1"') + fld('exc_sweetened', t('Excise: sweetened drinks %'), Z.r(V.exciseRates.sweetened * 100), 'number', 'step="1"', t('Use the Rate column per line if your drinks fall under sugar-based tiers.')) + '</div>' +
+      fld('exc_ecig', t('Excise: e-cigarettes and liquids %'), Z.r(V.exciseRates.ecig * 100), 'number', 'step="1"') + fld('exc_sweetened', t('Excise: sweetened drinks % (before 2026)'), Z.r(V.exciseRates.sweetened * 100), 'number', 'step="1"') + '</div>' +
       '<label class="f" style="margin-top:12px"><span>' + t('Marketplace payout keywords (bank descriptions)') + '</span><input type="text" name="marketplaceKeywords" value="' + esc(V.marketplace.payoutKeywords) + '"></label>' +
       '<label class="f" style="margin-top:12px"><span>' + t('Blocked input VAT keywords') + '</span><textarea name="blockedKeywords">' + esc(V.blockedKeywords) + '</textarea><small>' + t('Matched against purchase descriptions, accounts and supplier names (VAT IR Art. 50).') + '</small></label></section>' +
       '<section class="paper area-wht"><h2>' + t('Withholding tax rates') + '</h2><p class="muted">' + t('Statutory rates for payments to non-residents. Lower treaty rates are accepted when the line is marked as treaty relief with a certificate.') + '</p><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Payment type') + '</th><th>%</th></tr></thead><tbody>' + whtRows + '</tbody></table></div></section>' +
@@ -441,6 +482,9 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
         else if (k.indexOf('gift_') === 0) { v.giftRelief = v.giftRelief || {}; v.giftRelief[k.slice(5)] = +val; }
         else if (k.indexOf('trend_') === 0) { v.trend = v.trend || {}; v.trend[k.slice(6)] = +val; }
         else if (k.indexOf('rett_') === 0) { v.rett = v.rett || {}; v.rett[k.slice(5)] = +val / 100; }
+        else if (k.indexOf('rettd_') === 0) { v.rett = v.rett || {}; v.rett[k.slice(6)] = +val; }
+        else if (k.indexOf('zakatp_') === 0) { v.zakat = v.zakat || {}; v.zakat[k.slice(7)] = +val / 100; }
+        else if (k.indexOf('sugar_') === 0) { v.sugarTiers = v.sugarTiers || { tiers: [[0, 5, 0], [5, 8, 0.79], [8, 1000, 1.09]] }; v.sugarTiers.tiers[k === 'sugar_mid' ? 1 : 2][2] = +val; }
         else if (k.indexOf('zakat_') === 0) { v.zakat = v.zakat || {}; v.zakat[k.slice(6)] = +val; }
         else if (k.indexOf('exc_') === 0) { v.exciseRates = v.exciseRates || {}; v.exciseRates[k.slice(4)] = +val / 100; }
         else if (k === 'marketplaceKeywords') { v.marketplace = { payoutKeywords: val }; }
@@ -462,7 +506,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   }
   Z.ACT.connect = function () {
     var u = document.getElementById('apiurl').value.trim();
-    if (!/^https:\/\/script\.google(usercontent)?\.com\//.test(u)) return Z.toast(t('Paste the web app URL that ends in /exec.'), true);
+    if (!Z.validApi(u)) return Z.toast(t('Paste the web app URL that ends in /exec.'), true);
     localStorage.setItem('zr_api_url', u); try { sessionStorage.removeItem('zr_local'); } catch (e) {} location.hash = ''; location.reload();
   };
   Z.ACT.disconnect = function () { localStorage.removeItem('zr_api_url'); try { sessionStorage.setItem('zr_local', '1'); } catch (e) {} location.reload(); };

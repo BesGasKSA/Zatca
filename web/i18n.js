@@ -282,3 +282,33 @@ Object.assign(window.ZI18N, {
 Object.assign(window.ZI18N, {
   'Exposure = shortfall plus the late-payment rate for each month or part (editable in Settings; verify against the current RETT regulations). Exempt disposals need the exemption reference recorded.': 'التعرض = النقص مضافاً إليه نسبة غرامة التأخير عن كل شهر أو جزء منه (قابلة للتعديل في الإعدادات؛ تحقق من اللائحة الحالية لضريبة التصرفات العقارية). يجب تسجيل مرجع الإعفاء للتصرفات المعفاة.'
 });
+
+/* Date-range reports, older periods, marketplace exception test, excise tiers and stock, Zakat prefill. */
+Object.assign(window.ZI18N, {
+  'Across every entity you can see, for the months you choose. Each report exports to Excel.': 'عبر كل الكيانات المتاحة لك وللأشهر التي تختارها. كل تقرير قابل للتصدير إلى Excel.',
+  'All done': 'اكتملت كل الفترات', 'An exercise for that period already exists.': 'يوجد تمرين لهذه الفترة بالفعل.', 'Average readiness': 'متوسط الجاهزية',
+  'Connect this app to the backend at': 'ربط التطبيق بالخادم على العنوان', 'Only continue if your administrator gave you this address.': 'تابع فقط إذا زودك مسؤول النظام بهذا العنوان.',
+  'Contracts, tax invoices and receipts name the seller as the supplier': 'العقود والفواتير والإيصالات تذكر البائع بصفته المورد',
+  'Due within 120 days of the year end (Zakat IR Art. 17). Late fine estimated at 1% per 30 days up to 25% (editable; verify).': 'يستحق خلال 120 يوماً من نهاية السنة (المادة 17 من لائحة الزكاة). الغرامة التقديرية 1% لكل 30 يوماً بحد أقصى 25% (قابلة للتعديل؛ تحقق).',
+  'Enter the TB accounts for at least one line first.': 'أدخل حسابات الميزان لسطر واحد على الأقل أولاً.', 'Every period of that year already has an exercise.': 'كل فترات تلك السنة لها تمارين.',
+  'Excise: sweetened drinks % (before 2026)': 'الانتقائية: المشروبات المحلاة % (قبل 2026)', 'Exercises': 'التمارين', 'Exported': 'المصدر', 'Failed checks': 'الفحوصات الفاشلة',
+  'Filing frequency': 'دورية التقديم', 'Fill from trial balance': 'تعبئة من ميزان المراجعة', 'Filled from the trial balance of': 'تمت التعبئة من ميزان المراجعة لفترة', 'From': 'من',
+  'If you operate a marketplace: deemed-supplier exception test': 'إن كنت تشغل منصة: اختبار استثناء المورد الاعتباري', 'Last year': 'السنة الماضية', 'Litres': 'لترات',
+  'No exercise in this year has a trial balance. Start one for the last period of the year.': 'لا يوجد تمرين بميزان مراجعة في هذه السنة. ابدأ تمريناً لآخر فترة في السنة.',
+  'Opening + received − released − exported must equal the count. Losses not approved by ZATCA are taxed as releases (exposure shown for price-based categories).': 'أول المدة + الوارد − المفرج عنه − المصدر يجب أن يساوي الجرد. الفاقد غير المعتمد من الهيئة يخضع للضريبة كإفراج (التعرض للفئات المحتسبة على السعر).',
+  'Per-litre tiers since 1 Jan 2026; under 5 g and sugar-free pay nothing.': 'شرائح لكل لتر منذ 1 يناير 2026؛ أقل من 5 غرام والخالية من السكر بدون ضريبة.',
+  'Questions answered (of 6)': 'الأسئلة المجابة (من 6)', 'RETT due within (days of the transaction)': 'سداد ضريبة التصرفات خلال (أيام من التصرف)', 'Received': 'الوارد', 'Released': 'المفرج عنه',
+  'Since 2018': 'منذ 2018', 'Sugar g/100 ml': 'السكر غ/100 مل', 'Sugar per 100 ml and litres needed (per-litre tiers since 1 Jan 2026)': 'يلزم السكر لكل 100 مل واللترات (شرائح لكل لتر منذ 1 يناير 2026)',
+  'Sweetened drinks 5–7.99 g sugar: SAR per litre': 'المشروبات المحلاة 5–7.99 غ سكر: ريال لكل لتر', 'Sweetened drinks 8 g sugar or more: SAR per litre': 'المشروبات المحلاة 8 غ سكر فأكثر: ريال لكل لتر',
+  'TB accounts': 'حسابات الميزان', 'Tax summary': 'الملخص الضريبي', 'The exercise for': 'تمرين فترة', 'has no trial balance loaded.': 'لا يحتوي على ميزان مراجعة محمل.',
+  'The platform does not collect payment from customers': 'المنصة لا تحصّل المدفوعات من العملاء', 'The platform does not handle customer complaints': 'المنصة لا تتولى شكاوى العملاء',
+  'The platform does not set the price': 'المنصة لا تحدد السعر', 'The platform does not set the terms and conditions of the supply': 'المنصة لا تحدد شروط وأحكام التوريد',
+  'The platform offers no promotions or compensation to customers': 'المنصة لا تقدم عروضاً أو تعويضات للعملاء',
+  'The platform is not the deemed supplier only if every answer is yes (VAT IR Art. 47, ZATCA guide of 25 Dec 2025). Sources differ on payment collection; this test treats it as disqualifying.': 'لا تعد المنصة مورداً اعتبارياً إلا إذا كانت كل الإجابات نعم (المادة 47 من اللائحة، دليل الهيئة 25 ديسمبر 2025). تختلف المصادر بشأن تحصيل المدفوعات؛ هذا الاختبار يعتبره مانعاً.',
+  'This quarter': 'هذا الربع', 'This year': 'هذه السنة', 'To': 'إلى',
+  "Tobacco, energy drinks and e-cigarettes: quantity × price × rate ÷ (1 + rate) on the higher of the retail price (excl. VAT) and ZATCA's standard price. Sweetened and carbonated drinks from 1 Jan 2026: litres × SAR 0 / 0.79 / 1.09 by sugar per 100 ml (under 5 g / 5–7.99 g / 8 g or more).": 'التبغ ومشروبات الطاقة والسجائر الإلكترونية: الكمية × السعر × النسبة ÷ (1 + النسبة) على الأعلى من سعر التجزئة (بدون القيمة المضافة) والسعر المعياري. المشروبات المحلاة والغازية من 1 يناير 2026: اللترات × 0 / 0.79 / 1.09 ريال حسب السكر لكل 100 مل (أقل من 5 غ / 5–7.99 غ / 8 غ فأكثر).',
+  "Totals come from each exercise's saved figures. An exercise counts when its period overlaps the range; quarterly filers count in full.": 'الإجماليات من الأرقام المحفوظة لكل تمرين. يُحتسب التمرين إذا تقاطعت فترته مع النطاق؛ الإقرارات الربعية تحتسب كاملة.',
+  'Under the RETT Law effective April 2025 the tax is due within 30 days of the transaction date, and ZATCA can hold the deed registration until it is paid.': 'بموجب نظام ضريبة التصرفات العقارية النافذ من أبريل 2025 تستحق الضريبة خلال 30 يوماً من تاريخ التصرف، ويمكن للهيئة تعليق تسجيل الصك حتى السداد.',
+  'Uses the TB of the last exercise of the year. Adjusted net profit stays manual: it needs your tax adjustments.': 'يستخدم ميزان آخر تمرين في السنة. صافي الربح المعدل يبقى يدوياً لأنه يحتاج تعديلاتك الضريبية.',
+  'Zakat late fine % per 30 days (estimate)': 'غرامة تأخر الزكاة % لكل 30 يوماً (تقديرية)', 'findings aged as of': 'أعمار الملاحظات حتى', 'Opening': 'أول المدة'
+});

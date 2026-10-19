@@ -140,8 +140,37 @@ t('M1 platform deemed supplier: unregistered resident seller from 2026 with no V
   var m1 = byId(r.checks, 'M1'); assert.strictEqual(m1.counts.list, 2); assert.strictEqual(m1.exposure, 180);
 });
 t('R1 RETT short by 32,000 on the warehouse; the exempt transfer is not flagged', function () { assert.strictEqual(OC('R1').a, 32000); assert.strictEqual(OC('R1').counts.list, 1); });
-t('R2 RETT paid after the deed transfer', function () { assert.strictEqual(OC('R2').counts.list, 1); });
-t('K1 cigarettes: excise on the higher standard price', function () { assert.strictEqual(OC('K1').a, 5000); assert.strictEqual(OC('K1').counts.list, 1); });
+t('R2 RETT paid 36 days after the transaction (limit 30)', function () { assert.strictEqual(OC('R2').counts.list, 1); assert.strictEqual(OC('R2').exceptions.list[0].daysLate, 6); });
+t('K1 sweetened drinks from 2026: SAR per litre by sugar tier', function () {
+  var r = E.runOtherTaxes({ settings: E.mergeSettings({}), periodKey: '2026-09', data: { excise: [
+    { date: '2026-09-30', product: 'Cola', category: 'Carbonated sweetened', qty: 1, retailPrice: 2, litres: 1000, sugar: 10.6, excise: 1090 },
+    { date: '2026-09-30', product: 'Light juice', category: 'Sweetened drinks', qty: 1, retailPrice: 2, litres: 1000, sugar: 6, excise: 0 },
+    { date: '2026-09-30', product: 'Diet cola', category: 'Sweetened drinks', qty: 1, retailPrice: 2, litres: 1000, sugar: 0, excise: 0 },
+    { date: '2025-09-30', product: 'Old juice', category: 'Sweetened drinks', qty: 300, retailPrice: 3, excise: 300 }] } });
+  var k1 = byId(r.checks, 'K1'); assert.strictEqual(k1.counts.list, 1); assert.strictEqual(k1.exceptions.list[0].product, 'Light juice'); assert.strictEqual(k1.a, 790);
+});
+t('K3 200 packs missing from the designated zone, taxed as released', function () { assert.strictEqual(OC('K3').counts.list, 1); assert.strictEqual(OC('K3').exposure, 2600); });
+t('K4 released quantities match the taxed quantities', function () { assert.strictEqual(OC('K4').status, 'pass'); });
+t('M1 / M3 the deemed-supplier exception switches M1 off only when all six conditions hold', function () {
+  var data = { mkt_sales: [{ date: '2026-02-01', seller: 'Home bakery', sellerVat: '', sellerResident: 'yes', category: 'goods', gross: 1150, vat: 0 }] };
+  var all = { named: 'yes', noTerms: 'yes', noPrice: 'yes', noPayment: 'yes', noComplaints: 'yes', noPromos: 'yes' };
+  var ok1 = E.runOtherTaxes({ settings: E.mergeSettings({}), data: data, mktException: all });
+  assert.ok(!byId(ok1.checks, 'M1') && byId(ok1.checks, 'M3').status === 'pass');
+  var one = Object.assign({}, all, { noPayment: 'no' }), r = E.runOtherTaxes({ settings: E.mergeSettings({}), data: data, mktException: one });
+  assert.strictEqual(byId(r.checks, 'M1').status, 'fail');
+  assert.strictEqual(byId(E.runOtherTaxes({ settings: E.mergeSettings({}), data: data }).checks, 'M3').status, 'warn');
+});
+t('Zakat late fine: none under 30 days, 1% per 30 days, capped at 25%', function () {
+  var base = { capital: 1000000, adjustedNetProfit: 0, yearType: 'hijri', fyEnd: '2025-12-31' };
+  assert.strictEqual(byId(E.zakat(Object.assign({ filedOn: '2026-05-20' }, base), {}).checks, 'Z2').exposure, 0);
+  assert.strictEqual(byId(E.zakat(Object.assign({ filedOn: '2026-06-30' }, base), {}).checks, 'Z2').exposure, 500);
+  assert.strictEqual(byId(E.zakat(Object.assign({ filedOn: '2030-01-01' }, base), {}).checks, 'Z2').exposure, 6250);
+});
+t('Zakat worksheet prefill from the year-end trial balance', function () {
+  var z = E.zakatFromTb(demo.datasets.tb, { provisions: '2220', netFixedAssets: '5000', longTermFinancing: '' });
+  assert.strictEqual(z.provisions, 0); assert.ok(z.netFixedAssets > 0); assert.ok(!('longTermFinancing' in z));
+});
+t('K1 cigarettes: excise on the higher standard price (juice at its sugar tier is fine)', function () { assert.strictEqual(OC('K1').a, 5000); assert.strictEqual(OC('K1').counts.list, 1); });
 t('K2 excise return ties to the register', function () { assert.strictEqual(OC('K2').status, 'pass'); });
 t('E10 integrated before the wave deadline', function () { assert.strictEqual(byId(R3.einv.checks, 'E10').status, 'pass'); });
 t('Zakat: Gregorian-year rate, worksheet vs declared', function () {

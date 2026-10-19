@@ -28,7 +28,7 @@ See README.md for the feature map and deployment.
 
 ## Tests
 
-`npm test` — engine (79) + backend (18). `npm run dev` serves `web/` with
+`npm test` — engine (85) + backend (18). `npm run dev` serves `web/` with
 no-cache headers on 127.0.0.1:5181 (Python's http.server caused stale-JS
 confusion during development; don't go back to it).
 
@@ -57,8 +57,16 @@ confusion during development; don't go back to it).
   are); RETT 5% must be paid before the deed date; excise is tax-inclusive:
   qty × max(retail, standard) × rate ÷ (1 + rate); Zakat base = additions −
   deductions, never below adjusted net profit (then a flat 2.5%), Gregorian
-  rate 2.5% × 365/354. RETT late rate (2%/month) and sweetened-drink tiers are
-  reported inconsistently by sources — kept editable, flagged "verify" in the UI.
+  rate 2.5% × 365/354, due 120 days after year end (ZATCA guideline, Art. 17).
+  Verified 2026-10-20: sweetened/carbonated drinks pay SAR 0 / 0.79 / 1.09 per
+  litre by sugar (<5 g / 5–7.99 g / ≥8 g per 100 ml) from 1 Jan 2026; RETT is
+  due within 30 days of the transaction (new law, April 2025). Still single-
+  source, so editable and labelled "verify": RETT late 2%/month, Zakat late
+  1%/30 days capped 25%, the marketplace exception's payment condition.
+- Security: `Z.validApi` — the hosted build (ZR_API_URL baked) ignores `?api=`
+  and stored URLs; never relax this, a crafted link would phish sign-ins.
+- Periods start at `Z.FIRST_YEAR` (2018). `Z.exFor(entity, month)` finds a
+  monthly *or* the covering quarterly exercise — use it, not exact matching.
 - Row packing (`Z.pack`) takes the union of keys over all rows — optional columns
   may be missing from the first row.
 

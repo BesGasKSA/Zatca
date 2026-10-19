@@ -18,14 +18,16 @@ in **Google Sheets** — one private spreadsheet per organisation.
 | **WHT** | Return vs payments register vs Excel by payment type (W1–W3). Return vs WHT payable credits in the GL (W4). Statutory rates per payment type, with treaty relief only when a residency certificate is on file (W5). Remittance by the 10th + 1%/30-days fines (W6). Certificates issued (W7). Non-resident expenses in the GL missing from the register (W8). |
 | **Analytics (100% of invoices)** | VAT ≠ 15%; VAT on zero/exempt lines; input VAT without a valid supplier TRN; invalid customer TRNs; duplicates; out-of-period dates; numbering gaps; exports to SA; foreign suppliers not on RCM; RCM from Saudi suppliers; credit-note ratio; key items; round amounts; weekend purchases; import VAT vs customs; Benford first-digit test (Nigrini MAD). Effective VAT rate, input/output ratio, zero/exempt share. |
 | **Sampling** | Sales, purchases and WHT payments. MUS (PPS, top stratum), simple random, stratified, key items, risk-based (analytics flags). AICPA/Poisson sample sizes; **seeded and reproducible**. Attribute checklists per population (tax invoice fields, QR, Fatoora, TRN, blocked input VAT, customs, RCM, bank trace…). Deviation rate with upper limit; MUS projected misstatement and upper misstatement limit. Excel export. |
+| **Marketplace exception test** | Six-question test for platform operators (seller named as supplier; platform sets no terms or price, collects no payment, handles no complaints, offers no promotions) that switches M1 off only when every answer is yes (M3). |
 | **Marketplaces** | Sellers: platform payouts found in the bank (Noon, Amazon, Salla, Zid, Jahez, HungerStation… — editable) traced to sales booked for that platform (M2). Platform operators: supplies by non-registered resident sellers (from 1 Jan 2026) and non-resident e-services (from April 2025) where the platform, as deemed supplier, accounted no VAT (M1). |
-| **Real estate (RETT)** | 5% on every taxable disposal, exemptions recorded (R1), paid before the deed transfer (R2), real estate sales wrongly charged with VAT (R3). |
-| **Excise** | Each product line recomputed on the higher of the retail price and ZATCA's standard price, tax-inclusive (K1); excise return vs register (K2). Rates editable, with a per-line rate for sugar-based tiers. |
-| **Zakat** | Annual worksheet: additions and deductions, base never below adjusted net profit, 2.5% for a Hijri year or prorated for a Gregorian one, filing deadline and declared-vs-worksheet check. |
+| **Real estate (RETT)** | 5% on every taxable disposal, exemptions recorded (R1), paid within 30 days of the transaction under the RETT Law effective April 2025 (R2), real estate sales wrongly charged with VAT (R3). |
+| **Excise** | Tobacco, energy drinks, e-cigarettes recomputed on the higher of retail and standard price, tax-inclusive; sweetened and carbonated drinks from 1 Jan 2026 at SAR 0 / 0.79 / 1.09 per litre by sugar per 100 ml (K1); excise return vs register (K2); designated-zone stock reconciliation (K3) and released vs taxed quantities (K4). |
+| **Zakat** | Annual worksheet: additions and deductions (pre-filled from the year-end trial balance by account pattern), base never below adjusted net profit, 2.5% for a Hijri year or prorated for a Gregorian one, filing within 120 days (Zakat IR Art. 17), estimated late fine, declared-vs-worksheet check. |
 | **E-invoicing integration** | The entity's Phase 2 wave, notified deadline and integration date (E10). |
 | **Risk-engine trends** | Each return against the entity's last three: sales drops, input VAT surges, zero-rated/exempt share jumps, input/output ratio. |
 | **Annual reconciliation** | Twelve months (or four quarters) of returns against audited FS revenue, the Zakat / income tax return, annual GL VAT and the annual WHT figure, with reconciling items, missing periods, and a WHT-by-beneficiary report. |
-| **Reports centre** | Portfolio readiness, findings aging, exposure by entity and a filing compliance calendar across all entities — each exports to Excel. |
+| **Reports centre** | For any From–To month range back to 2018: tax summary per entity (sales, output/input VAT, net VAT, WHT, exposure), portfolio readiness, findings aging as of the range end, exposure by entity and a filing compliance calendar — each exports to Excel. |
+| **Any period** | Exercises can be started for any month or quarter since January 2018, monthly or quarterly per exercise (a company's frequency can change over the years). |
 | **Inspection file** | 22 documents inspectors ask for (VAT, bank, WHT), status / owner / Drive link. |
 | **Findings** | Severity, tax impact, penalty estimate (VAT 50% of difference + 5%/month; WHT 1%/30 days — rates editable), correction route (VAT IR Art. 63: amend the original return within 20 days when the net difference is SAR 15,000 or more; otherwise correct in the return for the period of discovery; over-declarations within 5 years), root cause, action, owner, due date. |
 | **Score & sign-off** | Readiness score from reconciliation, bank, analytics, sampling, documents and open findings (weights editable). Preparer → reviewer → manager sign-off; a signed-off exercise is read-only on the server. Printable readiness pack (PDF) and a full Excel workbook. |
@@ -49,7 +51,7 @@ apps-script/         the backend (Google Apps Script)
   Jobs.gs            monthly reminder trigger
   Index.html         GENERATED by build.js — the client, served by the web app
 tests/
-  engine.test.js     79 tests: every planted problem is caught, regulatory rules pinned
+  engine.test.js     85 tests: every planted problem is caught, regulatory rules pinned
   backend.test.js    18 tests: real Code.gs under a fake SpreadsheetApp
 build.js             inlines web/ into dist/index.html and apps-script/Index.html
 tools/serve.js       no-cache dev server
@@ -100,6 +102,7 @@ Every source can be uploaded as Excel or CSV. Headers in English or Arabic are m
 - Isolation: one spreadsheet per organisation. Every read and write is checked server-side against the user's role and entity access. Child records take their entity from the exercise, never from the client.
 - Roles: owner (everything) · manager (entities, settings, sign-off) · preparer (data, checks, samples, findings) · viewer (read).
 - Signed-off exercises are immutable until a manager reopens them.
+- The hosted client talks only to its built-in backend; `?api=` links and stored addresses are ignored there (an REA audit of the client found that a crafted link could otherwise redirect sign-ins). The generic build accepts only an Apps Script `/exec` address, after an on-screen confirmation.
 - Every user-typed value is written to Sheets as text (leading apostrophe), so nothing is ever evaluated as a formula. Ids are restricted to `[A-Za-z0-9_-]`.
 - Audit trail per organisation, plus a platform audit in the Registry.
 

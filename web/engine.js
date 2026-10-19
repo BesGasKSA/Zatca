@@ -36,9 +36,15 @@
     // Electronic marketplaces as deemed supplier (VAT IR Art. 47, amended 2025)
     marketplace: { nonResidentFrom: '2025-04-18', residentUnregisteredFrom: '2026-01-01',
       payoutKeywords: 'noon,amazon,salla,zid,jahez,hungerstation,careem,talabat,mrsool,the chefz,keeta,toyou,نون,أمازون,سلة,زد,جاهز,هنقرستيشن' },
-    rett: { rate: 0.05, latePctPerMonth: 0.02 },
+    // RETT Law (Royal Decree M/84) and Implementing Regulations, effective April 2025:
+    // 5%, due within 30 days of the transaction date.
+    rett: { rate: 0.05, latePctPerMonth: 0.02, dueDays: 30 },
     exciseRates: { tobacco: 1, energy: 1, ecig: 1, sweetened: 0.5 },
-    zakat: { rate: 0.025, gregorianDays: 365, dueDays: 120 },
+    // Excise IR amended 29 Dec 2025: from 1 Jan 2026 sweetened (incl. carbonated)
+    // drinks pay a fixed SAR per litre by sugar per 100 ml instead of 50%.
+    sugarTiers: { from: '2026-01-01', tiers: [[0, 5, 0], [5, 8, 0.79], [8, 1000, 1.09]] },
+    // Zakat IR Art. 17: return and payment within 120 days of the year end.
+    zakat: { rate: 0.025, gregorianDays: 365, dueDays: 120, latePctPer30Days: 0.01, lateCap: 0.25 },
     materiality: 50000,
     benfordMin: 300,
     glBasis: 'movement',  // movement | gross — how TB VAT accounts are read when no GL is given
@@ -223,7 +229,22 @@
         { k: 'retailPrice', t: 'n', req: 1, syn: ['retail price', 'retail selling price', 'unit price', 'سعر التجزئة'] },
         { k: 'standardPrice', t: 'n', syn: ['standard price', 'zatca price', 'السعر المعياري'] },
         { k: 'rate', t: 'n', syn: ['rate', 'excise rate', 'النسبة'] },
+        { k: 'litres', t: 'n', syn: ['litres', 'liters', 'volume', 'total litres', 'لتر', 'الحجم'] },
+        { k: 'sugar', t: 'n', syn: ['sugar', 'sugar g/100ml', 'sugar per 100 ml', 'السكر'] },
         { k: 'excise', t: 'n', req: 1, syn: ['excise', 'excise declared', 'excise amount', 'الضريبة الانتقائية'] }
+      ]
+    },
+    excise_stock: {
+      en: 'Excise designated-zone stock movements', ar: 'حركة مخزون السلع الانتقائية في المستودع المحدد', group: 'other',
+      fields: [
+        { k: 'product', t: 's', req: 1, syn: ['product', 'item', 'sku', 'المنتج', 'الصنف'] },
+        { k: 'category', t: 's', syn: ['category', 'excise category', 'الفئة'] },
+        { k: 'opening', t: 'n', syn: ['opening', 'opening stock', 'رصيد أول المدة'] },
+        { k: 'received', t: 'n', syn: ['received', 'imported', 'produced', 'in', 'الوارد'] },
+        { k: 'released', t: 'n', syn: ['released', 'released for consumption', 'out', 'المفرج عنه'] },
+        { k: 'exported', t: 'n', syn: ['exported', 'transferred', 'المصدر'] },
+        { k: 'closing', t: 'n', syn: ['closing', 'counted', 'closing stock', 'الجرد', 'رصيد آخر المدة'] },
+        { k: 'retailPrice', t: 'n', syn: ['retail price', 'unit price', 'سعر التجزئة'] }
       ]
     },
     einv_provider: {
@@ -1563,7 +1584,18 @@
     var C = function (o) { o.group = 'other'; return o; };
 
     // M1 — platform operators: deemed-supplier supplies with no VAT accounted
-    var mk = D.mkt_sales || [];
+    var mk = D.mkt_sales || [], q = ctx.mktException || {};
+    // The platform escapes deemed-supplier status only if ALL hold: the real
+    // seller is named as supplier (contract, invoice, receipt) and the platform
+    // sets no terms or price, collects no payment, handles no complaints and
+    // offers no promotions or compensation.
+    var QK = ['named', 'noTerms', 'noPrice', 'noPayment', 'noComplaints', 'noPromos'];
+    var answered = QK.filter(function (k) { return q[k] === 'yes' || q[k] === 'no'; }).length;
+    var exceptionMet = answered === QK.length && QK.every(function (k) { return q[k] === 'yes'; });
+    if (mk.length) checks.push(C({ id: 'M3', title: 'Deemed-supplier exception test (platform operators)', titleAr: 'اختبار استثناء المورد الاعتباري (مشغلو المنصات)', status: answered < QK.length ? 'warn' : 'pass',
+      a: answered, aLabel: 'Questions answered (of 6)', b: null, bLabel: '', diff: null,
+      note: answered < QK.length ? 'Answer the six questions on the Other taxes tab.' : exceptionMet ? 'All conditions met: the sellers, not the platform, account for VAT. Keep the contracts, invoices and receipts that show it.' : 'At least one condition fails: the platform is the deemed supplier for the supplies in scope.' }));
+    if (mk.length && exceptionMet) mk = [];
     if (mk.length) {
       var deemed = mk.filter(function (x) {
         var nonRes = /^(n|no|false|0|non|غير)/i.test(String(x.sellerResident || '')), registered = E.validVatNo(x.sellerVat);
@@ -1602,16 +1634,18 @@
         var exempt = String(x.exemption || '').trim() !== '';
         var expected = exempt ? 0 : r2((+x.value || 0) * (rr.rate || 0.05)), short = r2(expected - (+x.rett || 0));
         if (short > S.tolAbs) { bad.push(Object.assign({}, x, { expected: expected, shortfall: short, reason: 'RETT paid ' + (+x.rett || 0) + ' of ' + expected })); due += short; }
-        if (!exempt && x.paidOn && x.date && x.paidOn > x.date) late.push(Object.assign({}, x, { daysLate: daysBetween(x.date, x.paidOn), reason: 'Paid after the deed transfer date' }));
+        var dueBy = x.date ? new Date(Date.parse(x.date + 'T00:00:00Z') + (rr.dueDays || 30) * 86400000).toISOString().slice(0, 10) : '';
+        if (!exempt && x.paidOn && dueBy && x.paidOn > dueBy) late.push(Object.assign({}, x, { due: dueBy, daysLate: daysBetween(dueBy, x.paidOn), reason: 'Paid ' + daysBetween(x.date, x.paidOn) + ' days after the transaction (limit ' + (rr.dueDays || 30) + ')' }));
       });
       var today = ctx.today || new Date().toISOString().slice(0, 10);
       var pen = r2(bad.reduce(function (s, x) { return s + x.shortfall * (rr.latePctPerMonth || 0.02) * Math.max(1, Math.ceil(daysBetween(x.date, today) / 30)); }, 0));
       checks.push(C({ id: 'R1', title: 'Real estate transaction tax: 5% paid on every taxable disposal', titleAr: 'ضريبة التصرفات العقارية: سداد 5% عن كل تصرف خاضع', status: bad.length ? 'fail' : 'pass',
         a: r2(due), aLabel: 'RETT unpaid', b: 0, bLabel: '', diff: r2(due), exposure: r2(due + pen), exceptions: { list: bad }, counts: { list: bad.length },
         note: 'Exposure = shortfall plus the late-payment rate for each month or part (editable in Settings; verify against the current RETT regulations). Exempt disposals need the exemption reference recorded.' }));
-      checks.push(C({ id: 'R2', title: 'RETT paid before the deed transfer', titleAr: 'سداد الضريبة العقارية قبل نقل الصك', status: late.length ? 'fail' : 'pass',
-        a: late.length, aLabel: 'Exceptions', b: 0, bLabel: '', diff: late.length, exceptions: { list: late }, counts: { list: late.length },
-        note: 'The notary transfers the deed only after RETT is paid; a later payment date points at a missing or wrong record.' }));
+      var latePen = r2(late.reduce(function (s, x) { return s + (+x.rett || 0) * (rr.latePctPerMonth || 0.02) * Math.ceil(x.daysLate / 30); }, 0));
+      checks.push(C({ id: 'R2', title: 'RETT paid within 30 days of the transaction', titleAr: 'سداد ضريبة التصرفات العقارية خلال 30 يوماً من التصرف', status: late.length ? 'fail' : 'pass',
+        a: late.length, aLabel: 'Exceptions', b: 0, bLabel: '', diff: late.length, exposure: latePen, exceptions: { list: late }, counts: { list: late.length },
+        note: 'Under the RETT Law effective April 2025 the tax is due within 30 days of the transaction date, and ZATCA can hold the deed registration until it is paid.' }));
     }
     var reVat = (D.sys_vat || []).filter(function (x) { return x.flow === 'S' && (+x.vat || 0) > 0 && RE_WORDS.test(String(x.description || '') + ' ' + String(x.category || '')); })
       .map(function (x) { return Object.assign({}, x, { reason: 'Looks like a real estate disposal: exempt from VAT and subject to RETT' }); });
@@ -1623,7 +1657,15 @@
     var ek = D.excise || [];
     if (ek.length) {
       var rates = S.exciseRates || {}, diffs = [];
+      var st = S.sugarTiers || {}, pe = ctx.periodKey ? E.periodRange(ctx.periodKey).end : '';
       ek.forEach(function (x) {
+        if (E.exciseCat(x.category) === 'sweetened' && (x.date || pe) >= (st.from || '2026-01-01')) {
+          if (x.sugar === '' || x.sugar == null || !(+x.litres)) { diffs.push(Object.assign({}, x, { reason: 'Sugar per 100 ml and litres needed (per-litre tiers since 1 Jan 2026)' })); return; }
+          var tier = (st.tiers || []).filter(function (t) { return +x.sugar >= t[0] && +x.sugar < t[1]; })[0] || [0, 0, 0];
+          var expL = r2(+x.litres * tier[2]);
+          if (Math.abs(expL - (+x.excise || 0)) > Math.max(S.tolAbs, expL * 0.005)) diffs.push(Object.assign({}, x, { expected: expL, shortfall: r2(expL - (+x.excise || 0)), reason: 'Expected SAR ' + tier[2] + ' per litre for ' + x.sugar + ' g sugar / 100 ml' }));
+          return;
+        }
         var rate = x.rate ? +x.rate : rates[E.exciseCat(x.category)];
         if (rate == null) { diffs.push(Object.assign({}, x, { reason: 'Unknown excise category' })); return; }
         var base = Math.max(+x.retailPrice || 0, +x.standardPrice || 0);
@@ -1633,15 +1675,39 @@
       var under = r2(diffs.reduce(function (s, x) { return s + Math.max(0, x.shortfall || 0); }, 0));
       checks.push(C({ id: 'K1', title: 'Excise recomputed per product line', titleAr: 'إعادة احتساب الضريبة الانتقائية لكل منتج', status: diffs.length ? 'fail' : 'pass',
         a: under, aLabel: 'Excise under-declared', b: 0, bLabel: '', diff: under, exposure: under, exceptions: { list: diffs }, counts: { list: diffs.length },
-        note: 'Excise = quantity × price × rate ÷ (1 + rate), on the higher of the retail selling price (excl. VAT) and ZATCA\'s standard price. Sweetened drinks may carry a sugar-based tier: put the line\'s own rate in the Rate column.' }));
+        note: 'Tobacco, energy drinks and e-cigarettes: quantity × price × rate ÷ (1 + rate) on the higher of the retail price (excl. VAT) and ZATCA\'s standard price. Sweetened and carbonated drinks from 1 Jan 2026: litres × SAR 0 / 0.79 / 1.09 by sugar per 100 ml (under 5 g / 5–7.99 g / 8 g or more).' }));
       var decl = ctx.exciseReturn;
       if (decl != null && decl !== '') {
         var reg = r2(ek.reduce(function (s, x) { return s + (+x.excise || 0); }, 0));
         checks.push(C(check('K2', 'other', 'Excise return vs excise register', 'إقرار الضريبة الانتقائية مقابل السجل', +decl, 'Excise return', reg, 'Register total', S)));
       }
     }
+    // K3 — designated-zone stock: what is missing was released without excise
+    var sk = D.excise_stock || [];
+    if (sk.length) {
+      var miss = [], relBy = {};
+      sk.forEach(function (x) {
+        var expected = (+x.opening || 0) + (+x.received || 0) - (+x.released || 0) - (+x.exported || 0), gap = r2(expected - (+x.closing || 0));
+        if (gap > 0.0001) {
+          var rate = rates_(S, x.category), unit = rate ? (+x.retailPrice || 0) * rate / (1 + rate) : 0;
+          miss.push(Object.assign({}, x, { expected: r2(expected), shortfall: gap, excise: r2(gap * unit), reason: gap + ' units unaccounted for: treated as released for consumption' }));
+        }
+        relBy[String(x.product).toLowerCase()] = (+x.released || 0);
+      });
+      checks.push(C({ id: 'K3', title: 'Designated-zone stock reconciliation', titleAr: 'مطابقة مخزون المستودع المحدد', status: miss.length ? 'fail' : 'pass',
+        a: miss.length, aLabel: 'Exceptions', b: 0, bLabel: '', diff: miss.length, exposure: r2(miss.reduce(function (s, x) { return s + x.excise; }, 0)),
+        exceptions: { list: miss }, counts: { list: miss.length }, note: 'Opening + received − released − exported must equal the count. Losses not approved by ZATCA are taxed as releases (exposure shown for price-based categories).' }));
+      if (ek.length) {
+        var regQ = {}, gaps = [];
+        ek.forEach(function (x) { var k = String(x.product).toLowerCase(); regQ[k] = (regQ[k] || 0) + (+x.qty || 0); });
+        Object.keys(relBy).forEach(function (k) { if (regQ[k] != null && Math.abs(regQ[k] - relBy[k]) > 0.0001) gaps.push({ product: k, qty: regQ[k], expected: relBy[k], reason: 'Released ' + relBy[k] + ' but excise declared on ' + regQ[k] }); });
+        checks.push(C({ id: 'K4', title: 'Quantities released vs quantities taxed', titleAr: 'الكميات المفرج عنها مقابل الكميات الخاضعة', status: gaps.length ? 'fail' : 'pass',
+          a: gaps.length, aLabel: 'Exceptions', b: 0, bLabel: '', diff: gaps.length, exceptions: { list: gaps }, counts: { list: gaps.length } }));
+      }
+    }
     return { checks: checks };
   };
+  function rates_(S, cat) { var c = E.exciseCat(cat); return c === 'sweetened' ? 0 : (S.exciseRates || {})[c] || 0; }
   E.exciseCat = function (v) {
     var s = String(v || '').toLowerCase();
     if (/tobacco|cigar|shisha|تبغ|دخان|سجائر|معسل/.test(s)) return 'tobacco';
@@ -1669,11 +1735,28 @@
       var due = new Date(Date.parse(z.fyEnd + 'T00:00:00Z') + (S.zakat.dueDays || 120) * 86400000).toISOString().slice(0, 10);
       res.dueDate = due;
       var filed = z.filedOn, late = filed ? daysBetween(due, filed) : daysBetween(due, z.today || new Date().toISOString().slice(0, 10));
+      var zl = S.zakat, fine = late >= 30 ? r2(Math.min(res.zakat * (zl.latePctPer30Days || 0.01) * Math.floor(late / 30), res.zakat * (zl.lateCap || 0.25))) : 0;
       res.checks.push({ id: 'Z2', group: 'zakat', title: 'Zakat return filed and paid by ' + due, titleAr: 'تقديم وسداد إقرار الزكاة قبل ' + due, status: filed ? (late > 0 ? 'fail' : 'pass') : (late > 0 ? 'fail' : 'na'),
-        a: late > 0 ? late : 0, aLabel: 'Days late', b: null, bLabel: '', diff: null, missing: filed ? '' : 'Filing date', note: 'Due ' + (S.zakat.dueDays || 120) + ' days after the financial year end (editable).' });
+        a: late > 0 ? late : 0, aLabel: 'Days late', b: null, bLabel: '', diff: null, missing: filed ? '' : 'Filing date', exposure: fine,
+        note: 'Due within 120 days of the year end (Zakat IR Art. 17). Late fine estimated at 1% per 30 days up to 25% (editable; verify).' });
     }
     if (z.declared != null && z.declared !== '') res.checks.push(check('Z3', 'zakat', 'Zakat declared vs worksheet', 'الزكاة المقرة مقابل ورقة العمل', +z.declared, 'Declared in the return', res.zakat, 'Worksheet', S));
     return res;
+  };
+
+  // Year-end TB balances for the worksheet. map: { line: 'account patterns' }.
+  // Additions are credit balances (equity, provisions, financing); deductions
+  // are debit balances (fixed assets, investments, losses).
+  var ZAKAT_DEDUCT = { netFixedAssets: 1, longTermInvestments: 1, accumulatedLosses: 1, otherDeductions: 1 };
+  E.zakatFromTb = function (tb, map) {
+    var out = {};
+    Object.keys(map || {}).forEach(function (k) {
+      if (!map[k]) return;
+      var b = E.tbBalance(tb, map[k], 'closing');
+      if (b == null) return;
+      out[k] = r2(ZAKAT_DEDUCT[k] ? b : -b);
+    });
+    return out;
   };
 
   // ------------------------------------------------------------------ penalties & readiness
