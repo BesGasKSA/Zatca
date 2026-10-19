@@ -1,0 +1,12 @@
+{
+  "name": "inspection-ready",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Monthly VAT & WHT inspection readiness for Saudi entities — multi-tenant, Google Sheets backend.",
+  "scripts": {
+    "test": "node tests/engine.test.js && node tests/backend.test.js",
+    "build": "node build.js",
+    "dev": "node tools/serve.js web 5181",
+    "preview": "node build.js && node tools/serve.js dist 5182"
+  }
+}

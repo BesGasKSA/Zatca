@@ -1,0 +1,7 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "web", "runtimeExecutable": "node", "runtimeArgs": ["tools/serve.js", "web", "5181"], "port": 5181 },
+    { "name": "dist", "runtimeExecutable": "node", "runtimeArgs": ["tools/serve.js", "dist", "5182"], "port": 5182 }
+  ]
+}
