@@ -45,7 +45,7 @@ t('V5 input VAT ties to GL', function () { assert.strictEqual(byId(R.vat.checks,
 t('V6 revenue: other income explained, invoice gap remains', function () { var c = byId(R.vat.checks, 'V6'); assert.strictEqual(c.diff, 23400); });
 t('V7 net VAT liability across all VAT accounts shows the same 3,510', function () { assert.strictEqual(byId(R.vat.checks, 'V7').diff, -3510); });
 t('B2 payments tie to purchases once RCM VAT is excluded', function () { assert.strictEqual(byId(R.bank.checks, 'B2').status, 'pass'); });
-t('B1 excess = cash deposit + cash for the unreported invoice', function () { assert.strictEqual(byId(R.bank.checks, 'B1').diff, 85000 + 26910); });
+t('B1 excess = cash deposit + cash for the unreported invoice + the untraced Noon payout', function () { assert.strictEqual(byId(R.bank.checks, 'B1').diff, 85000 + 26910 + 48000); });
 t('V8 customs: one import declaration missing', function () { assert.strictEqual(byId(R.vat.checks, 'V8').status, 'fail'); });
 t('V9 Fatoora: 3 unreported, 1 rejected', function () { var c = byId(R.vat.checks, 'V9'); assert.strictEqual(c.counts.notReported, 3); assert.strictEqual(c.counts.rejected, 1); });
 
@@ -125,6 +125,34 @@ var XC = function (id) { return byId(R2.wht.checks, id); };
 t('X1 reverse-charged training with no WHT line', function () { assert.strictEqual(XC('X1').counts.list, 1); assert.ok(/Amman/.test(XC('X1').exceptions.list[0].party)); });
 t('X2 management fees to the parent with no reverse-charge VAT', function () { assert.strictEqual(XC('X2').counts.list, 1); assert.strictEqual(XC('X2').exposure, 18000); });
 t('T2 input VAT surge against history; T1 sales steady', function () { assert.strictEqual(byId(R2.analytics.tests, 'T2').status, 'warn'); assert.strictEqual(byId(R2.analytics.tests, 'T1').status, 'pass'); });
+
+console.log('marketplaces, RETT, excise, Zakat, integration wave');
+var R3 = E.runAll({ entity: demo.entity, periodKey: demo.period, settings: {}, data: demo.datasets, returnBoxes: demo.returnBoxes, reconItems: demo.reconItems, prevNetVat: demo.prevNetVat, prevWhtTax: demo.prevWhtTax,
+  filing: demo.filing, recovery: demo.recovery, history: demo.history, exciseReturn: demo.exciseReturn, today: '2026-11-05', samples: [], checklist: [], findings: [] });
+var OC = function (id) { return byId(R3.other.checks, id); };
+t('M2 Noon payout with no Noon sales booked', function () { assert.strictEqual(OC('M2').a, 48000); });
+t('M1 platform deemed supplier: unregistered resident seller from 2026 with no VAT', function () {
+  var r = E.runOtherTaxes({ settings: E.mergeSettings({}), data: { mkt_sales: [
+    { date: '2026-02-01', seller: 'Home bakery', sellerVat: '', sellerResident: 'yes', category: 'goods', gross: 1150, vat: 0 },
+    { date: '2025-12-15', seller: 'Home bakery', sellerVat: '', sellerResident: 'yes', category: 'goods', gross: 1150, vat: 0 },
+    { date: '2026-02-01', seller: 'Registered shop', sellerVat: '310123456700003', sellerResident: 'yes', category: 'goods', gross: 1150, vat: 0 },
+    { date: '2025-06-01', seller: 'US app studio', sellerVat: '', sellerResident: 'no', category: 'electronic services', gross: 230, vat: 0 }] } });
+  var m1 = byId(r.checks, 'M1'); assert.strictEqual(m1.counts.list, 2); assert.strictEqual(m1.exposure, 180);
+});
+t('R1 RETT short by 32,000 on the warehouse; the exempt transfer is not flagged', function () { assert.strictEqual(OC('R1').a, 32000); assert.strictEqual(OC('R1').counts.list, 1); });
+t('R2 RETT paid after the deed transfer', function () { assert.strictEqual(OC('R2').counts.list, 1); });
+t('K1 cigarettes: excise on the higher standard price', function () { assert.strictEqual(OC('K1').a, 5000); assert.strictEqual(OC('K1').counts.list, 1); });
+t('K2 excise return ties to the register', function () { assert.strictEqual(OC('K2').status, 'pass'); });
+t('E10 integrated before the wave deadline', function () { assert.strictEqual(byId(R3.einv.checks, 'E10').status, 'pass'); });
+t('Zakat: Gregorian-year rate, worksheet vs declared', function () {
+  var z = E.zakat(demo.zakat2025, {});
+  assert.strictEqual(z.base, 15000000); assert.strictEqual(z.zakat, 386652.54); assert.strictEqual(z.dueDate, '2026-04-30');
+  assert.strictEqual(byId(z.checks, 'Z3').status, 'fail'); assert.strictEqual(byId(z.checks, 'Z2').status, 'pass');
+});
+t('Zakat: base below adjusted net profit is raised to it at a flat 2.5%', function () {
+  var z = E.zakat({ capital: 1000000, adjustedNetProfit: 2000000, netFixedAssets: 2500000, yearType: 'gregorian' }, {});
+  assert.strictEqual(z.baseUsed, 2000000); assert.strictEqual(z.zakat, 50000); assert.strictEqual(byId(z.checks, 'Z1').status, 'warn');
+});
 
 console.log('regulatory rules');
 var S0 = E.mergeSettings({});

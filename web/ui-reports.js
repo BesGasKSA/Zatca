@@ -125,8 +125,38 @@
       '<section class="paper flush"><div style="padding:14px 18px" class="spread"><h2>' + t('Period by period') + '</h2><button class="btn small" data-act="whtbenef" data-e="' + e.id + '" data-y="' + year + '"' + (e.whtRegistered === false ? ' disabled' : '') + '>' + t('WHT by beneficiary for the year') + '</button></div><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Period') + '</th><th class="num">' + t('Sales (box 6)') + '</th><th class="num">' + t('Output VAT') + '</th><th class="num">' + t('Input VAT') + '</th><th class="num">' + t('Net VAT due') + '</th><th class="num">' + t('WHT') + '</th><th>' + t('Readiness') + '</th></tr></thead><tbody>' +
       rows.map(function (r) { return '<tr class="clickable" data-act="openex" data-id="' + r.exId + '"><td>' + Z.ltr(r.period) + '</td><td class="num">' + fmt(r.sales) + '</td><td class="num">' + fmt(r.outputVat) + '</td><td class="num">' + fmt(r.inputVat) + '</td><td class="num">' + fmt(r.netVat) + '</td><td class="num">' + fmt(r.whtTax) + '</td><td>' + (r.score != null ? Z.pill(r.grade, r.score + '%') : '') + '</td></tr>'; }).join('') +
       '<tr class="total"><td>' + t('Total') + '</td><td class="num">' + fmt(rec.totals.sales) + '</td><td class="num">' + fmt(rec.totals.outputVat) + '</td><td class="num">' + fmt(rec.totals.inputVat) + '</td><td class="num">' + fmt(rec.totals.netVat) + '</td><td class="num">' + fmt(rec.totals.whtTax) + '</td><td></td></tr></tbody></table></div></section>' +
+      zakatSection(e) +
       '<div id="benef"></div></div>');
   }
+
+  // Zakat worksheet: the preparer classifies the balances, the engine does the
+  // arithmetic and applies the two hard rules (base ≥ adjusted net profit; rate).
+  var ZF = [
+    ['add', 'capital', 'Paid-up capital'], ['add', 'reserves', 'Statutory and other reserves'], ['add', 'retainedEarnings', 'Retained earnings (opening)'],
+    ['add', 'provisions', 'Provisions (opening, not deducted)'], ['add', 'longTermFinancing', 'Long-term loans and financing'], ['add', 'otherAdditions', 'Other additions'],
+    ['add', 'adjustedNetProfit', 'Adjusted net profit for the year'],
+    ['ded', 'netFixedAssets', 'Net fixed assets'], ['ded', 'longTermInvestments', 'Long-term investments'], ['ded', 'accumulatedLosses', 'Accumulated losses'], ['ded', 'otherDeductions', 'Other deductions']
+  ];
+  function zakatSection(e) {
+    var z = S.annual.zakat || {}, can = Z.can('preparer'), dis = can ? '' : ' disabled';
+    var res = E.zakat(Object.assign({ today: Z.today() }, z), S.settingsDoc ? S.settingsDoc.values : {});
+    var f = function (row) { return Z.fld('z_' + row[1], t(row[2]), z[row[1]], 'number', 'step="0.01" data-chg="zak" data-f="' + row[1] + '"' + dis); };
+    return '<section class="paper area-ledger"><header><div><h2>' + t('Zakat worksheet') + ' ' + S.annual.year + '</h2><p>' + t('Classify each balance as your Zakat adviser does; the worksheet adds them up, applies the floor of adjusted net profit and the rate for the length of the year.') + '</p></div></header>' +
+      '<div class="grid g2"><div><h3 style="margin-bottom:8px">' + t('Additions') + '</h3><div class="grid">' + ZF.filter(function (r) { return r[0] === 'add'; }).map(f).join('') + '</div></div>' +
+      '<div><h3 style="margin-bottom:8px">' + t('Deductions') + '</h3><div class="grid">' + ZF.filter(function (r) { return r[0] === 'ded'; }).map(f).join('') + '</div>' +
+      '<h3 style="margin:16px 0 8px">' + t('Return') + '</h3><div class="grid g2">' +
+      '<label class="f"><span>' + t('Financial year') + '</span><select data-chg="zak" data-f="yearType"' + dis + '><option value="gregorian"' + (z.yearType !== 'hijri' ? ' selected' : '') + '>' + t('Gregorian (365 days)') + '</option><option value="hijri"' + (z.yearType === 'hijri' ? ' selected' : '') + '>' + t('Hijri (354 days)') + '</option></select></label>' +
+      Z.fld('z_fyEnd', t('Year end'), z.fyEnd, 'date', 'data-chg="zak" data-f="fyEnd"' + dis) + Z.fld('z_filedOn', t('Filed and paid on'), z.filedOn, 'date', 'data-chg="zak" data-f="filedOn"' + dis) +
+      Z.fld('z_declared', t('Zakat declared in the return'), z.declared, 'number', 'step="0.01" data-chg="zak" data-f="declared"' + dis) + '</div></div></div>' +
+      '<div class="kpis" style="margin-top:16px"><div><b>' + fmt(res.base, 0) + '</b><span>' + t('Computed Zakat base') + '</span></div><div><b>' + fmt(res.baseUsed, 0) + '</b><span>' + t('Base used (not below adjusted net profit)') + '</span></div>' +
+      '<div><b>' + Z.r(res.rate * 100) + '%</b><span>' + t('Rate applied') + '</span></div><div><b>' + fmt(res.zakat) + '</b><span>' + t('Zakat due (SAR)') + '</span></div>' + (res.dueDate ? '<div><b>' + Z.ltr(res.dueDate) + '</b><span>' + t('Return due') + '</span></div>' : '') + '</div>' +
+      '<div style="margin-top:12px">' + res.checks.map(function (c) { return '<div class="row" style="flex-wrap:nowrap;padding:7px 0;border-top:1px solid var(--rule-2)">' + Z.tick(c.status) + '<span style="flex:1">' + esc(c.id) + ' · ' + esc(Z.tt(c, 'title')) + (c.note ? '<span class="faint" style="display:block;font-size:12.5px">' + esc(t(c.note)) + '</span>' : '') + '</span>' + (c.diff != null && c.bLabel ? '<b class="num ' + (c.status === 'fail' ? 'diff-bad' : '') + '">' + fmt(c.diff) + '</b>' : '') + '</div>'; }).join('') + '</div></section>';
+  }
+  Z.CHG.zak = function (el) {
+    S.annual.zakat = S.annual.zakat || {};
+    var f = el.dataset.f; S.annual.zakat[f] = /yearType|fyEnd|filedOn/.test(f) ? el.value : (el.value === '' ? null : +el.value);
+    saveAnnual();
+  };
   function saveAnnual() { return Z.save('annual', S.annual).then(function (d) { S.annual = d; S.annual.items = S.annual.items || []; renderAnnual(Z.entity(d.entityId), d.year); }); }
   Z.CHG.annual = function (el) { S.annual[el.dataset.f] = el.value === '' ? null : +el.value; saveAnnual(); };
   Z.CHG.annyear = function (el) { location.hash = '#/annual/' + el.dataset.e + '/' + el.value; };

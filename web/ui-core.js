@@ -314,6 +314,8 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       '<label class="f"><span>' + t('Pays non-residents (WHT)') + '</span><select name="whtRegistered"><option value="1"' + (e.whtRegistered !== false ? ' selected' : '') + '>' + t('Yes') + '</option><option value="0"' + (e.whtRegistered === false ? ' selected' : '') + '>' + t('No') + '</option></select></label>' +
       fld('erp', t('Accounting system'), e.erp, 'text', '', t('e.g. SAP, Oracle, Odoo, NetSuite')) +
       '<label class="f"><span>' + t('Status') + '</span><select name="active"><option value="1"' + (e.active !== false ? ' selected' : '') + '>' + t('Active') + '</option><option value="0"' + (e.active === false ? ' selected' : '') + '>' + t('Inactive') + '</option></select></label></div></section>' +
+      '<section class="paper area-vat"><h2>' + t('E-invoicing Phase 2 (Fatoora integration)') + '</h2><p class="muted">' + t('From the ZATCA notification for this entity. ZATCA gives at least six months\' notice before the integration date.') + '</p><div class="grid g3" style="margin-top:12px">' +
+      fld('einvWave', t('Wave'), e.einvWave, 'text', 'placeholder="' + esc(t('e.g. Wave 24')) + '"') + fld('einvDeadline', t('Integration deadline'), e.einvDeadline, 'date') + fld('einvIntegratedOn', t('Integrated on'), e.einvIntegratedOn, 'date') + '</div></section>' +
       '<section class="paper area-ledger"><h2>' + t('Chart of accounts mapping') + '</h2><p class="muted">' + t('Separate codes with commas. Use 4* for a prefix and 1200-1299 for a range.') + '</p><div class="grid g2" style="margin-top:12px">' +
       Z.MAP_FIELDS.map(function (f) { return fld('map_' + f[0], t(f[1]), m[f[0]], 'text', 'placeholder="' + esc(f[2]) + '"'); }).join('') + '</div></section>' +
       '<div class="row end">' + (e.id && Z.can('owner') ? '<button type="button" class="btn danger" data-act="delent" data-id="' + e.id + '">' + t('Delete entity') + '</button>' : '') + '<a class="btn" href="#/' + (e.id ? 'entity/' + e.id : 'entities') + '">' + t('Cancel') + '</a><button class="btn primary" type="submit">' + t('Save entity') + '</button></div></form>');
@@ -408,7 +410,12 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       fld('gift_perRecipient', t('Gift relief per recipient per year (SAR)'), V.giftRelief.perRecipient, 'number', 'step="1"') +
       fld('gift_annualCap', t('Gift relief annual cap (SAR)'), V.giftRelief.annualCap, 'number', 'step="1"') +
       fld('trend_salesDropPct', t('Flag a sales drop above (%)'), V.trend.salesDropPct, 'number', 'step="1"') +
-      fld('trend_inputJumpPct', t('Flag an input VAT rise above (%)'), V.trend.inputJumpPct, 'number', 'step="1"') + '</div>' +
+      fld('trend_inputJumpPct', t('Flag an input VAT rise above (%)'), V.trend.inputJumpPct, 'number', 'step="1"') +
+      fld('rett_rate', t('RETT rate %'), Z.r(V.rett.rate * 100), 'number', 'step="0.01"') + fld('rett_latePctPerMonth', t('RETT late payment % per month'), Z.r(V.rett.latePctPerMonth * 100), 'number', 'step="0.01"', t('Sources report 2% under the current law; verify.')) +
+      fld('zakat_dueDays', t('Zakat return due (days after year end)'), V.zakat.dueDays, 'number', 'step="1"') +
+      fld('exc_tobacco', t('Excise: tobacco %'), Z.r(V.exciseRates.tobacco * 100), 'number', 'step="1"') + fld('exc_energy', t('Excise: energy drinks %'), Z.r(V.exciseRates.energy * 100), 'number', 'step="1"') +
+      fld('exc_ecig', t('Excise: e-cigarettes and liquids %'), Z.r(V.exciseRates.ecig * 100), 'number', 'step="1"') + fld('exc_sweetened', t('Excise: sweetened drinks %'), Z.r(V.exciseRates.sweetened * 100), 'number', 'step="1"', t('Use the Rate column per line if your drinks fall under sugar-based tiers.')) + '</div>' +
+      '<label class="f" style="margin-top:12px"><span>' + t('Marketplace payout keywords (bank descriptions)') + '</span><input type="text" name="marketplaceKeywords" value="' + esc(V.marketplace.payoutKeywords) + '"></label>' +
       '<label class="f" style="margin-top:12px"><span>' + t('Blocked input VAT keywords') + '</span><textarea name="blockedKeywords">' + esc(V.blockedKeywords) + '</textarea><small>' + t('Matched against purchase descriptions, accounts and supplier names (VAT IR Art. 50).') + '</small></label></section>' +
       '<section class="paper area-wht"><h2>' + t('Withholding tax rates') + '</h2><p class="muted">' + t('Statutory rates for payments to non-residents. Lower treaty rates are accepted when the line is marked as treaty relief with a certificate.') + '</p><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Payment type') + '</th><th>%</th></tr></thead><tbody>' + whtRows + '</tbody></table></div></section>' +
       '<section class="paper"><h2 style="margin-bottom:12px">' + t('Penalties used for exposure estimates') + '</h2><div class="grid g3">' +
@@ -433,6 +440,10 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
         else if (k.indexOf('ein_') === 0) { v.einv = v.einv || {}; v.einv[k.slice(4)] = +val; }
         else if (k.indexOf('gift_') === 0) { v.giftRelief = v.giftRelief || {}; v.giftRelief[k.slice(5)] = +val; }
         else if (k.indexOf('trend_') === 0) { v.trend = v.trend || {}; v.trend[k.slice(6)] = +val; }
+        else if (k.indexOf('rett_') === 0) { v.rett = v.rett || {}; v.rett[k.slice(5)] = +val / 100; }
+        else if (k.indexOf('zakat_') === 0) { v.zakat = v.zakat || {}; v.zakat[k.slice(6)] = +val; }
+        else if (k.indexOf('exc_') === 0) { v.exciseRates = v.exciseRates || {}; v.exciseRates[k.slice(4)] = +val / 100; }
+        else if (k === 'marketplaceKeywords') { v.marketplace = { payoutKeywords: val }; }
         else if (k !== 'orgName') v[k] = +val;
       });
       var jobs = [Z.save('settings', { id: 'tenant', values: v })];

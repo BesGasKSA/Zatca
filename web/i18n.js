@@ -245,3 +245,40 @@ Object.assign(window.ZI18N, {
   'Days late': 'أيام التأخير', 'Credit claimed': 'الرصيد المطالب به', 'Unpaid': 'غير مسدد', 'Due': 'المستحق', 'Nothing payable': 'لا يوجد مستحق',
   'Recoverable % (taxable ÷ total supplies) ': 'النسبة القابلة للخصم %', 'Under-withheld': 'استقطاع ناقص', 'Late-payment fines': 'غرامات التأخير', 'Lines without certificate': 'سطور بدون شهادة'
 });
+
+/* Marketplaces, RETT, excise, Zakat and the e-invoicing integration wave. */
+Object.assign(window.ZI18N, {
+  'Additions': 'الإضافات', 'Deductions': 'الحسميات', 'Adjusted net profit': 'صافي الربح المعدل', 'Base used (not below adjusted net profit)': 'الوعاء المعتمد (لا يقل عن صافي الربح المعدل)',
+  'Buyer': 'المشتري', 'Channel': 'القناة', 'Checks': 'الفحوصات', 'Computed Zakat base': 'الوعاء الزكوي المحتسب', 'Computed base': 'الوعاء المحتسب', 'Declared in the return': 'المقر في الإقرار',
+  'Classify each balance as your Zakat adviser does; the worksheet adds them up, applies the floor of adjusted net profit and the rate for the length of the year.': 'صنّف كل رصيد كما يفعل مستشار الزكاة؛ تجمعها ورقة العمل وتطبق حد صافي الربح المعدل والنسبة حسب طول السنة.',
+  'Deed no.': 'رقم الصك', 'Exemption': 'الإعفاء', 'Excise': 'الضريبة الانتقائية', 'Excise return': 'إقرار الضريبة الانتقائية', 'Excise under-declared': 'ضريبة انتقائية غير مقرة',
+  'Disposals of real estate are outside VAT and subject to 5% RETT; leases and services on property stay within VAT. Review each line.': 'التصرفات العقارية خارج نطاق ضريبة القيمة المضافة وتخضع لضريبة التصرفات العقارية 5%؛ الإيجارات والخدمات على العقار تبقى خاضعة. راجع كل سطر.',
+  'E-invoicing Phase 2 (Fatoora integration)': 'الفوترة الإلكترونية — المرحلة الثانية (الربط مع فاتورة)',
+  "Excise = quantity × price × rate ÷ (1 + rate), on the higher of the retail selling price (excl. VAT) and ZATCA's standard price. Sweetened drinks may carry a sugar-based tier: put the line's own rate in the Rate column.": 'الضريبة الانتقائية = الكمية × السعر × النسبة ÷ (1 + النسبة)، على الأعلى من سعر التجزئة (بدون القيمة المضافة) والسعر المعياري للهيئة. قد تخضع المشروبات المحلاة لشرائح حسب السكر: ضع نسبة السطر في عمود النسبة.',
+  'Excise declared in the excise return': 'الضريبة المقرة في إقرار الضريبة الانتقائية', 'Excise: e-cigarettes and liquids %': 'الانتقائية: السجائر الإلكترونية وسوائلها %', 'Excise: energy drinks %': 'الانتقائية: مشروبات الطاقة %',
+  'Excise: sweetened drinks %': 'الانتقائية: المشروبات المحلاة %', 'Excise: tobacco %': 'الانتقائية: التبغ %', 'Filed and paid on': 'تاريخ التقديم والسداد', 'Financial year': 'السنة المالية',
+  "From 1 Jan 2026 a platform that facilitates supplies by resident sellers who are not VAT-registered (and, since April 2025, electronic services by non-residents) accounts for the VAT itself, unless it meets the ZATCA guide's exceptions. Exposure assumes VAT-inclusive prices.": 'من 1 يناير 2026 تحتسب المنصة التي تيسّر توريدات البائعين المقيمين غير المسجلين (ومنذ أبريل 2025 الخدمات الإلكترونية لغير المقيمين) الضريبة بنفسها، ما لم تنطبق استثناءات دليل الهيئة. التعرض محسوب على أسعار شاملة الضريبة.',
+  "From the ZATCA notification for this entity. ZATCA gives at least six months' notice before the integration date.": 'من إشعار الهيئة لهذا الكيان. تمنح الهيئة مهلة ستة أشهر على الأقل قبل موعد الربط.',
+  'Gregorian (365 days)': 'ميلادية (365 يوماً)', 'Hijri (354 days)': 'هجرية (354 يوماً)', 'Integrated on': 'تاريخ الربط', 'Integration deadline': 'موعد الربط',
+  'Load the registers that apply to this entity on the Data tab: marketplace sales if you run a platform, property disposals, excise goods. Marketplace payouts are found in the bank statements automatically.': 'حمّل السجلات التي تنطبق على هذا الكيان من تبويب البيانات: مبيعات المنصة إن كنت تشغل منصة، والتصرفات العقارية، والسلع الانتقائية. تُكتشف مدفوعات المنصات من كشوف البنك تلقائياً.',
+  'Looks like a real estate disposal: exempt from VAT and subject to RETT': 'يبدو تصرفاً عقارياً: خارج ضريبة القيمة المضافة وخاضع لضريبة التصرفات',
+  'Marketplace payout keywords (bank descriptions)': 'كلمات مدفوعات المنصات (في وصف البنك)', 'Marketplaces, real estate and excise': 'المنصات والعقار والضريبة الانتقائية',
+  'Nothing to check yet: no marketplace payouts in the bank, and no marketplace, RETT or excise registers loaded.': 'لا يوجد ما يُفحص بعد: لا مدفوعات منصات في البنك ولا سجلات منصة أو عقارية أو انتقائية محملة.',
+  'Order': 'الطلب', 'Other taxes': 'ضرائب أخرى', 'Other taxes — load only what applies': 'ضرائب أخرى — حمّل ما ينطبق فقط', 'Paid after the deed transfer date': 'سددت بعد تاريخ نقل الصك', 'Paid on': 'تاريخ السداد',
+  'Payouts not covered by sales': 'مدفوعات غير مغطاة بالمبيعات', 'Platform is the deemed supplier but accounted no VAT': 'المنصة هي المورد الاعتباري ولم تحتسب الضريبة',
+  'Platform payouts are net of commission, so booked sales should always exceed them. If you sell as a VAT-registered business the sale is yours to declare; the platform is not the deemed supplier for you.': 'مدفوعات المنصة صافية من العمولة، لذا يجب أن تتجاوزها المبيعات المسجلة دائماً. إذا كنت تبيع كمنشأة مسجلة فالإقرار بالبيع عليك؛ المنصة ليست المورد الاعتباري عنك.',
+  'Product': 'المنتج', 'Property': 'العقار', 'Quantity': 'الكمية', 'RETT late payment % per month': 'غرامة تأخر ضريبة التصرفات % شهرياً', 'RETT rate %': 'نسبة ضريبة التصرفات %', 'RETT unpaid': 'ضريبة تصرفات غير مسددة',
+  'Rate applied': 'النسبة المطبقة', 'Real estate transaction tax': 'ضريبة التصرفات العقارية', 'Register total': 'إجمالي السجل', 'Resident': 'مقيم', 'Retail price': 'سعر التجزئة', 'Return due': 'موعد الإقرار',
+  'Seller': 'البائع', 'Seller VAT no.': 'الرقم الضريبي للبائع', 'Sources report 2% under the current law; verify.': 'تشير المصادر إلى 2% بموجب النظام الحالي؛ تحقق.', 'Standard price': 'السعر المعياري',
+  'The notary transfers the deed only after RETT is paid; a later payment date points at a missing or wrong record.': 'لا يُنقل الصك إلا بعد سداد الضريبة؛ تاريخ سداد لاحق يشير إلى سجل ناقص أو خاطئ.',
+  'Unknown excise category': 'فئة انتقائية غير معروفة', 'Use the Rate column per line if your drinks fall under sugar-based tiers.': 'استخدم عمود النسبة لكل سطر إذا كانت مشروباتك ضمن شرائح السكر.',
+  'Wave': 'الموجة', 'Worksheet': 'ورقة العمل', 'Year end': 'نهاية السنة', 'Zakat declared in the return': 'الزكاة المقرة في الإقرار', 'Zakat due (SAR)': 'الزكاة المستحقة (ريال)',
+  'Zakat return due (days after year end)': 'موعد إقرار الزكاة (أيام بعد نهاية السنة)', 'Zakat worksheet': 'ورقة عمل الزكاة', 'e.g. Wave 24': 'مثل الموجة 24',
+  'Paid-up capital': 'رأس المال المدفوع', 'Statutory and other reserves': 'الاحتياطي النظامي والاحتياطيات الأخرى', 'Retained earnings (opening)': 'الأرباح المبقاة (أول المدة)',
+  'Provisions (opening, not deducted)': 'المخصصات (أول المدة، غير المستخدمة)', 'Long-term loans and financing': 'القروض والتمويل طويل الأجل', 'Other additions': 'إضافات أخرى',
+  'Adjusted net profit for the year': 'صافي الربح المعدل للسنة', 'Net fixed assets': 'صافي الأصول الثابتة', 'Long-term investments': 'الاستثمارات طويلة الأجل', 'Accumulated losses': 'الخسائر المتراكمة', 'Other deductions': 'حسميات أخرى',
+  'Excise': 'الضريبة الانتقائية', 'Zakat': 'الزكاة', 'The base is raised to the adjusted net profit, taxed at 2.5% whatever the length of the year.': 'يُرفع الوعاء إلى صافي الربح المعدل بنسبة 2.5% أياً كان طول السنة.'
+});
+Object.assign(window.ZI18N, {
+  'Exposure = shortfall plus the late-payment rate for each month or part (editable in Settings; verify against the current RETT regulations). Exempt disposals need the exemption reference recorded.': 'التعرض = النقص مضافاً إليه نسبة غرامة التأخير عن كل شهر أو جزء منه (قابلة للتعديل في الإعدادات؛ تحقق من اللائحة الحالية لضريبة التصرفات العقارية). يجب تسجيل مرجع الإعفاء للتصرفات المعفاة.'
+});

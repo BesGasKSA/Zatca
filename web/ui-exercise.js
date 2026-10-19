@@ -52,7 +52,7 @@
       entity: ent, periodKey: S.ex.period, settings: S.settingsDoc ? S.settingsDoc.values : {}, data: S.data,
       returnBoxes: S.ex.returnBoxes, reconItems: S.ex.reconItems, bankOverrides: S.ex.bankOverrides,
       prevNetVat: pn, prevWhtTax: pw, samples: S.samples, checklist: S.checklist.items, findings: S.findings,
-      filing: S.ex.filing || {}, recovery: S.ex.recovery || {}, today: Z.today(),
+      filing: S.ex.filing || {}, recovery: S.ex.recovery || {}, today: Z.today(), exciseReturn: S.ex.exciseReturn,
       // the same entity's earlier periods, newest first, for the risk-engine trends
       history: S.exercises.filter(function (x) { return x.entityId === S.ex.entityId && x.period < S.ex.period && x.summary; })
         .sort(function (a, b) { return a.period < b.period ? 1 : -1; }).map(function (x) { return Object.assign({ period: x.period }, x.summary); })
@@ -67,7 +67,7 @@
   // Saves the exercise's headline figures so the dashboard and trends need no recomputation.
   Z.saveSummary = function () {
     var R = S.R, ret = R.vat.boxes.ret || R.vat.boxes.sys;
-    var all = R.vat.checks.concat(R.wht.checks, R.bank.checks, R.einv.checks, R.filing.checks), fg = R.figures || {};
+    var all = R.vat.checks.concat(R.wht.checks, R.bank.checks, R.einv.checks, R.filing.checks, R.other.checks), fg = R.figures || {};
     var sm = {
       score: R.score.score, grade: R.score.grade, exposure: R.exposure,
       fails: all.filter(function (c) { return c.status === 'fail'; }).length, warns: all.filter(function (c) { return c.status === 'warn'; }).length,
@@ -93,7 +93,7 @@
   Z.changed = function () { Z.recompute(); Z.saveSummary(); Z.route(); };
 
   // ---------------------------------------------------------------- exercise view
-  var TABS = [['overview', 'Overview'], ['data', 'Data'], ['filing', 'Filing & payment'], ['vat', 'VAT reconciliation'], ['einv', 'E-invoicing'], ['bank', 'Bank'], ['wht', 'Withholding tax'], ['analytics', 'Analytics'], ['sampling', 'Sampling'], ['checklist', 'Documents'], ['findings', 'Findings'], ['report', 'Report & sign-off']];
+  var TABS = [['overview', 'Overview'], ['data', 'Data'], ['filing', 'Filing & payment'], ['vat', 'VAT reconciliation'], ['einv', 'E-invoicing'], ['bank', 'Bank'], ['wht', 'Withholding tax'], ['other', 'Other taxes'], ['analytics', 'Analytics'], ['sampling', 'Sampling'], ['checklist', 'Documents'], ['findings', 'Findings'], ['report', 'Report & sign-off']];
 
   Z.views.ex = function (h) {
     return Z.loadExercise(h[1]).then(function () {
@@ -101,7 +101,7 @@
       if (S.entityId !== ex.entityId) { S.entityId = ex.entityId; localStorage.setItem('zr_entity', ex.entityId); }
       Z.paintChrome('ex');
       var count = function (list) { return list.filter(function (c) { return c.status === 'fail'; }).length; };
-      var badges = { vat: count(R.vat.checks), bank: count(R.bank.checks), einv: count(R.einv.checks), filing: count(R.filing.checks), wht: ent.whtRegistered === false ? 0 : count(R.wht.checks), analytics: R.analytics.tests.filter(function (x) { return x.status === 'fail'; }).length, findings: S.findings.filter(function (f) { return f.status !== 'closed'; }).length };
+      var badges = { vat: count(R.vat.checks), bank: count(R.bank.checks), einv: count(R.einv.checks), filing: count(R.filing.checks), other: count(R.other.checks), wht: ent.whtRegistered === false ? 0 : count(R.wht.checks), analytics: R.analytics.tests.filter(function (x) { return x.status === 'fail'; }).length, findings: S.findings.filter(function (f) { return f.status !== 'closed'; }).length };
       var tabs = '<nav class="tabs" aria-label="' + t('Exercise sections') + '">' + TABS.filter(function (x) { return !(x[0] === 'wht' && ent.whtRegistered === false); }).map(function (x) {
         return '<a href="#/ex/' + ex.id + '/' + x[0] + '"' + (tab === x[0] ? ' aria-current="page"' : '') + '>' + t(x[1]) + (badges[x[0]] ? '<span class="count">' + badges[x[0]] + '</span>' : '') + '</a>';
       }).join('') + '</nav>';
@@ -126,9 +126,9 @@
       var v = sc.parts[k]; if (v == null) return '';
       return '<div class="p"><span>' + t(Z.partName(k)) + '</span><div class="bar ' + (v >= 0.85 ? '' : v >= 0.5 ? 'warn' : 'fail') + '"><i style="width:' + Math.round(v * 100) + '%"></i></div><b class="num">' + Math.round(v * 100) + '%</b></div>';
     }).join('');
-    var checks = R.filing.checks.concat(R.vat.checks, R.einv.checks, R.bank.checks, ent.whtRegistered === false ? [] : R.wht.checks);
+    var checks = R.filing.checks.concat(R.vat.checks, R.einv.checks, R.bank.checks, ent.whtRegistered === false ? [] : R.wht.checks, R.other.checks);
     var attention = checks.filter(function (c) { return c.status === 'fail' || c.status === 'warn'; }).sort(function (a, b) { return (a.status === 'fail' ? 0 : 1) - (b.status === 'fail' ? 0 : 1) || Math.abs(b.diff || 0) - Math.abs(a.diff || 0); });
-    var tabOf = function (c) { return { vat: 'vat', bank: 'bank', einv: 'einv', filing: 'filing' }[c.group] || 'wht'; };
+    var tabOf = function (c) { return { vat: 'vat', bank: 'bank', einv: 'einv', filing: 'filing', other: 'other' }[c.group] || 'wht'; };
     var missing = Object.keys(E.KINDS).filter(function (k) { return E.KINDS[k].required && !(S.data[k] || []).length && !(k === 'ret_wht' && ent.whtRegistered === false) && !(k === 'wht_reg' && ent.whtRegistered === false); });
     if (!S.ex.returnBoxes) missing.unshift('return');
     var ret = R.vat.boxes.ret, sys = R.vat.boxes.sys, xls = R.vat.boxes.xls;
@@ -150,7 +150,7 @@
   };
 
   // ---------------------------------------------------------------- data
-  var GROUPS = [['ledger', 'Ledger', 'area-ledger'], ['vat', 'VAT', 'area-vat'], ['bank', 'Bank', 'area-bank'], ['wht', 'Withholding tax', 'area-wht']];
+  var GROUPS = [['ledger', 'Ledger', 'area-ledger'], ['vat', 'VAT', 'area-vat'], ['bank', 'Bank', 'area-bank'], ['wht', 'Withholding tax', 'area-wht'], ['other', 'Other taxes — load only what applies', 'area-ledger']];
   Z.tabs.data = function () {
     var ent = Z.entity(S.ex.entityId) || {}, lk = locked();
     var cards = function (g) {
@@ -279,10 +279,12 @@
 
   var FIELD_LABELS = { account: 'Account', name: 'Account name', opening: 'Opening', debit: 'Debit', credit: 'Credit', closing: 'Closing', date: 'Date', doc: 'Document', description: 'Description', party: 'Counterparty', country: 'Country', flow: 'Sales / purchase', invoice: 'Invoice no.', vatNo: 'VAT no.', category: 'Tax category', docType: 'Document type', net: 'Net', vat: 'VAT', total: 'Total', box: 'Box', amount: 'Amount', adj: 'Adjustment', uuid: 'UUID', status: 'Status', declaration: 'Declaration no.', value: 'Customs value', reference: 'Reference', balance: 'Balance', paymentType: 'Payment type', gross: 'Gross', rate: 'Rate', wht: 'WHT', dtt: 'Treaty relief', certificate: 'Certificate', paidDate: 'Paid to ZATCA', tax: 'Tax', cls: 'Class', reason: 'Why', expected: 'Expected', statutory: 'Statutory rate', applied: 'Applied rate', shortfall: 'Shortfall', due: 'Due', daysLate: 'Days late', penalty: 'Fine', missing: 'Missing',
     type: 'Invoice type', issuedAt: 'Issued', submittedAt: 'Sent to ZATCA', egs: 'EGS unit', icv: 'Counter', buyerVat: 'Buyer VAT no.', ref: 'Original invoice', message: 'ZATCA message',
+    property: 'Property', deed: 'Deed no.', buyer: 'Buyer', paidOn: 'Paid on', exemption: 'Exemption', product: 'Product', qty: 'Quantity', retailPrice: 'Retail price', standardPrice: 'Standard price',
+    excise: 'Excise', seller: 'Seller', sellerVat: 'Seller VAT no.', sellerResident: 'Resident', order: 'Order', channel: 'Channel',
     other: 'Compared with', otherNet: 'Their net', otherVat: 'Their VAT', exportRef: 'Export declaration', period: 'Period', average: 'Average', overdue: 'Days overdue', owner: 'Owner', title: 'Finding', severity: 'Severity', taxImpact: 'Tax impact', entity: 'Entity' };
   function fieldLabel(k) { return t(FIELD_LABELS[k] || k); }
   Z.fieldLabel = fieldLabel;
-  var NUMF = { opening: 1, debit: 1, credit: 1, closing: 1, net: 1, vat: 1, total: 1, amount: 1, adj: 1, value: 1, balance: 1, gross: 1, wht: 1, tax: 1, expected: 1, shortfall: 1, penalty: 1, otherNet: 1, otherVat: 1, average: 1, taxImpact: 1 };
+  var NUMF = { opening: 1, debit: 1, credit: 1, closing: 1, net: 1, vat: 1, total: 1, amount: 1, adj: 1, value: 1, balance: 1, gross: 1, wht: 1, tax: 1, expected: 1, shortfall: 1, penalty: 1, otherNet: 1, otherVat: 1, average: 1, taxImpact: 1, retailPrice: 1, standardPrice: 1, excise: 1, rett: 1 };
   Z.rowsTable = function (rows, cols) {
     if (!rows.length) return '<p class="faint">' + t('None.') + '</p>';
     cols = cols || Object.keys(rows[0]).filter(function (k) { return k[0] !== '_'; });
@@ -314,6 +316,10 @@
     var pickCols = function (cands) { return cands.filter(function (c) { return r[c] !== undefined && r[c] !== ''; }).concat(r.reason ? ['reason'] : []); };
     if (r.icv !== undefined || r.egs !== undefined || r.submittedAt !== undefined) return pickCols(['invoice', 'type', 'docType', 'issuedAt', 'submittedAt', 'status', 'egs', 'icv', 'ref', 'net', 'vat', 'message']);
     if (r.otherVat !== undefined) return ['invoice', 'date', 'party', 'vat', 'other', 'otherVat', 'reason'];
+    if (r.property !== undefined) return pickCols(['date', 'deed', 'property', 'buyer', 'value', 'rett', 'expected', 'shortfall', 'paidOn', 'daysLate']);
+    if (r.product !== undefined) return pickCols(['product', 'category', 'qty', 'retailPrice', 'standardPrice', 'excise', 'expected', 'shortfall']);
+    if (r.seller !== undefined) return pickCols(['date', 'order', 'seller', 'sellerVat', 'sellerResident', 'category', 'gross', 'vat']);
+    if (r.party !== undefined && r.total !== undefined && r.gross !== undefined && r.flow === undefined) return ['party', 'gross', 'total', 'reason'];
     if (r.flow !== undefined) return pickCols(['invoice', 'date', 'party', 'vatNo', 'country', 'category', 'description', 'net', 'vat']);
     if (r.period !== undefined && r.value !== undefined) return ['period', 'value', 'average'];
     if (r.description !== undefined && r.cls !== undefined) return ['date', 'description', 'reference', 'debit', 'credit', 'cls'];
@@ -374,6 +380,16 @@
       S.R.filing.checks.map(function (c) { return Z.checkHtml(c); }).join('') + '</section>';
   };
   Z.CHG.filing = function (el) { S.ex.filing = S.ex.filing || {}; S.ex.filing[el.dataset.f] = el.value; Z.saveEx().then(Z.changed); };
+
+  // ---------------------------------------------------------------- other taxes
+  Z.tabs.other = function () {
+    var lk = locked(), O = S.R.other;
+    return '<section class="paper area-ledger"><header><div><h2>' + t('Marketplaces, real estate and excise') + '</h2><p>' + t('Load the registers that apply to this entity on the Data tab: marketplace sales if you run a platform, property disposals, excise goods. Marketplace payouts are found in the bank statements automatically.') + '</p></div>' +
+      '<a class="btn small" href="#/annual/' + S.ex.entityId + '/' + (+S.ex.period.slice(0, 4) - 1) + '">' + t('Zakat worksheet') + '</a></header>' +
+      '<div class="grid g3">' + Z.fld('exciseReturn', t('Excise declared in the excise return'), S.ex.exciseReturn, 'number', 'step="0.01" data-chg="exnum"' + (lk ? ' disabled' : '')) + '</div></section>' +
+      '<section class="paper" style="margin-top:18px"><header><div><h2>' + t('Checks') + '</h2></div></header>' +
+      (O.checks.length ? O.checks.map(function (c) { return Z.checkHtml(c, Z.exceptionsHtml(c)); }).join('') : '<p class="muted">' + t('Nothing to check yet: no marketplace payouts in the bank, and no marketplace, RETT or excise registers loaded.') + '</p>') + '</section>';
+  };
 
   // ---------------------------------------------------------------- e-invoicing (ERP ↔ provider ↔ ZATCA)
   var EST = { CLEARED: 'Cleared by ZATCA', REPORTED: 'Reported to ZATCA', REJECTED: 'Rejected', PENDING: 'Pending at provider', WARNING: 'Accepted with warnings', NOT_SUBMITTED: 'Not sent' };

@@ -28,7 +28,7 @@ See README.md for the feature map and deployment.
 
 ## Tests
 
-`npm test` — engine (70) + backend (18). `npm run dev` serves `web/` with
+`npm test` — engine (79) + backend (18). `npm run dev` serves `web/` with
 no-cache headers on 127.0.0.1:5181 (Python's http.server caused stale-JS
 confusion during development; don't go back to it).
 
@@ -52,6 +52,13 @@ confusion during development; don't go back to it).
 - Three e-invoicing sources: `sys_vat` (ERP), `einv_provider` (the third-party
   system that talks to Fatoora), `einv` (ZATCA's own export). E-checks prefer the
   provider as the hub and fall back to ZATCA when there is no provider file.
+- Other taxes (group `other`): marketplace payouts are found in the *bank*
+  by keyword (so they also count in B1 as customer receipts — correct, they
+  are); RETT 5% must be paid before the deed date; excise is tax-inclusive:
+  qty × max(retail, standard) × rate ÷ (1 + rate); Zakat base = additions −
+  deductions, never below adjusted net profit (then a flat 2.5%), Gregorian
+  rate 2.5% × 365/354. RETT late rate (2%/month) and sweetened-drink tiers are
+  reported inconsistently by sources — kept editable, flagged "verify" in the UI.
 - Row packing (`Z.pack`) takes the union of keys over all rows — optional columns
   may be missing from the first row.
 

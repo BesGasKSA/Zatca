@@ -27,6 +27,12 @@
  *     training service with no WHT line
  *   - WHT filed and paid 2 days late (late, but under 30 days: no fine)
  *   - input VAT about 65% above the average of the last three months
+ *   - a SAR 48,000 Noon marketplace payout with no Noon sales booked
+ *   - a warehouse sold with RETT paid at 4% instead of 5%, and paid after the
+ *     deed transfer (an exempt land transfer next to it must not be flagged)
+ *   - cigarettes' excise computed on the retail price although ZATCA's
+ *     standard price is higher
+ *   - Zakat for 2025 declared at SAR 380,000 against a worksheet of 386,652.54
  */
 (function (root) {
   'use strict';
@@ -157,6 +163,7 @@
     bl('2026-09-27', 'SWIFT international transfer Lisbon Analytics Lda', 'SW04', 31000, 0);
     bl('2026-09-28', 'Payroll WPS September', 'WPS09', 486000, 0);
     bl('2026-09-29', 'Internal transfer to own account Riyad Bank', 'INT01', 250000, 0);
+    bl('2026-09-30', 'NOON PAYOUT settlement Sep-2026', 'NOON-0926', 0, 48000);
     bank.sort(function (a, b2) { return a.date < b2.date ? -1 : a.date > b2.date ? 1 : 0; });
     var running = 2650000;
     bank.forEach(function (x) { running = r2(running - x.debit + x.credit); x.balance = running; });
@@ -207,7 +214,7 @@
 
     return {
       entity: {
-        name: 'Al Noor Trading Co.', nameAr: 'شركة النور التجارية', trn: '310123456700003', cr: '1010987654', vatFreq: 'monthly', whtRegistered: true, erp: 'Oracle NetSuite',
+        name: 'Al Noor Trading Co.', einvWave: 'Wave 21', einvDeadline: '2025-09-30', einvIntegratedOn: '2025-09-21', nameAr: 'شركة النور التجارية', trn: '310123456700003', cr: '1010987654', vatFreq: 'monthly', whtRegistered: true, erp: 'Oracle NetSuite',
         mapping: { outputVat: '2210', inputVat: '1410', vatPayable: '2220', revenue: '4000,4100', receivables: '1200', payables: '2100', bank: '1100', whtPayable: '2230', foreignExpense: '5300,5400', gifts: '5600' }
       },
       period: '2026-09',
@@ -216,6 +223,9 @@
       prevWhtTax: 9840,
       filing: { vatFiledOn: '2026-10-28', vatPaidOn: '2026-10-29', vatPaidAmount: '', whtFiledOn: '2026-10-12', whtPaidOn: '2026-10-12' },
       recovery: { method: 'none' },
+      exciseReturn: 195000,
+      zakat2025: { capital: 10000000, reserves: 2000000, retainedEarnings: 6500000, provisions: 800000, longTermFinancing: 3000000, adjustedNetProfit: 4200000,
+        netFixedAssets: 9500000, longTermInvestments: 2000000, yearType: 'gregorian', fyEnd: '2025-12-31', filedOn: '2026-04-28', declared: 380000 },
       history: (function () {
         var cur = E.periodFigures(ret);
         return [['2026-08', 1.02, 0.62, 412880], ['2026-07', 0.98, 0.58, 401220], ['2026-06', 1.01, 0.60, 318400]].map(function (h) {
@@ -223,7 +233,16 @@
         });
       })(),
       reconItems: [{ check: 'V6', description: 'Other income — scrap sales and insurance claims (out of scope)', amount: 12000 }],
-      datasets: { tb: tb, gl: gl, sys_vat: sys, xls_vat: xls, einv: einv, einv_provider: prov, customs: customs, bank: bank, wht_reg: reg, ret_wht: retWht, xls_wht: xlsWht }
+      datasets: { tb: tb, gl: gl, sys_vat: sys, xls_vat: xls, einv: einv, einv_provider: prov, customs: customs,
+        rett: [
+          { date: '2026-09-14', deed: '4301928', property: 'Warehouse — Al Sulay, Riyadh', buyer: 'Gulf Logistics Parks', value: 3200000, rett: 128000, paidOn: '2026-09-16', exemption: '' },
+          { date: '2026-09-22', deed: '4302277', property: 'Land plot — Dammam 2nd Industrial', buyer: 'Al Noor Logistics LLC', value: 900000, rett: 0, paidOn: '', exemption: 'Transfer to a wholly owned subsidiary' }
+        ],
+        excise: [
+          { date: '2026-09-30', product: 'Energy drink 250 ml (24-pack)', category: 'Energy drinks', qty: 24000, retailPrice: 10, standardPrice: 0, rate: 0, excise: 120000 },
+          { date: '2026-09-30', product: 'Cigarettes (pack of 20)', category: 'Tobacco', qty: 5000, retailPrice: 26, standardPrice: 28, rate: 0, excise: 65000 },
+          { date: '2026-09-30', product: 'Sweetened juice 1 L', category: 'Sweetened drinks', qty: 10000, retailPrice: 3, standardPrice: 0, rate: 0, excise: 10000 }
+        ], bank: bank, wht_reg: reg, ret_wht: retWht, xls_wht: xlsWht }
     };
   }
 
