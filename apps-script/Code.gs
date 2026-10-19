@@ -16,7 +16,7 @@
  */
 
 var REGISTRY_SHEETS = { TENANTS: 'tenants', USERS: 'users', AUDIT: 'audit' };
-var TENANT_TABLES = ['entities', 'exercises', 'datasets', 'rows', 'samples', 'findings', 'checklists', 'settings', 'annual', 'audit'];
+var TENANT_TABLES = ['entities', 'exercises', 'datasets', 'rows', 'samples', 'findings', 'checklists', 'settings', 'annual', 'requests', 'audit'];
 // tables whose documents hang off an exercise (parentId = exerciseId)
 var CHILD_TABLES = { datasets: 1, rows: 1, samples: 1, findings: 1, checklists: 1 };
 var COLS = ['id', 'parentId', 'entityId', 'label', 'updatedAt', 'updatedBy', 'data'];
@@ -303,7 +303,7 @@ function save_(s, table, doc) {
       if (ex.status === 'closed') throw new Error('exercise_closed');
       if (prev && prev.parentId !== doc.parentId) throw new Error('forbidden');
       doc.entityId = ex.entityId;
-    } else if (table === 'annual') {
+    } else if (table === 'annual' || table === 'requests') {
       // one doc per entity and year: annual figures for the year-end reconciliation
       if (!doc.entityId || !canEntity_(s, doc.entityId) || !readTable_(ss, 'entities', doc.entityId)[0]) throw new Error('forbidden');
       if (prev && prev.entityId !== doc.entityId) throw new Error('forbidden');

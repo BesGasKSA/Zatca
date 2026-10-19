@@ -202,7 +202,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   }
   function paintRail(view) {
     var ex = S.exId && S.ex ? S.ex : null;
-    var items = [['dashboard', t('Dashboard'), '▦'], ['entities', t('Entities'), '▤'], ['reports', t('Reports'), '▥']];
+    var items = [['dashboard', t('Dashboard'), '▦'], ['entities', t('Entities'), '▤'], ['requests', t('ZATCA requests'), '✉'], ['reports', t('Reports'), '▥']];
     var h = '<div class="brand">' + logo(30) + '<div><b>Inspection Ready</b><span>' + esc(S.tenant ? S.tenant.name : '') + '</span></div></div>';
     items.forEach(function (i) { h += '<a class="nav" href="#/' + i[0] + '"' + (view === i[0] ? ' aria-current="page"' : '') + '><span aria-hidden="true">' + i[2] + '</span>' + i[1] + '</a>'; });
     if (ex) {
@@ -268,7 +268,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       '<div class="stack"><div class="kpis"><div><b>' + S.entities.length + '</b><span>' + t('Entities') + '</span></div><div><b>' + open.length + '</b><span>' + t('Exercises not signed off') + '</span></div>' +
       '<div><b>' + (avg == null ? '—' : avg + '%') + '</b><span>' + t('Average readiness, last 12 months') + '</span></div><div class="' + (fails ? 'bad' : '') + '"><b>' + fails + '</b><span>' + t('Failed checks in latest exercises') + '</span></div>' +
       '<div class="' + (exposure ? 'bad' : '') + '"><b>' + Z.fmt(exposure, 0) + '</b><span>' + t('Quantified tax exposure (SAR)') + '</span></div></div>' +
-      dataStrip() +
+      dataStrip() + '<div id="reqalert"></div>' +
       '<section class="paper"><header><div><h2>' + t('Readiness by month') + '</h2><p>' + t('Green is ready, amber at risk, red not ready. A dark underline means signed off.') + '</p></div></header><div class="tbl-wrap">' + heat + '</div></section>' +
       '<section class="paper"><header><div><h2>' + t('Filing deadlines') + '</h2><p>' + t('VAT is due by the last day of the month after the period; WHT by the 10th of the following month.') + '</p></div></header><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Entity') + '</th><th>' + t('Period') + '</th><th>' + t('VAT return due') + '</th><th>' + t('WHT return due') + '</th></tr></thead><tbody>' + dl + '</tbody></table></div></section></div>');
   };
@@ -451,6 +451,8 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       fld('rett_rate', t('RETT rate %'), Z.r(V.rett.rate * 100), 'number', 'step="0.01"') + fld('rett_latePctPerMonth', t('RETT late payment % per month'), Z.r(V.rett.latePctPerMonth * 100), 'number', 'step="0.01"', t('Sources report 2% under the current law; verify.')) +
       fld('rettd_dueDays', t('RETT due within (days of the transaction)'), V.rett.dueDays, 'number', 'step="1"') +
       fld('zakat_dueDays', t('Zakat return due (days after year end)'), V.zakat.dueDays, 'number', 'step="1"') +
+      fld('disp_objectionDays', t('Days to object to an assessment'), V.disputes.objectionDays, 'number', 'step="1"') +
+      fld('disp_appealDays', t('Days to appeal a committee decision'), V.disputes.appealDays, 'number', 'step="1"') +
       fld('zakatp_latePctPer30Days', t('Zakat late fine % per 30 days (estimate)'), Z.r(V.zakat.latePctPer30Days * 100), 'number', 'step="0.01"') +
       fld('sugar_mid', t('Sweetened drinks 5–7.99 g sugar: SAR per litre'), V.sugarTiers.tiers[1][2], 'number', 'step="0.01"') +
       fld('sugar_high', t('Sweetened drinks 8 g sugar or more: SAR per litre'), V.sugarTiers.tiers[2][2], 'number', 'step="0.01"', t('Per-litre tiers since 1 Jan 2026; under 5 g and sugar-free pay nothing.')) +
@@ -483,6 +485,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
         else if (k.indexOf('trend_') === 0) { v.trend = v.trend || {}; v.trend[k.slice(6)] = +val; }
         else if (k.indexOf('rett_') === 0) { v.rett = v.rett || {}; v.rett[k.slice(5)] = +val / 100; }
         else if (k.indexOf('rettd_') === 0) { v.rett = v.rett || {}; v.rett[k.slice(6)] = +val; }
+        else if (k.indexOf('disp_') === 0) { v.disputes = v.disputes || {}; v.disputes[k.slice(5)] = +val; }
         else if (k.indexOf('zakatp_') === 0) { v.zakat = v.zakat || {}; v.zakat[k.slice(7)] = +val / 100; }
         else if (k.indexOf('sugar_') === 0) { v.sugarTiers = v.sugarTiers || { tiers: [[0, 5, 0], [5, 8, 0.79], [8, 1000, 1.09]] }; v.sugarTiers.tiers[k === 'sugar_mid' ? 1 : 2][2] = +val; }
         else if (k.indexOf('zakat_') === 0) { v.zakat = v.zakat || {}; v.zakat[k.slice(6)] = +val; }

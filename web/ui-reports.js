@@ -7,7 +7,7 @@
   var E = window.ZEngine, S = Z.S, t = Z.t, esc = Z.esc, fmt = Z.fmt;
 
   // ---------------------------------------------------------------- reports centre
-  var RTABS = [['summary', 'Tax summary'], ['portfolio', 'Portfolio readiness'], ['aging', 'Findings aging'], ['exposure', 'Exposure by entity'], ['calendar', 'Filing compliance']];
+  var RTABS = [['summary', 'Tax summary'], ['portfolio', 'Portfolio readiness'], ['aging', 'Findings aging'], ['exposure', 'Exposure by entity'], ['corrections', 'Corrections register'], ['calendar', 'Filing compliance']];
 
   // ---- the date range every report follows (months, inclusive)
   function nextMonth(p) { var y = +p.slice(0, 4), m = +p.slice(5) + 1; if (m > 12) { y++; m = 1; } return y + '-' + (m < 10 ? '0' : '') + m; }
@@ -49,8 +49,8 @@
     var tab = h[1] || 'summary';
     var nav = '<nav class="tabs" aria-label="' + t('Reports') + '">' + RTABS.map(function (x) { return '<a href="#/reports/' + x[0] + '"' + (tab === x[0] ? ' aria-current="page"' : '') + '>' + t(x[1]) + '</a>'; }).join('') + '</nav>';
     var head = '<div class="pagehead"><div><h1>' + t('Reports') + '</h1><p>' + t('Across every entity you can see, for the months you choose. Each report exports to Excel.') + '</p></div><button class="btn" data-act="rexport" data-r="' + tab + '">' + t('Export to Excel') + '</button></div>';
-    if (tab === 'aging' || tab === 'exposure') {
-      return Z.list('findings').then(function (fs) { S.allFindings = fs; Z.setMain(head + rangeBar() + nav + (tab === 'aging' ? aging(fs) : exposure(fs))); });
+    if (tab === 'aging' || tab === 'exposure' || tab === 'corrections') {
+      return Z.list('findings').then(function (fs) { S.allFindings = fs; Z.setMain(head + rangeBar() + nav + (tab === 'aging' ? aging(fs) : tab === 'corrections' ? corrections(fs) : exposure(fs))); });
     }
     Z.setMain(head + rangeBar() + nav + (tab === 'calendar' ? calendar() : tab === 'portfolio' ? portfolio() : summary()));
   };
@@ -100,6 +100,60 @@
       (rows.join('') || '<tr><td colspan="7" class="empty">' + t('No open findings.') + '</td></tr>') + '</tbody></table></div></section>';
   }
   Z.ACT.gofinding = function (el) { location.hash = '#/ex/' + el.dataset.ex + '/findings'; };
+
+  function corrections(fs) {
+    var rows = E.corrections(findingsInRange(fs), S.settingsDoc ? S.settingsDoc.values : {}, Z.today());
+    var by = { overdue: 0, open: 0, done: 0 }; rows.forEach(function (r) { by[r.state]++; });
+    var pill = function (r) { return Z.pill(r.state === 'done' ? 'pass' : r.state === 'overdue' ? 'fail' : 'warn', t({ done: 'Corrected', overdue: 'Overdue', open: 'Open' }[r.state])); };
+    return '<div class="kpis"><div class="' + (by.overdue ? 'bad' : '') + '"><b>' + by.overdue + '</b><span>' + t('Overdue corrections') + '</span></div><div><b>' + by.open + '</b><span>' + t('Open, still in time') + '</span></div><div><b>' + by.done + '</b><span>' + t('Corrected') + '</span></div></div>' +
+      '<p class="muted" style="margin-top:12px">' + t('Every VAT finding with a tax impact is an error to correct: at or above the threshold, amend the original return within 20 days of discovery; below it, include it in the return for the period of discovery.') + '</p>' +
+      '<section class="paper flush"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Status') + '</th><th>' + t('Finding') + '</th><th class="num">' + t('Tax impact') + '</th><th>' + t('How to correct') + '</th><th>' + t('Discovered') + '</th><th>' + t('Due by') + '</th><th>' + t('Corrected') + '</th></tr></thead><tbody>' +
+      (rows.map(function (r) { return '<tr class="clickable" data-act="gofinding" data-ex="' + r.parentId + '"><td>' + pill(r) + '</td><td><b>' + esc(r.title) + '</b><div class="faint" style="font-size:12.5px">' + esc(exName(r.parentId)) + '</div></td><td class="num">' + fmt(r.taxImpact) + '</td><td>' + t(r.route === 'amend' ? 'Amended return' : 'Return for the period of discovery') + '</td><td class="nowrap">' + Z.ltr(r.discoveredOn) + '</td><td class="nowrap">' + Z.ltr(r.dueBy) + (r.state !== 'done' ? ' <span class="' + (r.daysLeft < 0 ? 'diff-bad' : 'faint') + '">(' + r.daysLeft + ')</span>' : '') + '</td><td class="nowrap">' + esc(r.correctedOn || r.correctedPeriod || '') + '</td></tr>'; }).join('') || '<tr><td colspan="7" class="empty">' + t('No VAT findings with a tax impact in this range.') + '</td></tr>') + '</tbody></table></div></section>';
+  }
+
+  // ---------------------------------------------------------------- ZATCA requests and assessments
+  var QTYPES = [['information', 'Information request'], ['visit', 'Field visit'], ['assessment', 'Assessment'], ['decision', 'Committee decision']];
+  Z.views.requests = function () {
+    return Z.list('requests').then(function (qs) {
+      S.requests = qs;
+      var cfg = S.settingsDoc ? S.settingsDoc.values : {};
+      var rows = qs.map(function (q) { return Object.assign({}, q, E.requestDue(q, cfg, Z.today())); }).sort(function (a, b) { return (a.state === 'closed') - (b.state === 'closed') || String(a.due || '9').localeCompare(String(b.due || '9')); });
+      var pill = function (r) { return Z.pill(r.state === 'closed' ? 'pass' : r.state === 'overdue' ? 'fail' : r.state === 'urgent' ? 'risk' : 'na', t({ closed: 'Closed', overdue: 'Overdue', urgent: 'Due within 7 days', open: 'Open' }[r.state])); };
+      Z.setMain('<div class="pagehead"><div><h1>' + t('ZATCA requests and assessments') + '</h1><p>' + t('Every letter from ZATCA with its deadline: information requests, field visits, assessments (60 days to object) and committee decisions (30 days to appeal).') + '</p></div>' +
+        (Z.can('preparer') ? '<button class="btn primary" data-act="editreq">' + t('Record a request') + '</button>' : '') + '</div>' +
+        '<section class="paper flush"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Status') + '</th><th>' + t('Type') + '</th><th>' + t('Entity') + '</th><th>' + t('Reference') + '</th><th>' + t('Received') + '</th><th>' + t('Deadline') + '</th><th class="num">' + t('Amount') + '</th><th>' + t('Owner') + '</th></tr></thead><tbody>' +
+        (rows.map(function (r) { return '<tr class="clickable" data-act="editreq" data-id="' + r.id + '"><td>' + pill(r) + '</td><td>' + esc(t((QTYPES.filter(function (x) { return x[0] === r.type; })[0] || [0, r.type])[1])) + '</td><td>' + esc(Z.entName(Z.entity(r.entityId))) + '</td><td><b>' + esc(r.reference || '') + '</b><div class="faint" style="font-size:12.5px">' + esc(r.items || '') + '</div></td><td class="nowrap">' + Z.ltr(r.receivedOn || '') + '</td><td class="nowrap">' + Z.ltr(r.due || '—') + (r.state !== 'closed' && r.daysLeft != null ? ' <span class="' + (r.daysLeft <= 7 ? 'diff-bad' : 'faint') + '">(' + r.daysLeft + ' ' + t('days') + ')</span>' : '') + '</td><td class="num">' + (r.amount ? fmt(r.amount) : '') + '</td><td>' + esc(r.owner || '') + '</td></tr>'; }).join('') || '<tr><td colspan="8" class="empty">' + t('No requests recorded. When ZATCA writes, record it here so nobody misses the deadline.') + '</td></tr>') + '</tbody></table></div></section>');
+    });
+  };
+  Z.ACT.editreq = function (el) {
+    var q = (S.requests || []).filter(function (x) { return x.id === el.dataset.id; })[0] || { type: 'information', status: 'open', entityId: S.entityId, receivedOn: Z.today() };
+    S.editQ = q;
+    var sel = function (name, cur, opts) { return '<select name="' + name + '">' + opts.map(function (o) { return '<option value="' + o[0] + '"' + (cur === o[0] ? ' selected' : '') + '>' + esc(t(o[1])) + '</option>'; }).join('') + '</select>'; };
+    Z.modal(q.id ? q.reference || t('Request') : t('Record a request'), '<form id="qf" class="grid g2">' +
+      '<label class="f"><span>' + t('Type') + '</span>' + sel('type', q.type, QTYPES) + '</label>' +
+      '<label class="f"><span>' + t('Entity') + '</span>' + sel('entityId', q.entityId, S.entities.map(function (e) { return [e.id, Z.entName(e)]; })) + '</label>' +
+      Z.fld('reference', t('ZATCA reference'), q.reference, 'text', 'required') + Z.fld('period', t('Period concerned'), q.period, 'text', 'placeholder="2026-Q3"') +
+      Z.fld('receivedOn', t('Received on'), q.receivedOn, 'date', 'required') + Z.fld('dueOn', t('Deadline given by ZATCA'), q.dueOn, 'date', '', t('Leave empty for assessments and decisions: 60 / 30 days are applied.')) +
+      Z.fld('amount', t('Amount assessed (SAR)'), q.amount, 'number', 'step="0.01"') + Z.fld('owner', t('Owner'), q.owner, 'text') +
+      '<label class="f" style="grid-column:1/-1"><span>' + t('What is requested / assessed') + '</span><textarea name="items">' + esc(q.items || '') + '</textarea></label>' +
+      '<label class="f"><span>' + t('Status') + '</span>' + sel('status', q.status, [['open', 'Open'], ['responded', 'Responded'], ['closed', 'Closed']]) + '</label>' + Z.fld('respondedOn', t('Responded on'), q.respondedOn, 'date') + '</form>',
+      (q.id && Z.can('preparer') ? '<button class="btn danger" data-act="delreq" data-id="' + q.id + '">' + t('Delete') + '</button>' : '') + '<button class="btn" data-act="closemodal">' + t('Cancel') + '</button>' + (Z.can('preparer') ? '<button class="btn primary" data-act="savereq">' + t('Save') + '</button>' : ''));
+  };
+  Z.ACT.savereq = function () {
+    var f = document.getElementById('qf'); if (!f.reportValidity()) return;
+    var d = Object.assign({}, S.editQ, Object.fromEntries(new FormData(f))); d.amount = d.amount === '' ? null : +d.amount; d.label = d.reference;
+    Z.save('requests', d).then(function () { Z.closeModal(); Z.toast(t('Saved')); Z.route(); });
+  };
+  Z.ACT.delreq = function (el) { if (!confirm(t('Delete this request?'))) return; Z.call('remove', { table: 'requests', id: el.dataset.id }).then(function () { Z.closeModal(); Z.route(); }); };
+  // dashboard alert: deadlines within 7 days
+  Z.requestAlert = function () {
+    var box = document.getElementById('reqalert'); if (!box) return;
+    Z.list('requests').then(function (qs) {
+      var cfg = S.settingsDoc ? S.settingsDoc.values : {}, hot = qs.map(function (q) { return Object.assign({}, q, E.requestDue(q, cfg, Z.today())); }).filter(function (r) { return r.state === 'urgent' || r.state === 'overdue'; });
+      if (!hot.length || !document.getElementById('reqalert')) return;
+      box.innerHTML = '<section class="paper" style="border-color:var(--red);display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap"><div><h3>' + hot.length + ' ' + t('ZATCA deadlines within 7 days or overdue') + '</h3><p class="muted" style="margin:2px 0 0">' + hot.map(function (r) { return esc(r.reference) + ' — ' + Z.ltr(r.due); }).join(' · ') + '</p></div><a class="btn primary" href="#/requests">' + t('Open requests') + '</a></section>';
+    }).catch(function () {});
+  };
 
   function exposure(fs) {
     var rows = ents().map(function (e) {
@@ -282,3 +336,5 @@
     XLSX.writeFile(wb, 'annual-reconciliation-' + e.name.replace(/\W+/g, '-') + '-' + year + '.xlsx');
   };
 })();
+// the dashboard shows ZATCA deadlines that are close
+(function () { var dash = Z.views.dashboard; Z.views.dashboard = function (h) { var r = dash(h); setTimeout(Z.requestAlert, 0); return r; }; })();

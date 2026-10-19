@@ -183,6 +183,42 @@ t('Zakat: base below adjusted net profit is raised to it at a flat 2.5%', functi
   assert.strictEqual(z.baseUsed, 2000000); assert.strictEqual(z.zakat, 50000); assert.strictEqual(byId(z.checks, 'Z1').status, 'warn');
 });
 
+console.log('return integrity, cross-period, QR, POS, corrections, requests');
+var R4 = E.runAll({ entity: demo.entity, periodKey: demo.period, settings: {}, data: demo.datasets, returnBoxes: demo.returnBoxes, reconItems: demo.reconItems, prevNetVat: demo.prevNetVat, prevWhtTax: demo.prevWhtTax,
+  filing: demo.filing, recovery: demo.recovery, history: demo.history, exciseReturn: demo.exciseReturn, priorPurchaseKeys: demo.priorPurchaseKeys, today: '2026-11-05', samples: [], checklist: [], findings: [] });
+t('V13 box 14 at or above SAR 15,000 fails; below passes', function () {
+  var b = JSON.parse(JSON.stringify(demo.returnBoxes)); b[14].vat = 18000;
+  assert.strictEqual(byId(E.runReturnIntegrity({ settings: E.mergeSettings({}), returnBoxes: b }).checks, 'V13').status, 'fail');
+  b[14].vat = 9000; assert.strictEqual(byId(E.runReturnIntegrity({ settings: E.mergeSettings({}), returnBoxes: b }).checks, 'V13').status, 'pass');
+});
+t('V14 box 15 must equal the previous credit', function () {
+  var b = JSON.parse(JSON.stringify(demo.returnBoxes)); b[15].vat = 5000;
+  assert.strictEqual(byId(E.runReturnIntegrity({ settings: E.mergeSettings({}), returnBoxes: b, prevNetVatBox16: -5000 }).checks, 'V14').status, 'pass');
+  assert.strictEqual(byId(E.runReturnIntegrity({ settings: E.mergeSettings({}), returnBoxes: b, prevNetVatBox16: 4000 }).checks, 'V14').status, 'fail');
+});
+t('A18 the supplier invoice already claimed in August', function () { var a = byId(R4.analytics.tests, 'A18'); assert.strictEqual(a.count, 1); assert.ok(/2026-08/.test(a.items[0].reason)); });
+t('QR encode/decode round trip with Arabic', function () {
+  var q = E.decodeQr(E.encodeQr({ sellerName: 'شركة النور', vatNo: '310123456700003', timestamp: '2026-09-01T10:00:00Z', total: 115, vat: 15 }));
+  assert.strictEqual(q.sellerName, 'شركة النور'); assert.strictEqual(q.total, 115); assert.strictEqual(q.vat, 15);
+});
+t('E11 two QR codes do not match their invoices', function () { var c = byId(R4.einv.checks, 'E11'); assert.strictEqual(c.counts.list, 2); });
+t('P1 card takings above B2C sales; P2 POS settlements tie to the bank', function () {
+  assert.strictEqual(byId(R4.bank.checks, 'P1').status, 'fail'); assert.strictEqual(byId(R4.bank.checks, 'P2').status, 'pass');
+});
+t('corrections register: amend within 20 days at or above SAR 15,000', function () {
+  var c = E.corrections([
+    { tax: 'VAT', taxImpact: 20000, discoveredOn: '2026-09-01' },
+    { tax: 'VAT', taxImpact: 20000, discoveredOn: '2026-09-01', correctedOn: '2026-09-15' },
+    { tax: 'VAT', taxImpact: 3000, discoveredOn: '2026-09-10' },
+    { tax: 'WHT', taxImpact: 900 }], {}, '2026-10-19');
+  assert.strictEqual(c.length, 3); assert.strictEqual(c[0].state, 'overdue'); assert.strictEqual(c[0].dueBy, '2026-09-21');
+  assert.strictEqual(c[1].state, 'done'); assert.strictEqual(c[2].route, 'next'); assert.strictEqual(c[2].dueBy, '2026-10-31');
+});
+t('requests: objection window 60 days after an assessment', function () {
+  var a = E.requestDue(demo.requests[1], {}, '2026-10-19'); assert.strictEqual(a.due, '2026-10-24'); assert.strictEqual(a.state, 'urgent');
+  var i = E.requestDue(demo.requests[0], {}, '2026-10-19'); assert.strictEqual(i.due, '2026-10-22'); assert.strictEqual(i.daysLeft, 3);
+});
+
 console.log('regulatory rules');
 var S0 = E.mergeSettings({});
 t('Art. 63: SAR 15,000 threshold and routes', function () {

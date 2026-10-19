@@ -180,6 +180,40 @@ t('owner can (re)share the sheet with themselves', function () {
   var r = ok(call({ action: 'shareSheet', token: A.token }));
   assert.ok(/docs\.google\.com\/spreadsheets/.test(r.url));
 });
+t('data cycle: upload → Sheets (chunked) → read back → recompute gives identical results', function () {
+  var E = require('../web/engine.js'); global.ZEngine = E;
+  var demo = require('../web/demo.js').gen();
+  var ce = ok(call({ action: 'save', token: A.token, table: 'entities', doc: { name: 'Cycle Co', trn: demo.entity.trn, mapping: demo.entity.mapping } })).doc;
+  var cx = ok(call({ action: 'save', token: A.token, table: 'exercises', doc: { entityId: ce.id, period: demo.period, status: 'in_progress', returnBoxes: demo.returnBoxes, filing: demo.filing } })).doc;
+  var sent = 0;
+  Object.keys(demo.datasets).forEach(function (k) {
+    var rows = demo.datasets[k].map(function (r, i) { return Object.assign({ _r: i + 2 }, r); });
+    sent += rows.length;
+    var ds = ok(call({ action: 'save', token: A.token, table: 'datasets', doc: { parentId: cx.id, kind: k, rowCount: rows.length } })).doc;
+    ok(call({ action: 'save', token: A.token, table: 'rows', doc: Object.assign({ id: ds.id, parentId: cx.id }, E.packRows(rows)) }));
+  });
+  // read back exactly as the client does (Z.loadExercise)
+  var loaded = {}, got = 0;
+  ok(call({ action: 'list', token: A.token, table: 'datasets', parentId: cx.id })).docs.forEach(function (d) {
+    var back = E.unpackRows(ok(call({ action: 'get', token: A.token, table: 'rows', id: d.id })).doc);
+    got += back.length; (loaded[d.kind] = loaded[d.kind] || []).push.apply(loaded[d.kind], back);
+  });
+  assert.strictEqual(got, sent, 'every row came back');
+  var exBack = ok(call({ action: 'get', token: A.token, table: 'exercises', id: cx.id })).doc;
+  var ctx = function (data, boxes, filing) {
+    return { entity: demo.entity, periodKey: demo.period, settings: {}, data: data, returnBoxes: boxes, reconItems: demo.reconItems, prevNetVat: demo.prevNetVat, prevWhtTax: demo.prevWhtTax,
+      filing: filing, recovery: demo.recovery, history: demo.history, exciseReturn: demo.exciseReturn, priorPurchaseKeys: demo.priorPurchaseKeys, today: '2026-11-05', samples: [], checklist: [], findings: [] };
+  };
+  var a = E.runAll(ctx(demo.datasets, demo.returnBoxes, demo.filing)), b = E.runAll(ctx(loaded, exBack.returnBoxes, exBack.filing));
+  var sig = function (R) {
+    return R.vat.checks.concat(R.wht.checks, R.bank.checks, R.einv.checks, R.filing.checks, R.other.checks).map(function (c) { return c.id + ':' + c.status + ':' + c.diff + ':' + (c.exposure || 0); })
+      .concat(R.analytics.tests.map(function (x) { return x.id + ':' + x.status + ':' + x.count; })).join('|');
+  };
+  assert.strictEqual(sig(b), sig(a));
+  assert.strictEqual(b.score.score, a.score.score); assert.strictEqual(b.exposure, a.exposure);
+  var bk = books[A.tenant.spreadsheetUrl.split('/d/')[1]];
+  assert.ok(bk._sheets._chunks._rows.length > 1, 'large datasets were chunked');
+});
 t('audit trail records changes for managers', function () {
   var a = ok(call({ action: 'list', token: A.token, table: 'audit' })).docs;
   assert.ok(a.length > 5 && a.some(function (x) { return x.action === 'delete'; }));

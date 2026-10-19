@@ -34,6 +34,12 @@
  *     standard price is higher; 200 packs missing from the designated-zone count
  *   - sweetened juice at 9 g sugar / 100 ml declared at SAR 1.09 per litre (correct)
  *   - Zakat for 2025 declared at SAR 380,000 against a worksheet of 386,652.54
+ *   - QR codes on the first 20 provider invoices: one carries the wrong seller
+ *     TRN, one a total SAR 100 off
+ *   - POS / mada card takings well above the simplified (B2C) sales declared;
+ *     POS net settlements tie to the bank
+ *   - one supplier invoice already claimed in August
+ *   - an open ZATCA information request and an assessment with days left to object
  */
 (function (root) {
   'use strict';
@@ -209,6 +215,16 @@
     prov[260].status = 'WARNING'; prov[260].message = 'BR-KSA-F-06: seller address is incomplete';
     prov.push({ invoice: 'POS-88417', type: 'simplified', docType: 'INV', issuedAt: '2026-09-19T21:14', submittedAt: '2026-09-19T21:20', status: 'REPORTED', icv: ++ctr['POS-02'], egs: 'POS-02', uuid: 'u-pos', buyerVat: '', ref: '', net: 4200, vat: 630, message: '' });
 
+    var TRN = '310123456700003';
+    prov.slice(0, 20).forEach(function (x, i) {
+      x.qr = E.encodeQr({ sellerName: 'Al Noor Trading Co.', vatNo: i === 3 ? '310123456700099' : TRN, timestamp: x.issuedAt + ':00Z',
+        total: r2((+x.net || 0) + (+x.vat || 0) + (i === 7 ? 100 : 0)), vat: x.vat });
+    });
+    // POS: one settlement per mada batch credited in the bank, 1.5% fees
+    var pos = bank.filter(function (l) { return /mada/i.test(l.description); }).map(function (l, i) {
+      var g = r2(l.credit / 0.985); return { date: l.date, terminal: 'POS-0' + (1 + i % 3), reference: l.reference, gross: g, fees: r2(g - l.credit), net: l.credit };
+    });
+
     var einv = sys.filter(function (x) { return x.flow === 'S'; }).filter(function (x, i5) { return i5 !== 55 && i5 !== 233 && i5 !== 470; })
       .map(function (x, i6) { return { invoice: x.invoice, date: x.date, uuid: 'uuid-' + i6, status: i6 === 101 ? 'REJECTED' : x.vatNo ? 'CLEARED' : 'REPORTED', net: x.net, vat: x.vat }; });
     var customs = imports.slice(0, 9).map(function (x, i7) { return { declaration: 'BYN-26-' + (40100 + i7), date: x.date, party: x.party, value: x.net, vat: x.vat }; });
@@ -225,6 +241,11 @@
       filing: { vatFiledOn: '2026-10-28', vatPaidOn: '2026-10-29', vatPaidAmount: '', whtFiledOn: '2026-10-12', whtPaidOn: '2026-10-12' },
       recovery: { method: 'none' },
       exciseReturn: 195900,
+      priorPurchaseKeys: (function () { var o = {}; o[E.purchaseKey(purch[50])] = '2026-08'; return o; })(),
+      requests: [
+        { type: 'information', reference: 'ZATCA-IR-2026-55821', receivedOn: '2026-10-12', dueOn: '2026-10-22', items: 'Sales listing Q3 2026, bank statements Jul–Sep, 25 sample tax invoices', owner: 'Tax manager', status: 'open' },
+        { type: 'assessment', reference: 'ZATCA-AS-2026-11402', period: '2025-Q4', receivedOn: '2026-08-25', amount: 46500, items: 'Assessment of input VAT on hospitality and vehicle expenses', owner: 'CFO', status: 'open' }
+      ],
       zakat2025: { capital: 10000000, reserves: 2000000, retainedEarnings: 6500000, provisions: 800000, longTermFinancing: 3000000, adjustedNetProfit: 4200000,
         netFixedAssets: 9500000, longTermInvestments: 2000000, yearType: 'gregorian', fyEnd: '2025-12-31', filedOn: '2026-04-28', declared: 380000 },
       history: (function () {
@@ -234,7 +255,7 @@
         });
       })(),
       reconItems: [{ check: 'V6', description: 'Other income — scrap sales and insurance claims (out of scope)', amount: 12000 }],
-      datasets: { tb: tb, gl: gl, sys_vat: sys, xls_vat: xls, einv: einv, einv_provider: prov, customs: customs,
+      datasets: { tb: tb, gl: gl, sys_vat: sys, xls_vat: xls, einv: einv, einv_provider: prov, pos: pos, customs: customs,
         rett: [
           { date: '2026-09-14', deed: '4301928', property: 'Warehouse — Al Sulay, Riyadh', buyer: 'Gulf Logistics Parks', value: 3200000, rett: 128000, paidOn: '2026-10-20', exemption: '' },
           { date: '2026-09-22', deed: '4302277', property: 'Land plot — Dammam 2nd Industrial', buyer: 'Al Noor Logistics LLC', value: 900000, rett: 0, paidOn: '', exemption: 'Transfer to a wholly owned subsidiary' }

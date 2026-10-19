@@ -5,18 +5,8 @@
   var E = window.ZEngine, S = Z.S, t = Z.t, esc = Z.esc, fmt = Z.fmt;
 
   // ---------------------------------------------------------------- loading
-  function pack(rows) {
-    if (!rows.length) return { cols: [], data: [] };
-    // every key that appears in any row — the first row may lack optional columns
-    var seen = {}, cols = [];
-    rows.forEach(function (r) { Object.keys(r).forEach(function (k) { if (!seen[k]) { seen[k] = 1; cols.push(k); } }); });
-    return { cols: cols, data: rows.map(function (r) { return cols.map(function (c) { return r[c]; }); }) };
-  }
-  function unpack(d) {
-    if (!d) return [];
-    if (d.rows) return d.rows;
-    return (d.data || []).map(function (a) { var o = {}; d.cols.forEach(function (c, i) { o[c] = a[i]; }); return o; });
-  }
+  // one implementation, shared with the data-cycle test (tests/backend.test.js)
+  var pack = E.packRows, unpack = E.unpackRows;
   Z.pack = pack;
 
   Z.loadExercise = function (id) {
@@ -54,6 +44,8 @@
       prevNetVat: pn, prevWhtTax: pw, samples: S.samples, checklist: S.checklist.items, findings: S.findings,
       filing: S.ex.filing || {}, recovery: S.ex.recovery || {}, today: Z.today(), exciseReturn: S.ex.exciseReturn, mktException: S.ex.mktException || {},
       // the same entity's earlier periods, newest first, for the risk-engine trends
+      priorPurchaseKeys: (function () { var o = {}; S.exercises.forEach(function (x) { if (x.entityId === S.ex.entityId && x.period < S.ex.period && x.pkeys) x.pkeys.forEach(function (k) { o[k] = x.period; }); }); return o; })(),
+      prevNetVatBox16: prev && prev.summary && prev.summary.netVat != null ? prev.summary.netVat : null, prevRefunded: !!(prev && prev.refundClaimed),
       history: S.exercises.filter(function (x) { return x.entityId === S.ex.entityId && x.period < S.ex.period && x.summary; })
         .sort(function (a, b) { return a.period < b.period ? 1 : -1; }).map(function (x) { return Object.assign({ period: x.period }, x.summary); })
     };
@@ -79,8 +71,9 @@
       whtLateDays: ((R.filing.checks.filter(function (c) { return c.id === 'C3'; })[0] || {}).a) || 0,
       openFindings: S.findings.filter(function (f) { return f.status !== 'closed'; }).length
     };
-    if (JSON.stringify(sm) === JSON.stringify(S.ex.summary || {}) || S.ex.status === 'closed') return Promise.resolve();
-    S.ex.summary = sm;
+    var pk = E.purchaseKeys(S.data.sys_vat || []);
+    if ((JSON.stringify(sm) === JSON.stringify(S.ex.summary || {}) && JSON.stringify(pk) === JSON.stringify(S.ex.pkeys || [])) || S.ex.status === 'closed') return Promise.resolve();
+    S.ex.summary = sm; S.ex.pkeys = pk;
     return Z.saveEx();
   };
   Z.saveEx = function () {
@@ -280,7 +273,7 @@
   var FIELD_LABELS = { account: 'Account', name: 'Account name', opening: 'Opening', debit: 'Debit', credit: 'Credit', closing: 'Closing', date: 'Date', doc: 'Document', description: 'Description', party: 'Counterparty', country: 'Country', flow: 'Sales / purchase', invoice: 'Invoice no.', vatNo: 'VAT no.', category: 'Tax category', docType: 'Document type', net: 'Net', vat: 'VAT', total: 'Total', box: 'Box', amount: 'Amount', adj: 'Adjustment', uuid: 'UUID', status: 'Status', declaration: 'Declaration no.', value: 'Customs value', reference: 'Reference', balance: 'Balance', paymentType: 'Payment type', gross: 'Gross', rate: 'Rate', wht: 'WHT', dtt: 'Treaty relief', certificate: 'Certificate', paidDate: 'Paid to ZATCA', tax: 'Tax', cls: 'Class', reason: 'Why', expected: 'Expected', statutory: 'Statutory rate', applied: 'Applied rate', shortfall: 'Shortfall', due: 'Due', daysLate: 'Days late', penalty: 'Fine', missing: 'Missing',
     type: 'Invoice type', issuedAt: 'Issued', submittedAt: 'Sent to ZATCA', egs: 'EGS unit', icv: 'Counter', buyerVat: 'Buyer VAT no.', ref: 'Original invoice', message: 'ZATCA message',
     property: 'Property', deed: 'Deed no.', buyer: 'Buyer', paidOn: 'Paid on', exemption: 'Exemption', product: 'Product', qty: 'Quantity', retailPrice: 'Retail price', standardPrice: 'Standard price',
-    excise: 'Excise', litres: 'Litres', sugar: 'Sugar g/100 ml', opening: 'Opening', received: 'Received', released: 'Released', exported: 'Exported', seller: 'Seller', sellerVat: 'Seller VAT no.', sellerResident: 'Resident', order: 'Order', channel: 'Channel',
+    excise: 'Excise', litres: 'Litres', sugar: 'Sugar g/100 ml', opening: 'Opening', received: 'Received', released: 'Released', exported: 'Exported', seller: 'Seller', sellerVat: 'Seller VAT no.', terminal: 'Terminal', fees: 'Fees', qr: 'QR', sellerResident: 'Resident', order: 'Order', channel: 'Channel',
     other: 'Compared with', otherNet: 'Their net', otherVat: 'Their VAT', exportRef: 'Export declaration', period: 'Period', average: 'Average', overdue: 'Days overdue', owner: 'Owner', title: 'Finding', severity: 'Severity', taxImpact: 'Tax impact', entity: 'Entity' };
   function fieldLabel(k) { return t(FIELD_LABELS[k] || k); }
   Z.fieldLabel = fieldLabel;

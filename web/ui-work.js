@@ -202,7 +202,10 @@
       '<label class="f" style="grid-column:1/-1"><span>' + t('Corrective action') + '</span><textarea name="action"' + (lk ? ' disabled' : '') + '>' + esc(f.action || '') + '</textarea></label>' +
       Z.fld('owner', t('Owner'), f.owner, 'text', lk ? 'disabled' : '') + Z.fld('due', t('Due date'), f.due, 'date', lk ? 'disabled' : '') +
       '<label class="f"><span>' + t('Status') + '</span>' + sel('status', f.status, [['open', 'Open'], ['in_progress', 'In progress'], ['closed', 'Closed']]) + '</label>' +
-      Z.fld('checkId', t('Linked check'), f.checkId, 'text', lk ? 'disabled' : '') + '</form>',
+      Z.fld('checkId', t('Linked check'), f.checkId, 'text', lk ? 'disabled' : '') +
+      Z.fld('discoveredOn', t('Error discovered on'), f.discoveredOn || Z.today(), 'date', lk ? 'disabled' : '', t('Starts the 20-day clock for an amended return.')) +
+      Z.fld('correctedOn', t('Amended return filed on'), f.correctedOn, 'date', lk ? 'disabled' : '') +
+      Z.fld('correctedPeriod', t('Or corrected in the return for period'), f.correctedPeriod, 'text', (lk ? 'disabled ' : '') + 'placeholder="2026-10"') + '</form>',
       (f.id && !lk ? '<button class="btn danger" data-act="delfinding" data-id="' + f.id + '">' + t('Delete') + '</button>' : '') + '<button class="btn" data-act="closemodal">' + t('Cancel') + '</button>' + (lk ? '' : '<button class="btn primary" data-act="savefinding">' + t('Save finding') + '</button>'));
     Z.CHG.fcalc();
   }
@@ -304,7 +307,7 @@
       var byP = {}; d.history.forEach(function (h) { byP[h.period] = h; });
       var hist = [['2026-06', 92, 7650], ['2026-07', 88, 8920], ['2026-08', 81, 9840]].map(function (h) {
         var f = byP[h[0]] || {};
-        return { entityId: e.id, period: h[0], status: 'closed', signedOffBy: 'Tax manager', signedOffAt: h[0] + '-28T10:00:00Z', label: e.name + ' ' + h[0], reconItems: [], checkNotes: {}, bankOverrides: {},
+        return { entityId: e.id, period: h[0], status: 'closed', pkeys: h[0] === '2026-08' ? Object.keys(d.priorPurchaseKeys) : [], signedOffBy: 'Tax manager', signedOffAt: h[0] + '-28T10:00:00Z', label: e.name + ' ' + h[0], reconItems: [], checkNotes: {}, bankOverrides: {},
           filing: { vatFiledOn: E.deadlines(h[0]).vat, vatPaidOn: E.deadlines(h[0]).vat, whtFiledOn: E.deadlines(h[0]).wht, whtPaidOn: E.deadlines(h[0]).wht },
           summary: { score: h[1], grade: h[1] >= 85 ? 'ready' : 'mostly', exposure: h[1] > 90 ? 0 : 4200, fails: h[1] > 90 ? 0 : 1, warns: 1, netVat: f.netVat, whtTax: h[2], openFindings: 0,
             sales: f.sales, inputVat: f.inputVat, outputVat: f.outputVat, zeroShare: f.zeroShare, vatLateDays: 0, whtLateDays: 0 } };
@@ -313,7 +316,7 @@
     }).then(function () {
       return Z.save('exercises', { entityId: entId, period: d.period, status: 'in_progress', label: ent.name + ' ' + d.period, returnBoxes: d.returnBoxes, reconItems: d.reconItems.map(function (r) { return Object.assign({ id: Z.uid('RI') }, r); }), checkNotes: {}, bankOverrides: {}, filing: d.filing, recovery: d.recovery, exciseReturn: d.exciseReturn });
     }).then(function (ex) {
-      var files = { tb: 'TB_Sep2026.xlsx', gl: 'GL_foreign_services.xlsx', sys_vat: 'NetSuite_VAT_Report_Sep2026.xlsx', xls_vat: 'VAT_workings_Sep2026.xlsx', einv: 'Fatoora_export_Sep2026.csv', einv_provider: 'EInvoicing_provider_log_Sep2026.xlsx', rett: 'RETT_register_2026.xlsx', excise: 'Excise_register_Sep2026.xlsx', excise_stock: 'Excise_stock_Sep2026.xlsx', customs: 'Customs_Bayan_Sep2026.xlsx', bank: 'SNB_statement_Sep2026.xlsx', wht_reg: 'WHT_register_Sep2026.xlsx', ret_wht: 'WHT_return_Sep2026.xlsx', xls_wht: 'WHT_workings_Sep2026.xlsx' };
+      var files = { tb: 'TB_Sep2026.xlsx', gl: 'GL_foreign_services.xlsx', sys_vat: 'NetSuite_VAT_Report_Sep2026.xlsx', xls_vat: 'VAT_workings_Sep2026.xlsx', einv: 'Fatoora_export_Sep2026.csv', einv_provider: 'EInvoicing_provider_log_Sep2026.xlsx', pos: 'POS_mada_settlements_Sep2026.xlsx', rett: 'RETT_register_2026.xlsx', excise: 'Excise_register_Sep2026.xlsx', excise_stock: 'Excise_stock_Sep2026.xlsx', customs: 'Customs_Bayan_Sep2026.xlsx', bank: 'SNB_statement_Sep2026.xlsx', wht_reg: 'WHT_register_Sep2026.xlsx', ret_wht: 'WHT_return_Sep2026.xlsx', xls_wht: 'WHT_workings_Sep2026.xlsx' };
       var jobs = Object.keys(d.datasets).map(function (k) {
         var rows = d.datasets[k].map(function (r, i) { return Object.assign({ _r: i + 2 }, r); });
         return Z.save('datasets', { parentId: ex.id, kind: k, fileName: files[k], rowCount: rows.length, errors: 0, uploadedAt: new Date().toISOString(), label: files[k] })
@@ -321,6 +324,7 @@
       });
       var cl = { id: ex.id, parentId: ex.id, items: E.DEFAULT_CHECKLIST.map(function (c, i) { return { id: 'c' + i, area: c[0], en: c[1], ar: c[2], status: i < 7 || i === 14 || i === 17 ? 'available' : i === 9 || i === 20 ? 'requested' : 'missing', owner: i < 7 ? 'Tax team' : '', link: i < 3 ? 'https://drive.google.com/' : '', note: '' }; }) };
       jobs.push(Z.save('checklists', cl));
+      d.requests.forEach(function (q) { jobs.push(Z.save('requests', Object.assign({ entityId: entId }, q))); });
       jobs.push(Z.save('annual', { id: entId + '_2025', entityId: entId, year: 2025, items: [], zakat: d.zakat2025 }));
       var ent2 = { name: 'Al Noor Logistics LLC', nameAr: 'النور للخدمات اللوجستية', trn: '311987654300003', cr: '1010223344', vatFreq: 'quarterly', whtRegistered: false, erp: 'Odoo', active: true, demo: true, mapping: { outputVat: '2210', inputVat: '1410', revenue: '4*' } };
       jobs.push(Z.save('entities', ent2).then(function (e2) {
