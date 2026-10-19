@@ -420,3 +420,16 @@ table.matrix td.bl { border-inline-start: 1px solid var(--line); }
   .ready-row > .parts { flex: 1 1 100% !important; min-width: 0; }
   .parts .p { grid-template-columns: minmax(0, 1fr) 90px 44px; }
 }
+
+/* users x companies access matrix */
+.t.access th.c, .t.access td.c { text-align: center; width: 1%; }
+.t.access th.ent span { display: inline-block; max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
+.t.access input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
+.t.access input.implied { opacity: .45; }
+.t.access select { min-height: 32px; width: auto; }
+.t.access tr.off td { opacity: .55; }
+.paper.note { display: flex; gap: 8px; align-items: center; background: var(--accent-soft); border-color: transparent; color: var(--ink); margin-bottom: 16px; }
+.access-pick { border: 1px solid var(--line); border-radius: var(--r-s); padding: 10px 12px; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 6px 14px; }
+.access-pick legend { padding: 0 6px; font-weight: 700; }
+.access-pick .all, .access-pick small { grid-column: 1 / -1; }
+.access-pick input { width: auto; margin-inline-end: 6px; }

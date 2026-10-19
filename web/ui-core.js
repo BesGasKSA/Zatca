@@ -623,28 +623,81 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   };
 
   // ---------------------------------------------------------------- users
+  // Users and company access. One row per person, one column per company:
+  // tick a box to give access. The server enforces it on every read and write.
+  var ROLE_LIST = ['owner', 'manager', 'preparer', 'viewer'];
+  var hasAll = function (u) { return u.role === 'owner' || (u.entityIds || []).indexOf('*') >= 0; };
+  var canSee = function (u, e) { return hasAll(u) || (u.entityIds || []).indexOf(e.id) >= 0; };
   Z.views.users = function () {
-    if (S.api.mode !== 'cloud') return Z.setMain('<div class="paper empty"><h2>' + t('Users need the Google Sheets backend') + '</h2><p>' + t('On this device there is one user. Connect the backend in Settings to invite your team with roles and entity access.') + '</p></div>');
+    if (!Z.can('owner')) return Z.setMain('<div class="paper empty"><h2>' + t('Only the owner manages users') + '</h2></div>');
     return Z.call('usersList').then(function (r) {
       S.users = r.users;
+      var ents = S.entities, me = S.user.id, demo = S.api.mode !== 'cloud';
+      var active = r.users.filter(function (u) { return u.active !== false; });
+      var head = '<tr><th>' + t('User') + '</th><th>' + t('Role') + '</th><th class="c">' + t('All companies') + '</th>' +
+        ents.map(function (e) { return '<th class="c ent" title="' + esc(Z.entName(e)) + '"><span>' + esc(Z.entName(e)) + '</span></th>'; }).join('') + '<th>' + t('Status') + '</th></tr>';
       var rows = r.users.map(function (u) {
-        var ents = (u.entityIds || []).indexOf('*') >= 0 ? t('All entities') : (u.entityIds || []).map(function (id) { return Z.entName(Z.entity(id)); }).join(', ');
-        return '<tr class="clickable" data-act="edituser" data-id="' + u.id + '"><td><b>' + esc(u.name) + '</b><div class="faint">' + esc(u.email) + '</div></td><td>' + esc(t(cap(u.role))) + '</td><td>' + esc(ents) + '</td><td>' + (u.active ? Z.pill('pass', t('Active')) : Z.pill('na', t('Disabled'))) + '</td><td>' + esc(String(u.lastLoginAt || '').slice(0, 16).replace('T', ' ')) + '</td></tr>';
+        var self = u.id === me, owner = u.role === 'owner', lock = self || owner;
+        var roleSel = self ? '<span class="pill na">' + esc(t(cap(u.role))) + '</span>' :
+          '<select data-chg="urole" data-u="' + u.id + '" aria-label="' + esc(t('Role') + ' — ' + u.name) + '">' + ROLE_LIST.map(function (x) { return '<option value="' + x + '"' + (u.role === x ? ' selected' : '') + '>' + t(cap(x)) + '</option>'; }).join('') + '</select>';
+        var box = function (attrs, on, label) { return '<td class="c"><input type="checkbox" ' + attrs + (on ? ' checked' : '') + (lock ? ' disabled' : '') + ' aria-label="' + esc(label) + '"></td>'; };
+        return '<tr' + (u.active === false ? ' class="off"' : '') + '><td><a href="#" data-act="edituser" data-id="' + u.id + '"><b>' + esc(Z.userLabel(u)) + '</b></a><div class="faint">' + esc(u.email) + (self ? ' · ' + t('you') : '') + '</div></td><td>' + roleSel + '</td>' +
+          box('data-chg="uall" data-u="' + u.id + '"', hasAll(u), t('All companies') + ' — ' + u.name) +
+          ents.map(function (e) { return box('data-chg="uacc" data-u="' + u.id + '" data-e="' + e.id + '"' + (hasAll(u) ? ' class="implied"' : ''), canSee(u, e), Z.entName(e) + ' — ' + u.name); }).join('') +
+          '<td>' + (u.active === false ? Z.pill('fail', t('Disabled')) : Z.pill('pass', t('Active'))) + '</td></tr>';
       }).join('');
-      Z.setMain('<div class="pagehead"><div><h1>' + t('Users') + '</h1><p>' + t('Owner: everything. Manager: entities, settings and sign-off. Preparer: uploads, checks, samples and findings. Viewer: read only.') + '</p></div><button class="btn primary" data-act="edituser">' + t('Add user') + '</button></div>' +
-        '<div class="paper flush"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('User') + '</th><th>' + t('Role') + '</th><th>' + t('Entity access') + '</th><th>' + t('Status') + '</th><th>' + t('Last sign-in') + '</th></tr></thead><tbody>' + rows + '</tbody></table></div></div>');
+      // per company: who works on it, and whether someone other than the owner can sign it off
+      var cover = ents.map(function (e) {
+        var people = active.filter(function (u) { return canSee(u, e); });
+        var signers = people.filter(function (u) { return u.role === 'manager' || u.role === 'owner'; }), preparers = people.filter(function (u) { return u.role === 'preparer'; });
+        var warn = !preparers.length ? t('No preparer') : '';
+        return '<tr><td><b>' + esc(Z.entName(e)) + '</b></td><td class="num">' + people.length + '</td><td>' + esc(preparers.map(Z.userLabel).join(', ') || '—') + '</td><td>' + esc(signers.map(Z.userLabel).join(', ')) + '</td><td>' + (warn ? Z.pill('risk', warn) : Z.pill('pass', t('Covered'))) + '</td></tr>';
+      }).join('');
+      Z.setMain('<div class="pagehead"><div><p class="eyebrow">' + t('Organisation') + '</p><h1>' + t('Users and company access') + '</h1><p>' + t('Tick a box to let a person work on a company. Owner: everything. Manager: settings and sign-off. Preparer: uploads, checks, samples and findings. Viewer: read only.') + '</p></div>' +
+        '<button class="btn primary" data-act="edituser">' + Z.icon('user-plus') + ' ' + t('Add user') + '</button></div>' +
+        (demo ? '<div class="paper note">' + Z.icon('info') + ' ' + t('Demo mode: you can set up users and access to try it, but they cannot sign in. Connect the Google Sheets backend to invite your team.') + '</div>' : '') +
+        '<div class="stack"><div class="kpis">' +
+        '<div>' + Z.icon('users-three') + '<b>' + active.length + '</b><span>' + t('Active users') + '</span></div>' +
+        '<div>' + Z.icon('buildings') + '<b>' + ents.length + '</b><span>' + t('Companies') + '</span></div>' +
+        '<div>' + Z.icon('seal-check') + '<b>' + active.filter(function (u) { return u.role === 'owner' || u.role === 'manager'; }).length + '</b><span>' + t('Can sign off') + '</span></div>' +
+        '<div>' + Z.icon('user-circle-dashed') + '<b>' + active.filter(function (u) { return !hasAll(u) && !(u.entityIds || []).length; }).length + '</b><span>' + t('Without any company') + '</span></div></div>' +
+        '<section class="paper flush"><div class="tbl-wrap"><table class="t access">' + '<thead>' + head + '</thead><tbody>' + rows + '</tbody></table></div>' +
+        '<p class="faint" style="padding:10px 18px;margin:0;font-size:12.5px">' + t('Owners always see every company. "All companies" includes companies added later. Changes apply at the person\'s next click; no need to sign out.') + '</p></section>' +
+        (ents.length ? '<section class="paper flush"><div style="padding:14px 18px"><h2>' + t('Coverage by company') + '</h2><p class="muted" style="margin:2px 0 0">' + t('Every company needs someone to prepare it and someone to sign it off.') + '</p></div><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Company') + '</th><th class="num">' + t('People') + '</th><th>' + t('Preparers') + '</th><th>' + t('Can sign off') + '</th><th>' + t('Status') + '</th></tr></thead><tbody>' + cover + '</tbody></table></div></section>' : '') + '</div>');
     });
   };
+  Z.userLabel = function (u) { return u.id === 'local' ? t(u.name) : u.name; };
+  function saveAccess(u, msg) {
+    return Z.call('userSave', { user: { id: u.id, name: u.name, email: u.email, role: u.role, active: u.active !== false, entityIds: u.entityIds } })
+      .then(function () { Z.toast(msg || t('Access updated')); Z.route(); })
+      .catch(function () { Z.route(); });
+  }
+  var userById = function (id) { return Object.assign({}, (S.users || []).filter(function (x) { return x.id === id; })[0]); };
+  Z.CHG.urole = function (el) { var u = userById(el.dataset.u); u.role = el.value; saveAccess(u, t('Role updated')); };
+  Z.CHG.uall = function (el) {
+    var u = userById(el.dataset.u);
+    // switching "all" off keeps the companies that exist today, so nobody loses access by surprise
+    u.entityIds = el.checked ? ['*'] : S.entities.map(function (e) { return e.id; });
+    saveAccess(u);
+  };
+  Z.CHG.uacc = function (el) {
+    var u = userById(el.dataset.u), ids = hasAll(u) ? S.entities.map(function (e) { return e.id; }) : (u.entityIds || []).slice();
+    ids = ids.filter(function (id) { return id !== el.dataset.e; });
+    if (el.checked) ids.push(el.dataset.e);
+    u.entityIds = ids;
+    saveAccess(u);
+  };
   Z.ACT.edituser = function (el) {
-    var u = (S.users || []).filter(function (x) { return x.id === el.dataset.id; })[0] || { role: 'preparer', entityIds: ['*'], active: true };
-    var all = (u.entityIds || []).indexOf('*') >= 0;
-    Z.modal(u.id ? u.name : t('Add user'), '<form id="userf" class="grid g2">' + fld('name', t('Name'), u.name, 'text', 'required') + fld('email', t('Email'), u.email, 'email', 'required') +
-      '<label class="f"><span>' + t('Role') + '</span><select name="role">' + ['owner', 'manager', 'preparer', 'viewer'].map(function (r) { return '<option value="' + r + '"' + (u.role === r ? ' selected' : '') + '>' + t(cap(r)) + '</option>'; }).join('') + '</select></label>' +
-      fld('password', u.id ? t('New password (leave blank to keep)') : t('Temporary password'), '', 'password', u.id ? 'minlength="10"' : 'required minlength="10"', t('Share it with the user privately.')) +
-      '<fieldset class="f" style="grid-column:1/-1;border:1px solid var(--rule);border-radius:4px"><legend>' + t('Entity access') + '</legend><label><input type="checkbox" name="all"' + (all ? ' checked' : '') + '> ' + t('All entities, including future ones') + '</label>' +
-      S.entities.map(function (e) { return '<label style="display:block"><input type="checkbox" name="ent" value="' + e.id + '"' + ((u.entityIds || []).indexOf(e.id) >= 0 ? ' checked' : '') + '> ' + esc(Z.entName(e)) + '</label>'; }).join('') + '</fieldset>' +
-      '<label class="f"><span>' + t('Status') + '</span><select name="active"><option value="1">' + t('Active') + '</option><option value="0"' + (u.active === false ? ' selected' : '') + '>' + t('Disabled') + '</option></select></label></form>',
-      '<button class="btn" data-act="closemodal">' + t('Cancel') + '</button><button class="btn primary" data-act="saveuser" data-id="' + (u.id || '') + '">' + t('Save user') + '</button>');
+    var u = (S.users || []).filter(function (x) { return x.id === el.dataset.id; })[0] || { role: 'preparer', entityIds: [], active: true };
+    var all = hasAll(u), self = u.id === S.user.id, cloud = S.api.mode === 'cloud';
+    Z.modal(u.id ? Z.userLabel(u) : t('Add user'), '<form id="userf" class="grid g2">' + fld('name', t('Name'), Z.userLabel(u), 'text', 'required' + (self ? ' disabled' : '')) + fld('email', t('Email'), u.email, 'email', 'required' + (self ? ' disabled' : '')) +
+      '<label class="f"><span>' + t('Role') + '</span><select name="role"' + (self ? ' disabled' : '') + '>' + ROLE_LIST.map(function (r) { return '<option value="' + r + '"' + (u.role === r ? ' selected' : '') + '>' + t(cap(r)) + '</option>'; }).join('') + '</select></label>' +
+      (cloud ? fld('password', u.id ? t('New password (leave blank to keep)') : t('Temporary password'), '', 'password', (u.id ? '' : 'required ') + 'minlength="10" autocomplete="new-password"', t('Share it with the user privately.')) : '<div></div>') +
+      '<fieldset class="f access-pick" style="grid-column:1/-1"><legend>' + t('Company access') + '</legend><label class="all"><input type="checkbox" name="all"' + (all ? ' checked' : '') + (self ? ' disabled' : '') + '> <b>' + t('All companies, including future ones') + '</b></label>' +
+      S.entities.map(function (e) { return '<label><input type="checkbox" name="ent" value="' + e.id + '"' + ((u.entityIds || []).indexOf(e.id) >= 0 ? ' checked' : '') + (self ? ' disabled' : '') + '> ' + esc(Z.entName(e)) + '</label>'; }).join('') +
+      '<small>' + t('Tick nothing to keep the person without access until you choose.') + '</small></fieldset>' +
+      '<label class="f"><span>' + t('Status') + '</span><select name="active"' + (self ? ' disabled' : '') + '><option value="1">' + t('Active') + '</option><option value="0"' + (u.active === false ? ' selected' : '') + '>' + t('Disabled') + '</option></select></label></form>',
+      '<button class="btn" data-act="closemodal">' + t('Cancel') + '</button>' + (self ? '' : '<button class="btn primary" data-act="saveuser" data-id="' + (u.id || '') + '">' + t('Save user') + '</button>'));
   };
   Z.ACT.saveuser = function (el) {
     var form = document.getElementById('userf'); if (!form.reportValidity()) return;

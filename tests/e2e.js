@@ -180,6 +180,24 @@ async function audit(label) {
   await ev("document.getElementById('setf').requestSubmit(); return 1"); await sleep(1200);
   for (const v of ['users', 'audit', 'entities']) { await go('#/vat/' + v); await audit(v); }
 
+  step = 'users and company access';
+  await go('#/vat/users');
+  ok(await ev("return !!document.querySelector('table.access')"), 'access matrix shown');
+  await click('.pagehead [data-act="edituser"]', 800);
+  await setVal('#userf [name=name]', 'Sara Preparer'); await setVal('#userf [name=email]', 'sara@test.sa'); await setVal('#userf [name=role]', 'preparer');
+  await ev("var b = document.querySelector('#userf [name=ent]'); if (b) b.checked = true; return 1");
+  await click('[data-act="saveuser"]', 1500);
+  const sara = "Z.S.users.filter(function (u) { return u.email === 'sara@test.sa'; })[0]";
+  ok(await ev('var u = ' + sara + "; return !!u && u.role === 'preparer' && u.entityIds.length === 1 && u.entityIds[0] === Z.S.entities[0].id"), 'user added with one company');
+  await ev('var u = ' + sara + "; var el = document.querySelector('[data-chg=\"uacc\"][data-u=\"' + u.id + '\"]'); el.checked = false; el.dispatchEvent(new Event('change', { bubbles: true })); return 1"); await sleep(1200);
+  ok(await ev('var u = ' + sara + '; return u.entityIds.length === 0'), 'unticking the only company leaves no access (not all)');
+  await ev('var u = ' + sara + "; var el = document.querySelector('[data-chg=\"uall\"][data-u=\"' + u.id + '\"]'); el.checked = true; el.dispatchEvent(new Event('change', { bubbles: true })); return 1"); await sleep(1200);
+  ok(await ev('var u = ' + sara + "; return u.entityIds[0] === '*'"), 'all companies ticked');
+  await ev('var u = ' + sara + "; var el = document.querySelector('[data-chg=\"urole\"][data-u=\"' + u.id + '\"]'); el.value = 'manager'; el.dispatchEvent(new Event('change', { bubbles: true })); return 1"); await sleep(1200);
+  ok(await ev('var u = ' + sara + "; return u.role === 'manager'"), 'role changed in the matrix');
+  ok(await ev("return document.querySelectorAll('[data-chg=\"uacc\"][data-u=\"local\"]:not([disabled])').length === 0"), 'your own row is locked');
+  await audit('users matrix');
+
   // ---- the demo company: every page, both sections, both languages, desktop and phone
   step = 'demo';
   await ev('Z.ACT.loaddemo(); return 1');

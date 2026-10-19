@@ -203,7 +203,7 @@ function userSave_(s, u) {
     if (cur && cur.id === s.user.id && u.role !== 'owner') throw new Error('cannot_demote_self');
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('bad_email');
     rec.email = email; rec.name = String(u.name || email).slice(0, 120); rec.role = u.role;
-    rec.entityIds = Array.isArray(u.entityIds) && u.entityIds.length ? u.entityIds : ['*'];
+    rec.entityIds = cleanEntityIds_(u.entityIds);
     rec.active = u.active !== false;
     if (u.password) {
       if (String(u.password).length < 10) throw new Error('weak_password');
@@ -215,6 +215,16 @@ function userSave_(s, u) {
     tenantAudit_(s, 'user_saved', 'users', rec.id, rec.email + ' ' + rec.role);
     return rec;
   });
+}
+
+// '*' = every company, including future ones. An empty list = no company: the
+// user sees nothing until given one (it used to fall back to '*', which turned
+// "untick everything" into "see everything").
+function cleanEntityIds_(ids) {
+  if (!Array.isArray(ids)) return ['*'];
+  if (ids.indexOf('*') >= 0) return ['*'];
+  var seen = {};
+  return ids.map(String).filter(function (id) { if (seen[id] || !/^[A-Za-z0-9_-]{1,64}$/.test(id)) return false; seen[id] = 1; return true; }).slice(0, 500);
 }
 
 function changePassword_(s, oldPw, newPw) {

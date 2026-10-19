@@ -123,9 +123,21 @@
           if (p.table === 'datasets') jobs.push(self.all('rows').then(function (mm) { delete mm[p.id]; return self.put('rows', mm); }));
           return Promise.all(jobs).then(function () { self.audit('delete', p.table, p.id, d ? (d.name || d.period || d.title || '') : ''); return { ok: true }; });
         });
-      case 'usersList': return Promise.resolve({ ok: true, users: [user] });
+      case 'usersList':
+        return self.all('users').then(function (m) { return { ok: true, users: [user].concat(Object.keys(m).map(function (k) { return m[k]; })) }; });
+      case 'userSave':
+        return self.all('users').then(function (m) {
+          var u = Object.assign({}, p.user), email = String(u.email || '').trim().toLowerCase();
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw Object.assign(new Error('bad_email'), { code: 'bad_email' });
+          if (email === user.email || Object.keys(m).some(function (k) { return m[k].email === email && m[k].id !== u.id; })) throw Object.assign(new Error('email_taken'), { code: 'email_taken' });
+          if (u.id === 'local') throw Object.assign(new Error('cannot_demote_self'), { code: 'cannot_demote_self' });
+          var rec = Object.assign(m[u.id] || { id: uid('U'), createdAt: new Date().toISOString() }, { name: String(u.name || email).slice(0, 120), email: email, role: u.role, active: u.active !== false,
+            entityIds: !Array.isArray(u.entityIds) ? ['*'] : u.entityIds.indexOf('*') >= 0 ? ['*'] : u.entityIds.slice() });
+          m[rec.id] = rec;
+          return self.put('users', m).then(function () { self.audit('save', 'users', rec.id, rec.email + ' ' + rec.role); return { ok: true, user: rec }; });
+        });
       case 'tenantSave': localStorage.setItem('zr_local_org', p.tenant.name); return Promise.resolve({ ok: true, tenant: Object.assign(tenant, { name: p.tenant.name }) });
-      case 'userSave': case 'changePassword': case 'platformTenants':
+      case 'changePassword': case 'platformTenants':
         return Promise.reject(Object.assign(new Error('cloud_only'), { code: 'cloud_only' }));
       default: return Promise.reject(new Error('unknown_action'));
     }

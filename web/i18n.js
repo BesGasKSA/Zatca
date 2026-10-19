@@ -372,3 +372,14 @@ Object.assign(window.ZI18N, {
   'Open the exercise': 'فتح التمرين', 'Get started in three steps': 'ابدأ في ثلاث خطوات', 'About an hour for the first month; less every month after.': 'نحو ساعة للشهر الأول، وأقل في كل شهر بعده.', 'Hide': 'إخفاء'
 });
 Object.assign(window.ZI18N, { 'You': 'أنت', 'My organisation (this device)': 'منشأتي (هذا الجهاز)' });
+Object.assign(window.ZI18N, {
+  'Only the owner manages users': 'إدارة المستخدمين للمالك فقط', 'All companies': 'كل الشركات', 'you': 'أنت',
+  'No preparer': 'لا يوجد معد', 'Covered': 'مغطاة', 'Users and company access': 'المستخدمون وصلاحيات الشركات',
+  'Tick a box to let a person work on a company. Owner: everything. Manager: settings and sign-off. Preparer: uploads, checks, samples and findings. Viewer: read only.': 'ضع علامة لتمكين الشخص من العمل على شركة. المالك: كل شيء. المدير: الإعدادات والاعتماد. المعد: التحميل والفحوصات والعينات والملاحظات. المطلع: قراءة فقط.',
+  'Demo mode: you can set up users and access to try it, but they cannot sign in. Connect the Google Sheets backend to invite your team.': 'وضع تجريبي: يمكنك إعداد المستخدمين والصلاحيات للتجربة، لكنهم لا يستطيعون تسجيل الدخول. اربط خادم Google Sheets لدعوة فريقك.',
+  'Active users': 'المستخدمون النشطون', 'Companies': 'الشركات', 'Can sign off': 'يحق له الاعتماد', 'Without any company': 'بلا أي شركة',
+  'Owners always see every company. "All companies" includes companies added later. Changes apply at the person\'s next click; no need to sign out.': 'المالك يرى كل الشركات دائماً. "كل الشركات" تشمل الشركات المضافة لاحقاً. تسري التغييرات عند النقرة التالية للشخص دون الحاجة لتسجيل الخروج.',
+  'Coverage by company': 'التغطية حسب الشركة', 'Every company needs someone to prepare it and someone to sign it off.': 'كل شركة تحتاج إلى من يعدّها ومن يعتمدها.',
+  'Company': 'الشركة', 'People': 'الأشخاص', 'Preparers': 'المعدون', 'Access updated': 'تم تحديث الصلاحيات', 'Role updated': 'تم تحديث الدور',
+  'Company access': 'صلاحية الشركات', 'All companies, including future ones': 'كل الشركات، بما فيها المضافة لاحقاً', 'Tick nothing to keep the person without access until you choose.': 'اترك الكل دون علامة ليبقى الشخص بلا صلاحية حتى تختار.'
+});

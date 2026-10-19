@@ -149,6 +149,17 @@ t('owner invites a preparer limited to one entity', function () {
   err(call({ action: 'save', token: P.token, table: 'entities', doc: { name: 'New' } }), 'forbidden');
   err(call({ action: 'usersList', token: P.token }), 'forbidden');
 });
+t('company access: unticking every company means none, never all; bad ids are dropped', function () {
+  ok(call({ action: 'userSave', token: A.token, user: { name: 'Nora', email: 'nora@alpha.sa', role: 'viewer', password: 'viewer-pass-123', entityIds: [] } }));
+  var N = ok(call({ action: 'login', email: 'nora@alpha.sa', password: 'viewer-pass-123' }));
+  assert.strictEqual(ok(call({ action: 'list', token: N.token, table: 'entities' })).docs.length, 0, 'no company ticked: sees nothing');
+  var nora = ok(call({ action: 'usersList', token: A.token })).users.filter(function (u) { return u.email === 'nora@alpha.sa'; })[0];
+  assert.deepStrictEqual(nora.entityIds, []);
+  ok(call({ action: 'userSave', token: A.token, user: { id: nora.id, name: 'Nora', email: 'nora@alpha.sa', role: 'viewer', entityIds: [ent2.id, '../../x', ent2.id, '<script>'] } }));
+  nora = ok(call({ action: 'usersList', token: A.token })).users.filter(function (u) { return u.email === 'nora@alpha.sa'; })[0];
+  assert.deepStrictEqual(nora.entityIds, [ent2.id], 'invalid and duplicate ids dropped');
+  assert.deepStrictEqual(ok(call({ action: 'list', token: N.token, table: 'entities' })).docs.map(function (e) { return e.id; }), [ent2.id], 'access applies without signing in again');
+});
 t('preparer cannot sign off; manager can, and then the exercise is locked', function () {
   var cur = ok(call({ action: 'get', token: P.token, table: 'exercises', id: ex.id })).doc;
   cur.status = 'closed';
