@@ -16,7 +16,7 @@
  */
 
 var REGISTRY_SHEETS = { TENANTS: 'tenants', USERS: 'users', AUDIT: 'audit' };
-var TENANT_TABLES = ['entities', 'exercises', 'datasets', 'rows', 'samples', 'findings', 'checklists', 'settings', 'audit'];
+var TENANT_TABLES = ['entities', 'exercises', 'datasets', 'rows', 'samples', 'findings', 'checklists', 'settings', 'annual', 'audit'];
 // tables whose documents hang off an exercise (parentId = exerciseId)
 var CHILD_TABLES = { datasets: 1, rows: 1, samples: 1, findings: 1, checklists: 1 };
 var COLS = ['id', 'parentId', 'entityId', 'label', 'updatedAt', 'updatedBy', 'data'];
@@ -81,7 +81,8 @@ function route_(req) {
     case 'userSave': need_(s, 'owner'); out = { user: publicUser_(userSave_(s, req.user)) }; break;
     case 'changePassword': changePassword_(s, req.oldPassword, req.newPassword); out = {}; break;
     case 'tenantSave': need_(s, 'owner'); out = { tenant: publicTenant_(tenantSave_(s, req.tenant)) }; break;
-    case 'platformTenants': if (!isSuper_(s.user.email)) throw new Error('forbidden'); out = { tenants: regRows_(REGISTRY_SHEETS.TENANTS).map(publicTenant_) }; break;
+    case 'shareSheet': need_(s, 'owner'); out = { shared: shareWith_(book_(s), s.user.email, s.tenant.id, s.user.id), url: publicTenant_(s.tenant).spreadsheetUrl }; break;
+    case 'platformTenants': if (!isSuper_(s.user.email)) throw new Error('forbidden'); out = { tenants: regRows_(REGISTRY_SHEETS.TENANTS).map(publicTenant_), registryUrl: 'https://docs.google.com/spreadsheets/d/' + prop_('REGISTRY_ID') }; break;
     case 'platformTenantStatus':
       if (!isSuper_(s.user.email)) throw new Error('forbidden');
       var t = regFind_(REGISTRY_SHEETS.TENANTS, req.id); if (!t) throw new Error('not_found');
@@ -111,9 +112,9 @@ function signup_(req) {
     var user = { id: uid_('U'), tenantId: tenant.id, email: email, name: String(req.name || email), role: 'owner', entityIds: ['*'],
       salt: salt, pw: hashPw_(req.password, salt), active: true, createdAt: now_() };
     regUpsert_(REGISTRY_SHEETS.USERS, user);
-    // Optional: let the organisation's owner open their own data sheet (view only;
-    // every write still goes through this script's checks).
-    if (prop_('SHARE_SHEET_WITH_OWNER') === 'true') { try { ss.addViewer(email); } catch (e) { regAudit_('share_failed', tenant.id, user.id, String(e.message || e)); } }
+    // The owner can open their own data sheet (view only; every write still goes
+    // through this script's checks). On by default; SHARE_SHEET_WITH_OWNER=false turns it off.
+    if (prop_('SHARE_SHEET_WITH_OWNER') !== 'false') shareWith_(ss, email, tenant.id, user.id);
     regAudit_('signup', tenant.id, user.id, org);
     return { ok: true, token: issueToken_(user, tenant), user: publicUser_(user), tenant: publicTenant_(tenant) };
   });
@@ -225,6 +226,11 @@ function tenantSave_(s, t) {
   return s.tenant;
 }
 
+function shareWith_(ss, email, tid, uid) {
+  try { ss.addViewer(email); return true; }
+  catch (e) { try { regAudit_('share_failed', tid, uid, String(e.message || e)); } catch (e2) {} return false; }
+}
+
 function usersOfTenant_(tid) { return regRows_(REGISTRY_SHEETS.USERS).filter(function (u) { return u.tenantId === tid; }); }
 function publicUser_(u) { return { id: u.id, email: u.email, name: u.name, role: u.role, entityIds: u.entityIds, active: u.active !== false, lastLoginAt: u.lastLoginAt || '' }; }
 function publicTenant_(t) { return { id: t.id, name: t.name, plan: t.plan, status: t.status, createdAt: t.createdAt, spreadsheetUrl: 'https://docs.google.com/spreadsheets/d/' + t.spreadsheetId }; }
@@ -297,6 +303,10 @@ function save_(s, table, doc) {
       if (ex.status === 'closed') throw new Error('exercise_closed');
       if (prev && prev.parentId !== doc.parentId) throw new Error('forbidden');
       doc.entityId = ex.entityId;
+    } else if (table === 'annual') {
+      // one doc per entity and year: annual figures for the year-end reconciliation
+      if (!doc.entityId || !canEntity_(s, doc.entityId) || !readTable_(ss, 'entities', doc.entityId)[0]) throw new Error('forbidden');
+      if (prev && prev.entityId !== doc.entityId) throw new Error('forbidden');
     } else if (table === 'settings') {
       doc.entityId = '';
     }

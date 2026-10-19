@@ -137,13 +137,13 @@
   // ---------------------------------------------------------------- checklist
   Z.tabs.checklist = function () {
     var items = S.checklist.items || [], lk = Z.locked(), ent = Z.entity(S.ex.entityId) || {};
-    var areas = [['VAT', 'VAT'], ['BANK', 'Bank'], ['WHT', 'Withholding tax']].filter(function (a) { return !(a[0] === 'WHT' && ent.whtRegistered === false); });
+    var areas = [['VAT', 'VAT'], ['EINV', 'E-invoicing'], ['BANK', 'Bank'], ['WHT', 'Withholding tax']].filter(function (a) { return !(a[0] === 'WHT' && ent.whtRegistered === false); });
     var stOpt = function (v) { return ['available', 'requested', 'missing', 'na'].map(function (s) { return '<option value="' + s + '"' + (v === s ? ' selected' : '') + '>' + t({ available: 'On file', requested: 'Requested', missing: 'Missing', na: 'Not applicable' }[s]) + '</option>'; }).join(''); };
     var done = items.filter(function (i) { return i.status === 'available'; }).length, req = items.filter(function (i) { return i.status !== 'na'; }).length;
     return '<p class="muted">' + t('The inspection file: what ZATCA inspectors typically request. Link each document (Google Drive, SharePoint) so it can be produced the same day.') + ' <b>' + done + ' / ' + req + '</b> ' + t('on file') + '.</p>' +
       areas.map(function (a) {
         var list = items.map(function (x, i) { return [x, i]; }).filter(function (p) { return p[0].area === a[0]; });
-        return '<section class="paper flush area-' + (a[0] === 'VAT' ? 'vat' : a[0] === 'BANK' ? 'bank' : 'wht') + '" style="margin-top:16px"><div style="padding:14px 18px"><h2>' + t(a[1]) + '</h2></div><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Document') + '</th><th style="width:150px">' + t('Status') + '</th><th style="width:150px">' + t('Owner') + '</th><th>' + t('Link') + '</th></tr></thead><tbody>' +
+        return '<section class="paper flush area-' + (a[0] === 'VAT' || a[0] === 'EINV' ? 'vat' : a[0] === 'BANK' ? 'bank' : 'wht') + '" style="margin-top:16px"><div style="padding:14px 18px"><h2>' + t(a[1]) + '</h2></div><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Document') + '</th><th style="width:150px">' + t('Status') + '</th><th style="width:150px">' + t('Owner') + '</th><th>' + t('Link') + '</th></tr></thead><tbody>' +
           list.map(function (p) {
             var x = p[0], i = p[1];
             return '<tr><td>' + esc(S.lang === 'ar' ? x.ar : x.en) + '</td><td><select data-chg="cl" data-i="' + i + '" data-f="status"' + (lk ? ' disabled' : '') + ' aria-label="' + t('Status') + '">' + stOpt(x.status) + '</select></td><td><input type="text" value="' + esc(x.owner) + '" data-chg="cl" data-i="' + i + '" data-f="owner"' + (lk ? ' disabled' : '') + ' aria-label="' + t('Owner') + '"></td><td><div class="row" style="flex-wrap:nowrap"><input type="url" value="' + esc(x.link) + '" data-chg="cl" data-i="' + i + '" data-f="link" placeholder="https://"' + (lk ? ' disabled' : '') + ' aria-label="' + t('Link') + '">' + (/^https?:\/\//i.test(x.link || '') ? '<a class="btn small ghost" href="' + esc(x.link) + '" target="_blank" rel="noopener noreferrer">' + t('Open') + '</a>' : '') + '</div></td></tr>';
@@ -170,7 +170,7 @@
       '<div class="paper flush"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Severity') + '</th><th>' + t('Finding') + '</th><th class="num">' + t('Tax impact') + '</th><th class="num">' + t('Penalty') + '</th><th>' + t('Owner / due') + '</th><th>' + t('Status') + '</th></tr></thead><tbody>' + (rows || '<tr><td colspan="6" class="empty">' + t('No findings. Raise one from any failed check or test.') + '</td></tr>') + '</tbody></table></div></div>';
   };
   function findCheck(id) {
-    var all = S.R.vat.checks.concat(S.R.bank.checks, S.R.wht.checks, S.R.analytics.tests);
+    var all = S.R.vat.checks.concat(S.R.bank.checks, S.R.wht.checks, S.R.einv.checks, S.R.filing.checks, S.R.analytics.tests);
     return all.filter(function (c) { return c.id === id; })[0];
   }
   Z.ACT.raise = function (el) {
@@ -179,7 +179,8 @@
     // VAT, so its tax is the VAT fraction; a net-amount difference times the rate.
     var r = S.settings.vatRate, d = Math.abs(c.diff || 0);
     var impact = c.exposure || (c.group === 'bank' ? d * r / (1 + r) : c.group === 'vat' ? (/VAT/.test(c.aLabel || '') ? d : d * r) : d);
-    findingModal({ title: Z.tt(c, 'title'), checkId: c.id, tax: c.group === 'wht' ? 'WHT' : 'VAT', severity: c.status === 'fail' ? 'high' : 'medium', taxImpact: E.r2(impact), status: 'open', monthsLate: 0 });
+    if (c.group === 'einv' || c.group === 'filing') impact = c.exposure || 0;
+    findingModal({ title: Z.tt(c, 'title'), checkId: c.id, tax: c.group === 'wht' || c.id === 'C3' ? 'WHT' : c.group === 'einv' ? 'EINV' : 'VAT', severity: c.status === 'fail' ? 'high' : 'medium', taxImpact: E.r2(impact), status: 'open', monthsLate: 0 });
   };
   Z.ACT.raisea = function (el) {
     var c = findCheck(el.dataset.id) || {};
@@ -253,6 +254,8 @@
       '<tr class="total"><td>' + t('Quantified exposure (SAR)') + '</td><td class="num">' + fmt(R.exposure) + '</td></tr></tbody></table>' +
       (boxRows ? '<h2>' + t('VAT return as filed') + '</h2><table class="t"><thead><tr><th>#</th><th>' + t('Box') + '</th><th class="num">' + t('Amount') + '</th><th class="num">' + t('VAT') + '</th></tr></thead><tbody>' + boxRows + '</tbody></table>' : '') +
       '<h2>' + t('VAT reconciliation') + '</h2><table class="t">' + th + '<tbody>' + checkRows(R.vat.checks) + '</tbody></table>' +
+      '<h2>' + t('Filing and payment') + '</h2><table class="t">' + th + '<tbody>' + checkRows(R.filing.checks) + '</tbody></table>' +
+      '<h2>' + t('E-invoicing: ERP, provider and ZATCA') + '</h2><table class="t">' + th + '<tbody>' + checkRows(R.einv.checks) + '</tbody></table>' +
       '<h2>' + t('Bank reconciliation') + '</h2><table class="t">' + th + '<tbody>' + checkRows(R.bank.checks) + '</tbody></table>' +
       (ent.whtRegistered === false ? '' : '<h2>' + t('Withholding tax') + '</h2><table class="t">' + th + '<tbody>' + checkRows(R.wht.checks) + '</tbody></table>') +
       '<h2>' + t('Data analytics exceptions') + '</h2>' + (an.length ? '<table class="t"><tbody>' + an.map(function (x) { return '<tr><td>' + Z.tick(x.status) + '</td><td>' + esc(x.id) + '</td><td>' + esc(Z.tt(x, 'title')) + '</td><td class="num">' + fmt(x.count, 0) + '</td><td class="num">' + (x.amount ? fmt(x.amount) : '') + '</td></tr>'; }).join('') + '</tbody></table>' : '<p>' + t('No exceptions.') + '</p>') +
@@ -276,10 +279,10 @@
       var g = function (B, f) { return B ? (f === 'amount' ? (+B[bx.n].amount || 0) + (+B[bx.n].adj || 0) : B[bx.n].vat) : ''; };
       return [bx.n, bx.en, g(b.ret, 'amount'), g(b.ret, 'vat'), g(b.sys, 'amount'), g(b.sys, 'vat'), g(b.xls, 'amount'), g(b.xls, 'vat')];
     })));
-    add('Checks', [['Area', 'Check', 'Title', 'Status', 'A', 'A label', 'B', 'B label', 'Difference', 'Exposure', 'Explanation']].concat(R.vat.checks.concat(R.bank.checks, R.wht.checks).map(function (c) { return [c.group, c.id, c.title, c.status, c.a, c.aLabel, c.b, c.bLabel, c.diff, c.exposure || '', S.ex.checkNotes[c.id] || '']; })));
+    add('Checks', [['Area', 'Check', 'Title', 'Status', 'A', 'A label', 'B', 'B label', 'Difference', 'Exposure', 'Explanation']].concat(R.filing.checks.concat(R.vat.checks, R.einv.checks, R.bank.checks, R.wht.checks).map(function (c) { return [c.group, c.id, c.title, c.status, c.a, c.aLabel, c.b, c.bLabel, c.diff, c.exposure || '', S.ex.checkNotes[c.id] || '']; })));
     add('Analytics', [['Test', 'Title', 'Severity', 'Status', 'Items', 'Amount']].concat(R.analytics.tests.map(function (x) { return [x.id, x.title, x.severity, x.status, x.count, x.amount]; })));
     var ex = [['Check', 'Exception', 'Date', 'Reference', 'Party / description', 'Amount', 'Detail']];
-    R.vat.checks.concat(R.bank.checks, R.wht.checks).forEach(function (c) { Object.keys(c.exceptions || {}).forEach(function (k) { c.exceptions[k].forEach(function (r) { ex.push([c.id, k, r.date, r.invoice || r.reference || r.doc || '', r.party || r.description || '', r.net || r.credit || r.debit || r.gross || '', r.reason || r.status || '']); }); }); });
+    R.vat.checks.concat(R.einv.checks, R.bank.checks, R.wht.checks).forEach(function (c) { Object.keys(c.exceptions || {}).forEach(function (k) { c.exceptions[k].forEach(function (r) { ex.push([c.id, k, r.date, r.invoice || r.reference || r.doc || '', r.party || r.description || '', r.net || r.credit || r.debit || r.gross || '', r.reason || r.status || '']); }); }); });
     R.analytics.tests.forEach(function (x) { x.items.forEach(function (r) { ex.push([x.id, x.title, r.date, r.invoice, r.party, r.net, r.reason || '']); }); });
     add('Exceptions', ex);
     add('Bank lines', [['Date', 'Description', 'Reference', 'Out', 'In', 'Class']].concat(R.bank.lines.map(function (l) { return [l.date, l.description, l.reference, l.debit, l.credit, Z.bankClassName(l.cls)]; })));
@@ -297,15 +300,19 @@
     var ent = Object.assign({ demo: true, active: true }, d.entity), entId;
     Z.save('entities', ent).then(function (e) {
       entId = e.id;
-      var hist = [['2026-06', 92, 318400, 7650], ['2026-07', 88, 401220, 8920], ['2026-08', 81, 412880, 9840]].map(function (h) {
+      var byP = {}; d.history.forEach(function (h) { byP[h.period] = h; });
+      var hist = [['2026-06', 92, 7650], ['2026-07', 88, 8920], ['2026-08', 81, 9840]].map(function (h) {
+        var f = byP[h[0]] || {};
         return { entityId: e.id, period: h[0], status: 'closed', signedOffBy: 'Tax manager', signedOffAt: h[0] + '-28T10:00:00Z', label: e.name + ' ' + h[0], reconItems: [], checkNotes: {}, bankOverrides: {},
-          summary: { score: h[1], grade: h[1] >= 85 ? 'ready' : 'mostly', exposure: h[1] > 90 ? 0 : 4200, fails: h[1] > 90 ? 0 : 1, warns: 1, netVat: h[2], whtTax: h[3], openFindings: 0 } };
+          filing: { vatFiledOn: E.deadlines(h[0]).vat, vatPaidOn: E.deadlines(h[0]).vat, whtFiledOn: E.deadlines(h[0]).wht, whtPaidOn: E.deadlines(h[0]).wht },
+          summary: { score: h[1], grade: h[1] >= 85 ? 'ready' : 'mostly', exposure: h[1] > 90 ? 0 : 4200, fails: h[1] > 90 ? 0 : 1, warns: 1, netVat: f.netVat, whtTax: h[2], openFindings: 0,
+            sales: f.sales, inputVat: f.inputVat, outputVat: f.outputVat, zeroShare: f.zeroShare, vatLateDays: 0, whtLateDays: 0 } };
       });
       return Z.call('saveMany', { table: 'exercises', docs: hist });
     }).then(function () {
-      return Z.save('exercises', { entityId: entId, period: d.period, status: 'in_progress', label: ent.name + ' ' + d.period, returnBoxes: d.returnBoxes, reconItems: d.reconItems.map(function (r) { return Object.assign({ id: Z.uid('RI') }, r); }), checkNotes: {}, bankOverrides: {} });
+      return Z.save('exercises', { entityId: entId, period: d.period, status: 'in_progress', label: ent.name + ' ' + d.period, returnBoxes: d.returnBoxes, reconItems: d.reconItems.map(function (r) { return Object.assign({ id: Z.uid('RI') }, r); }), checkNotes: {}, bankOverrides: {}, filing: d.filing, recovery: d.recovery });
     }).then(function (ex) {
-      var files = { tb: 'TB_Sep2026.xlsx', gl: 'GL_foreign_services.xlsx', sys_vat: 'NetSuite_VAT_Report_Sep2026.xlsx', xls_vat: 'VAT_workings_Sep2026.xlsx', einv: 'Fatoora_export_Sep2026.csv', customs: 'Customs_Bayan_Sep2026.xlsx', bank: 'SNB_statement_Sep2026.xlsx', wht_reg: 'WHT_register_Sep2026.xlsx', ret_wht: 'WHT_return_Sep2026.xlsx', xls_wht: 'WHT_workings_Sep2026.xlsx' };
+      var files = { tb: 'TB_Sep2026.xlsx', gl: 'GL_foreign_services.xlsx', sys_vat: 'NetSuite_VAT_Report_Sep2026.xlsx', xls_vat: 'VAT_workings_Sep2026.xlsx', einv: 'Fatoora_export_Sep2026.csv', einv_provider: 'EInvoicing_provider_log_Sep2026.xlsx', customs: 'Customs_Bayan_Sep2026.xlsx', bank: 'SNB_statement_Sep2026.xlsx', wht_reg: 'WHT_register_Sep2026.xlsx', ret_wht: 'WHT_return_Sep2026.xlsx', xls_wht: 'WHT_workings_Sep2026.xlsx' };
       var jobs = Object.keys(d.datasets).map(function (k) {
         var rows = d.datasets[k].map(function (r, i) { return Object.assign({ _r: i + 2 }, r); });
         return Z.save('datasets', { parentId: ex.id, kind: k, fileName: files[k], rowCount: rows.length, errors: 0, uploadedAt: new Date().toISOString(), label: files[k] })

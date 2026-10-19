@@ -15,6 +15,18 @@
  *   - a foreign transfer with no WHT register line
  *   - management fees withheld at 15% instead of 20%; one WHT line paid late,
  *     one without a certificate; the WHT return misses one line
+ *   - e-invoicing provider: 2 ERP invoices never sent, a POS sale outside the
+ *     ERP, a rejected and a pending invoice, an amount mismatch, a B2C invoice
+ *     reported after 30 h and a B2B invoice cleared 3.5 h after issue, a skipped
+ *     counter, a credit note with no reference, a simplified invoice to a
+ *     VAT-registered customer, one accepted with a warning
+ *   - input VAT on a staff dinner, a hotel stay and the GM's car; exempt sales
+ *     with no apportionment; SAR 30,000 of gifts against a SAR 4,167 monthly relief
+ *   - one export without a customs export declaration (plus the export to SA)
+ *   - management fees to the parent with no reverse-charge VAT; a reverse-charged
+ *     training service with no WHT line
+ *   - WHT filed and paid 2 days late (late, but under 30 days: no fine)
+ *   - input VAT about 65% above the average of the last three months
  */
 (function (root) {
   'use strict';
@@ -160,6 +172,35 @@
       { date: '2026-09-11', account: '5400', doc: 'JV-911', description: 'Group management fee', debit: 120000, credit: 0, party: 'Gulf Holding (parent)', country: 'AE' }
     ];
 
+    // ---- details for the input-VAT, export and e-invoicing checks. No random
+    // draws below this line, so every figure above stays as the tests pin it.
+    var pdesc = ['Raw materials', 'Packaging materials', 'Spare parts', 'Logistics services', 'Office supplies', 'IT equipment', 'Maintenance services', 'Utilities'], pi = 0;
+    sys.forEach(function (x) { if (x.flow === 'P') x.description = x.category === 'RCM' ? 'Professional services' : x.category === 'IMP' ? 'Imported goods' : pdesc[pi++ % pdesc.length]; });
+    purch[30].description = 'Staff dinner — restaurant'; purch[31].description = 'Hotel accommodation for visiting directors'; purch[32].description = 'Purchase of Toyota Land Cruiser for the GM';
+    var xi = 0;
+    sys.forEach(function (x) { if (x.flow === 'S' && x.category === 'X' && x !== ex) { if (xi !== 2) x.exportRef = 'EXP-26-' + (7000 + xi); xi++; } });
+    gl.push({ date: '2026-09-17', account: '5600', doc: 'JV-917', description: 'Customer gifts — National Day giveaways', debit: 30000, credit: 0, party: '', country: 'SA' });
+
+    var salesAll = sys.filter(function (x) { return x.flow === 'S'; }), prov = [], ctr = { 'ERP-01': 5000, 'POS-02': 900 };
+    salesAll.forEach(function (x, i) {
+      if (i === 12 || i === 301) return;
+      var egs = x.vatNo ? 'ERP-01' : 'POS-02', type = x.vatNo ? 'standard' : 'simplified';
+      ctr[egs] += i === 150 ? 2 : 1;
+      var ref = '';
+      if (x.docType === 'CN') { var k = +x.invoice.slice(3) - 501; ref = k < 8 ? sys[30 + k * 11].invoice : ''; }
+      prov.push({ invoice: x.invoice, type: type, docType: x.docType, issuedAt: x.date + 'T10:00', submittedAt: x.date + (type === 'standard' ? 'T10:02' : 'T11:30'),
+        status: type === 'standard' ? 'CLEARED' : 'REPORTED', icv: ctr[egs], egs: egs, uuid: 'u-' + i, buyerVat: x.vatNo || '', ref: ref, net: x.net, vat: x.vat, message: '' });
+    });
+    prov[40].status = 'REJECTED'; prov[40].message = 'BR-KSA-37: buyer VAT number is not valid';
+    prov[90].status = 'PENDING';
+    prov[120].vat = r2(prov[120].vat + 150);
+    var firstSimp = prov.filter(function (x) { return x.type === 'simplified'; })[0];
+    firstSimp.submittedAt = E.datetime(new Date(Date.parse(firstSimp.issuedAt + ':00Z') + 30 * 3600000).toISOString());
+    var lateStd = prov.filter(function (x, i) { return x.type === 'standard' && i > 200; })[0]; lateStd.submittedAt = lateStd.issuedAt.slice(0, 11) + '13:30';
+    var wrongType = prov.filter(function (x, i) { return x.type === 'standard' && i > 250 && x.docType === 'INV'; })[0]; wrongType.type = 'simplified';
+    prov[260].status = 'WARNING'; prov[260].message = 'BR-KSA-F-06: seller address is incomplete';
+    prov.push({ invoice: 'POS-88417', type: 'simplified', docType: 'INV', issuedAt: '2026-09-19T21:14', submittedAt: '2026-09-19T21:20', status: 'REPORTED', icv: ++ctr['POS-02'], egs: 'POS-02', uuid: 'u-pos', buyerVat: '', ref: '', net: 4200, vat: 630, message: '' });
+
     var einv = sys.filter(function (x) { return x.flow === 'S'; }).filter(function (x, i5) { return i5 !== 55 && i5 !== 233 && i5 !== 470; })
       .map(function (x, i6) { return { invoice: x.invoice, date: x.date, uuid: 'uuid-' + i6, status: i6 === 101 ? 'REJECTED' : x.vatNo ? 'CLEARED' : 'REPORTED', net: x.net, vat: x.vat }; });
     var customs = imports.slice(0, 9).map(function (x, i7) { return { declaration: 'BYN-26-' + (40100 + i7), date: x.date, party: x.party, value: x.net, vat: x.vat }; });
@@ -167,14 +208,22 @@
     return {
       entity: {
         name: 'Al Noor Trading Co.', nameAr: 'شركة النور التجارية', trn: '310123456700003', cr: '1010987654', vatFreq: 'monthly', whtRegistered: true, erp: 'Oracle NetSuite',
-        mapping: { outputVat: '2210', inputVat: '1410', vatPayable: '2220', revenue: '4000,4100', receivables: '1200', payables: '2100', bank: '1100', whtPayable: '2230', foreignExpense: '5300,5400' }
+        mapping: { outputVat: '2210', inputVat: '1410', vatPayable: '2220', revenue: '4000,4100', receivables: '1200', payables: '2100', bank: '1100', whtPayable: '2230', foreignExpense: '5300,5400', gifts: '5600' }
       },
       period: '2026-09',
       returnBoxes: ret,
       prevNetVat: 412880,
       prevWhtTax: 9840,
+      filing: { vatFiledOn: '2026-10-28', vatPaidOn: '2026-10-29', vatPaidAmount: '', whtFiledOn: '2026-10-12', whtPaidOn: '2026-10-12' },
+      recovery: { method: 'none' },
+      history: (function () {
+        var cur = E.periodFigures(ret);
+        return [['2026-08', 1.02, 0.62, 412880], ['2026-07', 0.98, 0.58, 401220], ['2026-06', 1.01, 0.60, 318400]].map(function (h) {
+          return { period: h[0], sales: r2(cur.sales * h[1]), inputVat: r2(cur.inputVat * h[2]), outputVat: r2(cur.outputVat * h[1]), zeroShare: cur.zeroShare, netVat: h[3] };
+        });
+      })(),
       reconItems: [{ check: 'V6', description: 'Other income — scrap sales and insurance claims (out of scope)', amount: 12000 }],
-      datasets: { tb: tb, gl: gl, sys_vat: sys, xls_vat: xls, einv: einv, customs: customs, bank: bank, wht_reg: reg, ret_wht: retWht, xls_wht: xlsWht }
+      datasets: { tb: tb, gl: gl, sys_vat: sys, xls_vat: xls, einv: einv, einv_provider: prov, customs: customs, bank: bank, wht_reg: reg, ret_wht: retWht, xls_wht: xlsWht }
     };
   }
 

@@ -22,7 +22,17 @@
     tolAbs: 1,            // SAR: a difference this small passes
     tolPct: 0.005,        // up to this share of the base is a warning…
     tolWarnAbs: 1000,     // …but never more than this many SAR; above it a failure
-    vatCorrectionThreshold: 5000,
+    // VAT IR Art. 63 (amended 23 June 2023): net error >= SAR 15,000 -> amend the
+    // original return within 20 days of becoming aware; below it -> include in the
+    // return for the period of discovery; overstatements -> deduct within 5 years.
+    vatCorrectionThreshold: 15000,
+    correctionNotifyDays: 20,
+    overstatementYears: 5,
+    refundMin: 5000,                 // minimum refund application (2025 amendment)
+    einv: { simplifiedHours: 24, standardMinutes: 60 },
+    blockedKeywords: 'entertainment,hospitality,restaurant,catering,banquet,party,hotel,club membership,gym,cinema,concert,tickets for staff,alcohol,personal use,car purchase,vehicle purchase,land cruiser,ترفيه,ضيافة,مطعم,تموين,حفل,فندق,اشتراك نادي,شراء سيارة',
+    giftRelief: { perRecipient: 200, annualCap: 50000 },   // IR Art. 15
+    trend: { salesDropPct: 25, inputJumpPct: 40, zeroShareJumpPts: 15, inputOutputMax: 90 },
     materiality: 50000,
     benfordMin: 300,
     glBasis: 'movement',  // movement | gross — how TB VAT accounts are read when no GL is given
@@ -51,7 +61,7 @@
       intl_telecom: 0.05, dividends: 0.05, loan_returns: 0.05, insurance: 0.05,
       royalties: 0.15, head_office_services: 0.15, management_fees: 0.20, other: 0.15
     },
-    weights: { recon: 35, bank: 10, analytics: 15, sampling: 15, checklist: 15, findings: 10 }
+    weights: { recon: 30, bank: 10, einv: 10, filing: 10, analytics: 10, sampling: 12, checklist: 10, findings: 8 }
   };
 
   E.WHT_TYPES = [
@@ -164,7 +174,29 @@
         { k: 'docType', t: 's', syn: ['doc type', 'document type', 'invoice type', 'نوع المستند'] },
         { k: 'net', t: 'n', req: 1, syn: ['net', 'net amount', 'taxable amount', 'amount excl vat', 'amount', 'المبلغ قبل الضريبة', 'المبلغ الخاضع', 'الصافي'] },
         { k: 'vat', t: 'n', req: 1, syn: ['vat', 'vat amount', 'tax', 'tax amount', 'مبلغ الضريبة', 'الضريبة'] },
-        { k: 'total', t: 'n', syn: ['total', 'gross', 'amount incl vat', 'الإجمالي', 'المبلغ شامل الضريبة'] }
+        { k: 'total', t: 'n', syn: ['total', 'gross', 'amount incl vat', 'الإجمالي', 'المبلغ شامل الضريبة'] },
+        { k: 'description', t: 's', syn: ['description', 'item', 'narration', 'line description', 'الوصف', 'البيان'] },
+        { k: 'account', t: 's', syn: ['gl account', 'expense account', 'account', 'حساب المصروف', 'الحساب'] },
+        { k: 'exportRef', t: 's', syn: ['export declaration', 'export ref', 'customs export', 'bill of lading', 'بيان التصدير', 'بوليصة الشحن'] }
+      ]
+    },
+    einv_provider: {
+      en: 'E-invoicing provider export (3rd-party system)', ar: 'تقرير مزود الفوترة الإلكترونية (النظام الوسيط)', group: 'vat',
+      fields: [
+        { k: 'invoice', t: 's', req: 1, syn: ['invoice', 'invoice no', 'invoice number', 'document no', 'رقم الفاتورة'] },
+        { k: 'type', t: 's', syn: ['invoice type', 'type', 'subtype', 'b2b/b2c', 'transaction type', 'نوع الفاتورة'] },
+        { k: 'docType', t: 's', syn: ['document type', 'doc type', 'نوع المستند'] },
+        { k: 'issuedAt', t: 't', syn: ['issue date', 'issued at', 'issue time', 'invoice date', 'تاريخ الإصدار'] },
+        { k: 'submittedAt', t: 't', syn: ['submitted at', 'submission date', 'sent to zatca', 'reported at', 'cleared at', 'clearance date', 'تاريخ الإرسال'] },
+        { k: 'status', t: 's', syn: ['zatca status', 'status', 'clearance status', 'reporting status', 'الحالة'] },
+        { k: 'icv', t: 'n', syn: ['icv', 'invoice counter', 'counter value', 'عداد الفاتورة'] },
+        { k: 'egs', t: 's', syn: ['egs', 'egs unit', 'device', 'unit', 'pos', 'الجهاز', 'الوحدة'] },
+        { k: 'uuid', t: 's', syn: ['uuid'] },
+        { k: 'buyerVat', t: 's', syn: ['buyer vat', 'customer vat', 'buyer trn', 'الرقم الضريبي للمشتري'] },
+        { k: 'ref', t: 's', syn: ['billing reference', 'original invoice', 'reference invoice', 'ref', 'الفاتورة الأصلية'] },
+        { k: 'net', t: 'n', syn: ['net', 'taxable amount', 'amount excl vat', 'المبلغ الخاضع', 'الصافي'] },
+        { k: 'vat', t: 'n', syn: ['vat', 'vat amount', 'tax amount', 'الضريبة', 'مبلغ الضريبة'] },
+        { k: 'message', t: 's', syn: ['message', 'error', 'validation', 'warning', 'الرسالة', 'الخطأ'] }
       ]
     },
     xls_vat: {
@@ -300,6 +332,37 @@
 
   E.str = function (v) { return v == null ? '' : deArabic(v).trim(); };
 
+  // 'YYYY-MM-DDTHH:MM' or ''. Used for e-invoicing issue / submission times.
+  E.datetime = function (v) {
+    if (v == null || v === '') return '';
+    if (v instanceof Date && !isNaN(v)) return iso(v.getFullYear(), v.getMonth() + 1, v.getDate()) + 'T' + pad(v.getHours()) + ':' + pad(v.getMinutes());
+    if (typeof v === 'number' && v > 20000 && v < 80000) { var d = new Date(Math.round((v - 25569) * 86400000)); return d.toISOString().slice(0, 16); }
+    var s = deArabic(v).trim(), m;
+    if ((m = s.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{1,2}):(\d{2})/))) return m[1] + '-' + m[2] + '-' + m[3] + 'T' + pad(+m[4]) + ':' + m[5];
+    if ((m = s.match(/^(\d{1,2}[\/.-]\d{1,2}[\/.-]\d{2,4})[ T]+(\d{1,2}):(\d{2})/))) { var dd = E.date(m[1]); return dd ? dd + 'T' + pad(+m[2]) + ':' + m[3] : ''; }
+    var d0 = E.date(v);
+    return d0 ? d0 + 'T00:00' : '';
+  };
+  function minutesBetween(a, b) { return Math.round((Date.parse(b + ':00Z') - Date.parse(a + ':00Z')) / 60000); }
+  E.minutesBetween = minutesBetween;
+
+  E.invType = function (v) {
+    var s = String(v || '').toLowerCase();
+    if (/simpl|b2c|0200|مبسط/.test(s)) return 'simplified';
+    if (/stand|b2b|tax invoice|0100|قياسي|ضريبية/.test(s)) return 'standard';
+    return '';
+  };
+  E.einvStatus = function (v) {
+    var s = String(v || '').toLowerCase();
+    if (/reject|fail|error|مرفوض|رفض|خطأ/.test(s)) return 'REJECTED';
+    if (/warn|تحذير/.test(s)) return 'WARNING';
+    if (/clear|معتمد|اعتماد/.test(s)) return 'CLEARED';
+    if (/report|مبلغ|إبلاغ|ابلاغ/.test(s)) return 'REPORTED';
+    if (/pend|queue|انتظار|معلق/.test(s)) return 'PENDING';
+    if (/not sent|not submitted|لم ي/.test(s)) return 'NOT_SUBMITTED';
+    return s ? s.toUpperCase() : '';
+  };
+
   // TRN: 15 digits, first and last digit 3.
   E.validVatNo = function (v) { return /^3\d{13}3$/.test(String(v || '').replace(/\s/g, '')); };
 
@@ -393,6 +456,7 @@
       def.fields.forEach(function (f) {
         var v = map[f.k] == null || map[f.k] === '' ? '' : src[map[f.k]];
         if (f.t === 'n') o[f.k] = r2(E.num(v));
+        else if (f.t === 't') o[f.k] = E.datetime(v);
         else if (f.t === 'd') { o[f.k] = E.date(v); if (f.req && !o[f.k]) bad.push(f.k); }
         else { o[f.k] = E.str(v); if (f.req && !o[f.k]) bad.push(f.k); }
       });
@@ -412,6 +476,8 @@
         if (o.rate > 1) o.rate = o.rate / 100;
       }
       if (kind === 'bank') { o.debit = Math.abs(o.debit); o.credit = Math.abs(o.credit); }
+      if (kind === 'einv_provider') { o.type = E.invType(o.type); o.status = E.einvStatus(o.status); o.docType = E.docType(o.docType); }
+      if (kind === 'einv') o.status = E.einvStatus(o.status) || o.status;
       if (bad.length) errors.push({ row: r + 1, fields: bad });
       o._r = r + 1;
       rows.push(o);
@@ -846,7 +912,7 @@
       if (!x.date) return;
       var d = x.date, due = new Date(Date.UTC(+d.slice(0, 4), +d.slice(5, 7), 10)).toISOString().slice(0, 10);
       if (x.paidDate && x.paidDate > due) {
-        var days = daysBetween(due, x.paidDate), per = Math.ceil(days / 30);
+        var days = daysBetween(due, x.paidDate), per = days < 30 ? 0 : Math.floor(days / 30);
         var pen = r2((+x.wht || 0) * S.penalties.whtLatePctPer30Days * per);
         late.push(Object.assign({}, x, { due: due, daysLate: days, penalty: pen })); latePen += pen;
       }
@@ -928,6 +994,8 @@
     T('A7', 'Gaps in sales invoice numbering', 'فجوات في تسلسل فواتير المبيعات', 'medium', gaps, 'Missing numbers must be explained (cancelled, voided) — inspectors ask for them.');
     T('A8', 'Exports without a foreign destination', 'صادرات بدون دولة وجهة خارجية', 'medium',
       sales.filter(function (x) { return x.category === 'X' && (!x.country || /^(sa|ksa|saudi|السعودية)/i.test(x.country)); }), 'Zero-rating an export needs proof the goods left KSA (customs export declaration).');
+    if (sales.some(function (x) { return x.exportRef; })) T('A17', 'Exports without a customs export declaration reference', 'صادرات بدون مرجع بيان تصدير جمركي', 'high',
+      sales.filter(function (x) { return x.category === 'X' && !x.exportRef; }), 'Zero-rating an export needs customs evidence that the goods left KSA (VAT IR Art. 33); without it the sale is standard-rated.', 'net');
     T('A9', 'Foreign supplier charged standard VAT instead of reverse charge', 'مورد أجنبي بضريبة أساسية بدلاً من الاحتساب العكسي', 'medium',
       purch.filter(function (x) { return x.category === 'S' && x.country && !/^(sa|ksa|saudi|السعودية)/i.test(x.country); }), 'Services from non-residents are self-assessed under RCM (box 9).');
     T('A10', 'Reverse-charge lines from Saudi suppliers', 'احتساب عكسي على موردين سعوديين', 'low',
@@ -1153,19 +1221,296 @@
     return res;
   };
 
+  // ------------------------------------------------------------------ e-invoicing: ERP ↔ provider ↔ ZATCA
+  // Most taxpayers do not talk to Fatoora directly: a third-party provider (or
+  // POS / middleware) receives the ERP's invoices, signs them and clears or
+  // reports them. An inspector compares what the ERP sold, what the provider
+  // received and what ZATCA holds. Every gap is an invoice ZATCA may treat as
+  // not issued, or a sale that never reached the return.
+  function invKey(v) { return String(v == null ? '' : v).trim().toUpperCase(); }
+  var ACCEPTED = { CLEARED: 1, REPORTED: 1, WARNING: 1 };
+
+  E.runEinvoicing = function (ctx) {
+    var S = ctx.settings, D = ctx.data, checks = [];
+    var erp = (D.sys_vat || []).filter(function (x) { return x.flow === 'S'; });
+    var prov = D.einv_provider || [], zat = D.einv || [];
+    var T = function (id, title, titleAr, items, failIfAny, extra) {
+      var c = { id: id, group: 'einv', title: title, titleAr: titleAr, a: items.length, aLabel: 'Exceptions', b: 0, bLabel: '', diff: items.length,
+        status: items.length ? (failIfAny ? 'fail' : 'warn') : 'pass', exceptions: { list: items.slice(0, 300) }, counts: { list: items.length } };
+      if (extra) Object.keys(extra).forEach(function (k) { c[k] = extra[k]; });
+      return c;
+    };
+    if (!prov.length && !zat.length) {
+      return { checks: [{ id: 'E1', group: 'einv', title: 'E-invoicing: system vs provider vs ZATCA', titleAr: 'الفوترة الإلكترونية: النظام مقابل المزود مقابل الهيئة', status: 'na', missing: 'E-invoicing provider export' }], summary: null };
+    }
+    var byErp = {}, byProv = {}, byZat = {};
+    erp.forEach(function (x) { byErp[invKey(x.invoice)] = x; });
+    prov.forEach(function (x) { byProv[invKey(x.invoice)] = x; });
+    zat.forEach(function (x) { byZat[invKey(x.invoice)] = x; });
+    var hub = prov.length ? byProv : byZat, hubName = prov.length ? 'provider' : 'ZATCA';
+
+    checks.push(T('E1', 'ERP sales invoices that never reached the ' + hubName, 'فواتير مبيعات في النظام لم تصل إلى ' + (prov.length ? 'المزود' : 'الهيئة'),
+      erp.filter(function (x) { return !hub[invKey(x.invoice)]; }).map(function (x) { return Object.assign({}, x, { reason: 'Not in ' + hubName + ' export' }); }), true));
+    checks.push(T('E2', 'Invoices at the ' + hubName + ' that are not in the ERP (issued outside the books)', 'فواتير لدى ' + (prov.length ? 'المزود' : 'الهيئة') + ' غير موجودة في النظام',
+      (prov.length ? prov : zat).filter(function (x) { return !byErp[invKey(x.invoice)]; }).map(function (x) { return Object.assign({}, x, { reason: 'Sale may be missing from the return' }); }), true,
+      { note: 'POS, branch or manual invoices sent to ZATCA but not booked are sales ZATCA can see and the return may not include.' }));
+    if (prov.length) {
+      var notAccepted = prov.filter(function (x) { return !ACCEPTED[x.status]; }).map(function (x) { return Object.assign({}, x, { reason: x.status ? 'Status ' + x.status + (x.message ? ': ' + x.message : '') : 'No ZATCA status' }); });
+      if (zat.length) prov.forEach(function (x) { if (ACCEPTED[x.status] && !byZat[invKey(x.invoice)]) notAccepted.push(Object.assign({}, x, { reason: 'Provider shows ' + x.status + ' but ZATCA has no record' })); });
+      checks.push(T('E3', 'Invoices not cleared / reported by ZATCA (rejected, pending, not sent)', 'فواتير لم تُعتمد أو يُبلغ عنها لدى الهيئة',
+        notAccepted, true, { note: 'A rejected or unsent invoice is legally not a valid tax invoice. Fix and resubmit; repeated failures attract e-invoicing fines.' }));
+    }
+    var mism = [];
+    Object.keys(byErp).forEach(function (k) {
+      var e = byErp[k], p = byProv[k], z = byZat[k];
+      [[p, 'provider'], [z, 'ZATCA']].forEach(function (pair) {
+        var o = pair[0]; if (!o) return;
+        var dv = r2((+e.vat || 0) - (+o.vat || 0)), dn = o.net == null || o.net === 0 && !e.net ? 0 : r2((+e.net || 0) - (+o.net || 0));
+        if (Math.abs(dv) > S.tolAbs || Math.abs(dn) > S.tolAbs) mism.push({ invoice: e.invoice, date: e.date, party: e.party, net: e.net, vat: e.vat, other: pair[1], otherNet: o.net, otherVat: o.vat, reason: 'VAT differs by ' + dv + ' (' + pair[1] + ')' });
+      });
+    });
+    checks.push(T('E4', 'Amounts differ between ERP, provider and ZATCA', 'اختلاف المبالغ بين النظام والمزود والهيئة', mism, true));
+    if (prov.length) {
+      var hrs = (S.einv && S.einv.simplifiedHours) || 24, mins = (S.einv && S.einv.standardMinutes) || 60, late = [];
+      prov.forEach(function (x) {
+        if (!x.issuedAt || !x.submittedAt) return;
+        var m = minutesBetween(x.issuedAt, x.submittedAt), type = x.type || (E.validVatNo(x.buyerVat) ? 'standard' : 'simplified');
+        if (type === 'simplified' && m > hrs * 60) late.push(Object.assign({}, x, { reason: 'Reported ' + Math.round(m / 60) + ' h after issue (limit ' + hrs + ' h)' }));
+        if (type === 'standard' && m > mins) late.push(Object.assign({}, x, { reason: 'Cleared ' + Math.round(m / 60 * 10) / 10 + ' h after issue — a standard invoice must be cleared before it is shared' }));
+      });
+      checks.push(T('E5', 'Clearance / reporting time limits', 'المهل الزمنية للاعتماد والإبلاغ', late, true,
+        { note: 'Standard (B2B) invoices are cleared before sharing; simplified (B2C) invoices are reported within ' + hrs + ' hours.' }));
+      var byEgs = {}, chain = [];
+      prov.forEach(function (x) { if (x.icv) (byEgs[x.egs || 'default'] = byEgs[x.egs || 'default'] || []).push(x); });
+      Object.keys(byEgs).forEach(function (g) {
+        var a = byEgs[g].slice().sort(function (p, q) { return p.icv - q.icv; });
+        for (var i = 1; i < a.length; i++) {
+          var d = a[i].icv - a[i - 1].icv;
+          if (d === 0) chain.push({ egs: g, invoice: a[i].invoice, icv: a[i].icv, reason: 'Counter repeated (also ' + a[i - 1].invoice + ')' });
+          else if (d > 1) chain.push({ egs: g, invoice: a[i].invoice, icv: a[i].icv, reason: (d - 1) + ' counter value(s) missing before this invoice' });
+        }
+      });
+      checks.push(T('E6', 'Invoice counter (ICV) continuity per EGS unit', 'تسلسل عداد الفواتير لكل وحدة إصدار', chain, true,
+        { note: 'Each EGS unit must number invoices with an unbroken counter and hash chain; a gap means an invoice was generated and never submitted.' }));
+    }
+    var notes = (prov.length ? prov : erp).filter(function (x) { return x.docType === 'CN' || x.docType === 'DN'; });
+    var refs = Object.assign({}, byErp, byProv);
+    checks.push(T('E7', 'Credit / debit notes without a valid reference to the original invoice', 'إشعارات دائنة/مدينة بدون مرجع صحيح للفاتورة الأصلية',
+      notes.filter(function (x) { return !x.ref || !refs[invKey(x.ref)]; }).map(function (x) { return Object.assign({}, x, { reason: x.ref ? 'Reference ' + x.ref + ' not found' : 'No billing reference' }); }), true));
+    if (prov.length) {
+      var typ = [];
+      prov.forEach(function (x) {
+        var buyer = x.buyerVat || (byErp[invKey(x.invoice)] || {}).vatNo;
+        if (x.type === 'simplified' && E.validVatNo(buyer)) typ.push(Object.assign({}, x, { reason: 'Customer has a TRN — a standard (cleared) tax invoice is required' }));
+        if (x.type === 'standard' && !E.validVatNo(buyer) && buyer) typ.push(Object.assign({}, x, { reason: 'Standard invoice with an invalid buyer TRN' }));
+      });
+      checks.push(T('E8', 'Invoice type matches the customer (standard for B2B)', 'نوع الفاتورة يطابق العميل (قياسية للشركات)', typ, false));
+      checks.push(T('E9', 'Accepted with warnings', 'مقبولة مع تحذيرات', prov.filter(function (x) { return x.status === 'WARNING'; }), false,
+        { note: 'Warnings do not block clearance but are visible to ZATCA and usually point at a data-quality issue.' }));
+    }
+    var summary = { erp: erp.length, provider: prov.length, zatca: zat.length, byStatus: {} };
+    prov.forEach(function (x) { summary.byStatus[x.status || '—'] = (summary.byStatus[x.status || '—'] || 0) + 1; });
+    return { checks: checks, summary: summary };
+  };
+
+  // ------------------------------------------------------------------ filing & payment compliance
+  // ctx.filing = { vatFiledOn, vatPaidOn, vatPaidAmount, whtFiledOn, whtPaidOn, whtPaidAmount }
+  E.runFiling = function (ctx) {
+    var S = ctx.settings, F = ctx.filing || {}, P = S.penalties, checks = [];
+    var dl = E.deadlines(ctx.periodKey), ret = ctx.returnBoxes ? E.completeBoxes(JSON.parse(JSON.stringify(ctx.returnBoxes)), true) : null;
+    var due = ret ? +ret[16].vat || 0 : null, today = ctx.today || new Date().toISOString().slice(0, 10);
+    var monthsOrPart = function (a, b) { var d = daysBetween(a, b); return d <= 0 ? 0 : Math.ceil(d / 30); };
+    var C = function (id, title, titleAr, status, a, aLabel, extra) { var c = { id: id, group: 'filing', title: title, titleAr: titleAr, status: status, a: a, aLabel: aLabel, b: null, bLabel: '', diff: null }; Object.keys(extra || {}).forEach(function (k) { c[k] = extra[k]; }); return c; };
+    if (!F.vatFiledOn) checks.push(C('C1', 'VAT return filed by the deadline (' + dl.vat + ')', 'تقديم إقرار القيمة المضافة في موعده', 'na', null, '', { missing: 'Filing date' }));
+    else {
+      var lf = daysBetween(dl.vat, F.vatFiledOn);
+      checks.push(C('C1', 'VAT return filed by the deadline (' + dl.vat + ')', 'تقديم إقرار القيمة المضافة في موعده', lf > 0 ? 'fail' : 'pass', lf > 0 ? lf : 0, 'Days late',
+        { exposure: lf > 0 && due > 0 ? r2(due * P.vatLateFilingMinPct) : 0, note: lf > 0 ? 'Late filing: ' + Math.round(P.vatLateFilingMinPct * 100) + '%–' + Math.round(P.vatLateFilingMaxPct * 100) + '% of the tax due (minimum shown).' : '' }));
+    }
+    if (due != null && due <= 0) {
+      checks.push(C('C2', 'VAT paid in full by the deadline', 'سداد الضريبة كاملة في موعدها', 'pass', 0, 'Nothing payable'));
+      if (due < 0) checks.push(C('C4', 'Refund / credit position', 'مركز استرداد / رصيد دائن', 'warn', r2(-due), 'Credit claimed',
+        { note: 'ZATCA reviews refund claims before paying (minimum application SAR ' + (S.refundMin || 5000).toLocaleString('en-US') + '). Expect a desk review of input VAT: keep every purchase invoice and customs declaration ready.' }));
+    } else if (!F.vatPaidOn) checks.push(C('C2', 'VAT paid in full by the deadline', 'سداد الضريبة كاملة في موعدها', due == null ? 'na' : today > dl.vat ? 'fail' : 'warn', due, 'Due', { missing: due == null ? 'VAT return' : '', exposure: today > dl.vat && due > 0 ? r2(due * P.vatLatePaymentPctPerMonth * monthsOrPart(dl.vat, today)) : 0, note: today > dl.vat ? 'No payment recorded and the deadline has passed.' : 'Record the SADAD payment date.' }));
+    else {
+      var paid = F.vatPaidAmount === '' || F.vatPaidAmount == null ? due : +F.vatPaidAmount, short = r2(Math.max(0, due - paid));
+      var ml = monthsOrPart(dl.vat, F.vatPaidOn), exp = r2(paid * P.vatLatePaymentPctPerMonth * ml + short * P.vatLatePaymentPctPerMonth * monthsOrPart(dl.vat, today));
+      checks.push(C('C2', 'VAT paid in full by the deadline', 'سداد الضريبة كاملة في موعدها', ml || short > S.tolAbs ? 'fail' : 'pass', short || (ml ? daysBetween(dl.vat, F.vatPaidOn) : 0), short ? 'Unpaid' : 'Days late',
+        { exposure: exp, note: ml ? 'Late payment: ' + Math.round(P.vatLatePaymentPctPerMonth * 100) + '% of the unpaid tax for each month or part (' + ml + ').' : short ? 'Paid less than the return shows.' : '' }));
+    }
+    if (ctx.whtApplies) {
+      var wTax = ctx.whtTax || 0;
+      if (!F.whtPaidOn && !F.whtFiledOn) checks.push(C('C3', 'WHT return filed and paid by ' + dl.wht, 'تقديم وسداد إقرار الاستقطاع قبل ' + dl.wht, 'na', null, '', { missing: 'WHT filing / payment date' }));
+      else {
+        var last = [F.whtFiledOn, F.whtPaidOn].filter(Boolean).sort().pop(), days = daysBetween(dl.wht, last);
+        var fine = days < 30 ? 0 : r2(wTax * P.whtLatePctPer30Days * Math.floor(days / 30));
+        checks.push(C('C3', 'WHT return filed and paid by ' + dl.wht, 'تقديم وسداد إقرار الاستقطاع قبل ' + dl.wht, days > 0 ? (days < 30 ? 'warn' : 'fail') : 'pass', days > 0 ? days : 0, 'Days late',
+          { exposure: fine, note: days > 0 ? (days < 30 ? 'Late, but under 30 days: no delay fine (IR Art. 68).' : '1% of the tax for each 30 days of delay.') : '' }));
+      }
+    }
+    return { checks: checks };
+  };
+
+  // ------------------------------------------------------------------ cross-tax: reverse charge ↔ withholding
+  // A service bought from a non-resident usually triggers both: VAT under the
+  // reverse charge (box 9) and WHT. Each tax's records should name the other.
+  var NO_RCM = { dividends: 1, loan_returns: 1, insurance: 1, air_tickets_freight: 1 };
+  function partyKey(s) { return String(s || '').toLowerCase().replace(/[^a-z0-9؀-ۿ]/g, '').slice(0, 10); }
+  E.runCrossTax = function (ctx) {
+    var S = ctx.settings, D = ctx.data, checks = [];
+    var rcm = (D.sys_vat || []).filter(function (x) { return x.flow === 'P' && x.category === 'RCM'; }), reg = D.wht_reg || [];
+    if (!rcm.length && !reg.length) return { checks: [] };
+    var regK = {}, rcmK = {};
+    reg.forEach(function (w) { regK[partyKey(w.party)] = 1; });
+    rcm.forEach(function (x) { rcmK[partyKey(x.party)] = 1; });
+    var x1 = rcm.filter(function (x) { return !regK[partyKey(x.party)]; }).map(function (x) { return Object.assign({}, x, { reason: 'Reverse-charged service with no WHT line' }); });
+    var x2 = reg.filter(function (w) { return !NO_RCM[w.paymentType] && !rcmK[partyKey(w.party)]; }).map(function (w) { return Object.assign({}, w, { reason: 'Non-resident service with no reverse-charge VAT' }); });
+    var rate = S.vatRate, low = S.whtRates.technical_services || 0.05;
+    checks.push({ id: 'X1', group: 'wht', title: 'Reverse-charge purchases without WHT', titleAr: 'مشتريات بالاحتساب العكسي بدون ضريبة استقطاع',
+      status: !rcm.length ? 'na' : x1.length ? 'fail' : 'pass', missing: rcm.length ? '' : 'Reverse-charge purchases', a: r2(x1.reduce(function (s, x) { return s + (+x.net || 0); }, 0)), aLabel: 'Paid to non-residents, no WHT', b: 0, bLabel: '',
+      exceptions: { list: x1 }, counts: { list: x1.length }, exposure: r2(x1.reduce(function (s, x) { return s + (+x.net || 0) * low; }, 0)), note: 'Exposure at the lowest WHT rate (5%); management fees, royalties and head-office services are 15–20%.' });
+    checks[0].diff = checks[0].a;
+    checks.push({ id: 'X2', group: 'wht', title: 'WHT payments without reverse-charge VAT', titleAr: 'مدفوعات استقطاع بدون ضريبة احتساب عكسي',
+      status: !reg.length ? 'na' : x2.length ? 'fail' : 'pass', missing: reg.length ? '' : 'WHT register', a: r2(x2.reduce(function (s, w) { return s + (+w.gross || 0); }, 0)), aLabel: 'Services with no box 9 VAT', b: 0, bLabel: '',
+      exceptions: { list: x2 }, counts: { list: x2.length }, exposure: r2(x2.reduce(function (s, w) { return s + (+w.gross || 0) * rate; }, 0)), note: 'Undeclared reverse-charge VAT is an incorrect return even when the same VAT is recoverable (penalty on the difference).' });
+    checks[1].diff = checks[1].a;
+    return { checks: checks };
+  };
+
+  // ------------------------------------------------------------------ input VAT recovery
+  // ctx.recovery = { method: 'none'|'standard'|'special', directExemptVat, commonVat, ratioUsed }
+  E.runRecovery = function (ctx) {
+    var S = ctx.settings, D = ctx.data, map = (ctx.entity && ctx.entity.mapping) || {}, checks = [], rc = ctx.recovery || {};
+    var purch = (D.sys_vat || []).filter(function (x) { return x.flow === 'P' && /^(S|IMP|RCM)$/.test(x.category) && (+x.vat || 0) > 0; });
+    var hasDesc = purch.some(function (x) { return x.description || x.account; });
+    var keys = String(S.blockedKeywords || '').toLowerCase().split(',').map(function (k) { return k.trim(); }).filter(Boolean);
+    var blocked = purch.filter(function (x) { var d = (String(x.description || '') + ' ' + String(x.account || '') + ' ' + String(x.party || '')).toLowerCase(); return keys.some(function (k) { return d.indexOf(k) >= 0; }); })
+      .map(function (x) { return Object.assign({}, x, { reason: 'Matches a blocked category (entertainment, hospitality, restricted vehicles…)' }); });
+    var bv = r2(blocked.reduce(function (s, x) { return s + (+x.vat || 0); }, 0));
+    checks.push({ id: 'V10', group: 'vat', title: 'Input VAT on blocked items', titleAr: 'ضريبة مدخلات على بنود غير قابلة للخصم', status: !purch.length ? 'na' : !hasDesc ? 'na' : blocked.length ? 'fail' : 'pass',
+      missing: !purch.length ? 'System VAT report' : !hasDesc ? 'Purchase descriptions (optional column)' : '', a: bv, aLabel: 'Input VAT claimed', b: 0, bLabel: '', diff: bv, exposure: bv,
+      exceptions: { list: blocked }, counts: { list: blocked.length }, note: 'Entertainment, hospitality, catering, cultural/sports services and restricted vehicles are not deductible (VAT IR Art. 50). Keywords are editable in Settings.' });
+
+    var B = ctx.returnBoxes ? E.completeBoxes(JSON.parse(JSON.stringify(ctx.returnBoxes)), true) : (D.sys_vat && D.sys_vat.length ? E.boxesFromSystem(D.sys_vat) : null);
+    if (B) {
+      var taxable = [1, 2, 3, 4].reduce(function (s, n) { return s + (+B[n].amount || 0) + (+B[n].adj || 0); }, 0), exempt = (+B[5].amount || 0) + (+B[5].adj || 0);
+      var ratio = taxable + exempt > 0 ? taxable / (taxable + exempt) : 1, inVat = +B[12].vat || 0;
+      var c = { id: 'V11', group: 'vat', title: 'Input VAT apportionment for exempt supplies', titleAr: 'تخصيص ضريبة المدخلات للتوريدات المعفاة', a: Math.round(ratio * 10000) / 100, aLabel: 'Recoverable % (taxable ÷ total supplies)', b: rc.ratioUsed === '' || rc.ratioUsed == null ? null : +rc.ratioUsed, bLabel: 'Ratio applied %', ratio: ratio, exemptSales: r2(exempt) };
+      if (exempt <= 0) { c.status = 'pass'; c.note = 'No exempt supplies this period: full recovery is allowed.'; c.b = null; }
+      else if (!rc.method || rc.method === 'none') {
+        c.status = 'fail'; c.exposure = r2(inVat * (1 - ratio)); c.diff = c.exposure;
+        c.note = 'Exempt sales of SAR ' + r2(exempt).toLocaleString('en-US') + ' but no apportionment recorded. Input VAT on common costs must be restricted to the taxable share (VAT IR Art. 51). Exposure shown is the upper bound (all input VAT treated as common).';
+      } else {
+        var dir = +rc.directExemptVat || 0, com = +rc.commonVat || 0, disallowed = r2(dir + com * (1 - ratio));
+        c.exposure = 0; c.disallowed = disallowed;
+        var used = rc.ratioUsed === '' || rc.ratioUsed == null ? null : +rc.ratioUsed;
+        c.status = used != null && Math.abs(used - ratio * 100) > 1 ? 'warn' : 'pass';
+        c.diff = used == null ? null : r2(used - ratio * 100);
+        c.note = 'Disallowed this period: SAR ' + disallowed.toLocaleString('en-US') + ' (direct exempt + common × exempt share). Recompute the ratio on actual annual supplies at year end.';
+      }
+      checks.push(c);
+    }
+    if (map.gifts) {
+      var gm = E.accountMatcher(map.gifts), gifts = 0;
+      (D.gl || []).forEach(function (x) { if (gm(x.account)) gifts += (+x.debit || 0) - (+x.credit || 0); });
+      if (!D.gl || !D.gl.length) { var tm = E.tbMovement(D.tb, map.gifts, 'movement'); gifts = tm == null ? 0 : tm; }
+      var relief = ((S.giftRelief && S.giftRelief.annualCap) || 50000) / 12, over = r2(Math.max(0, gifts - relief));
+      checks.push({ id: 'V12', group: 'vat', title: 'Deemed supplies: gifts, samples and own use', titleAr: 'التوريدات الاعتبارية: الهدايا والعينات والاستخدام الخاص', status: gifts <= 0 ? 'pass' : over > 0 ? 'warn' : 'pass',
+        a: r2(gifts), aLabel: 'Gifts & samples this period', b: r2(relief), bLabel: 'Monthly share of the SAR 50,000 relief', diff: over, exposure: r2(over * S.vatRate),
+        note: 'Free goods above SAR ' + ((S.giftRelief && S.giftRelief.perRecipient) || 200) + ' per recipient per year (capped at SAR 50,000 a year) are deemed supplies: output VAT is due on them (VAT IR Art. 15).' });
+    }
+    return { checks: checks };
+  };
+
+  // ------------------------------------------------------------------ risk-engine trends
+  // ZATCA's risk engine compares each return with the taxpayer's own history.
+  // ctx.history: prior periods' summaries, newest first.
+  E.periodFigures = function (B) {
+    if (!B) return null;
+    var sales = (+B[6].amount || 0) + (+B[6].adj || 0), zero = [3, 4, 5].reduce(function (s, n) { return s + (+B[n].amount || 0); }, 0);
+    return { sales: r2(sales), outputVat: r2((+B[6].vat || 0) + (+B[9].vat || 0)), inputVat: r2(+B[12].vat || 0), netVat: r2(+B[16].vat || 0), zeroShare: sales ? r2(zero / sales * 100) : 0 };
+  };
+  E.runTrends = function (ctx) {
+    var S = ctx.settings, T = S.trend || {}, hist = (ctx.history || []).filter(function (h) { return h && h.sales != null; }).slice(0, 3), tests = [];
+    var B = ctx.returnBoxes ? E.completeBoxes(JSON.parse(JSON.stringify(ctx.returnBoxes)), true) : null, cur = E.periodFigures(B);
+    var mk = function (id, title, titleAr, flag, value, avg, desc) {
+      return { id: id, title: title, titleAr: titleAr, severity: 'medium', desc: desc, count: flag ? 1 : 0, amount: 0, status: !cur || hist.length < 2 ? 'na' : flag ? 'warn' : 'pass',
+        items: flag ? [{ period: 'This period', value: value, average: avg, reason: desc }].concat(hist.map(function (h) { return { period: h.period, value: h[id === 'T1' ? 'sales' : id === 'T2' ? 'inputVat' : id === 'T3' ? 'zeroShare' : 'inputVat'] }; })) : [] };
+    };
+    if (!cur || hist.length < 2) {
+      ['T1', 'T2', 'T3', 'T4'].forEach(function (id) { tests.push({ id: id, title: { T1: 'Sales against the last 3 periods', T2: 'Input VAT against the last 3 periods', T3: 'Zero-rated / exempt share against history', T4: 'Input VAT as a share of output VAT' }[id], titleAr: '', severity: 'medium', status: 'na', count: 0, amount: 0, items: [], desc: 'Needs this return and at least two earlier exercises.' }); });
+      return tests;
+    }
+    var avg = function (k) { return hist.reduce(function (s, h) { return s + (+h[k] || 0); }, 0) / hist.length; };
+    var aS = avg('sales'), aI = avg('inputVat'), aZ = avg('zeroShare');
+    var drop = aS ? (aS - cur.sales) / aS * 100 : 0, jump = aI ? (cur.inputVat - aI) / aI * 100 : 0, zj = cur.zeroShare - aZ, io = cur.outputVat ? cur.inputVat / cur.outputVat * 100 : 0;
+    tests.push(mk('T1', 'Sales against the last 3 periods', 'المبيعات مقارنة بآخر 3 فترات', drop > (T.salesDropPct || 25), cur.sales, r2(aS), 'Sales ' + (drop >= 0 ? 'fell ' : 'rose ') + Math.abs(Math.round(drop)) + '% against the average of the last ' + hist.length + ' periods.'));
+    tests.push(mk('T2', 'Input VAT against the last 3 periods', 'ضريبة المدخلات مقارنة بآخر 3 فترات', jump > (T.inputJumpPct || 40), cur.inputVat, r2(aI), 'Input VAT ' + (jump >= 0 ? 'rose ' : 'fell ') + Math.abs(Math.round(jump)) + '% against the average.'));
+    tests.push(mk('T3', 'Zero-rated / exempt share against history', 'حصة الصفرية والمعفاة مقارنة بالسابق', zj > (T.zeroShareJumpPts || 15), cur.zeroShare, r2(aZ), 'Zero-rated, export and exempt sales are ' + cur.zeroShare + '% of sales (average ' + r2(aZ) + '%).'));
+    tests.push(mk('T4', 'Input VAT as a share of output VAT', 'ضريبة المدخلات كنسبة من المخرجات', io > (T.inputOutputMax || 90), r2(io), null, 'Input VAT is ' + Math.round(io) + '% of output VAT.'));
+    return tests;
+  };
+
+  // ------------------------------------------------------------------ annual reconciliation
+  // rows: one summary per period of the year. inputs: annual figures from outside
+  // the returns (audited FS, Zakat / income tax return, annual GL, WHT statement).
+  E.annualRecon = function (rows, inputs, S, expectedPeriods) {
+    S = E.mergeSettings(S); inputs = inputs || {};
+    var sum = function (k) { return r2(rows.reduce(function (s, r) { return s + (+r[k] || 0); }, 0)); };
+    var tot = { sales: sum('sales'), outputVat: sum('outputVat'), inputVat: sum('inputVat'), netVat: sum('netVat'), whtTax: sum('whtTax') };
+    var items = (inputs.items || []).reduce(function (s, i) { return s + (+i.amount || 0); }, 0);
+    var line = function (key, label, labelAr, a, b, bLabel) {
+      var l = { key: key, label: label, labelAr: labelAr, a: a, b: b === '' || b == null ? null : +b, bLabel: bLabel };
+      l.diff = l.b == null ? null : r2(l.a - l.b);
+      l.status = l.b == null ? 'na' : status(l.diff, Math.max(Math.abs(l.a), Math.abs(l.b)), S);
+      return l;
+    };
+    var lines = [
+      line('fs', 'Sales per VAT returns vs revenue per audited financial statements', 'المبيعات في الإقرارات مقابل الإيرادات في القوائم المالية المدققة', tot.sales + items, inputs.fsRevenue, 'Audited FS revenue'),
+      line('zakat', 'Sales per VAT returns vs revenue per Zakat / income tax return', 'المبيعات في الإقرارات مقابل الإيرادات في إقرار الزكاة / الدخل', tot.sales + items, inputs.zakatRevenue, 'Zakat / CIT return revenue'),
+      line('outvat', 'Output VAT per returns vs annual GL output VAT', 'ضريبة المخرجات في الإقرارات مقابل الأستاذ السنوي', tot.outputVat, inputs.glOutputVat, 'GL output VAT (year)'),
+      line('invat', 'Input VAT per returns vs annual GL input VAT', 'ضريبة المدخلات في الإقرارات مقابل الأستاذ السنوي', tot.inputVat, inputs.glInputVat, 'GL input VAT (year)'),
+      line('wht', 'WHT per monthly returns vs annual WHT statement / GL', 'الاستقطاع في الإقرارات الشهرية مقابل البيان السنوي / الأستاذ', tot.whtTax, inputs.whtAnnual, 'Annual WHT')
+    ];
+    var have = {}; rows.forEach(function (r) { have[r.period] = 1; });
+    var missing = (expectedPeriods || []).filter(function (p) { return !have[p]; });
+    return { totals: tot, explained: r2(items), lines: lines, missing: missing, status: missing.length ? 'fail' : worst(lines.map(function (l) { return l.status === 'na' ? 'pass' : l.status; })) };
+  };
+  E.periodsOfYear = function (year, freq) {
+    var out = [];
+    if (freq === 'quarterly') for (var q = 1; q <= 4; q++) out.push(year + '-Q' + q);
+    else for (var m = 1; m <= 12; m++) out.push(year + '-' + pad(m));
+    return out;
+  };
+
+  // ------------------------------------------------------------------ findings aging
+  E.aging = function (findings, today) {
+    today = today || new Date().toISOString().slice(0, 10);
+    var b = { notDue: [], d30: [], d60: [], d90: [], over90: [], noDate: [] };
+    (findings || []).filter(function (f) { return f.status !== 'closed'; }).forEach(function (f) {
+      if (!f.due) return b.noDate.push(f);
+      var d = daysBetween(f.due, today);
+      (d <= 0 ? b.notDue : d <= 30 ? b.d30 : d <= 60 ? b.d60 : d <= 90 ? b.d90 : b.over90).push(Object.assign({}, f, { overdue: Math.max(0, d) }));
+    });
+    return b;
+  };
+
   // ------------------------------------------------------------------ penalties & readiness
   E.penaltyForFinding = function (f, S) {
     var P = S.penalties, tax = Math.abs(+f.taxImpact || 0), months = +f.monthsLate || 0;
-    if (f.tax === 'WHT') return r2(tax * P.whtLatePctPer30Days * Math.max(1, Math.ceil((+f.daysLate || 30) / 30)));
+    if (f.tax === 'WHT') { var dl = +f.daysLate || (+f.monthsLate || 0) * 30; return r2(tax * P.whtLatePctPer30Days * (dl < 30 ? 0 : Math.floor(dl / 30))); }
     var err = tax * P.vatErrorPct;
     var late = tax * P.vatLatePaymentPctPerMonth * months;
     return r2(err + late);
   };
 
+  // VAT IR Art. 63. netVatImpact > 0 = tax under-declared, < 0 = over-declared.
   E.correctionRoute = function (netVatImpact, S) {
-    return Math.abs(netVatImpact) > (S.vatCorrectionThreshold || 5000)
-      ? 'Amended return (voluntary disclosure) — impact above SAR ' + (S.vatCorrectionThreshold || 5000)
-      : 'Correct through Box 14 of the next return';
+    var th = S.vatCorrectionThreshold || 15000;
+    if (netVatImpact < 0) return 'Over-declared: deduct in a later return within ' + (S.overstatementYears || 5) + ' years from the end of the calendar year of the period';
+    return Math.abs(netVatImpact) >= th
+      ? 'Amend the original return — notify ZATCA within ' + (S.correctionNotifyDays || 20) + ' days of becoming aware (net difference ≥ SAR ' + th.toLocaleString('en-US') + ')'
+      : 'Include in the return for the period in which the error was discovered (net difference below SAR ' + th.toLocaleString('en-US') + ')';
   };
 
   E.DEFAULT_CHECKLIST = [
@@ -1190,7 +1535,16 @@
     ['WHT', 'WHT payments register with contracts and invoices', 'سجل مدفوعات الاستقطاع مع العقود والفواتير'],
     ['WHT', 'WHT certificates issued to beneficiaries', 'شهادات الاستقطاع الصادرة للمستفيدين'],
     ['WHT', 'Tax residency certificates / treaty forms (DTT)', 'شهادات الإقامة الضريبية ونماذج الاتفاقيات'],
-    ['WHT', 'Intercompany / head-office agreements', 'اتفاقيات الأطراف المرتبطة والمركز الرئيسي']
+    ['WHT', 'Intercompany / head-office agreements', 'اتفاقيات الأطراف المرتبطة والمركز الرئيسي'],
+    ['EINV', 'E-invoicing provider contract, scope and ZATCA-compliance evidence', 'عقد مزود الفوترة الإلكترونية ونطاقه وما يثبت توافقه'],
+    ['EINV', 'CSID / cryptographic stamp certificates for every EGS unit (valid, not expired)', 'شهادات الختم التشفيري لكل وحدة إصدار (سارية)'],
+    ['EINV', 'Provider submission log: cleared, reported, rejected and resubmitted invoices', 'سجل الإرسال لدى المزود: المعتمدة والمبلغ عنها والمرفوضة والمعاد إرسالها'],
+    ['EINV', 'Procedure for invoices issued outside the ERP (POS, manual, branch systems)', 'إجراءات الفواتير الصادرة خارج النظام (نقاط البيع، يدوية، الفروع)'],
+    ['VAT', 'Input VAT apportionment workings (exempt supplies, Art. 51)', 'أوراق احتساب النسبة القابلة للخصم (التوريدات المعفاة، المادة 51)'],
+    ['VAT', 'Deemed supplies register (gifts, samples, own use)', 'سجل التوريدات الاعتبارية (الهدايا، العينات، الاستخدام الخاص)'],
+    ['VAT', 'Error corrections log (amended returns and period-of-discovery adjustments)', 'سجل تصحيح الأخطاء (الإقرارات المعدلة والتسويات)'],
+    ['VAT', 'Zakat / income tax return for the year (revenue reconciliation)', 'إقرار الزكاة / ضريبة الدخل للسنة (مطابقة الإيرادات)'],
+    ['VAT', 'Electronic marketplace sales: deemed-supplier assessment (from 1 Jan 2026)', 'المبيعات عبر المنصات الإلكترونية: تقييم المورد الاعتباري (من 1 يناير 2026)']
   ];
 
   E.readiness = function (r) {
@@ -1204,6 +1558,8 @@
     }
     parts.recon = score((r.vat || []).concat(r.wht || []));
     parts.bank = score(r.bank || []);
+    parts.einv = r.einv ? score(r.einv) : null;
+    parts.filing = r.filing ? score(r.filing) : null;
     var tests = (r.analytics || []).filter(function (t) { return t.status !== 'na'; });
     parts.analytics = tests.length ? tests.reduce(function (a, t) { return a + (t.status === 'pass' ? 1 : t.status === 'warn' ? (t.severity === 'low' ? 0.85 : 0.6) : 0.2); }, 0) / tests.length : 0;
     var samples = r.samples || [];
@@ -1232,15 +1588,24 @@
   // One call that runs everything for an exercise.
   E.runAll = function (ctx) {
     ctx.settings = E.mergeSettings(ctx.settings);
+    var hasWht = !(ctx.entity && ctx.entity.whtRegistered === false);
     var vat = E.runVatRecon(ctx), wht = E.runWhtRecon(ctx), bank = E.runBankRecon(ctx), an = E.runAnalytics(ctx);
-    (ctx.checkNotes ? Object.keys(ctx.checkNotes) : []).forEach(function () {});
-    var res = { vat: vat, wht: wht, bank: bank, analytics: an };
+    vat.checks = vat.checks.concat(E.runRecovery(ctx).checks);
+    if (hasWht) wht.checks = wht.checks.concat(E.runCrossTax(ctx).checks);
+    var einv = E.runEinvoicing(ctx);
+    ctx.whtApplies = hasWht;
+    ctx.whtTax = r2((ctx.data.ret_wht || []).reduce(function (s, x) { return s + (+x.tax || 0); }, 0));
+    var filing = E.runFiling(ctx);
+    an.tests = an.tests.concat(E.runTrends(ctx));
+    var res = { vat: vat, wht: wht, bank: bank, analytics: an, einv: einv, filing: filing };
+    res.figures = E.periodFigures(ctx.returnBoxes ? E.completeBoxes(JSON.parse(JSON.stringify(ctx.returnBoxes)), true) : null);
     res.score = E.readiness({
-      settings: ctx.settings, vat: vat.checks, wht: (ctx.entity && ctx.entity.whtRegistered === false) ? [] : wht.checks, bank: bank.checks, analytics: an.tests,
-      samples: ctx.samples, checklist: ctx.checklist, findings: ctx.findings, hasWht: !(ctx.entity && ctx.entity.whtRegistered === false)
+      settings: ctx.settings, vat: vat.checks, wht: hasWht ? wht.checks : [], bank: bank.checks, analytics: an.tests,
+      einv: einv.checks, filing: filing.checks,
+      samples: ctx.samples, checklist: ctx.checklist, findings: ctx.findings, hasWht: hasWht
     });
     var exp = 0;
-    vat.checks.concat(wht.checks, bank.checks).forEach(function (c) { if (c.exposure) exp += c.exposure; });
+    vat.checks.concat(hasWht ? wht.checks : [], bank.checks, einv.checks, filing.checks).forEach(function (c) { if (c.exposure) exp += c.exposure; });
     res.exposure = r2(exp);
     return res;
   };

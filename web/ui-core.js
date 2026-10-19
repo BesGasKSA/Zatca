@@ -192,7 +192,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   }
   function paintRail(view) {
     var ex = S.exId && S.ex ? S.ex : null;
-    var items = [['dashboard', t('Dashboard'), '▦'], ['entities', t('Entities'), '▤']];
+    var items = [['dashboard', t('Dashboard'), '▦'], ['entities', t('Entities'), '▤'], ['reports', t('Reports'), '▥']];
     var h = '<div class="brand">' + logo(30) + '<div><b>Inspection Ready</b><span>' + esc(S.tenant ? S.tenant.name : '') + '</span></div></div>';
     items.forEach(function (i) { h += '<a class="nav" href="#/' + i[0] + '"' + (view === i[0] ? ' aria-current="page"' : '') + '><span aria-hidden="true">' + i[2] + '</span>' + i[1] + '</a>'; });
     if (ex) {
@@ -204,6 +204,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       if (Z.can(i[3])) h += '<a class="nav" href="#/' + i[0] + '"' + (view === i[0] ? ' aria-current="page"' : '') + '><span aria-hidden="true">' + i[2] + '</span>' + i[1] + '</a>';
     });
     if (S.api.mode === 'cloud') h += '<a class="nav" href="#/platform"' + (view === 'platform' ? ' aria-current="page"' : '') + '><span aria-hidden="true">⌂</span>' + t('Platform') + '</a>';
+    if (S.api.mode === 'cloud' && S.tenant && S.tenant.spreadsheetUrl) h += '<a class="nav" href="' + esc(S.tenant.spreadsheetUrl) + '" target="_blank" rel="noopener noreferrer"><span aria-hidden="true">▦</span>' + t('Google Sheet (your data)') + ' ↗</a>';
     h += '<div class="foot">' + esc(S.user.name) + ' — ' + esc(t(cap(S.user.role))) + '<br>' + (S.api.mode === 'cloud' ? '<button data-act="logout">' + t('Sign out') + '</button>' : t('Stored on this device')) + '</div>';
     document.querySelector('.rail').innerHTML = h;
   }
@@ -257,10 +258,19 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       '<div class="stack"><div class="kpis"><div><b>' + S.entities.length + '</b><span>' + t('Entities') + '</span></div><div><b>' + open.length + '</b><span>' + t('Exercises not signed off') + '</span></div>' +
       '<div><b>' + (avg == null ? '—' : avg + '%') + '</b><span>' + t('Average readiness, last 12 months') + '</span></div><div class="' + (fails ? 'bad' : '') + '"><b>' + fails + '</b><span>' + t('Failed checks in latest exercises') + '</span></div>' +
       '<div class="' + (exposure ? 'bad' : '') + '"><b>' + Z.fmt(exposure, 0) + '</b><span>' + t('Quantified tax exposure (SAR)') + '</span></div></div>' +
+      dataStrip() +
       '<section class="paper"><header><div><h2>' + t('Readiness by month') + '</h2><p>' + t('Green is ready, amber at risk, red not ready. A dark underline means signed off.') + '</p></div></header><div class="tbl-wrap">' + heat + '</div></section>' +
       '<section class="paper"><header><div><h2>' + t('Filing deadlines') + '</h2><p>' + t('VAT is due by the last day of the month after the period; WHT by the 10th of the following month.') + '</p></div></header><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Entity') + '</th><th>' + t('Period') + '</th><th>' + t('VAT return due') + '</th><th>' + t('WHT return due') + '</th></tr></thead><tbody>' + dl + '</tbody></table></div></section></div>');
   };
 
+  function dataStrip() {
+    if (S.api.mode !== 'cloud' || !S.tenant || !S.tenant.spreadsheetUrl) return '';
+    return '<section class="paper area-ledger" style="display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap"><div><h3>' + t('Your data lives in your own Google Sheet') + '</h3><p class="muted" style="margin:2px 0 0">' + t('Connected automatically. Every entity, exercise, upload, sample and finding is stored there, one tab per table.') + '</p></div>' +
+      '<div class="row"><a class="btn primary" href="' + esc(S.tenant.spreadsheetUrl) + '" target="_blank" rel="noopener noreferrer">' + t('Open Google Sheet') + ' ↗</a>' + (Z.can('owner') ? '<button class="btn" data-act="sharesheet">' + t('Give me access') + '</button>' : '') + '</div></section>';
+  }
+  Z.ACT.sharesheet = function () {
+    Z.call('shareSheet').then(function (r) { Z.toast(r.shared ? t('Shared with') + ' ' + S.user.email + ' — ' + t('check your inbox') : t('Google refused to share with this email. Ask the platform administrator.'), !r.shared); });
+  };
   Z.ACT.openex = function (el) { location.hash = '#/ex/' + el.dataset.id + '/overview'; };
   Z.ACT.newex = function (el) {
     if (!Z.can('preparer')) return Z.toast(t('Your role does not allow this.'), true);
@@ -342,7 +352,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     var unmapped = Z.MAP_FIELDS.filter(function (f) { return ['outputVat', 'inputVat', 'revenue', 'receivables', 'whtPayable'].indexOf(f[0]) >= 0 && !(e.mapping || {})[f[0]]; });
     Z.setMain('<div class="pagehead"><div><h1>' + esc(Z.entName(e)) + '</h1><p>' + t('TRN') + ' ' + esc(e.trn || '—') + ' · ' + t(cap(e.vatFreq || 'monthly')) + ' ' + t('VAT filer') + (e.erp ? ' · ' + esc(e.erp) : '') + '</p></div>' +
       '<div class="row">' + (Z.can('manager') ? '<a class="btn" href="#/entity/' + e.id + '/edit">' + t('Edit entity') + '</a>' : '') +
-      (Z.can('preparer') && periods.length ? '<select id="newp" aria-label="' + t('Period') + '" style="width:auto">' + periods.map(function (p) { return '<option>' + p + '</option>'; }).join('') + '</select><button class="btn primary" data-act="newexsel" data-e="' + e.id + '">' + t('Start inspection exercise') + '</button>' : '') + '</div></div>' +
+      (Z.can('preparer') && periods.length ? '<select id="newp" aria-label="' + t('Period') + '" style="width:auto">' + periods.map(function (p) { return '<option>' + p + '</option>'; }).join('') + '</select><button class="btn primary" data-act="newexsel" data-e="' + e.id + '">' + t('Start inspection exercise') + '</button>' : '') + '<a class="btn" href="#/annual/' + e.id + '/' + Z.today().slice(0, 4) + '">' + t('Annual reconciliation') + '</a></div></div>' +
       (unmapped.length ? '<div class="paper" style="margin-bottom:18px;border-color:var(--amber)"><b>' + t('Account mapping incomplete:') + '</b> ' + unmapped.map(function (f) { return esc(t(f[1])); }).join(', ') + '. ' + t('Ledger checks for these will show as no data.') + '</div>' : '') +
       '<div class="stack">' + (chart ? '<section class="paper"><header><div><h2>' + t('Readiness and VAT due over time') + '</h2></div></header>' + chart + '</section>' : '') +
       '<section class="paper flush"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Period') + '</th><th>' + t('Status') + '</th><th>' + t('Readiness') + '</th><th class="num">' + t('Net VAT due') + '</th><th class="num">' + t('WHT') + '</th><th class="num">' + t('Exposure') + '</th><th>' + t('Signed off') + '</th></tr></thead><tbody>' +
@@ -389,6 +399,17 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       fld('vatRate', t('VAT standard rate %'), Z.r(V.vatRate * 100), 'number', 'step="0.01"') + fld('vatCorrectionThreshold', t('Amended return above (SAR)'), V.vatCorrectionThreshold, 'number') +
       '<label class="f"><span>' + t('Read TB VAT accounts as') + '</span><select name="glBasis"><option value="movement"' + (V.glBasis === 'movement' ? ' selected' : '') + '>' + t('Net movement') + '</option><option value="gross"' + (V.glBasis === 'gross' ? ' selected' : '') + '>' + t('Gross side (credits for output, debits for input)') + '</option></select><small>' + t('Used only when no GL detail is loaded.') + '</small></label>' +
       fld('settlementKeywords', t('Settlement journal keywords'), V.settlementKeywords, 'text', '', t('GL lines with these words are left out of VAT account movement.')) + '</div></section>' +
+      '<section class="paper"><h2 style="margin-bottom:12px">' + t('Corrections, e-invoicing and input VAT rules') + '</h2><div class="grid g3">' +
+      fld('vatCorrectionThreshold', t('Amend the original return at or above (SAR)'), V.vatCorrectionThreshold, 'number', 'step="1"', t('VAT IR Art. 63: SAR 15,000 since 23 June 2023.')) +
+      fld('correctionNotifyDays', t('Days to notify ZATCA of a material error'), V.correctionNotifyDays, 'number', 'step="1"') +
+      fld('refundMin', t('Minimum refund application (SAR)'), V.refundMin, 'number', 'step="1"') +
+      fld('ein_simplifiedHours', t('Report simplified (B2C) invoices within (hours)'), V.einv.simplifiedHours, 'number', 'step="1"') +
+      fld('ein_standardMinutes', t('Clearance allowance for standard invoices (minutes)'), V.einv.standardMinutes, 'number', 'step="1"', t('Standard invoices must be cleared before sharing; this only absorbs clock differences.')) +
+      fld('gift_perRecipient', t('Gift relief per recipient per year (SAR)'), V.giftRelief.perRecipient, 'number', 'step="1"') +
+      fld('gift_annualCap', t('Gift relief annual cap (SAR)'), V.giftRelief.annualCap, 'number', 'step="1"') +
+      fld('trend_salesDropPct', t('Flag a sales drop above (%)'), V.trend.salesDropPct, 'number', 'step="1"') +
+      fld('trend_inputJumpPct', t('Flag an input VAT rise above (%)'), V.trend.inputJumpPct, 'number', 'step="1"') + '</div>' +
+      '<label class="f" style="margin-top:12px"><span>' + t('Blocked input VAT keywords') + '</span><textarea name="blockedKeywords">' + esc(V.blockedKeywords) + '</textarea><small>' + t('Matched against purchase descriptions, accounts and supplier names (VAT IR Art. 50).') + '</small></label></section>' +
       '<section class="paper area-wht"><h2>' + t('Withholding tax rates') + '</h2><p class="muted">' + t('Statutory rates for payments to non-residents. Lower treaty rates are accepted when the line is marked as treaty relief with a certificate.') + '</p><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Payment type') + '</th><th>%</th></tr></thead><tbody>' + whtRows + '</tbody></table></div></section>' +
       '<section class="paper"><h2 style="margin-bottom:12px">' + t('Penalties used for exposure estimates') + '</h2><div class="grid g3">' +
       fld('pen_vatErrorPct', t('Incorrect VAT return — % of difference'), Z.r(P.vatErrorPct * 100), 'number', 'step="0.1"') + fld('pen_vatLatePaymentPctPerMonth', t('VAT late payment — % per month'), Z.r(P.vatLatePaymentPctPerMonth * 100), 'number', 'step="0.1"') +
@@ -408,7 +429,10 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
         else if (k.indexOf('bank_') === 0) v.bankRules[k.slice(5)] = val;
         else if (k.indexOf('w_') === 0) v.weights[k.slice(2)] = +val;
         else if (k === 'tolPct' || k === 'vatRate') v[k] = +val / 100;
-        else if (k === 'glBasis' || k === 'settlementKeywords') v[k] = val;
+        else if (k === 'glBasis' || k === 'settlementKeywords' || k === 'blockedKeywords') v[k] = val;
+        else if (k.indexOf('ein_') === 0) { v.einv = v.einv || {}; v.einv[k.slice(4)] = +val; }
+        else if (k.indexOf('gift_') === 0) { v.giftRelief = v.giftRelief || {}; v.giftRelief[k.slice(5)] = +val; }
+        else if (k.indexOf('trend_') === 0) { v.trend = v.trend || {}; v.trend[k.slice(6)] = +val; }
         else if (k !== 'orgName') v[k] = +val;
       });
       var jobs = [Z.save('settings', { id: 'tenant', values: v })];
@@ -418,7 +442,9 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   };
   Z.r = function (x) { return Math.round(x * 1000) / 1000; };
   function storageBox() {
-    if (S.api.mode === 'cloud') return '<p>' + t('Connected to the Google Sheets backend.') + '</p>' + (localStorage.getItem('zr_api_url') ? '<button class="btn small" data-act="disconnect">' + t('Disconnect and use this device only') + '</button>' : '');
+    if (S.api.mode === 'cloud') return '<p>' + t('Connected automatically to the Google Sheets backend.') + '</p>' +
+      (S.tenant && S.tenant.spreadsheetUrl ? '<div class="row" style="margin:8px 0"><a class="btn primary" href="' + esc(S.tenant.spreadsheetUrl) + '" target="_blank" rel="noopener noreferrer">' + t('Open Google Sheet') + ' ↗</a>' + (Z.can('owner') ? '<button class="btn" data-act="sharesheet">' + t('Give me access') + '</button>' : '') + '</div><p class="faint" style="font-size:12.5px">' + esc(S.tenant.spreadsheetUrl) + '</p>' : '') +
+      (localStorage.getItem('zr_api_url') ? '<button class="btn small" data-act="disconnect">' + t('Disconnect and use this device only') + '</button>' : '');
     return '<p>' + t('Everything is stored in this browser. To share across users and entities, deploy the Apps Script backend (see README) and paste its web app URL.') + '</p>' +
       '<div class="row" style="margin-top:8px"><input type="url" id="apiurl" placeholder="https://script.google.com/macros/s/…/exec" style="max-width:520px"><button class="btn primary" data-act="connect">' + t('Connect') + '</button></div>' +
       '<div class="row" style="margin-top:14px"><button class="btn" data-act="backup">' + t('Download backup (JSON)') + '</button><label class="btn">' + t('Restore backup') + '<input type="file" accept=".json" data-chg="restore" hidden></label><button class="btn danger" data-act="wipe">' + t('Erase all data on this device') + '</button></div>';
@@ -487,7 +513,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   };
   Z.views.platform = function () {
     return Z.call('platformTenants').then(function (r) {
-      Z.setMain('<div class="pagehead"><div><h1>' + t('Platform — organisations') + '</h1><p>' + t('Every tenant has its own Google Sheet.') + '</p></div></div><div class="paper flush"><table class="t"><thead><tr><th>' + t('Organisation') + '</th><th>' + t('Created') + '</th><th>' + t('Status') + '</th><th></th></tr></thead><tbody>' +
+      Z.setMain('<div class="pagehead"><div><h1>' + t('Platform — organisations') + '</h1><p>' + t('Every tenant has its own Google Sheet.') + '</p></div>' + (r.registryUrl ? '<a class="btn" href="' + esc(r.registryUrl) + '" target="_blank" rel="noopener noreferrer">' + t('Open the Registry sheet') + ' ↗</a>' : '') + '</div><div class="paper flush"><table class="t"><thead><tr><th>' + t('Organisation') + '</th><th>' + t('Created') + '</th><th>' + t('Status') + '</th><th></th></tr></thead><tbody>' +
         r.tenants.map(function (x) { return '<tr><td><b>' + esc(x.name) + '</b><div><a href="' + esc(x.spreadsheetUrl) + '" target="_blank" rel="noopener">' + t('Sheet') + '</a></div></td><td>' + esc(String(x.createdAt).slice(0, 10)) + '</td><td>' + Z.pill(x.status === 'active' ? 'pass' : 'fail', t(cap(x.status))) + '</td><td><button class="btn small" data-act="tstatus" data-id="' + x.id + '" data-s="' + (x.status === 'active' ? 'suspended' : 'active') + '">' + (x.status === 'active' ? t('Suspend') : t('Reactivate')) + '</button></td></tr>'; }).join('') + '</tbody></table></div>');
     }).catch(function () { Z.setMain('<div class="paper empty"><h2>' + t('Platform administrators only') + '</h2><p>' + t('Add your email to the SUPER_ADMINS script property to manage tenants.') + '</p></div>'); });
   };
@@ -508,7 +534,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   Z.bankClassName = function (k) {
     return { customer_receipt: 'Customer receipts', supplier_payment: 'Supplier payments', zatca_vat: 'VAT paid to ZATCA', zatca_wht: 'WHT paid to ZATCA', zakat: 'Zakat', foreign_transfer: 'Foreign transfers', payroll: 'Payroll', internal_transfer: 'Internal transfers', financing: 'Financing / loans', other_in: 'Other receipts', other_out: 'Other payments' }[k] || k;
   };
-  Z.partName = function (k) { return { recon: 'Return & ledger reconciliation', bank: 'Bank reconciliation', analytics: 'Data analytics', sampling: 'Sample testing', checklist: 'Documents on file', findings: 'Open findings' }[k] || k; };
+  Z.partName = function (k) { return { recon: 'Return & ledger reconciliation', bank: 'Bank reconciliation', einv: 'E-invoicing chain', filing: 'Filing & payment', analytics: 'Data analytics', sampling: 'Sample testing', checklist: 'Documents on file', findings: 'Open findings' }[k] || k; };
 
   // apply saved theme before first paint
   try { var th = localStorage.getItem('zr_theme'); if (th) document.documentElement.dataset.theme = th; } catch (e) {}

@@ -36,6 +36,7 @@ function fakeBook(id) {
     getSheetByName: function (n) { return sheets[n] || null; },
     insertSheet: function (n) { sheets[n] = fakeSheet(n); order.push(n); return sheets[n]; },
     getSheets: function () { return order.map(function (n) { return sheets[n]; }); },
+    addViewer: function (e) { (b._viewers = b._viewers || []).push(e); },
     deleteSheet: function (s) { delete sheets[s.getName()]; order.splice(order.indexOf(s.getName()), 1); },
     _sheets: sheets
   };
@@ -85,6 +86,7 @@ t('sign-up creates a tenant with its own spreadsheet', function () {
   assert.notStrictEqual(A.tenant.spreadsheetUrl, B.tenant.spreadsheetUrl);
   var bk = books[A.tenant.spreadsheetUrl.split('/d/')[1]];
   assert.ok(bk._sheets.entities && bk._sheets._chunks && !bk._sheets.Sheet1);
+  assert.deepStrictEqual(bk._viewers, ['aisha@alpha.sa'], 'owner gets view access to their own sheet');
 });
 t('weak password and duplicate email refused', function () {
   err(call({ action: 'signup', orgName: 'X', email: 'x@x.sa', password: 'short' }), 'weak_password');
@@ -168,6 +170,15 @@ t('deleting an exercise removes its child documents', function () {
   ok(call({ action: 'remove', token: A.token, table: 'exercises', id: ex.id }));
   assert.strictEqual(ok(call({ action: 'list', token: A.token, table: 'findings' })).docs.length, 0);
   assert.strictEqual(ok(call({ action: 'list', token: A.token, table: 'datasets' })).docs.length, 0);
+});
+t('annual figures are scoped to an accessible entity', function () {
+  var a = ok(call({ action: 'save', token: A.token, table: 'annual', doc: { id: ent.id + '_2026', entityId: ent.id, year: 2026, fsRevenue: 1000 } })).doc;
+  assert.strictEqual(a.entityId, ent.id);
+  err(call({ action: 'save', token: B.token, table: 'annual', doc: { id: 'x_2026', entityId: ent.id, year: 2026 } }), 'forbidden');
+});
+t('owner can (re)share the sheet with themselves', function () {
+  var r = ok(call({ action: 'shareSheet', token: A.token }));
+  assert.ok(/docs\.google\.com\/spreadsheets/.test(r.url));
 });
 t('audit trail records changes for managers', function () {
   var a = ok(call({ action: 'list', token: A.token, table: 'audit' })).docs;

@@ -64,7 +64,7 @@ t('B7 bank balance ties to TB', function () { assert.strictEqual(byId(R.bank.che
 console.log('WHT');
 t('W1 return misses freight line', function () { var c = byId(R.wht.checks, 'W1'); assert.strictEqual(c.diff, -1300); });
 t('W5 management fees under-withheld by 6,000', function () { var c = byId(R.wht.checks, 'W5'); assert.strictEqual(c.a, 6000); });
-t('W6 one late remittance with a 1%-per-30-days fine', function () { var c = byId(R.wht.checks, 'W6'); assert.strictEqual(c.counts.late, 1); assert.strictEqual(c.exceptions.late[0].penalty, 9.5); });
+t('W6 one late remittance with a 1%-per-30-days fine', function () { var c = byId(R.wht.checks, 'W6'); assert.strictEqual(c.counts.late, 1); /* 43 days late: one full 30-day period */ assert.strictEqual(c.exceptions.late[0].penalty, 4.75); });
 t('W7 one certificate missing', function () { assert.strictEqual(byId(R.wht.checks, 'W7').counts.noCert, 1); });
 t('W8 Lisbon Analytics expense not in register', function () { var c = byId(R.wht.checks, 'W8'); assert.strictEqual(c.counts.missing, 1); });
 t('W4 WHT payable credits tie to register, not return', function () { assert.strictEqual(byId(R.wht.checks, 'W4').diff, -1300); });
@@ -80,6 +80,72 @@ t('A8 export to SA', function () { assert.strictEqual(A('A8').count, 1); });
 t('A9 foreign supplier not on RCM', function () { assert.strictEqual(A('A9').count, 1); });
 t('A16 Benford computed', function () { assert.ok(A('A16').mad > 0); });
 t('effective VAT rate below 15% because of the mis-rated line', function () { assert.ok(R.analytics.ratios.effectiveRate < 15 && R.analytics.ratios.effectiveRate > 14.8); });
+
+console.log('e-invoicing: ERP ↔ provider ↔ ZATCA');
+var R2 = E.runAll({ entity: demo.entity, periodKey: demo.period, settings: {}, data: demo.datasets, returnBoxes: demo.returnBoxes, reconItems: demo.reconItems,
+  prevNetVat: demo.prevNetVat, prevWhtTax: demo.prevWhtTax, filing: demo.filing, recovery: demo.recovery, history: demo.history, today: '2026-11-05', samples: [], checklist: [], findings: [] });
+var EI = function (id) { return byId(R2.einv.checks, id); };
+t('E1 two ERP invoices never reached the provider', function () { assert.strictEqual(EI('E1').counts.list, 2); });
+t('E2 the POS sale outside the ERP', function () { assert.strictEqual(EI('E2').counts.list, 1); assert.strictEqual(EI('E2').exceptions.list[0].invoice, 'POS-88417'); });
+t('E3 rejected, pending, and accepted-at-provider-but-unknown-to-ZATCA', function () {
+  var r = EI('E3').exceptions.list.map(function (x) { return x.reason; }).join('|');
+  assert.ok(/REJECTED/.test(r) && /PENDING/.test(r) && /ZATCA has no record/.test(r), r);
+});
+t('E4 the SAR 150 VAT mismatch', function () { assert.strictEqual(EI('E4').counts.list, 1); });
+t('E5 B2C after 30 h and B2B cleared 3.5 h after issue', function () { assert.strictEqual(EI('E5').counts.list, 2); });
+t('E6 skipped counter on an EGS unit', function () { assert.strictEqual(EI('E6').counts.list, 1); });
+t('E7 credit note without a reference', function () { assert.strictEqual(EI('E7').counts.list, 1); });
+t('E8 simplified invoice to a VAT-registered customer is flagged', function () { assert.ok(EI('E8').exceptions.list.some(function (x) { return /standard \(cleared\)/.test(x.reason); })); });
+t('E9 one accepted with a warning', function () { assert.strictEqual(EI('E9').counts.list, 1); });
+t('datetime parsing', function () { assert.strictEqual(E.datetime('03/09/2026 14:05'), '2026-09-03T14:05'); assert.strictEqual(E.datetime('2026-09-03T14:05:59Z'), '2026-09-03T14:05'); });
+
+console.log('filing & payment');
+var FC = function (id) { return byId(R2.filing.checks, id); };
+t('C1 VAT filed on time, C2 paid in full on time', function () { assert.strictEqual(FC('C1').status, 'pass'); assert.strictEqual(FC('C2').status, 'pass'); });
+t('C3 WHT 2 days late: late, but no fine under 30 days', function () { assert.strictEqual(FC('C3').status, 'warn'); assert.strictEqual(FC('C3').exposure, 0); });
+t('C1 late filing and C2 late payment are priced', function () {
+  var r = E.runFiling({ settings: E.mergeSettings({}), periodKey: '2026-09', returnBoxes: demo.returnBoxes, filing: { vatFiledOn: '2026-11-20', vatPaidOn: '2026-12-15' }, today: '2026-12-20' });
+  var c1 = byId(r.checks, 'C1'), c2 = byId(r.checks, 'C2');
+  assert.strictEqual(c1.status, 'fail'); assert.strictEqual(c2.status, 'fail');
+  assert.ok(c2.exposure > 0 && /2\)/.test(c2.note), c2.note); // 45 days → 2 months or part
+});
+
+console.log('input VAT recovery, cross-tax, trends');
+var VC = function (id) { return byId(R2.vat.checks, id); };
+t('V10 three blocked purchases (dinner, hotel, GM car)', function () { assert.strictEqual(VC('V10').counts.list, 3); });
+t('V11 exempt sales with no apportionment fail with an upper-bound exposure', function () { assert.strictEqual(VC('V11').status, 'fail'); assert.ok(VC('V11').exposure > 0 && VC('V11').a < 100); });
+t('V11 passes once apportionment is applied at the computed ratio', function () {
+  var ratio = VC('V11').a;
+  var r = E.runRecovery({ settings: E.mergeSettings({}), entity: demo.entity, data: demo.datasets, returnBoxes: demo.returnBoxes, recovery: { method: 'standard', commonVat: 100000, directExemptVat: 0, ratioUsed: ratio } });
+  assert.strictEqual(byId(r.checks, 'V11').status, 'pass');
+});
+t('V12 SAR 30,000 of gifts against the monthly relief', function () { assert.strictEqual(VC('V12').status, 'warn'); assert.strictEqual(VC('V12').exposure, 3875); });
+t('A17 two exports without customs evidence', function () { assert.strictEqual(byId(R2.analytics.tests, 'A17').count, 2); });
+var XC = function (id) { return byId(R2.wht.checks, id); };
+t('X1 reverse-charged training with no WHT line', function () { assert.strictEqual(XC('X1').counts.list, 1); assert.ok(/Amman/.test(XC('X1').exceptions.list[0].party)); });
+t('X2 management fees to the parent with no reverse-charge VAT', function () { assert.strictEqual(XC('X2').counts.list, 1); assert.strictEqual(XC('X2').exposure, 18000); });
+t('T2 input VAT surge against history; T1 sales steady', function () { assert.strictEqual(byId(R2.analytics.tests, 'T2').status, 'warn'); assert.strictEqual(byId(R2.analytics.tests, 'T1').status, 'pass'); });
+
+console.log('regulatory rules');
+var S0 = E.mergeSettings({});
+t('Art. 63: SAR 15,000 threshold and routes', function () {
+  assert.ok(/Amend the original return/.test(E.correctionRoute(15000, S0)) && /20 days/.test(E.correctionRoute(15000, S0)));
+  assert.ok(/period in which the error was discovered/.test(E.correctionRoute(14999, S0)));
+  assert.ok(/Over-declared/.test(E.correctionRoute(-20000, S0)));
+});
+t('WHT fine: none under 30 days, 1% per full 30 days after', function () {
+  assert.strictEqual(E.penaltyForFinding({ tax: 'WHT', taxImpact: 10000, daysLate: 29 }, S0), 0);
+  assert.strictEqual(E.penaltyForFinding({ tax: 'WHT', taxImpact: 10000, daysLate: 61 }, S0), 200);
+});
+t('annual reconciliation flags missing periods and FS differences', function () {
+  var rows = [{ period: '2026-01', sales: 100, outputVat: 15, inputVat: 5, netVat: 10, whtTax: 1 }, { period: '2026-02', sales: 200, outputVat: 30, inputVat: 10, netVat: 20, whtTax: 2 }];
+  var a = E.annualRecon(rows, { fsRevenue: 350, zakatRevenue: 300, items: [] }, {}, E.periodsOfYear(2026, 'monthly'));
+  assert.strictEqual(a.missing.length, 10); assert.strictEqual(a.lines[0].diff, -50); assert.strictEqual(a.lines[1].status, 'pass'); assert.strictEqual(a.status, 'fail');
+});
+t('findings aging buckets', function () {
+  var b = E.aging([{ status: 'open', due: '2026-10-01' }, { status: 'open', due: '2026-06-01' }, { status: 'closed', due: '2026-01-01' }, { status: 'open' }], '2026-10-19');
+  assert.strictEqual(b.d30.length, 1); assert.strictEqual(b.over90.length, 1); assert.strictEqual(b.noDate.length, 1);
+});
 
 console.log('sampling');
 t('attribute sample size 95% / 5% / 0 → 59 (Poisson)', function () { assert.strictEqual(E.sampleSizeAttribute(0.95, 0.05, 0, 100000), 60); });

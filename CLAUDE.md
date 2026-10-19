@@ -28,7 +28,7 @@ See README.md for the feature map and deployment.
 
 ## Tests
 
-`npm test` — engine (45) + backend (16). `npm run dev` serves `web/` with
+`npm test` — engine (70) + backend (18). `npm run dev` serves `web/` with
 no-cache headers on 127.0.0.1:5181 (Python's http.server caused stale-JS
 confusion during development; don't go back to it).
 
@@ -43,6 +43,17 @@ confusion during development; don't go back to it).
 - MUS default tolerable misstatement = max(materiality, 3% of book value);
   sample size is capped at the population.
 - Reliability factors are rounded *up* (AICPA tables): 95%/0 → 3.00, 95%/1 → 4.75.
+- Verified against sources on 2026-10-19: VAT IR Art. 63 correction threshold is
+  **SAR 15,000** (since 23 June 2023), 20 days to notify, period-of-discovery
+  route below it, 5 years for over-declarations; WHT delay fine 1% per 30 days
+  with **no fine under 30 days** (IR Art. 68(2)) — counted in full 30-day steps;
+  amnesty covered returns due before 1 Jan 2026 and closed 30 June 2026;
+  marketplace deemed-supplier rule from 1 Jan 2026; refund minimum SAR 5,000.
+- Three e-invoicing sources: `sys_vat` (ERP), `einv_provider` (the third-party
+  system that talks to Fatoora), `einv` (ZATCA's own export). E-checks prefer the
+  provider as the hub and fall back to ZATCA when there is no provider file.
+- Row packing (`Z.pack`) takes the union of keys over all rows — optional columns
+  may be missing from the first row.
 
 ## Deployment (backend live since 2026-10-19)
 

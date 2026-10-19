@@ -7,7 +7,9 @@
   // ---------------------------------------------------------------- loading
   function pack(rows) {
     if (!rows.length) return { cols: [], data: [] };
-    var cols = Object.keys(rows[0]);
+    // every key that appears in any row — the first row may lack optional columns
+    var seen = {}, cols = [];
+    rows.forEach(function (r) { Object.keys(r).forEach(function (k) { if (!seen[k]) { seen[k] = 1; cols.push(k); } }); });
     return { cols: cols, data: rows.map(function (r) { return cols.map(function (c) { return r[c]; }); }) };
   }
   function unpack(d) {
@@ -49,7 +51,11 @@
     return {
       entity: ent, periodKey: S.ex.period, settings: S.settingsDoc ? S.settingsDoc.values : {}, data: S.data,
       returnBoxes: S.ex.returnBoxes, reconItems: S.ex.reconItems, bankOverrides: S.ex.bankOverrides,
-      prevNetVat: pn, prevWhtTax: pw, samples: S.samples, checklist: S.checklist.items, findings: S.findings
+      prevNetVat: pn, prevWhtTax: pw, samples: S.samples, checklist: S.checklist.items, findings: S.findings,
+      filing: S.ex.filing || {}, recovery: S.ex.recovery || {}, today: Z.today(),
+      // the same entity's earlier periods, newest first, for the risk-engine trends
+      history: S.exercises.filter(function (x) { return x.entityId === S.ex.entityId && x.period < S.ex.period && x.summary; })
+        .sort(function (a, b) { return a.period < b.period ? 1 : -1; }).map(function (x) { return Object.assign({ period: x.period }, x.summary); })
     };
   };
 
@@ -61,12 +67,16 @@
   // Saves the exercise's headline figures so the dashboard and trends need no recomputation.
   Z.saveSummary = function () {
     var R = S.R, ret = R.vat.boxes.ret || R.vat.boxes.sys;
-    var all = R.vat.checks.concat(R.wht.checks, R.bank.checks);
+    var all = R.vat.checks.concat(R.wht.checks, R.bank.checks, R.einv.checks, R.filing.checks), fg = R.figures || {};
     var sm = {
       score: R.score.score, grade: R.score.grade, exposure: R.exposure,
       fails: all.filter(function (c) { return c.status === 'fail'; }).length, warns: all.filter(function (c) { return c.status === 'warn'; }).length,
       netVat: ret ? ret[16].vat : null, sales: ret ? ret[6].amount : null, purchases: ret ? ret[12].amount : null,
       whtTax: (S.data.ret_wht || []).reduce(function (a, x) { return a + (+x.tax || 0); }, 0) || null,
+      whtGross: (S.data.ret_wht || []).reduce(function (a, x) { return a + (+x.amount || 0); }, 0) || null,
+      outputVat: fg.outputVat == null ? null : fg.outputVat, inputVat: fg.inputVat == null ? null : fg.inputVat, zeroShare: fg.zeroShare == null ? null : fg.zeroShare,
+      vatLateDays: ((R.filing.checks.filter(function (c) { return c.id === 'C1'; })[0] || {}).a) || 0,
+      whtLateDays: ((R.filing.checks.filter(function (c) { return c.id === 'C3'; })[0] || {}).a) || 0,
       openFindings: S.findings.filter(function (f) { return f.status !== 'closed'; }).length
     };
     if (JSON.stringify(sm) === JSON.stringify(S.ex.summary || {}) || S.ex.status === 'closed') return Promise.resolve();
@@ -83,7 +93,7 @@
   Z.changed = function () { Z.recompute(); Z.saveSummary(); Z.route(); };
 
   // ---------------------------------------------------------------- exercise view
-  var TABS = [['overview', 'Overview'], ['data', 'Data'], ['vat', 'VAT reconciliation'], ['bank', 'Bank'], ['wht', 'Withholding tax'], ['analytics', 'Analytics'], ['sampling', 'Sampling'], ['checklist', 'Documents'], ['findings', 'Findings'], ['report', 'Report & sign-off']];
+  var TABS = [['overview', 'Overview'], ['data', 'Data'], ['filing', 'Filing & payment'], ['vat', 'VAT reconciliation'], ['einv', 'E-invoicing'], ['bank', 'Bank'], ['wht', 'Withholding tax'], ['analytics', 'Analytics'], ['sampling', 'Sampling'], ['checklist', 'Documents'], ['findings', 'Findings'], ['report', 'Report & sign-off']];
 
   Z.views.ex = function (h) {
     return Z.loadExercise(h[1]).then(function () {
@@ -91,7 +101,7 @@
       if (S.entityId !== ex.entityId) { S.entityId = ex.entityId; localStorage.setItem('zr_entity', ex.entityId); }
       Z.paintChrome('ex');
       var count = function (list) { return list.filter(function (c) { return c.status === 'fail'; }).length; };
-      var badges = { vat: count(R.vat.checks), bank: count(R.bank.checks), wht: ent.whtRegistered === false ? 0 : count(R.wht.checks), analytics: R.analytics.tests.filter(function (x) { return x.status === 'fail'; }).length, findings: S.findings.filter(function (f) { return f.status !== 'closed'; }).length };
+      var badges = { vat: count(R.vat.checks), bank: count(R.bank.checks), einv: count(R.einv.checks), filing: count(R.filing.checks), wht: ent.whtRegistered === false ? 0 : count(R.wht.checks), analytics: R.analytics.tests.filter(function (x) { return x.status === 'fail'; }).length, findings: S.findings.filter(function (f) { return f.status !== 'closed'; }).length };
       var tabs = '<nav class="tabs" aria-label="' + t('Exercise sections') + '">' + TABS.filter(function (x) { return !(x[0] === 'wht' && ent.whtRegistered === false); }).map(function (x) {
         return '<a href="#/ex/' + ex.id + '/' + x[0] + '"' + (tab === x[0] ? ' aria-current="page"' : '') + '>' + t(x[1]) + (badges[x[0]] ? '<span class="count">' + badges[x[0]] + '</span>' : '') + '</a>';
       }).join('') + '</nav>';
@@ -116,9 +126,9 @@
       var v = sc.parts[k]; if (v == null) return '';
       return '<div class="p"><span>' + t(Z.partName(k)) + '</span><div class="bar ' + (v >= 0.85 ? '' : v >= 0.5 ? 'warn' : 'fail') + '"><i style="width:' + Math.round(v * 100) + '%"></i></div><b class="num">' + Math.round(v * 100) + '%</b></div>';
     }).join('');
-    var checks = R.vat.checks.concat(R.bank.checks, ent.whtRegistered === false ? [] : R.wht.checks);
+    var checks = R.filing.checks.concat(R.vat.checks, R.einv.checks, R.bank.checks, ent.whtRegistered === false ? [] : R.wht.checks);
     var attention = checks.filter(function (c) { return c.status === 'fail' || c.status === 'warn'; }).sort(function (a, b) { return (a.status === 'fail' ? 0 : 1) - (b.status === 'fail' ? 0 : 1) || Math.abs(b.diff || 0) - Math.abs(a.diff || 0); });
-    var tabOf = function (c) { return c.group === 'vat' ? 'vat' : c.group === 'bank' ? 'bank' : 'wht'; };
+    var tabOf = function (c) { return { vat: 'vat', bank: 'bank', einv: 'einv', filing: 'filing' }[c.group] || 'wht'; };
     var missing = Object.keys(E.KINDS).filter(function (k) { return E.KINDS[k].required && !(S.data[k] || []).length && !(k === 'ret_wht' && ent.whtRegistered === false) && !(k === 'wht_reg' && ent.whtRegistered === false); });
     if (!S.ex.returnBoxes) missing.unshift('return');
     var ret = R.vat.boxes.ret, sys = R.vat.boxes.sys, xls = R.vat.boxes.xls;
@@ -267,10 +277,12 @@
     Z.modal(S.lang === 'ar' ? K.ar : K.en, '<p class="muted">' + fmt(rows.length, 0) + ' ' + t('rows') + (rows.length > 300 ? ' — ' + t('first 300 shown') : '') + '</p>' + Z.rowsTable(rows.slice(0, 300), K.fields.map(function (f) { return f.k; })), '', true);
   };
 
-  var FIELD_LABELS = { account: 'Account', name: 'Account name', opening: 'Opening', debit: 'Debit', credit: 'Credit', closing: 'Closing', date: 'Date', doc: 'Document', description: 'Description', party: 'Counterparty', country: 'Country', flow: 'Sales / purchase', invoice: 'Invoice no.', vatNo: 'VAT no.', category: 'Tax category', docType: 'Document type', net: 'Net', vat: 'VAT', total: 'Total', box: 'Box', amount: 'Amount', adj: 'Adjustment', uuid: 'UUID', status: 'Status', declaration: 'Declaration no.', value: 'Customs value', reference: 'Reference', balance: 'Balance', paymentType: 'Payment type', gross: 'Gross', rate: 'Rate', wht: 'WHT', dtt: 'Treaty relief', certificate: 'Certificate', paidDate: 'Paid to ZATCA', tax: 'Tax', cls: 'Class', reason: 'Why', expected: 'Expected', statutory: 'Statutory rate', applied: 'Applied rate', shortfall: 'Shortfall', due: 'Due', daysLate: 'Days late', penalty: 'Fine', missing: 'Missing' };
+  var FIELD_LABELS = { account: 'Account', name: 'Account name', opening: 'Opening', debit: 'Debit', credit: 'Credit', closing: 'Closing', date: 'Date', doc: 'Document', description: 'Description', party: 'Counterparty', country: 'Country', flow: 'Sales / purchase', invoice: 'Invoice no.', vatNo: 'VAT no.', category: 'Tax category', docType: 'Document type', net: 'Net', vat: 'VAT', total: 'Total', box: 'Box', amount: 'Amount', adj: 'Adjustment', uuid: 'UUID', status: 'Status', declaration: 'Declaration no.', value: 'Customs value', reference: 'Reference', balance: 'Balance', paymentType: 'Payment type', gross: 'Gross', rate: 'Rate', wht: 'WHT', dtt: 'Treaty relief', certificate: 'Certificate', paidDate: 'Paid to ZATCA', tax: 'Tax', cls: 'Class', reason: 'Why', expected: 'Expected', statutory: 'Statutory rate', applied: 'Applied rate', shortfall: 'Shortfall', due: 'Due', daysLate: 'Days late', penalty: 'Fine', missing: 'Missing',
+    type: 'Invoice type', issuedAt: 'Issued', submittedAt: 'Sent to ZATCA', egs: 'EGS unit', icv: 'Counter', buyerVat: 'Buyer VAT no.', ref: 'Original invoice', message: 'ZATCA message',
+    other: 'Compared with', otherNet: 'Their net', otherVat: 'Their VAT', exportRef: 'Export declaration', period: 'Period', average: 'Average', overdue: 'Days overdue', owner: 'Owner', title: 'Finding', severity: 'Severity', taxImpact: 'Tax impact', entity: 'Entity' };
   function fieldLabel(k) { return t(FIELD_LABELS[k] || k); }
   Z.fieldLabel = fieldLabel;
-  var NUMF = { opening: 1, debit: 1, credit: 1, closing: 1, net: 1, vat: 1, total: 1, amount: 1, adj: 1, value: 1, balance: 1, gross: 1, wht: 1, tax: 1, expected: 1, shortfall: 1, penalty: 1 };
+  var NUMF = { opening: 1, debit: 1, credit: 1, closing: 1, net: 1, vat: 1, total: 1, amount: 1, adj: 1, value: 1, balance: 1, gross: 1, wht: 1, tax: 1, expected: 1, shortfall: 1, penalty: 1, otherNet: 1, otherVat: 1, average: 1, taxImpact: 1 };
   Z.rowsTable = function (rows, cols) {
     if (!rows.length) return '<p class="faint">' + t('None.') + '</p>';
     cols = cols || Object.keys(rows[0]).filter(function (k) { return k[0] !== '_'; });
@@ -282,7 +294,7 @@
   Z.checkHtml = function (c, extra) {
     var note = S.ex.checkNotes[c.id] || '', lk = locked();
     var figs = c.status === 'na' ? '<span>' + t('Needs') + ': <b>' + esc(t(c.missing || '')) + '</b>' + (c.missingHint ? ' — ' + esc(t(c.missingHint)) : '') + '</span>'
-      : (c.aLabel ? '<span>' + esc(t(c.aLabel)) + ': <b>' + fmt(c.a) + '</b></span>' : '') + (c.bLabel ? '<span>' + esc(t(c.bLabel)) + ': <b>' + fmt(c.b) + '</b></span>' : '') +
+      : (c.aLabel ? '<span>' + esc(t(c.aLabel)) + ': <b>' + fmt(c.a, /^(Exceptions|Days late|Lines without)/.test(c.aLabel) ? 0 : 2) + '</b></span>' : '') + (c.bLabel ? '<span>' + esc(t(c.bLabel)) + ': <b>' + fmt(c.b) + '</b></span>' : '') +
         (c.diff != null && c.bLabel ? '<span class="d ' + c.status + '">' + t('Difference') + ': <b>' + fmt(c.diff) + '</b></span>' : '') + (c.exposure ? '<span class="d fail">' + t('Exposure') + ': <b>' + fmt(c.exposure) + '</b></span>' : '') + (c.source ? '<span class="faint">' + esc(c.source) + '</span>' : '');
     return '<div class="check" id="c-' + c.id + '">' + Z.tick(c.status) + '<div><h3>' + esc(c.id) + ' · ' + esc(Z.tt(c, 'title')) + '</h3><div class="figs">' + figs + '</div>' +
       (c.note ? '<p class="faint" style="font-size:12.5px;margin:4px 0 0">' + esc(t(c.note)) + '</p>' : '') + (extra || '') +
@@ -296,9 +308,14 @@
       return '<details><summary>' + esc(t(EXC[k] || k)) + ' (' + fmt((c.counts || {})[k] || c.exceptions[k].length, 0) + ')</summary>' + Z.rowsTable(c.exceptions[k].slice(0, 200), excCols(k, c.exceptions[k][0])) + '</details>';
     }).join('');
   };
-  var EXC = { notReported: 'Sales invoices not reported to Fatoora', notInSystem: 'Fatoora invoices not in the system', rejected: 'Rejected by Fatoora', mismatch: 'VAT differs from Fatoora', unmatched: 'Unmatched lines', rate: 'Rate exceptions', late: 'Late remittances', noCert: 'Lines without a certificate', missing: 'Not in the WHT register' };
+  var EXC = { notReported: 'Sales invoices not reported to Fatoora', notInSystem: 'Fatoora invoices not in the system', rejected: 'Rejected by Fatoora', mismatch: 'VAT differs from Fatoora', unmatched: 'Unmatched lines', rate: 'Rate exceptions', late: 'Late remittances', noCert: 'Lines without a certificate', missing: 'Not in the WHT register', list: 'Exceptions' };
   function excCols(k, r) {
     if (!r) return [];
+    var pickCols = function (cands) { return cands.filter(function (c) { return r[c] !== undefined && r[c] !== ''; }).concat(r.reason ? ['reason'] : []); };
+    if (r.icv !== undefined || r.egs !== undefined || r.submittedAt !== undefined) return pickCols(['invoice', 'type', 'docType', 'issuedAt', 'submittedAt', 'status', 'egs', 'icv', 'ref', 'net', 'vat', 'message']);
+    if (r.otherVat !== undefined) return ['invoice', 'date', 'party', 'vat', 'other', 'otherVat', 'reason'];
+    if (r.flow !== undefined) return pickCols(['invoice', 'date', 'party', 'vatNo', 'country', 'category', 'description', 'net', 'vat']);
+    if (r.period !== undefined && r.value !== undefined) return ['period', 'value', 'average'];
     if (r.description !== undefined && r.cls !== undefined) return ['date', 'description', 'reference', 'debit', 'credit', 'cls'];
     if (r.paymentType !== undefined) return ['date', 'party', 'country', 'paymentType', 'gross'].concat(k === 'rate' ? ['statutory', 'applied', 'wht', 'expected', 'shortfall', 'reason'] : k === 'late' ? ['wht', 'due', 'paidDate', 'daysLate', 'penalty'] : ['wht', 'certificate']);
     if (r.account !== undefined) return ['date', 'account', 'doc', 'description', 'party', 'country', 'debit'];
@@ -330,8 +347,45 @@
       '<div class="row" role="group" aria-label="' + t('Show') + '"><button class="btn small' + (mode === 'amount' ? ' primary' : '') + '" data-act="vatmode" data-m="amount">' + t('Amounts') + '</button><button class="btn small' + (mode === 'vat' ? ' primary' : '') + '" data-act="vatmode" data-m="vat">' + t('VAT') + '</button></div></header>' +
       '<div class="tbl-wrap"><table class="t matrix"><thead><tr><th></th><th>' + t('Box') + '</th><th class="num">' + t('Return') + '</th><th class="num">' + t('System') + '</th><th class="num">' + t('Excel') + '</th><th class="num grp">' + t('Return − System') + '</th><th class="num grp">' + t('Return − Excel') + '</th><th class="num grp">' + t('System − Excel') + '</th></tr></thead><tbody>' + rows + '</tbody></table></div></section>' +
       '<section class="paper" style="margin-top:18px"><header><div><h2>' + t('VAT checks') + '</h2><p>' + t('Each failed or unexplained check needs an explanation an inspector would accept, or a finding.') + '</p></div></header>' +
-      R.checks.map(function (c) { return Z.checkHtml(c, c.id === 'V6' ? v6extra : Z.exceptionsHtml(c)); }).join('') + '</section>';
+      R.checks.map(function (c) { return Z.checkHtml(c, c.id === 'V6' ? v6extra : c.id === 'V11' ? recoveryForm(c) : Z.exceptionsHtml(c)); }).join('') + '</section>';
   };
+  function recoveryForm(c) {
+    if (!c.exemptSales) return '';
+    var rc = S.ex.recovery || {}, lk = locked(), dis = lk ? ' disabled' : '';
+    var opt = function (v, l) { return '<option value="' + v + '"' + ((rc.method || 'none') === v ? ' selected' : '') + '>' + t(l) + '</option>'; };
+    return '<details' + (rc.method && rc.method !== 'none' ? '' : ' open') + '><summary>' + t('Apportionment applied this period') + '</summary><div class="grid g4" style="margin-top:8px">' +
+      '<label class="f"><span>' + t('Method') + '</span><select data-chg="recov" data-f="method"' + dis + '>' + opt('none', 'Not applied') + opt('standard', 'Standard (value of supplies)') + opt('special', 'Special method approved by ZATCA') + '</select></label>' +
+      Z.fld('directExemptVat', t('Input VAT directly on exempt supplies'), rc.directExemptVat, 'number', 'step="0.01" data-chg="recov" data-f="directExemptVat"' + dis) +
+      Z.fld('commonVat', t('Input VAT on common costs'), rc.commonVat, 'number', 'step="0.01" data-chg="recov" data-f="commonVat"' + dis) +
+      Z.fld('ratioUsed', t('Recoverable % applied'), rc.ratioUsed, 'number', 'step="0.01" data-chg="recov" data-f="ratioUsed"' + dis, t('Computed') + ': ' + c.a + '%') + '</div></details>';
+  }
+  Z.CHG.recov = function (el) { S.ex.recovery = S.ex.recovery || {}; S.ex.recovery[el.dataset.f] = el.value; Z.saveEx().then(Z.changed); };
+
+  // ---------------------------------------------------------------- filing & payment
+  Z.tabs.filing = function () {
+    var F = S.ex.filing || {}, lk = locked(), dis = lk ? ' disabled' : '', dl = E.deadlines(S.ex.period), ent = Z.entity(S.ex.entityId) || {};
+    var ret = S.R.vat.boxes.ret, due = ret ? ret[16].vat : null;
+    var f = function (k, label, type, hint) { return Z.fld(k, label, F[k], type, (type === 'number' ? 'step="0.01" ' : '') + 'data-chg="filing" data-f="' + k + '"' + dis, hint); };
+    return '<div class="grid g2" style="align-items:start"><section class="paper area-vat"><header><div><h2>' + t('VAT return') + '</h2><p>' + t('Due by') + ' ' + Z.ltr(dl.vat) + ' · ' + t('Net VAT due') + ' ' + fmt(due) + '</p></div></header><div class="grid g2">' +
+      f('vatFiledOn', t('Filed on'), 'date') + f('vatPaidOn', t('Paid on (SADAD)'), 'date') + f('vatPaidAmount', t('Amount paid'), 'number', t('Leave blank if equal to box 16')) + f('vatSadad', t('SADAD / payment reference'), 'text') + '</div></section>' +
+      (ent.whtRegistered === false ? '' : '<section class="paper area-wht"><header><div><h2>' + t('WHT return') + '</h2><p>' + t('Due by') + ' ' + Z.ltr(dl.wht) + '</p></div></header><div class="grid g2">' +
+        f('whtFiledOn', t('Filed on'), 'date') + f('whtPaidOn', t('Paid on (SADAD)'), 'date') + f('whtPaidAmount', t('Amount paid'), 'number') + f('whtSadad', t('SADAD / payment reference'), 'text') + '</div></section>') + '</div>' +
+      '<section class="paper" style="margin-top:18px"><header><div><h2>' + t('Filing and payment checks') + '</h2><p>' + t('Late filing: 5%–25% of the tax due. Late payment: 5% of unpaid VAT per month or part. WHT: 1% per 30 days, nothing under 30 days. The fine-cancellation initiative covered returns due before 1 January 2026 and closed on 30 June 2026.') + '</p></div></header>' +
+      S.R.filing.checks.map(function (c) { return Z.checkHtml(c); }).join('') + '</section>';
+  };
+  Z.CHG.filing = function (el) { S.ex.filing = S.ex.filing || {}; S.ex.filing[el.dataset.f] = el.value; Z.saveEx().then(Z.changed); };
+
+  // ---------------------------------------------------------------- e-invoicing (ERP ↔ provider ↔ ZATCA)
+  var EST = { CLEARED: 'Cleared by ZATCA', REPORTED: 'Reported to ZATCA', REJECTED: 'Rejected', PENDING: 'Pending at provider', WARNING: 'Accepted with warnings', NOT_SUBMITTED: 'Not sent' };
+  Z.tabs.einv = function () {
+    var EI = S.R.einv, sm = EI.summary;
+    var counts = sm ? '<div class="kpis"><div><b>' + fmt(sm.erp, 0) + '</b><span>' + t('Sales documents in the ERP') + '</span></div><div><b>' + fmt(sm.provider, 0) + '</b><span>' + t('Received by the e-invoicing provider') + '</span></div><div><b>' + fmt(sm.zatca, 0) + '</b><span>' + t('Held by ZATCA (Fatoora export)') + '</span></div>' +
+      Object.keys(sm.byStatus).map(function (k) { return '<div class="' + (/REJECT|PEND|NOT_/.test(k) ? 'bad' : '') + '"><b>' + fmt(sm.byStatus[k], 0) + '</b><span>' + esc(t(EST[k] || k)) + '</span></div>'; }).join('') + '</div>' : '';
+    return '<section class="paper area-vat"><header><div><h2>' + t('Three-way e-invoicing reconciliation') + '</h2><p>' + t('Your ERP issues the invoice, the e-invoicing provider signs it and sends it to Fatoora, ZATCA clears or records it. An inspector compares all three: an invoice missing anywhere along the chain is a finding.') + '</p></div>' +
+      '<a class="btn small" href="#/ex/' + S.ex.id + '/data">' + t('Load provider or Fatoora export') + '</a></header>' + counts + '</section>' +
+      '<section class="paper" style="margin-top:18px"><header><div><h2>' + t('E-invoicing checks') + '</h2></div></header>' + EI.checks.map(function (c) { return Z.checkHtml(c, Z.exceptionsHtml(c)); }).join('') + '</section>';
+  };
+
   Z.ACT.vatmode = function (el) { S.vatMode = el.dataset.m; Z.route(); };
   Z.ACT.additem = function () {
     var d = document.getElementById('ri-d').value.trim(), a = +document.getElementById('ri-a').value;
