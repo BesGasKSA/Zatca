@@ -35,6 +35,9 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     return '';
   };
   Z.ACT.exitdemo = function () { try { sessionStorage.removeItem('zr_local'); } catch (e) {} location.hash = ''; location.reload(); };
+  // demo-mode defaults are English words; show them in the interface language
+  Z.userName = function () { return S.api && S.api.mode === 'local' ? t(S.user.name) : S.user.name; };
+  Z.orgName = function () { return !S.tenant ? '' : S.api && S.api.mode === 'local' ? t(S.tenant.name) : S.tenant.name; };
   Z.icon = function (name) { return '<i class="ph ph-' + name + '" aria-hidden="true"></i>'; };
   // the active tax section: 'vat' or 'wht'
   Z.isWht = function () { return S.tax === 'wht'; };
@@ -259,7 +262,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     if (S.api.mode === 'cloud') h += nav('#/' + tx + '/platform', t('Platform'), 'globe-hemisphere-east', view === 'platform');
     if (S.api.mode === 'cloud' && S.tenant && S.tenant.spreadsheetUrl) h += '<a class="nav" href="' + esc(S.tenant.spreadsheetUrl) + '" target="_blank" rel="noopener noreferrer">' + Z.icon('table') + '<span>' + t('Google Sheet (your data)') + '</span></a>';
     h += '<a class="nav" href="https://besgasksa.github.io/Zatca/Inspection-Ready-Guide.pdf" target="_blank" rel="noopener noreferrer">' + Z.icon('book-open-text') + '<span>' + t('User guide (PDF)') + '</span></a>';
-    h += '<div class="foot"><b>' + esc(S.user.name) + '</b>' + esc(t(cap(S.user.role))) + (S.tenant ? ', ' + esc(S.tenant.name) : '') + '<br>' + (S.api.mode === 'cloud' ? '' : t('Stored on this device') + '<br>') + Z.exitButton('btn small exit-btn wide') + ' ' + '<button data-act="lang">' + (S.lang === 'ar' ? 'English' : 'العربية') + '</button></div>';
+    h += '<div class="foot"><b>' + esc(Z.userName()) + '</b>' + esc(t(cap(S.user.role))) + (S.tenant ? ', ' + esc(Z.orgName()) : '') + '<br>' + (S.api.mode === 'cloud' ? '' : t('Stored on this device') + '<br>') + Z.exitButton('btn small exit-btn wide') + ' ' + '<button data-act="lang">' + (S.lang === 'ar' ? 'English' : 'العربية') + '</button></div>';
     document.querySelector('.rail').innerHTML = h;
   }
   function cap(s) { return s ? s[0].toUpperCase() + s.slice(1) : ''; }
@@ -270,7 +273,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     var rest = (S.route || []).slice(), here = rest[0] === 'ex' ? ['ex', rest[1], 'overview'] : rest;
     var sw = function (tx, label) { return '<a href="#/' + tx + '/' + here.join('/') + '"' + (S.tax === tx ? ' aria-current="page"' : '') + '>' + label + '</a>'; };
     document.querySelector('.top').innerHTML = '<button class="btn ghost menu-btn" data-act="menu" aria-label="' + t('Menu') + '">' + Z.icon('list') + '</button>' +
-      '<div class="brand">' + logo() + '<div><b>Inspection Ready</b><span>' + esc(S.tenant ? S.tenant.name : '') + '</span></div></div>' +
+      '<div class="brand">' + logo() + '<div><b>Inspection Ready</b><span>' + esc(Z.orgName()) + '</span></div></div>' +
       '<nav class="switch" aria-label="' + t('Tax') + '">' + sw('vat', '<span class="lg">' + t('VAT') + '</span><span class="sh">' + (S.lang === 'ar' ? 'القيمة المضافة' : 'VAT') + '</span>') + sw('wht', '<span class="lg">' + t('Withholding tax') + '</span><span class="sh">' + (S.lang === 'ar' ? 'الاستقطاع' : 'WHT') + '</span>') + '</nav>' +
       '<span class="grow"></span>' +
       (S.entities.length ? '<label class="ent-pick" title="' + esc(t('Entity')) + '">' + Z.icon('buildings') + '<select data-chg="entity" aria-label="' + t('Entity') + '">' + opts + '</select></label>' : '') +

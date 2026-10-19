@@ -371,3 +371,4 @@ Object.assign(window.ZI18N, {
   'Start an exercise': 'ابدأ تمريناً', 'Clear the checks and sign off': 'عالج الفحوصات واعتمد', 'Explain or correct every red check, test the samples, link the documents, then a manager signs the month off.': 'فسّر أو صحّح كل فحص أحمر، واختبر العينات، واربط المستندات، ثم يعتمد المدير الشهر.',
   'Open the exercise': 'فتح التمرين', 'Get started in three steps': 'ابدأ في ثلاث خطوات', 'About an hour for the first month; less every month after.': 'نحو ساعة للشهر الأول، وأقل في كل شهر بعده.', 'Hide': 'إخفاء'
 });
+Object.assign(window.ZI18N, { 'You': 'أنت', 'My organisation (this device)': 'منشأتي (هذا الجهاز)' });
