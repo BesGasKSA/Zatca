@@ -28,9 +28,15 @@ See README.md for the feature map and deployment.
 
 ## Tests
 
-`npm test` — engine (94) + backend (19). `npm run e2e` (dev server running) drives the real UI in headless Chrome: a full first-month journey incl. a real file upload, then every page in both sections, EN/AR and phone width — 823 checks, fails on any JS error, overflow, NaN/undefined or English left in Arabic. `npm run dev` serves `web/` with
-no-cache headers on 127.0.0.1:5181 (Python's http.server caused stale-JS
-confusion during development; don't go back to it).
+`npm test` — engine (102) + backend (20) + a 600-run random-data stress test
+(`tests/fuzz.js`: messy values, bad dates, any period since 2018 — no NaN,
+no negative exposure, no crash). `npm run perf` — 20,000 invoices under 4 s.
+With `npm run dev` running, four browser suites drive the real UI in headless
+Chrome: `npm run e2e` (journeys, every page EN/AR/phone, 886 checks),
+`e2e:edge` (quarterly/no-WHT/2018, empty exercise, signed-off read-only,
+deletes, broken links), `e2e:security` (script injection through every field),
+`e2e:a11y` (axe-core WCAG 2.1 AA on 90 screens; keep it at zero). Chrome must
+get an absolute `--user-data-dir`; a relative one silently fails to start.
 
 ## Domain decisions worth remembering
 
@@ -67,6 +73,11 @@ confusion during development; don't go back to it).
   and stored URLs; never relax this, a crafted link would phish sign-ins.
 - Periods start at `Z.FIRST_YEAR` (2018). `Z.exFor(entity, month)` finds a
   monthly *or* the covering quarterly exercise — use it, not exact matching.
+- Dates: `E.cleanData` (run by `runAll`) passes every date/time field through
+  `E.date`, which rejects impossible dates (30 Feb) and reads day-first Saudi
+  formats and Excel serials. Never call `toISOString` on raw row values.
+- Contrast: `--ink-3` is #5b6880 and `--pass` #166534 to meet WCAG AA; the report
+  pack (`.report`) re-declares the light palette so it stays a white page in dark mode.
 - Row packing (`Z.pack`) takes the union of keys over all rows — optional columns
   may be missing from the first row.
 

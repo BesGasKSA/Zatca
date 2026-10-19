@@ -18,6 +18,17 @@
   var mine = function (a) { return Z.isWht() ? a.tax === 'WHT' : a.tax !== 'WHT'; };
   var doneMap = function () { return (S.ex && S.ex.actionsDone) || {}; };
   var isDone = function (a) { return !!doneMap()[a.checkId]; };
+  // true when no check in this section has anything to compare yet
+  Z.sectionEmpty = function () {
+    var R = S.R; if (!R) return true;
+    var list = Z.isWht() ? R.wht.checks.concat(R.filing.checks.filter(function (c) { return c.id === 'C3'; }))
+      : R.vat.checks.concat(R.bank.checks, R.einv.checks, R.other.checks, R.filing.checks.filter(function (c) { return c.id !== 'C3'; }));
+    return !list.some(function (c) { return c.status !== 'na'; });
+  };
+  var noDataCard = function () {
+    return '<section class="paper empty">' + Z.icon('upload-simple') + '<h2>' + t('No data to check yet') + '</h2><p>' + t('Load the return and the reports for this period; the action plan appears as soon as the checks can compare them.') + '</p>' +
+      (S.ex ? '<a class="btn primary" href="#/ex/' + S.ex.id + '/data">' + t('Load the data') + '</a>' : '') + '</section>';
+  };
   Z.planFor = function () {
     var acts = ((S.R && S.R.plan && S.R.plan.actions) || []).filter(mine);
     var open = acts.filter(function (a) { return !isDone(a); }), counted = open.filter(function (a) { return a.counted; });
@@ -106,6 +117,7 @@
 
   // exercise tab: the full plan for this section
   Z.tabs.plan = Z.tabsW.plan = function () {
+    if (Z.sectionEmpty()) return noDataCard();
     var p = Z.planFor(), lv = S.planLevel || '', show = S.planShow || 'open';
     var list = (show === 'all' ? p.all : show === 'done' ? p.all.filter(isDone) : p.open).filter(function (a) { return !lv || a.level === lv; });
     var pct = p.all.length ? Math.round(p.done / p.all.length * 100) : 100;
@@ -205,7 +217,7 @@
         '<div class="mini"><a href="#/ex/' + S.ex.id + '/findings">' + Z.icon('flag') + ' <b>' + fOpen.length + '</b> ' + t('open findings') + '</a><a href="#/requests">' + Z.icon('envelope-simple') + ' ' + t('ZATCA requests') + '</a><a href="#/reports/' + (wht ? 'beneficiaries' : 'corrections') + '">' + Z.icon('chart-bar') + ' ' + (wht ? t('WHT by beneficiary') : t('Corrections register')) + '</a></div></section>' +
 
         '<section class="span3 reveal" style="--i:5"><div class="spread" style="margin:6px 0 12px"><div><h2 style="margin:0">' + t('What to do next') + '</h2><p class="muted" style="margin:2px 0 0">' + t('Highest risk first. Each action says how to fix it, by when, and what acting now saves.') + '</p></div><a class="btn" href="#/ex/' + S.ex.id + '/plan">' + Z.icon('list-checks') + ' ' + t('Full action plan') + ' (' + p.open.length + ')</a></div>' +
-        (top.length ? '<div class="actgrid">' + top.map(function (a, i) { return Z.actionCard(a, i); }).join('') + '</div>' : '<section class="paper empty">' + Z.icon('seal-check') + '<h2>' + t('Every action is done') + '</h2></section>') + '</section>' +
+        (Z.sectionEmpty() ? noDataCard() : top.length ? '<div class="actgrid">' + top.map(function (a, i) { return Z.actionCard(a, i); }).join('') + '</div>' : '<section class="paper empty">' + Z.icon('seal-check') + '<h2>' + t('Every action is done') + '</h2></section>') + '</section>' +
         '</div>');
     });
   };

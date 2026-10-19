@@ -385,7 +385,12 @@
   };
 
   function pad(n) { return n < 10 ? '0' + n : '' + n; }
-  function iso(y, m, d) { return y + '-' + pad(m) + '-' + pad(d); }
+  function iso(y, m, d) {
+    if (!(y >= 1900 && y <= 2200 && m >= 1 && m <= 12 && d >= 1)) return '';
+    var t = new Date(Date.UTC(y, m - 1, d));
+    if (t.getUTCMonth() !== m - 1 || t.getUTCDate() !== d) return '';
+    return y + '-' + pad(m) + '-' + pad(d);
+  }
 
   // Returns 'YYYY-MM-DD' or '' — Saudi files are day-first, so 03/04/2026 is 3 April.
   E.date = function (v) {
@@ -420,7 +425,7 @@
     if (v instanceof Date && !isNaN(v)) return iso(v.getFullYear(), v.getMonth() + 1, v.getDate()) + 'T' + pad(v.getHours()) + ':' + pad(v.getMinutes());
     if (typeof v === 'number' && v > 20000 && v < 80000) { var d = new Date(Math.round((v - 25569) * 86400000)); return d.toISOString().slice(0, 16); }
     var s = deArabic(v).trim(), m;
-    if ((m = s.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{1,2}):(\d{2})/))) return m[1] + '-' + m[2] + '-' + m[3] + 'T' + pad(+m[4]) + ':' + m[5];
+    if ((m = s.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{1,2}):(\d{2})/))) return iso(+m[1], +m[2], +m[3]) && +m[4] < 24 && +m[5] < 60 ? m[1] + '-' + m[2] + '-' + m[3] + 'T' + pad(+m[4]) + ':' + m[5] : '';
     if ((m = s.match(/^(\d{1,2}[\/.-]\d{1,2}[\/.-]\d{2,4})[ T]+(\d{1,2}):(\d{2})/))) { var dd = E.date(m[1]); return dd ? dd + 'T' + pad(+m[2]) + ':' + m[3] : ''; }
     var d0 = E.date(v);
     return d0 ? d0 + 'T00:00' : '';
@@ -2271,8 +2276,33 @@
   };
 
   // One call that runs everything for an exercise.
+  // Rows reach the engine from uploads, storage, the demo or older versions.
+  // Clean every date / time field once so no check has to guard against
+  // "31/12/2025", "2026-02-30" or an Excel serial number.
+  E.cleanData = function (data) {
+    var out = {};
+    Object.keys(data || {}).forEach(function (k) {
+      var K = E.KINDS[k], rows = data[k] || [];
+      if (!K) { out[k] = rows; return; }
+      var df = K.fields.filter(function (f) { return f.t === 'd' || f.t === 't'; });
+      out[k] = !df.length ? rows : rows.map(function (r) {
+        var c = null;
+        df.forEach(function (f) {
+          var v = r[f.k]; if (v == null || v === '') return;
+          var n = f.t === 't' ? E.datetime(v) : E.date(v);
+          if (n !== v) { c = c || Object.assign({}, r); c[f.k] = n; }
+        });
+        return c || r;
+      });
+    });
+    return out;
+  };
+  var cleanDay = function (v) { return v ? E.date(v) : v; };
   E.runAll = function (ctx) {
     ctx.settings = E.mergeSettings(ctx.settings);
+    ctx.data = E.cleanData(ctx.data);
+    if (ctx.filing) { var F = {}; Object.keys(ctx.filing).forEach(function (k) { F[k] = /On$/.test(k) ? cleanDay(ctx.filing[k]) : ctx.filing[k]; }); ctx.filing = F; }
+    if (ctx.today) ctx.today = E.date(ctx.today) || new Date().toISOString().slice(0, 10);
     var hasWht = !(ctx.entity && ctx.entity.whtRegistered === false);
     var vat = E.runVatRecon(ctx), wht = E.runWhtRecon(ctx), bank = E.runBankRecon(ctx), an = E.runAnalytics(ctx);
     vat.checks = vat.checks.concat(E.runRecovery(ctx).checks, E.runReturnIntegrity(ctx).checks);
@@ -2302,6 +2332,9 @@
       samples: byFlow(['S', 'P']), requiredFlows: ['S', 'P'], checklist: clArea(function (a) { return a !== 'WHT'; }), findings: fTax(function (t) { return t !== 'WHT'; }) });
     res.whtScore = hasWht ? E.readiness({ settings: ctx.settings, vat: [], wht: wht.checks, bank: [], filing: whtFiling,
       samples: byFlow(['W']), requiredFlows: ['W'], checklist: clArea(function (a) { return a === 'WHT'; }), findings: fTax(function (t) { return t === 'WHT'; }) }) : null;
+    [].concat(vat.checks, wht.checks, bank.checks, einv.checks, filing.checks, other.checks).forEach(function (c) {
+      if (c.exposure != null) c.exposure = isFinite(c.exposure) && c.exposure > 0 ? r2(c.exposure) : 0;
+    });
     var sumExp = function (list) { return r2(list.reduce(function (a, c) { return a + (c.exposure || 0); }, 0)); };
     res.vatExposure = sumExp(vat.checks.concat(bank.checks, einv.checks, vatFiling, other.checks));
     res.whtExposure = hasWht ? sumExp(wht.checks.concat(whtFiling)) : 0;

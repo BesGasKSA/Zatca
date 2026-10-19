@@ -27,12 +27,12 @@
   --line-2: #cdd5de;
   --ink: #0f1a26;
   --ink-2: #44536a;
-  --ink-3: #74829a;
+  --ink-3: #5b6880;            /* 5.6:1 on white, 5.0:1 on --surface-2 (WCAG AA) */
   --accent: #0f766e;            /* VAT */
   --accent-ink: #ffffff;
   --accent-soft: #e2f2ef;
   --accent-line: #a8d8d0;
-  --pass: #15803d; --pass-soft: #e5f4ea;
+  --pass: #166534; --pass-soft: #e5f4ea;   /* 6.2:1 on its soft background */
   --warn: #b45309; --warn-soft: #fdf1df;
   --fail: #b91c1c; --fail-soft: #fce8e8;
   --info: #475569; --info-soft: #eef1f5;
@@ -356,6 +356,9 @@ table.matrix td.bl { border-inline-start: 1px solid var(--line); }
 .bench svg { width: 100%; height: 170px; }
 
 /* ------------------------------------------------------------------ report (print) */
+/* the readiness pack is a document: always a white page, whatever the theme */
+.report { --surface: #fff; --surface-2: #f0f3f6; --surface-3: #e8ecf1; --line: #e1e6ec; --line-2: #cdd5de; --ink: #0f1a26; --ink-2: #44536a; --ink-3: #5b6880;
+  --pass: #166534; --pass-soft: #e5f4ea; --warn: #b45309; --warn-soft: #fdf1df; --fail: #b91c1c; --fail-soft: #fce8e8; --info-soft: #eef1f5; color-scheme: light; }
 .report { background: #fff; color: #111; padding: 36px 44px; border: 1px solid var(--line); border-radius: var(--r-m); max-width: 1020px; width: 100%; overflow-x: auto; }
 .report h1 { font-size: 24px; }
 .report h2 { font-size: 15.5px; margin: 28px 0 10px; padding-bottom: 6px; border-bottom: 2px solid var(--accent); color: #0f1a26; }
@@ -598,6 +601,11 @@ input[type=checkbox], input[type=radio] { accent-color: var(--accent); width: 17
 @media print { .reveal, .act, .pair, .chart .cbar, .chart .ln.draw, .seal .arc { animation: none !important; } }
 .kpis b.num { text-align: start; display: block; }
 .pair .link .tk { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+
+.tbl-wrap[tabindex]:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+/* dark theme: the bright status fills need dark text to stay readable */
+:root[data-theme="dark"] .heat td.s-ready { color: #0b1117; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .heat td.s-ready { color: #0b1117; } }
 
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -1027,6 +1035,12 @@ Object.assign(window.ZI18N, {
   'Fix on Fatoora': 'المعالجة في فاتورة', 'Correct the books': 'تصحيح الدفاتر', 'Collect the evidence': 'جمع المستندات', 'Revenue (TB)': 'الإيرادات (ميزان المراجعة)', 'ERP invoices': 'فواتير النظام', 'Evidence': 'المستندات'
 });
 Object.assign(window.ZI18N, { 'Today': 'اليوم' });
+Object.assign(window.ZI18N, {
+  'It may have been deleted, or the link is incomplete.': 'ربما حُذف، أو أن الرابط غير مكتمل.', 'Back to the dashboard': 'العودة إلى لوحة المتابعة',
+  'No data to check yet': 'لا توجد بيانات للفحص بعد', 'Load the return and the reports for this period; the action plan appears as soon as the checks can compare them.': 'حمّل الإقرار والتقارير لهذه الفترة؛ تظهر خطة العمل بمجرد أن تتمكن الفحوصات من مقارنتها.',
+  'Load the data': 'تحميل البيانات'
+});
+Object.assign(window.ZI18N, { 'Table': 'جدول' });
 
 </script>
 <script>
@@ -1417,7 +1431,12 @@ Object.assign(window.ZI18N, { 'Today': 'اليوم' });
   };
 
   function pad(n) { return n < 10 ? '0' + n : '' + n; }
-  function iso(y, m, d) { return y + '-' + pad(m) + '-' + pad(d); }
+  function iso(y, m, d) {
+    if (!(y >= 1900 && y <= 2200 && m >= 1 && m <= 12 && d >= 1)) return '';
+    var t = new Date(Date.UTC(y, m - 1, d));
+    if (t.getUTCMonth() !== m - 1 || t.getUTCDate() !== d) return '';
+    return y + '-' + pad(m) + '-' + pad(d);
+  }
 
   // Returns 'YYYY-MM-DD' or '' — Saudi files are day-first, so 03/04/2026 is 3 April.
   E.date = function (v) {
@@ -1452,7 +1471,7 @@ Object.assign(window.ZI18N, { 'Today': 'اليوم' });
     if (v instanceof Date && !isNaN(v)) return iso(v.getFullYear(), v.getMonth() + 1, v.getDate()) + 'T' + pad(v.getHours()) + ':' + pad(v.getMinutes());
     if (typeof v === 'number' && v > 20000 && v < 80000) { var d = new Date(Math.round((v - 25569) * 86400000)); return d.toISOString().slice(0, 16); }
     var s = deArabic(v).trim(), m;
-    if ((m = s.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{1,2}):(\d{2})/))) return m[1] + '-' + m[2] + '-' + m[3] + 'T' + pad(+m[4]) + ':' + m[5];
+    if ((m = s.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{1,2}):(\d{2})/))) return iso(+m[1], +m[2], +m[3]) && +m[4] < 24 && +m[5] < 60 ? m[1] + '-' + m[2] + '-' + m[3] + 'T' + pad(+m[4]) + ':' + m[5] : '';
     if ((m = s.match(/^(\d{1,2}[\/.-]\d{1,2}[\/.-]\d{2,4})[ T]+(\d{1,2}):(\d{2})/))) { var dd = E.date(m[1]); return dd ? dd + 'T' + pad(+m[2]) + ':' + m[3] : ''; }
     var d0 = E.date(v);
     return d0 ? d0 + 'T00:00' : '';
@@ -3303,8 +3322,33 @@ Object.assign(window.ZI18N, { 'Today': 'اليوم' });
   };
 
   // One call that runs everything for an exercise.
+  // Rows reach the engine from uploads, storage, the demo or older versions.
+  // Clean every date / time field once so no check has to guard against
+  // "31/12/2025", "2026-02-30" or an Excel serial number.
+  E.cleanData = function (data) {
+    var out = {};
+    Object.keys(data || {}).forEach(function (k) {
+      var K = E.KINDS[k], rows = data[k] || [];
+      if (!K) { out[k] = rows; return; }
+      var df = K.fields.filter(function (f) { return f.t === 'd' || f.t === 't'; });
+      out[k] = !df.length ? rows : rows.map(function (r) {
+        var c = null;
+        df.forEach(function (f) {
+          var v = r[f.k]; if (v == null || v === '') return;
+          var n = f.t === 't' ? E.datetime(v) : E.date(v);
+          if (n !== v) { c = c || Object.assign({}, r); c[f.k] = n; }
+        });
+        return c || r;
+      });
+    });
+    return out;
+  };
+  var cleanDay = function (v) { return v ? E.date(v) : v; };
   E.runAll = function (ctx) {
     ctx.settings = E.mergeSettings(ctx.settings);
+    ctx.data = E.cleanData(ctx.data);
+    if (ctx.filing) { var F = {}; Object.keys(ctx.filing).forEach(function (k) { F[k] = /On$/.test(k) ? cleanDay(ctx.filing[k]) : ctx.filing[k]; }); ctx.filing = F; }
+    if (ctx.today) ctx.today = E.date(ctx.today) || new Date().toISOString().slice(0, 10);
     var hasWht = !(ctx.entity && ctx.entity.whtRegistered === false);
     var vat = E.runVatRecon(ctx), wht = E.runWhtRecon(ctx), bank = E.runBankRecon(ctx), an = E.runAnalytics(ctx);
     vat.checks = vat.checks.concat(E.runRecovery(ctx).checks, E.runReturnIntegrity(ctx).checks);
@@ -3334,6 +3378,9 @@ Object.assign(window.ZI18N, { 'Today': 'اليوم' });
       samples: byFlow(['S', 'P']), requiredFlows: ['S', 'P'], checklist: clArea(function (a) { return a !== 'WHT'; }), findings: fTax(function (t) { return t !== 'WHT'; }) });
     res.whtScore = hasWht ? E.readiness({ settings: ctx.settings, vat: [], wht: wht.checks, bank: [], filing: whtFiling,
       samples: byFlow(['W']), requiredFlows: ['W'], checklist: clArea(function (a) { return a === 'WHT'; }), findings: fTax(function (t) { return t === 'WHT'; }) }) : null;
+    [].concat(vat.checks, wht.checks, bank.checks, einv.checks, filing.checks, other.checks).forEach(function (c) {
+      if (c.exposure != null) c.exposure = isFinite(c.exposure) && c.exposure > 0 ? r2(c.exposure) : 0;
+    });
     var sumExp = function (list) { return r2(list.reduce(function (a, c) { return a + (c.exposure || 0); }, 0)); };
     res.vatExposure = sumExp(vat.checks.concat(bank.checks, einv.checks, vatFiling, other.checks));
     res.whtExposure = hasWht ? sumExp(wht.checks.concat(whtFiling)) : 0;
@@ -3991,12 +4038,19 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     var main = document.getElementById('main');
     main.innerHTML = '<div class="empty faint">' + t('Loading…') + '</div>';
     var fn = Z.views[view] || Z.views.dashboard;
-    Promise.resolve(fn(h)).catch(function (e) { console.error(e); main.innerHTML = '<div class="empty"><h2>' + t('This page could not load') + '</h2><p>' + esc(e.message) + '</p></div>'; });
+    Promise.resolve(fn(h)).catch(function (e) {
+      if (e && e.notFound) { main.innerHTML = '<div class="paper empty"><i class="ph ph-magnifying-glass big" aria-hidden="true"></i><h2>' + esc(e.message) + '</h2><p>' + t('It may have been deleted, or the link is incomplete.') + '</p><a class="btn primary" href="#/' + S.tax + '/dashboard">' + t('Back to the dashboard') + '</a></div>'; return; }
+      console.error(e); main.innerHTML = '<div class="empty"><h2>' + t('This page could not load') + '</h2><p>' + esc(e.message) + '</p></div>'; });
     document.querySelector('.shell').classList.remove('open');
     window.scrollTo(0, 0);
   };
   Z.paintChrome = function (view) { paintRail(view); paintTop(); };
-  Z.setMain = function (html) { document.getElementById('main').innerHTML = html; Z.fitTabs(); };
+  Z.setMain = function (html) { document.getElementById('main').innerHTML = html; Z.fitTabs(); Z.scrollables(); };
+  Z.scrollables = function () {
+    document.querySelectorAll('#main .tbl-wrap').forEach(function (w) {
+      if (w.scrollWidth > w.clientWidth + 1) { w.tabIndex = 0; w.setAttribute('role', 'region'); if (!w.getAttribute('aria-label')) { var h = w.closest('section') && w.closest('section').querySelector('h2, h3'); w.setAttribute('aria-label', h ? h.textContent : t('Table')); } }
+    });
+  };
   // Keeps every tab strip on one row. Tabs that do not fit move, from the end,
   // into a "More" menu; the open tab always stays visible.
   Z.fitTabs = function () {
@@ -4546,7 +4600,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     if (S.exId === id && S.ex && S.loaded) return Promise.resolve();
     S.loaded = false;
     return Z.get('exercises', id).then(function (ex) {
-      if (!ex) throw new Error(t('Exercise not found'));
+      if (!ex) throw Object.assign(new Error(t('Exercise not found')), { notFound: true });
       S.ex = ex; S.exId = id;
       ex.reconItems = ex.reconItems || []; ex.checkNotes = ex.checkNotes || {}; ex.bankOverrides = ex.bankOverrides || {};
       return Promise.all([Z.list('datasets', id), Z.list('samples', id), Z.list('findings', id), Z.get('checklists', id)]);
@@ -4654,6 +4708,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       Z.setMain(head + tabs + '<div id="tab"></div>');
       var html = (wht && Z.tabsW[tab] || Z.tabs[tab] || Z.tabs.overview)();
       document.getElementById('tab').innerHTML = html;
+      Z.scrollables();
       if (Z.after[tab]) Z.after[tab]();
       Z.saveSummary();
     });
@@ -5714,7 +5769,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       f('fsRevenue', t('Revenue per audited financial statements')) + f('zakatRevenue', t('Revenue per Zakat / income tax return')) + f('glOutputVat', t('Output VAT per GL for the year')) + f('glInputVat', t('Input VAT per GL for the year')) + f('whtAnnual', t('WHT per annual statement / GL')) + '</div>' +
       '<h3 style="margin:16px 0 6px">' + t('Reconciling items (revenue not in VAT returns, or returns not in revenue)') + '</h3><table class="t"><tbody>' +
       A.items.map(function (i) { return '<tr><td>' + esc(i.description) + '</td><td class="num">' + fmt(i.amount) + '</td><td>' + (can ? '<a href="#" data-act="anndel" data-id="' + i.id + '">' + t('Remove') + '</a>' : '') + '</td></tr>'; }).join('') +
-      (can ? '<tr><td><input type="text" id="ai-d" placeholder="' + esc(t('e.g. Out-of-scope income, unbilled revenue, FX gains')) + '"></td><td style="width:160px"><input type="number" step="0.01" id="ai-a"></td><td><button class="btn small" data-act="annadd">' + t('Add') + '</button></td></tr>' : '') + '</tbody></table></section>' +
+      (can ? '<tr><td><input type="text" id="ai-d" aria-label="' + esc(t('Description')) + '" placeholder="' + esc(t('e.g. Out-of-scope income, unbilled revenue, FX gains')) + '"></td><td style="width:160px"><input type="number" step="0.01" id="ai-a" aria-label="' + esc(t('Amount')) + '"></td><td><button class="btn small" data-act="annadd">' + t('Add') + '</button></td></tr>' : '') + '</tbody></table></section>' +
       '<section class="paper flush"><div style="padding:14px 18px" class="spread"><h2>' + t('Period by period') + '</h2><button class="btn small" data-act="whtbenef" data-e="' + e.id + '" data-y="' + year + '"' + (e.whtRegistered === false ? ' disabled' : '') + '>' + t('WHT by beneficiary for the year') + '</button></div><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Period') + '</th><th class="num">' + t('Sales (box 6)') + '</th><th class="num">' + t('Output VAT') + '</th><th class="num">' + t('Input VAT') + '</th><th class="num">' + t('Net VAT due') + '</th><th class="num">' + t('WHT') + '</th><th>' + t('Readiness') + '</th></tr></thead><tbody>' +
       rows.map(function (r) { return '<tr class="clickable" data-act="openex" data-id="' + r.exId + '"><td>' + Z.ltr(r.period) + '</td><td class="num">' + fmt(r.sales) + '</td><td class="num">' + fmt(r.outputVat) + '</td><td class="num">' + fmt(r.inputVat) + '</td><td class="num">' + fmt(r.netVat) + '</td><td class="num">' + fmt(r.whtTax) + '</td><td>' + (r.score != null ? Z.pill(r.grade, r.score + '%') : '') + '</td></tr>'; }).join('') +
       '<tr class="total"><td>' + t('Total') + '</td><td class="num">' + fmt(rec.totals.sales) + '</td><td class="num">' + fmt(rec.totals.outputVat) + '</td><td class="num">' + fmt(rec.totals.inputVat) + '</td><td class="num">' + fmt(rec.totals.netVat) + '</td><td class="num">' + fmt(rec.totals.whtTax) + '</td><td></td></tr></tbody></table></div></section>' +
@@ -5845,6 +5900,17 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   var mine = function (a) { return Z.isWht() ? a.tax === 'WHT' : a.tax !== 'WHT'; };
   var doneMap = function () { return (S.ex && S.ex.actionsDone) || {}; };
   var isDone = function (a) { return !!doneMap()[a.checkId]; };
+  // true when no check in this section has anything to compare yet
+  Z.sectionEmpty = function () {
+    var R = S.R; if (!R) return true;
+    var list = Z.isWht() ? R.wht.checks.concat(R.filing.checks.filter(function (c) { return c.id === 'C3'; }))
+      : R.vat.checks.concat(R.bank.checks, R.einv.checks, R.other.checks, R.filing.checks.filter(function (c) { return c.id !== 'C3'; }));
+    return !list.some(function (c) { return c.status !== 'na'; });
+  };
+  var noDataCard = function () {
+    return '<section class="paper empty">' + Z.icon('upload-simple') + '<h2>' + t('No data to check yet') + '</h2><p>' + t('Load the return and the reports for this period; the action plan appears as soon as the checks can compare them.') + '</p>' +
+      (S.ex ? '<a class="btn primary" href="#/ex/' + S.ex.id + '/data">' + t('Load the data') + '</a>' : '') + '</section>';
+  };
   Z.planFor = function () {
     var acts = ((S.R && S.R.plan && S.R.plan.actions) || []).filter(mine);
     var open = acts.filter(function (a) { return !isDone(a); }), counted = open.filter(function (a) { return a.counted; });
@@ -5933,6 +5999,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
 
   // exercise tab: the full plan for this section
   Z.tabs.plan = Z.tabsW.plan = function () {
+    if (Z.sectionEmpty()) return noDataCard();
     var p = Z.planFor(), lv = S.planLevel || '', show = S.planShow || 'open';
     var list = (show === 'all' ? p.all : show === 'done' ? p.all.filter(isDone) : p.open).filter(function (a) { return !lv || a.level === lv; });
     var pct = p.all.length ? Math.round(p.done / p.all.length * 100) : 100;
@@ -6032,7 +6099,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
         '<div class="mini"><a href="#/ex/' + S.ex.id + '/findings">' + Z.icon('flag') + ' <b>' + fOpen.length + '</b> ' + t('open findings') + '</a><a href="#/requests">' + Z.icon('envelope-simple') + ' ' + t('ZATCA requests') + '</a><a href="#/reports/' + (wht ? 'beneficiaries' : 'corrections') + '">' + Z.icon('chart-bar') + ' ' + (wht ? t('WHT by beneficiary') : t('Corrections register')) + '</a></div></section>' +
 
         '<section class="span3 reveal" style="--i:5"><div class="spread" style="margin:6px 0 12px"><div><h2 style="margin:0">' + t('What to do next') + '</h2><p class="muted" style="margin:2px 0 0">' + t('Highest risk first. Each action says how to fix it, by when, and what acting now saves.') + '</p></div><a class="btn" href="#/ex/' + S.ex.id + '/plan">' + Z.icon('list-checks') + ' ' + t('Full action plan') + ' (' + p.open.length + ')</a></div>' +
-        (top.length ? '<div class="actgrid">' + top.map(function (a, i) { return Z.actionCard(a, i); }).join('') + '</div>' : '<section class="paper empty">' + Z.icon('seal-check') + '<h2>' + t('Every action is done') + '</h2></section>') + '</section>' +
+        (Z.sectionEmpty() ? noDataCard() : top.length ? '<div class="actgrid">' + top.map(function (a, i) { return Z.actionCard(a, i); }).join('') + '</div>' : '<section class="paper empty">' + Z.icon('seal-check') + '<h2>' + t('Every action is done') + '</h2></section>') + '</section>' +
         '</div>');
     });
   };

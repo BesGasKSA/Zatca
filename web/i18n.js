@@ -419,3 +419,9 @@ Object.assign(window.ZI18N, {
   'Fix on Fatoora': 'المعالجة في فاتورة', 'Correct the books': 'تصحيح الدفاتر', 'Collect the evidence': 'جمع المستندات', 'Revenue (TB)': 'الإيرادات (ميزان المراجعة)', 'ERP invoices': 'فواتير النظام', 'Evidence': 'المستندات'
 });
 Object.assign(window.ZI18N, { 'Today': 'اليوم' });
+Object.assign(window.ZI18N, {
+  'It may have been deleted, or the link is incomplete.': 'ربما حُذف، أو أن الرابط غير مكتمل.', 'Back to the dashboard': 'العودة إلى لوحة المتابعة',
+  'No data to check yet': 'لا توجد بيانات للفحص بعد', 'Load the return and the reports for this period; the action plan appears as soon as the checks can compare them.': 'حمّل الإقرار والتقارير لهذه الفترة؛ تظهر خطة العمل بمجرد أن تتمكن الفحوصات من مقارنتها.',
+  'Load the data': 'تحميل البيانات'
+});
+Object.assign(window.ZI18N, { 'Table': 'جدول' });

@@ -13,7 +13,7 @@
     if (S.exId === id && S.ex && S.loaded) return Promise.resolve();
     S.loaded = false;
     return Z.get('exercises', id).then(function (ex) {
-      if (!ex) throw new Error(t('Exercise not found'));
+      if (!ex) throw Object.assign(new Error(t('Exercise not found')), { notFound: true });
       S.ex = ex; S.exId = id;
       ex.reconItems = ex.reconItems || []; ex.checkNotes = ex.checkNotes || {}; ex.bankOverrides = ex.bankOverrides || {};
       return Promise.all([Z.list('datasets', id), Z.list('samples', id), Z.list('findings', id), Z.get('checklists', id)]);
@@ -121,6 +121,7 @@
       Z.setMain(head + tabs + '<div id="tab"></div>');
       var html = (wht && Z.tabsW[tab] || Z.tabs[tab] || Z.tabs.overview)();
       document.getElementById('tab').innerHTML = html;
+      Z.scrollables();
       if (Z.after[tab]) Z.after[tab]();
       Z.saveSummary();
     });

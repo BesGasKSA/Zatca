@@ -2,12 +2,17 @@
   "name": "inspection-ready",
   "version": "1.0.0",
   "private": true,
-  "description": "Monthly VAT & WHT inspection readiness for Saudi entities \u00e2\u20ac\u201d multi-tenant, Google Sheets backend.",
+  "description": "Monthly VAT & WHT inspection readiness for Saudi entities â€” multi-tenant, Google Sheets backend.",
   "scripts": {
-    "test": "node tests/engine.test.js && node tests/backend.test.js",
+    "test": "node tests/engine.test.js && node tests/backend.test.js && node tests/fuzz.js 600",
     "build": "node build.js",
     "dev": "node tools/serve.js web 5181",
     "preview": "node build.js && node tools/serve.js dist 5182",
-    "e2e": "node tests/e2e.js"
+    "e2e": "node tests/e2e.js",
+    "e2e:edge": "node tests/e2e-edge.js",
+    "e2e:security": "node tests/e2e-security.js",
+    "e2e:a11y": "node tests/e2e-a11y.js",
+    "perf": "node tests/perf.js",
+    "fuzz": "node tests/fuzz.js 2000"
   }
 }

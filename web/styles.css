@@ -14,12 +14,12 @@
   --line-2: #cdd5de;
   --ink: #0f1a26;
   --ink-2: #44536a;
-  --ink-3: #74829a;
+  --ink-3: #5b6880;            /* 5.6:1 on white, 5.0:1 on --surface-2 (WCAG AA) */
   --accent: #0f766e;            /* VAT */
   --accent-ink: #ffffff;
   --accent-soft: #e2f2ef;
   --accent-line: #a8d8d0;
-  --pass: #15803d; --pass-soft: #e5f4ea;
+  --pass: #166534; --pass-soft: #e5f4ea;   /* 6.2:1 on its soft background */
   --warn: #b45309; --warn-soft: #fdf1df;
   --fail: #b91c1c; --fail-soft: #fce8e8;
   --info: #475569; --info-soft: #eef1f5;
@@ -343,6 +343,9 @@ table.matrix td.bl { border-inline-start: 1px solid var(--line); }
 .bench svg { width: 100%; height: 170px; }
 
 /* ------------------------------------------------------------------ report (print) */
+/* the readiness pack is a document: always a white page, whatever the theme */
+.report { --surface: #fff; --surface-2: #f0f3f6; --surface-3: #e8ecf1; --line: #e1e6ec; --line-2: #cdd5de; --ink: #0f1a26; --ink-2: #44536a; --ink-3: #5b6880;
+  --pass: #166534; --pass-soft: #e5f4ea; --warn: #b45309; --warn-soft: #fdf1df; --fail: #b91c1c; --fail-soft: #fce8e8; --info-soft: #eef1f5; color-scheme: light; }
 .report { background: #fff; color: #111; padding: 36px 44px; border: 1px solid var(--line); border-radius: var(--r-m); max-width: 1020px; width: 100%; overflow-x: auto; }
 .report h1 { font-size: 24px; }
 .report h2 { font-size: 15.5px; margin: 28px 0 10px; padding-bottom: 6px; border-bottom: 2px solid var(--accent); color: #0f1a26; }
@@ -585,3 +588,8 @@ input[type=checkbox], input[type=radio] { accent-color: var(--accent); width: 17
 @media print { .reveal, .act, .pair, .chart .cbar, .chart .ln.draw, .seal .arc { animation: none !important; } }
 .kpis b.num { text-align: start; display: block; }
 .pair .link .tk { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+
+.tbl-wrap[tabindex]:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+/* dark theme: the bright status fills need dark text to stay readable */
+:root[data-theme="dark"] .heat td.s-ready { color: #0b1117; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .heat td.s-ready { color: #0b1117; } }

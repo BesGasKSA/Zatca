@@ -207,12 +207,19 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     var main = document.getElementById('main');
     main.innerHTML = '<div class="empty faint">' + t('Loading…') + '</div>';
     var fn = Z.views[view] || Z.views.dashboard;
-    Promise.resolve(fn(h)).catch(function (e) { console.error(e); main.innerHTML = '<div class="empty"><h2>' + t('This page could not load') + '</h2><p>' + esc(e.message) + '</p></div>'; });
+    Promise.resolve(fn(h)).catch(function (e) {
+      if (e && e.notFound) { main.innerHTML = '<div class="paper empty"><i class="ph ph-magnifying-glass big" aria-hidden="true"></i><h2>' + esc(e.message) + '</h2><p>' + t('It may have been deleted, or the link is incomplete.') + '</p><a class="btn primary" href="#/' + S.tax + '/dashboard">' + t('Back to the dashboard') + '</a></div>'; return; }
+      console.error(e); main.innerHTML = '<div class="empty"><h2>' + t('This page could not load') + '</h2><p>' + esc(e.message) + '</p></div>'; });
     document.querySelector('.shell').classList.remove('open');
     window.scrollTo(0, 0);
   };
   Z.paintChrome = function (view) { paintRail(view); paintTop(); };
-  Z.setMain = function (html) { document.getElementById('main').innerHTML = html; Z.fitTabs(); };
+  Z.setMain = function (html) { document.getElementById('main').innerHTML = html; Z.fitTabs(); Z.scrollables(); };
+  Z.scrollables = function () {
+    document.querySelectorAll('#main .tbl-wrap').forEach(function (w) {
+      if (w.scrollWidth > w.clientWidth + 1) { w.tabIndex = 0; w.setAttribute('role', 'region'); if (!w.getAttribute('aria-label')) { var h = w.closest('section') && w.closest('section').querySelector('h2, h3'); w.setAttribute('aria-label', h ? h.textContent : t('Table')); } }
+    });
+  };
   // Keeps every tab strip on one row. Tabs that do not fit move, from the end,
   // into a "More" menu; the open tab always stays visible.
   Z.fitTabs = function () {
