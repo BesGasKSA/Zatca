@@ -92,6 +92,25 @@ t('E3 rejected, pending, and accepted-at-provider-but-unknown-to-ZATCA', functio
   assert.ok(/REJECTED/.test(r) && /PENDING/.test(r) && /ZATCA has no record/.test(r), r);
 });
 t('E4 the SAR 150 VAT mismatch', function () { assert.strictEqual(EI('E4').counts.list, 1); });
+var EZ = function (id) { return byId(R.einv.checks, id); };
+t('E12 Fatoora holds less VAT than the return (unreported, rejected, cut-off, plus the duplicate)', function () {
+  var c = EZ('E12'); assert.strictEqual(c.status, 'fail'); assert.ok(c.a < c.b, c.a + ' vs ' + c.b); assert.ok(!c.exposure);
+});
+t('E13 one standard sale shown as zero-rated on Fatoora', function () {
+  var c = EZ('E13'); assert.strictEqual(c.status, 'fail');
+  assert.strictEqual(c.exceptions.list.filter(function (x) { return /^Category Z on the e-invoice, S in the ERP/.test(x.reason); }).length, 1);
+});
+t('E14 one invoice dated in October on Fatoora but booked in September, listed once', function () {
+  var c = EZ('E14'); assert.strictEqual(c.counts.list, 1); assert.ok(/outside 2026-09; booked on 2026-09/.test(c.exceptions.list[0].reason), c.exceptions.list[0].reason);
+});
+t('E15 one invoice reported twice, its VAT is exposure', function () { var c = EZ('E15'); assert.strictEqual(c.counts.list, 1); assert.ok(c.exposure > 0); });
+t('E16 one e-invoice to a different buyer TRN than the ERP', function () { assert.strictEqual(EZ('E16').counts.list, 1); });
+t('E17 one e-invoice issued under a group company TRN', function () { assert.strictEqual(EZ('E17').counts.list, 1); });
+t('Fatoora checks need no Fatoora columns beyond the old ones (category / TRN checks just skip)', function () {
+  var D = JSON.parse(JSON.stringify(demo.datasets)); D.einv = D.einv.map(function (x) { return { invoice: x.invoice, date: x.date, uuid: x.uuid, status: x.status, net: x.net, vat: x.vat }; });
+  var r = E.runAll({ entity: demo.entity, periodKey: demo.period, settings: {}, data: D, returnBoxes: demo.returnBoxes, today: '2026-10-19' });
+  assert.ok(byId(r.einv.checks, 'E12')); assert.ok(!byId(r.einv.checks, 'E13')); assert.ok(!byId(r.einv.checks, 'E17'));
+});
 t('E5 B2C after 30 h and B2B cleared 3.5 h after issue', function () { assert.strictEqual(EI('E5').counts.list, 2); });
 t('E6 skipped counter on an EGS unit', function () { assert.strictEqual(EI('E6').counts.list, 1); });
 t('E7 credit note without a reference', function () { assert.strictEqual(EI('E7').counts.list, 1); });

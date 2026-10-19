@@ -1,12 +1,12 @@
 /**
- * Tax Inspection Readiness — the engine.
+ * Tax Inspection Readiness - the engine.
  * Pure functions only: no DOM, no storage. Runs in the browser and in Node
  * (tests/engine.test.js). Everything the UI shows as a check, a test, a sample
  * or a score is computed here from the normalized datasets of one exercise.
  *
  * Saudi rules encoded here (all overridable from tenant settings, because
- * regulations change — see DEFAULT_SETTINGS):
- *   VAT standard rate 15%; VAT return boxes 1–16 as on the ZATCA portal;
+ * regulations change - see DEFAULT_SETTINGS):
+ *   VAT standard rate 15%; VAT return boxes 1-16 as on the ZATCA portal;
  *   WHT rates per Income Tax Law Art. 68 / Implementing Regs Art. 63;
  *   WHT due by the 10th of the following month; VAT due by the last day of
  *   the month after the period; corrections over SAR 5,000 need an amended
@@ -49,7 +49,7 @@
     disputes: { objectionDays: 60, appealDays: 30 },
     materiality: 50000,
     benfordMin: 300,
-    glBasis: 'movement',  // movement | gross — how TB VAT accounts are read when no GL is given
+    glBasis: 'movement',  // movement | gross - how TB VAT accounts are read when no GL is given
     settlementKeywords: 'settlement,closing vat,vat closing,تسوية,اقفال الضريبة,إقفال الضريبة',
     bankRules: {
       zatca_vat: 'zatca vat,vat payment,ضريبة القيمة المضافة,sadad 001,هيئة الزكاة والضريبة والجمارك - ضريبة',
@@ -298,7 +298,12 @@
         { k: 'uuid', t: 's', syn: ['uuid', 'irn'] },
         { k: 'status', t: 's', syn: ['status', 'clearance status', 'reporting status', 'الحالة'] },
         { k: 'net', t: 'n', syn: ['net', 'taxable amount', 'المبلغ الخاضع'] },
-        { k: 'vat', t: 'n', syn: ['vat', 'tax amount', 'الضريبة'] }
+        { k: 'vat', t: 'n', syn: ['vat', 'tax amount', 'الضريبة'] },
+        { k: 'type', t: 's', syn: ['invoice type', 'type', 'نوع الفاتورة'] },
+        { k: 'docType', t: 's', syn: ['document type', 'doc type', 'invoice type code', 'نوع المستند'] },
+        { k: 'category', t: 's', syn: ['vat category', 'tax category', 'category code', 'فئة الضريبة'] },
+        { k: 'buyerVat', t: 's', syn: ['buyer vat', 'buyer vat number', 'customer vat', 'الرقم الضريبي للمشتري'] },
+        { k: 'sellerVat', t: 's', syn: ['seller vat', 'seller vat number', 'الرقم الضريبي للبائع'] }
       ]
     },
     customs: {
@@ -392,7 +397,7 @@
     return y + '-' + pad(m) + '-' + pad(d);
   }
 
-  // Returns 'YYYY-MM-DD' or '' — Saudi files are day-first, so 03/04/2026 is 3 April.
+  // Returns 'YYYY-MM-DD' or '' - Saudi files are day-first, so 03/04/2026 is 3 April.
   E.date = function (v) {
     if (v == null || v === '') return '';
     if (v instanceof Date && !isNaN(v)) return iso(v.getFullYear(), v.getMonth() + 1, v.getDate());
@@ -777,7 +782,7 @@
     checks.push(c6);
 
     // Net VAT payable vs the payable account balance at period end.
-    // Net VAT due vs the net of every VAT account at period end — works whether
+    // Net VAT due vs the net of every VAT account at period end - works whether
     // or not a settlement journal moved the balances into the payable account.
     if (map.vatPayable || (map.outputVat && map.inputVat)) {
       var vatAccts = [map.outputVat, map.inputVat, map.rcmOutput, map.vatPayable].filter(Boolean).join(',');
@@ -1067,7 +1072,7 @@
     if (ctx.priorPurchaseKeys && Object.keys(ctx.priorPurchaseKeys).length) T('A18', 'Purchase invoices already claimed in an earlier period', 'فواتير مشتريات سبق المطالبة بها في فترة سابقة', 'high',
       purch.filter(function (x) { return (+x.vat || 0) > 0 && ctx.priorPurchaseKeys[purchaseKey(x)]; }).map(function (x) { return Object.assign({}, x, { reason: 'Same supplier and invoice number claimed in ' + ctx.priorPurchaseKeys[purchaseKey(x)] }); }),
       'Input VAT can be deducted once. An invoice already in an earlier return is a double claim.');
-    T('A5', 'Duplicate invoices', 'فواتير مكررة', 'high', dups, 'Same counterparty and number, or same supplier/date/amount under a different number — double-claimed input VAT is a frequent assessment.');
+    T('A5', 'Duplicate invoices', 'فواتير مكررة', 'high', dups, 'Same counterparty and number, or same supplier/date/amount under a different number - double-claimed input VAT is a frequent assessment.');
     if (range) T('A6', 'Invoices dated outside the period', 'فواتير خارج الفترة', 'medium',
       rows.filter(function (x) { return x.date && (x.date < range.start || x.date > range.end); }), 'Cut-off: a tax point outside the period belongs in another return.');
     // sequence gaps per prefix
@@ -1082,7 +1087,7 @@
         gaps.push({ invoice: p + (a[i - 1] + 1) + (a[i] - a[i - 1] > 2 ? ' … ' + p + (a[i] - 1) : ''), missing: a[i] - a[i - 1] - 1, reason: 'Gap in sequence', vat: 0 });
       }
     });
-    T('A7', 'Gaps in sales invoice numbering', 'فجوات في تسلسل فواتير المبيعات', 'medium', gaps, 'Missing numbers must be explained (cancelled, voided) — inspectors ask for them.');
+    T('A7', 'Gaps in sales invoice numbering', 'فجوات في تسلسل فواتير المبيعات', 'medium', gaps, 'Missing numbers must be explained (cancelled, voided) - inspectors ask for them.');
     T('A8', 'Exports without a foreign destination', 'صادرات بدون دولة وجهة خارجية', 'medium',
       sales.filter(function (x) { return x.category === 'X' && (!x.country || /^(sa|ksa|saudi|السعودية)/i.test(x.country)); }), 'Zero-rating an export needs proof the goods left KSA (customs export declaration).');
     if (sales.some(function (x) { return x.exportRef; })) T('A17', 'Exports without a customs export declaration reference', 'صادرات بدون مرجع بيان تصدير جمركي', 'high',
@@ -1095,7 +1100,7 @@
     var cnAmt = Math.abs(cn.reduce(function (s, x) { return s + (+x.net || 0); }, 0)), sAmt = sales.reduce(function (s, x) { return s + Math.max(+x.net || 0, 0); }, 0);
     T('A11', 'Credit notes above 5% of sales', 'إشعارات دائنة تتجاوز 5% من المبيعات', 'low', sAmt && cnAmt / sAmt > 0.05 ? cn : [], 'High credit notes reduce output VAT and are always sampled. Ratio: ' + (sAmt ? (cnAmt / sAmt * 100).toFixed(1) : 0) + '%.');
     var big = rows.filter(function (x) { return Math.abs(+x.net || 0) >= (S.materiality || Infinity); }).sort(function (a, b) { return Math.abs(b.net) - Math.abs(a.net); });
-    T('A12', 'Transactions above materiality', 'معاملات تتجاوز الأهمية النسبية', 'low', big, 'Key items — test 100% of these.', 'net');
+    T('A12', 'Transactions above materiality', 'معاملات تتجاوز الأهمية النسبية', 'low', big, 'Key items - test 100% of these.', 'net');
     T('A13', 'Round-amount purchases (multiples of 1,000)', 'مشتريات بمبالغ مقربة', 'low',
       purch.filter(function (x) { return (+x.net || 0) >= 5000 && (+x.net || 0) % 1000 === 0; }), 'Round amounts can indicate estimates or non-genuine invoices.', 'net');
     T('A14', 'Purchases dated on a weekend (Fri/Sat)', 'مشتريات بتاريخ عطلة نهاية الأسبوع', 'low',
@@ -1126,7 +1131,7 @@
   // Benford first-digit test with Nigrini's MAD thresholds.
   E.benford = function (values, S) {
     var v = values.filter(function (x) { return x >= 10; });
-    var res = { id: 'A16', title: 'Benford\'s law — first digit (amounts ≥ 10)', titleAr: 'قانون بنفورد — الرقم الأول', severity: 'low', items: [], count: 0, amount: 0 };
+    var res = { id: 'A16', title: 'Benford\'s law - first digit (amounts ≥ 10)', titleAr: 'قانون بنفورد - الرقم الأول', severity: 'low', items: [], count: 0, amount: 0 };
     if (v.length < (S.benfordMin || 300)) { res.status = 'na'; res.desc = 'Needs at least ' + (S.benfordMin || 300) + ' amounts (have ' + v.length + ').'; return res; }
     var c = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     v.forEach(function (x) { c[+String(Math.floor(x))[0]]++; });
@@ -1252,7 +1257,7 @@
       ['inv_valid', 'Valid tax invoice addressed to the entity', 'فاتورة ضريبية صحيحة باسم المنشأة'],
       ['trn', 'Supplier TRN valid and active (checked on ZATCA)', 'الرقم الضريبي للمورد صحيح وفعال'],
       ['amount', 'VAT amount and rate correct', 'مبلغ ونسبة الضريبة صحيحة'],
-      ['business', 'For taxable business use — not a blocked item (entertainment, personal cars…)', 'للاستخدام في نشاط خاضع — ليست من البنود المحظورة'],
+      ['business', 'For taxable business use - not a blocked item (entertainment, personal cars…)', 'للاستخدام في نشاط خاضع - ليست من البنود المحظورة'],
       ['period', 'Claimed in the right period, not claimed before', 'مطالب بها في الفترة الصحيحة ولم يسبق المطالبة'],
       ['gl', 'Recorded in GL expense/asset and input VAT', 'مسجلة في المصروفات/الأصول وضريبة المدخلات'],
       ['bank', 'Payment traced to bank statement (or payable)', 'الدفع متتبع في كشف البنك'],
@@ -1381,10 +1386,10 @@
         if (!x.issuedAt || !x.submittedAt) return;
         var m = minutesBetween(x.issuedAt, x.submittedAt), type = x.type || (E.validVatNo(x.buyerVat) ? 'standard' : 'simplified');
         if (type === 'simplified' && m > hrs * 60) late.push(Object.assign({}, x, { reason: 'Reported ' + Math.round(m / 60) + ' h after issue (limit ' + hrs + ' h)' }));
-        if (type === 'standard' && m > mins) late.push(Object.assign({}, x, { reason: 'Cleared ' + Math.round(m / 60 * 10) / 10 + ' h after issue — a standard invoice must be cleared before it is shared' }));
+        if (type === 'standard' && m > mins) late.push(Object.assign({}, x, { reason: 'Cleared ' + Math.round(m / 60 * 10) / 10 + ' h after issue - a standard invoice must be cleared before it is shared' }));
       });
       checks.push(T('E5', 'Clearance / reporting time limits', 'المهل الزمنية للاعتماد والإبلاغ', late, true,
-        { note: 'Standard (B2B) invoices are cleared before sharing; simplified (B2C) invoices are reported within ' + hrs + ' hours.' }));
+        { note: 'Standard (B2B) invoices are cleared before sharing; simplified (B2C) invoices are reported within ' + hrs + ' hours.', noteAr: 'تُعتمد الفواتير الضريبية (B2B) قبل مشاركتها، ويُبلغ عن الفواتير المبسطة (B2C) خلال ' + hrs + ' ساعة.' }));
       var byEgs = {}, chain = [];
       prov.forEach(function (x) { if (x.icv) (byEgs[x.egs || 'default'] = byEgs[x.egs || 'default'] || []).push(x); });
       Object.keys(byEgs).forEach(function (g) {
@@ -1406,15 +1411,93 @@
       var typ = [];
       prov.forEach(function (x) {
         var buyer = x.buyerVat || (byErp[invKey(x.invoice)] || {}).vatNo;
-        if (x.type === 'simplified' && E.validVatNo(buyer)) typ.push(Object.assign({}, x, { reason: 'Customer has a TRN — a standard (cleared) tax invoice is required' }));
+        if (x.type === 'simplified' && E.validVatNo(buyer)) typ.push(Object.assign({}, x, { reason: 'Customer has a TRN - a standard (cleared) tax invoice is required' }));
         if (x.type === 'standard' && !E.validVatNo(buyer) && buyer) typ.push(Object.assign({}, x, { reason: 'Standard invoice with an invalid buyer TRN' }));
       });
       checks.push(T('E8', 'Invoice type matches the customer (standard for B2B)', 'نوع الفاتورة يطابق العميل (قياسية للشركات)', typ, false));
       checks.push(T('E9', 'Accepted with warnings', 'مقبولة مع تحذيرات', prov.filter(function (x) { return x.status === 'WARNING'; }), false,
         { note: 'Warnings do not block clearance but are visible to ZATCA and usually point at a data-quality issue.' }));
     }
-    var summary = { erp: erp.length, provider: prov.length, zatca: zat.length, byStatus: {} };
-    prov.forEach(function (x) { summary.byStatus[x.status || '—'] = (summary.byStatus[x.status || '—'] || 0) + 1; });
+    // ---- what ZATCA holds (the Fatoora portal) against everything else
+    // ZATCA's own export when loaded; otherwise what the provider says ZATCA accepted.
+    var portal = zat.length ? zat : prov.filter(function (x) { return ACCEPTED[x.status]; }), src = zat.length ? 'Fatoora' : 'provider (accepted)';
+    var accepted = portal.filter(function (x) { return !/reject|pend|not_sub|رفض|مرفوض/i.test(String(x.status || '')); });
+    var range = E.periodRange(ctx.periodKey) || {};
+    var inPeriod = function (x) { return !x.date || !range.start || (x.date >= range.start && x.date <= range.end); };
+    var sign = function (x) { return /^(CN|381)$/i.test(String(x.docType || '')) && (+x.vat || 0) > 0 ? -1 : 1; };
+    var ret = ctx.returnBoxes ? E.completeBoxes(JSON.parse(JSON.stringify(ctx.returnBoxes)), true) : null;
+    var fatVat = r2(accepted.filter(inPeriod).reduce(function (a, x) { return a + sign(x) * (+x.vat || 0); }, 0));
+    var fatNet = r2(accepted.filter(inPeriod).reduce(function (a, x) { return a + sign(x) * (+x.net || 0); }, 0));
+    // E12: the figure ZATCA's risk engine compares first
+    if (!ret) checks.push({ id: 'E12', group: 'einv', title: 'Fatoora vs the VAT return (output VAT)', titleAr: 'منصة فاتورة مقابل إقرار القيمة المضافة (ضريبة المخرجات)', status: 'na', missing: 'VAT return as filed' });
+    else {
+      var retVat = r2(+ret[6].vat || 0), retNet = r2((+ret[6].amount || 0) + (+ret[6].adj || 0));
+      var c12 = check('E12', 'einv', 'Fatoora vs the VAT return (output VAT)', 'منصة فاتورة مقابل إقرار القيمة المضافة (ضريبة المخرجات)', fatVat, 'VAT on accepted e-invoices', retVat, 'Output VAT on the return (box 6)', S);
+      c12.netFatoora = fatNet; c12.netReturn = retNet;
+      if (fatVat - retVat > S.tolAbs) c12.exposure = r2(fatVat - retVat);
+      c12.note = 'ZATCA holds every cleared and reported invoice and compares it with the return automatically. VAT on e-invoices above the return is treated as undeclared; below it means sales were declared that ZATCA has no invoice for.';
+      checks.push(c12);
+    }
+    // E13: the same split by VAT category (standard, zero-rated and exports, exempt)
+    var hasCat = accepted.some(function (x) { return x.category; });
+    if (ret && hasCat) {
+      var bucketOf = function (cat) { cat = String(cat || '').toUpperCase(); return cat === 'S' || cat === 'SC' ? 'standard' : cat === 'Z' || cat === 'X' ? 'zero' : cat === 'E' ? 'exempt' : null; };
+      var fb = { standard: 0, zero: 0, exempt: 0 };
+      accepted.filter(inPeriod).forEach(function (x) { var b = bucketOf(x.category); if (b) fb[b] += sign(x) * (+x.net || 0); });
+      var amt = function (n) { return (+ret[n].amount || 0) + (+ret[n].adj || 0); };
+      var rb = { standard: amt(1) + amt(2), zero: amt(3) + amt(4), exempt: amt(5) };
+      var LBL = { standard: 'Standard-rated sales (boxes 1-2)', zero: 'Zero-rated sales and exports (boxes 3-4)', exempt: 'Exempt sales (box 5)' };
+      var items13 = [];
+      Object.keys(fb).forEach(function (k) {
+        var d = r2(fb[k] - rb[k]);
+        if (Math.abs(d) > S.tolAbs) items13.push({ invoice: LBL[k], net: r2(fb[k]), vat: r2(rb[k]), reason: 'E-invoices ' + r2(fb[k]) + ' vs return ' + r2(rb[k]) + ' (difference ' + d + ')' });
+      });
+      accepted.forEach(function (x) {
+        var e = byErp[invKey(x.invoice)];
+        if (e && x.category && e.category && bucketOf(x.category) && bucketOf(e.category) && bucketOf(x.category) !== bucketOf(e.category))
+          items13.push(Object.assign({}, x, { reason: 'Category ' + x.category + ' on the e-invoice, ' + e.category + ' in the ERP' }));
+      });
+      checks.push(T('E13', 'Fatoora by VAT category vs the return boxes', 'منصة فاتورة حسب فئة الضريبة مقابل بنود الإقرار', items13, true,
+        { note: 'A sale zero-rated on the e-invoice but standard-rated in the return (or the reverse) moves tax between boxes; ZATCA compares each category separately.' }));
+    }
+    // E14: cut-off - the invoice belongs to another period on one side
+    var cut = [];
+    portal.forEach(function (x) {
+      var why = [], e = byErp[invKey(x.invoice)];
+      if (x.date && range.start && !inPeriod(x)) why.push('dated ' + x.date + ' on the e-invoice, outside ' + ctx.periodKey);
+      if (e && e.date && x.date && e.date.slice(0, 7) !== x.date.slice(0, 7)) why.push('booked on ' + e.date + ' in the ERP');
+      if (why.length) cut.push(Object.assign({}, x, { erpDate: e && e.date, reason: why.join('; ').replace(/^./, function (c) { return c.toUpperCase(); }) }));
+    });
+    checks.push(T('E14', 'Cut-off: e-invoice date and return period agree', 'الفصل الزمني: تاريخ الفاتورة الإلكترونية وفترة الإقرار', cut, true,
+      { note: 'VAT is due in the period of the tax invoice date. An invoice dated in one month on Fatoora and booked in another is either under-declared now or declared twice.' }));
+    // E15: the same invoice or UUID twice in what ZATCA holds
+    var seenNo = {}, seenId = {}, dup = [];
+    portal.forEach(function (x) {
+      var k = invKey(x.invoice), u = invKey(x.uuid);
+      if (k && seenNo[k]) dup.push(Object.assign({}, x, { reason: 'Invoice number appears more than once' }));
+      else if (u && seenId[u]) dup.push(Object.assign({}, x, { reason: 'UUID ' + x.uuid + ' appears more than once' }));
+      if (k) seenNo[k] = 1; if (u) seenId[u] = 1;
+    });
+    checks.push(T('E15', 'Duplicate invoices or UUIDs on Fatoora', 'فواتير أو معرفات مكررة في منصة فاتورة', dup, true,
+      { note: 'A duplicate inflates the sales ZATCA sees. Cancel it on the e-invoicing system with a credit note referencing it.', exposure: r2(dup.reduce(function (a, x) { return a + Math.max(0, +x.vat || 0); }, 0)) || undefined }));
+    // E16: the buyer on the e-invoice is the buyer in the books
+    var buyer = [];
+    portal.forEach(function (x) {
+      var e = byErp[invKey(x.invoice)], p = byProv[invKey(x.invoice)];
+      var fb = String(x.buyerVat || (p && p.buyerVat) || '').trim(), eb = String((e && e.vatNo) || '').trim();
+      if (e && fb && eb && fb !== eb) buyer.push(Object.assign({}, x, { buyerVat: fb, erpVat: eb, reason: 'Buyer TRN ' + fb + ' on the e-invoice, ' + eb + ' in the ERP' }));
+    });
+    checks.push(T('E16', 'Buyer VAT number on the e-invoice matches the ERP', 'الرقم الضريبي للمشتري في الفاتورة الإلكترونية يطابق النظام', buyer, true,
+      { note: 'The customer can only recover VAT on an invoice issued to its own VAT number, and ZATCA matches it against the customer\'s input VAT.' }));
+    // E17: invoices issued under the entity's own VAT number
+    var trn = String((ctx.entity && ctx.entity.trn) || '').trim();
+    if (trn && portal.some(function (x) { return x.sellerVat; })) {
+      checks.push(T('E17', 'Seller VAT number on e-invoices is the entity\'s TRN', 'الرقم الضريبي للبائع في الفواتير الإلكترونية هو رقم المنشأة', portal.filter(function (x) { return x.sellerVat && String(x.sellerVat).trim() !== trn; })
+        .map(function (x) { return Object.assign({}, x, { reason: 'Issued under ' + x.sellerVat + ', the entity is ' + trn }); }), true,
+        { note: 'An EGS unit onboarded under another VAT number (a branch or a group company) reports these sales to the wrong taxpayer.' }));
+    }
+    var summary = { erp: erp.length, provider: prov.length, zatca: zat.length, byStatus: {}, fatVat: fatVat, fatNet: fatNet, source: src };
+    prov.forEach(function (x) { summary.byStatus[x.status || '-'] = (summary.byStatus[x.status || '-'] || 0) + 1; });
     return { checks: checks, summary: summary };
   };
 
@@ -1430,7 +1513,7 @@
     else {
       var lf = daysBetween(dl.vat, F.vatFiledOn);
       checks.push(C('C1', 'VAT return filed by the deadline (' + dl.vat + ')', 'تقديم إقرار القيمة المضافة في موعده', lf > 0 ? 'fail' : 'pass', lf > 0 ? lf : 0, 'Days late',
-        { exposure: lf > 0 && due > 0 ? r2(due * P.vatLateFilingMinPct) : 0, note: lf > 0 ? 'Late filing: ' + Math.round(P.vatLateFilingMinPct * 100) + '%–' + Math.round(P.vatLateFilingMaxPct * 100) + '% of the tax due (minimum shown).' : '' }));
+        { exposure: lf > 0 && due > 0 ? r2(due * P.vatLateFilingMinPct) : 0, note: lf > 0 ? 'Late filing: ' + Math.round(P.vatLateFilingMinPct * 100) + '%-' + Math.round(P.vatLateFilingMaxPct * 100) + '% of the tax due (minimum shown).' : '' }));
     }
     if (due != null && due <= 0) {
       checks.push(C('C2', 'VAT paid in full by the deadline', 'سداد الضريبة كاملة في موعدها', 'pass', 0, 'Nothing payable'));
@@ -1473,7 +1556,7 @@
     var rate = S.vatRate, low = S.whtRates.technical_services || 0.05;
     checks.push({ id: 'X1', group: 'wht', title: 'Reverse-charge purchases without WHT', titleAr: 'مشتريات بالاحتساب العكسي بدون ضريبة استقطاع',
       status: !rcm.length ? 'na' : x1.length ? 'fail' : 'pass', missing: rcm.length ? '' : 'Reverse-charge purchases', a: r2(x1.reduce(function (s, x) { return s + (+x.net || 0); }, 0)), aLabel: 'Paid to non-residents, no WHT', b: 0, bLabel: '',
-      exceptions: { list: x1 }, counts: { list: x1.length }, exposure: r2(x1.reduce(function (s, x) { return s + (+x.net || 0) * low; }, 0)), note: 'Exposure at the lowest WHT rate (5%); management fees, royalties and head-office services are 15–20%.' });
+      exceptions: { list: x1 }, counts: { list: x1.length }, exposure: r2(x1.reduce(function (s, x) { return s + (+x.net || 0) * low; }, 0)), note: 'Exposure at the lowest WHT rate (5%); management fees, royalties and head-office services are 15-20%.' });
     checks[0].diff = checks[0].a;
     checks.push({ id: 'X2', group: 'wht', title: 'WHT payments without reverse-charge VAT', titleAr: 'مدفوعات استقطاع بدون ضريبة احتساب عكسي',
       status: !reg.length ? 'na' : x2.length ? 'fail' : 'pass', missing: reg.length ? '' : 'WHT register', a: r2(x2.reduce(function (s, w) { return s + (+w.gross || 0); }, 0)), aLabel: 'Services with no box 9 VAT', b: 0, bLabel: '',
@@ -1505,6 +1588,7 @@
       else if (!rc.method || rc.method === 'none') {
         c.status = 'fail'; c.exposure = r2(inVat * (1 - ratio)); c.diff = c.exposure;
         c.note = 'Exempt sales of SAR ' + r2(exempt).toLocaleString('en-US') + ' but no apportionment recorded. Input VAT on common costs must be restricted to the taxable share (VAT IR Art. 51). Exposure shown is the upper bound (all input VAT treated as common).';
+        c.noteAr = 'مبيعات معفاة بقيمة ' + r2(exempt).toLocaleString('en-US') + ' ريال دون تسجيل نسبة تخصيص. يجب قصر ضريبة المدخلات على التكاليف المشتركة على الحصة الخاضعة (المادة 51 من اللائحة). المخاطر المعروضة هي الحد الأعلى (اعتبار كل ضريبة المدخلات مشتركة).';
       } else {
         var dir = +rc.directExemptVat || 0, com = +rc.commonVat || 0, disallowed = r2(dir + com * (1 - ratio));
         c.exposure = 0; c.disallowed = disallowed;
@@ -1522,7 +1606,8 @@
       var relief = ((S.giftRelief && S.giftRelief.annualCap) || 50000) / 12, over = r2(Math.max(0, gifts - relief));
       checks.push({ id: 'V12', group: 'vat', title: 'Deemed supplies: gifts, samples and own use', titleAr: 'التوريدات الاعتبارية: الهدايا والعينات والاستخدام الخاص', status: gifts <= 0 ? 'pass' : over > 0 ? 'warn' : 'pass',
         a: r2(gifts), aLabel: 'Gifts & samples this period', b: r2(relief), bLabel: 'Monthly share of the SAR 50,000 relief', diff: over, exposure: r2(over * S.vatRate),
-        note: 'Free goods above SAR ' + ((S.giftRelief && S.giftRelief.perRecipient) || 200) + ' per recipient per year (capped at SAR 50,000 a year) are deemed supplies: output VAT is due on them (VAT IR Art. 15).' });
+        note: 'Free goods above SAR ' + ((S.giftRelief && S.giftRelief.perRecipient) || 200) + ' per recipient per year (capped at SAR 50,000 a year) are deemed supplies: output VAT is due on them (VAT IR Art. 15).',
+        noteAr: 'السلع المجانية التي تزيد عن ' + ((S.giftRelief && S.giftRelief.perRecipient) || 200) + ' ريال لكل مستفيد سنوياً (بحد أقصى 50,000 ريال في السنة) توريدات اعتبارية تستحق عليها ضريبة المخرجات (المادة 15 من اللائحة).' });
     }
     return { checks: checks };
   };
@@ -1606,7 +1691,7 @@
     var S = ctx.settings, D = ctx.data, checks = [], r = S.vatRate;
     var C = function (o) { o.group = 'other'; return o; };
 
-    // M1 — platform operators: deemed-supplier supplies with no VAT accounted
+    // M1 - platform operators: deemed-supplier supplies with no VAT accounted
     var mk = D.mkt_sales || [], q = ctx.mktException || {};
     // The platform escapes deemed-supplier status only if ALL hold: the real
     // seller is named as supplier (contract, invoice, receipt) and the platform
@@ -1631,7 +1716,7 @@
         a: deemed.length, aLabel: 'Exceptions', b: 0, bLabel: '', diff: deemed.length, exposure: ex, exceptions: { list: deemed.slice(0, 300) }, counts: { list: deemed.length },
         note: 'From 1 Jan 2026 a platform that facilitates supplies by resident sellers who are not VAT-registered (and, since April 2025, electronic services by non-residents) accounts for the VAT itself, unless it meets the ZATCA guide\'s exceptions. Exposure assumes VAT-inclusive prices.' }));
     }
-    // M2 — sellers: marketplace payouts in the bank must trace to sales booked for that platform
+    // M2 - sellers: marketplace payouts in the bank must trace to sales booked for that platform
     var words = String(S.marketplace.payoutKeywords || '').toLowerCase().split(',').map(function (w) { return w.trim(); }).filter(Boolean);
     var payouts = (D.bank || []).filter(function (l) { var d = String(l.description || '').toLowerCase(); return (+l.credit || 0) > 0 && words.some(function (w) { return d.indexOf(w) >= 0; }); });
     if (payouts.length) {
@@ -1649,7 +1734,7 @@
         note: 'Platform payouts are net of commission, so booked sales should always exceed them. If you sell as a VAT-registered business the sale is yours to declare; the platform is not the deemed supplier for you.' }));
     }
 
-    // RETT — 5% of the disposal value, paid before the deed is transferred
+    // RETT - 5% of the disposal value, paid before the deed is transferred
     var re = D.rett || [], rr = S.rett || {};
     if (re.length) {
       var bad = [], late = [], due = 0;
@@ -1676,7 +1761,7 @@
       a: reVat.length, aLabel: 'Exceptions', b: 0, bLabel: '', diff: reVat.length, exceptions: { list: reVat }, counts: { list: reVat.length },
       note: 'Disposals of real estate are outside VAT and subject to 5% RETT; leases and services on property stay within VAT. Review each line.' }));
 
-    // Excise — recomputed from the tax-inclusive retail price (or ZATCA's standard price if higher)
+    // Excise - recomputed from the tax-inclusive retail price (or ZATCA's standard price if higher)
     var ek = D.excise || [];
     if (ek.length) {
       var rates = S.exciseRates || {}, diffs = [];
@@ -1698,14 +1783,14 @@
       var under = r2(diffs.reduce(function (s, x) { return s + Math.max(0, x.shortfall || 0); }, 0));
       checks.push(C({ id: 'K1', title: 'Excise recomputed per product line', titleAr: 'إعادة احتساب الضريبة الانتقائية لكل منتج', status: diffs.length ? 'fail' : 'pass',
         a: under, aLabel: 'Excise under-declared', b: 0, bLabel: '', diff: under, exposure: under, exceptions: { list: diffs }, counts: { list: diffs.length },
-        note: 'Tobacco, energy drinks and e-cigarettes: quantity × price × rate ÷ (1 + rate) on the higher of the retail price (excl. VAT) and ZATCA\'s standard price. Sweetened and carbonated drinks from 1 Jan 2026: litres × SAR 0 / 0.79 / 1.09 by sugar per 100 ml (under 5 g / 5–7.99 g / 8 g or more).' }));
+        note: 'Tobacco, energy drinks and e-cigarettes: quantity × price × rate ÷ (1 + rate) on the higher of the retail price (excl. VAT) and ZATCA\'s standard price. Sweetened and carbonated drinks from 1 Jan 2026: litres × SAR 0 / 0.79 / 1.09 by sugar per 100 ml (under 5 g / 5-7.99 g / 8 g or more).' }));
       var decl = ctx.exciseReturn;
       if (decl != null && decl !== '') {
         var reg = r2(ek.reduce(function (s, x) { return s + (+x.excise || 0); }, 0));
         checks.push(C(check('K2', 'other', 'Excise return vs excise register', 'إقرار الضريبة الانتقائية مقابل السجل', +decl, 'Excise return', reg, 'Register total', S)));
       }
     }
-    // K3 — designated-zone stock: what is missing was released without excise
+    // K3 - designated-zone stock: what is missing was released without excise
     var sk = D.excise_stock || [];
     if (sk.length) {
       var miss = [], relBy = {};
@@ -1900,7 +1985,7 @@
     });
     return { id: 'E11', group: 'einv', title: 'QR code matches the invoice (seller TRN, total, VAT, date)', titleAr: 'رمز الاستجابة السريعة يطابق الفاتورة (الرقم الضريبي، الإجمالي، الضريبة، التاريخ)',
       status: bad.length ? 'fail' : 'pass', a: bad.length, aLabel: 'Exceptions', b: 0, bLabel: '', diff: bad.length, exceptions: { list: bad.slice(0, 300) }, counts: { list: bad.length },
-      note: rows.length + ' QR codes decoded. The QR is what a customer\'s or inspector\'s phone reads; a wrong TRN or amount is an invoice-content violation.' };
+      note: rows.length + ' QR codes decoded. The QR is what a customer\'s or inspector\'s phone reads; a wrong TRN or amount is an invoice-content violation.', noteAr: 'تمت قراءة ' + rows.length + ' رمز استجابة سريعة. هذا ما يقرؤه هاتف العميل أو الفاحص، والرقم الضريبي أو المبلغ الخاطئ مخالفة في محتوى الفاتورة.' };
   };
 
   // ------------------------------------------------------------------ POS / mada settlements
@@ -1965,7 +2050,7 @@
     var th = S.vatCorrectionThreshold || 15000;
     if (netVatImpact < 0) return 'Over-declared: deduct in a later return within ' + (S.overstatementYears || 5) + ' years from the end of the calendar year of the period';
     return Math.abs(netVatImpact) >= th
-      ? 'Amend the original return — notify ZATCA within ' + (S.correctionNotifyDays || 20) + ' days of becoming aware (net difference ≥ SAR ' + th.toLocaleString('en-US') + ')'
+      ? 'Amend the original return - notify ZATCA within ' + (S.correctionNotifyDays || 20) + ' days of becoming aware (net difference ≥ SAR ' + th.toLocaleString('en-US') + ')'
       : 'Include in the return for the period in which the error was discovered (net difference below SAR ' + th.toLocaleString('en-US') + ')';
   };
 
@@ -1977,14 +2062,14 @@
     ['VAT', 'General ledger (VAT, revenue, expense accounts)', 'دفتر الأستاذ (حسابات الضريبة والإيرادات والمصروفات)'],
     ['VAT', 'Sales and purchase listings (system VAT report)', 'كشوف المبيعات والمشتريات (تقرير الضريبة)'],
     ['VAT', 'VAT working papers reconciling to the return', 'أوراق عمل الضريبة المطابقة للإقرار'],
-    ['VAT', 'Sample tax invoices — sales and purchases', 'عينات الفواتير الضريبية — مبيعات ومشتريات'],
+    ['VAT', 'Sample tax invoices - sales and purchases', 'عينات الفواتير الضريبية - مبيعات ومشتريات'],
     ['VAT', 'Credit / debit notes with reasons', 'الإشعارات الدائنة والمدينة وأسبابها'],
     ['VAT', 'Customs declarations for imports', 'البيانات الجمركية للواردات'],
     ['VAT', 'Export evidence for zero-rated supplies', 'إثبات التصدير للتوريدات الصفرية'],
     ['VAT', 'Contracts with key customers and suppliers', 'العقود مع العملاء والموردين الرئيسيين'],
     ['VAT', 'E-invoicing: Fatoora onboarding (CSID) and integration evidence', 'الفوترة الإلكترونية: شهادة الربط وأدلة التكامل'],
     ['VAT', 'Fixed asset register (capital goods adjustments)', 'سجل الأصول الثابتة'],
-    ['BANK', 'Bank statements — all accounts, full period', 'كشوف الحسابات البنكية — جميع الحسابات للفترة كاملة'],
+    ['BANK', 'Bank statements - all accounts, full period', 'كشوف الحسابات البنكية - جميع الحسابات للفترة كاملة'],
     ['BANK', 'Bank reconciliations', 'المطابقات البنكية'],
     ['BANK', 'POS / mada settlement reports', 'تقارير تسويات نقاط البيع / مدى'],
     ['WHT', 'Monthly WHT return and payment receipt', 'إقرار الاستقطاع الشهري وإيصال السداد'],
@@ -2128,6 +2213,22 @@
     E8: PB('einv', 'VAT', ['Customers', 'Invoice type']),
     E9: PB('einv', 'VAT', ['Provider', 'ZATCA']),
     E10: PB('process', 'VAT', ['Fatoora integration', 'Wave deadline']),
+    E12: PB('amend', 'VAT', ['Fatoora', 'Return box 6'],
+      ['Export the e-invoice list for the period from the Fatoora portal (or the provider) and total the VAT of cleared and reported invoices, net of credit notes.', 'If Fatoora is higher than the return, list the invoices behind the difference: they are sales ZATCA can see that were not declared. Correct the return for them.', 'If Fatoora is lower, find the declared sales with no accepted e-invoice (never sent, rejected, pending) and clear or report them now.', 'Keep the reconciliation with the return: it is the first figure an inspector compares.'],
+      ['صدّر قائمة الفواتير الإلكترونية للفترة من منصة فاتورة (أو من المزود) واجمع ضريبة الفواتير المعتمدة والمبلغ عنها بعد خصم الإشعارات الدائنة.', 'إذا كانت فاتورة أعلى من الإقرار فحدد الفواتير المسببة للفرق: هي مبيعات تراها الهيئة ولم تُقر. صحح الإقرار بها.', 'إذا كانت فاتورة أقل فحدد المبيعات المقرة التي لا توجد لها فاتورة إلكترونية معتمدة (لم تُرسل أو رُفضت أو معلقة) واعتمدها أو أبلغ عنها الآن.', 'احتفظ بالمطابقة مع الإقرار: هي أول رقم يقارنه الفاحص.']),
+    E13: PB('amend', 'VAT', ['Fatoora by category', 'Return boxes'],
+      ['Compare the e-invoices by VAT category (standard, zero-rated and exports, exempt) with boxes 1 to 5 of the return.', 'For each invoice whose category differs from the ERP, decide which is right using the contract and export evidence.', 'Issue a credit note and a corrected e-invoice when the e-invoice is wrong; correct the return when the return is wrong.'],
+      ['قارن الفواتير الإلكترونية حسب فئة الضريبة (أساسية، صفرية وصادرات، معفاة) مع البنود من 1 إلى 5 في الإقرار.', 'لكل فاتورة تختلف فئتها عن النظام حدد الصحيح بالعقد ومستندات التصدير.', 'أصدر إشعاراً دائناً وفاتورة إلكترونية مصححة إذا كانت الفاتورة خاطئة، وصحح الإقرار إذا كان الإقرار خاطئاً.']),
+    E14: PB('amend', 'VAT', ['E-invoice date', 'Return period'],
+      ['For each invoice listed, take the tax point from the e-invoice date: VAT is due in that period.', 'Move the ERP posting to the same period, or declare it in the return for that period.', 'Stop back-dating or post-dating invoices at month end; lock the ERP period after filing.'],
+      ['لكل فاتورة مدرجة اعتمد تاريخ الفاتورة الإلكترونية كتاريخ الاستحقاق: الضريبة مستحقة في تلك الفترة.', 'انقل الترحيل في النظام إلى نفس الفترة، أو أقرّها في إقرار تلك الفترة.', 'أوقف تقديم أو تأخير تواريخ الفواتير في نهاية الشهر، وأقفل الفترة في النظام بعد التقديم.']),
+    E15: PB('einv', 'VAT', ['Fatoora', 'ERP'],
+      ['Confirm which copy is the real invoice.', 'Cancel the duplicate on the e-invoicing system with a credit note that references it.', 'Fix the integration step that sent it twice (retry without checking the first response).'],
+      ['تأكد من النسخة الصحيحة للفاتورة.', 'ألغِ النسخة المكررة في نظام الفوترة بإشعار دائن يشير إليها.', 'عالج خطوة الربط التي أرسلتها مرتين (إعادة إرسال دون التحقق من الرد الأول).']),
+    E16: PB('einv', 'VAT', ['E-invoice buyer', 'ERP customer']),
+    E17: PB('einv', 'VAT', ['E-invoice seller', 'Entity TRN'],
+      ['Identify the EGS unit that issued the invoices and the VAT number it was onboarded with.', 'Re-onboard the unit under the entity\'s TRN and reissue the invoices.', 'Agree with the group company how the sales it reported are corrected.'],
+      ['حدد وحدة الإصدار التي أصدرت الفواتير والرقم الضريبي المسجلة به.', 'أعد تسجيل الوحدة برقم المنشأة الضريبي وأعد إصدار الفواتير.', 'اتفق مع الشركة الشقيقة على طريقة تصحيح المبيعات التي أبلغت عنها.']),
     E11: PB('einv', 'VAT', ['QR code', 'Invoice']),
     C1: PB('pay', 'VAT', ['Filing date', 'Deadline'],
       ['File the return now if it is still outstanding.', 'Set a reminder five working days before the last day of the following month.'],
@@ -2175,7 +2276,7 @@
   // count each family once, at its largest amount.
   E.ACTION_FAMILIES = {
     returnDiff: ['V1', 'V2', 'V3', 'V4', 'V5', 'V7'],
-    undeclaredSales: ['V6', 'B1', 'P1', 'V9', 'B6'],
+    undeclaredSales: ['V6', 'B1', 'P1', 'V9', 'B6', 'E12'],
     whtReturnDiff: ['W1', 'W2', 'W4'],
     missingWht: ['W3', 'W8', 'B5', 'X1'],
     rett: ['R1', 'R2', 'R3']

@@ -224,7 +224,7 @@ async function audit(label) {
   ok(await ev("return !!document.querySelector('details.more') || document.querySelector('nav.tabs').scrollWidth <= document.querySelector('nav.tabs').clientWidth"), 'tabs fit with a More menu');
   step = 'company 360';
   await go('#/vat/insights/' + demo.e, 3000);
-  ok(await ev("return document.querySelectorAll('.pair').length === 9 && document.querySelectorAll('.act').length >= 3 && !!document.querySelector('.chart svg .cbar')"), '360 shows the match map, actions and the returns chart');
+  ok(await ev("return document.querySelectorAll('.pair').length === 11 && document.querySelectorAll('.act').length >= 3 && !!document.querySelector('.chart svg .cbar')"), '360 shows the match map, actions and the returns chart');
   ok(await ev("var p = Z.planFor(); return p.avoided > 0 && p.costLater > p.costNow"), 'acting now saves money');
   await go('#/vat/ex/' + demo.x + '/plan', 1500);
   const firstAct = await ev("var b = document.querySelector('[data-act=\"actdone\"]'); return b ? b.dataset.id : null");

@@ -121,6 +121,28 @@ get an absolute `--user-data-dir`; a relative one silently fails to start.
   plain SVG; motion is CSS only and off under prefers-reduced-motion. SVG rects
   use class `cbar` — `.bar` and `.acts` are taken by older components.
 
+## Interface components (design v3, 2026-10-19)
+
+- `web/ui-design.js` enhances every `<select>` into a listbox popover and every
+  date/month input into a calendar popover via a MutationObserver. The native
+  element stays in the DOM (hidden, `aria-hidden`), so `data-chg` handlers,
+  forms and the e2e tests keep using it. Add `data-native` to opt out.
+- Breakdowns: any element with `data-drill="key[:arg]"` opens `Z.drawer` with
+  rows from `Z.DRILL[key](arg)`. `web/ui-drills.js` recognises KPI cards by
+  their label (`RULES`), so a new KPI card becomes drillable by adding one line
+  there, not by editing the template.
+- Class names are global: `.act` (action cards), `.mini` (360 links), `.bar`
+  (readiness bars), `.acts` (check buttons) are taken. Collisions with these
+  broke the dropdown, the folded sidebar and a whole tab once each. Name new
+  component classes specifically.
+- Folded sidebar (`.shell.folded`, `zr_mini`) is desktop only; on phones the
+  sidebar is a fixed overlay. Em-dashes are banned in visible copy (taste-skill);
+  `Z.revealPage()` staggers sections on each render.
+- Fatoora (E12-E17): what ZATCA holds is compared with the return (E12, the
+  first thing ZATCA's own engine does), by category (E13), cut-off (E14),
+  duplicates (E15), buyer TRN (E16), seller TRN (E17). Checks with live
+  figures in their note carry `noteAr`.
+
 ## Deployment (backend live since 2026-10-19)
 
 The ids and URLs live in `deploy.json` (read by `build.js`). The Google

@@ -1,10 +1,10 @@
 /**
  * Storage backends. Both expose call(action, payload) → Promise of the same
  * response shapes as apps-script/Code.gs.
- *   CloudBackend — the Google Sheets backend, via google.script.run when this
+ *   CloudBackend - the Google Sheets backend, via google.script.run when this
  *                  page is served by Apps Script, or fetch() when hosted
  *                  elsewhere (Content-Type text/plain avoids a CORS preflight).
- *   LocalBackend — IndexedDB in this browser only; for trying the system
+ *   LocalBackend - IndexedDB in this browser only; for trying the system
  *                  out and for demos. Single user, owner role.
  */
 (function (root) {
@@ -58,7 +58,7 @@
   function uid(p) { return p + '-' + Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-4); }
 
   // Each action reads a whole table and writes it back, so actions run one at
-  // a time — two saves in parallel would otherwise lose one of them.
+  // a time - two saves in parallel would otherwise lose one of them.
   function LocalBackend() { this.mode = 'local'; this.token = 'local'; this.q = Promise.resolve(); }
   LocalBackend.prototype.all = function (table) {
     return tx('readonly', function (st) { return st.get(table); }).then(function (v) { return v || {}; });

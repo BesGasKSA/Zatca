@@ -31,6 +31,7 @@
     Z.route();
   }
   function inRange(period) { var r = E.periodRange(period), R = range(); return !!r && r.end.slice(0, 7) >= R.from && r.start.slice(0, 7) <= R.to; }
+  Z.reportAsOf = function () { return asOf(); };
   function asOf() { var end = E.periodRange(range().to).end; return end < Z.today() ? end : Z.today(); }
   function exercisesInRange(e) { return S.exercises.filter(function (x) { return (!e || x.entityId === e.id) && inRange(x.period); }); }
   Z.CHG.rfrom = function (el) { if (el.value) setRange(el.value, range().to); };
@@ -84,15 +85,15 @@
     if (W()) return whtSummary();
     var rows = summaryRows(), tot = rows.reduce(function (a, r) { ['n', 'sales', 'outputVat', 'inputVat', 'netVat', 'whtTax', 'exposure', 'fails', 'signed'].forEach(function (k) { a[k] = (a[k] || 0) + r[k]; }); return a; }, {});
     return '<section class="paper flush"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Entity') + '</th><th class="num">' + t('Exercises') + '</th><th class="num">' + t('Signed off') + '</th><th class="num">' + t('Sales (box 6)') + '</th><th class="num">' + t('Output VAT') + '</th><th class="num">' + t('Input VAT') + '</th><th class="num">' + t('Net VAT due') + '</th><th class="num">' + t('Failed checks') + '</th><th class="num">' + t('VAT exposure (SAR)') + '</th><th class="num">' + t('Average readiness') + '</th></tr></thead><tbody>' +
-      rows.map(function (r) { return '<tr><td><a href="#/entity/' + r.e.id + '">' + esc(Z.entName(r.e)) + '</a></td><td class="num">' + r.n + '</td><td class="num">' + r.signed + '</td><td class="num">' + fmt(r.sales) + '</td><td class="num">' + fmt(r.outputVat) + '</td><td class="num">' + fmt(r.inputVat) + '</td><td class="num">' + fmt(r.netVat) + '</td><td class="num">' + r.fails + '</td><td class="num">' + fmt(r.exposure) + '</td><td class="num">' + (r.avg == null ? '—' : r.avg + '%') + '</td></tr>'; }).join('') +
+      rows.map(function (r) { return '<tr><td><a href="#/entity/' + r.e.id + '">' + esc(Z.entName(r.e)) + '</a></td><td class="num">' + r.n + '</td><td class="num">' + r.signed + '</td><td class="num">' + fmt(r.sales) + '</td><td class="num">' + fmt(r.outputVat) + '</td><td class="num">' + fmt(r.inputVat) + '</td><td class="num">' + fmt(r.netVat) + '</td><td class="num">' + r.fails + '</td><td class="num">' + fmt(r.exposure) + '</td><td class="num">' + (r.avg == null ? '-' : r.avg + '%') + '</td></tr>'; }).join('') +
       '<tr class="total"><td>' + t('Total') + '</td><td class="num">' + (tot.n || 0) + '</td><td class="num">' + (tot.signed || 0) + '</td><td class="num">' + fmt(tot.sales || 0) + '</td><td class="num">' + fmt(tot.outputVat || 0) + '</td><td class="num">' + fmt(tot.inputVat || 0) + '</td><td class="num">' + fmt(tot.netVat || 0) + '</td><td class="num">' + (tot.fails || 0) + '</td><td class="num">' + fmt(tot.exposure || 0) + '</td><td></td></tr></tbody></table></div></section>' +
       '<p class="faint" style="font-size:12.5px">' + t('Totals come from each exercise\'s saved figures. An exercise counts when its period overlaps the range; quarterly filers count in full.') + '</p>';
   }
   function whtSummary() {
     var rows = summaryRows(), tot = rows.reduce(function (a, r) { ['n', 'signed', 'whtGross', 'whtTax', 'lateDays', 'fails', 'exposure'].forEach(function (k) { a[k] = (a[k] || 0) + r[k]; }); return a; }, {});
-    var cells = function (r) { return '<td class="num">' + (r.n || 0) + '</td><td class="num">' + (r.signed || 0) + '</td><td class="num">' + fmt(r.whtGross || 0) + '</td><td class="num">' + fmt(r.whtTax || 0) + '</td><td class="num">' + (r.whtGross ? Z.r((r.whtTax || 0) / r.whtGross * 100) + '%' : '—') + '</td><td class="num">' + (r.lateDays || 0) + '</td><td class="num">' + (r.fails || 0) + '</td><td class="num">' + fmt(r.exposure || 0) + '</td>'; };
+    var cells = function (r) { return '<td class="num">' + (r.n || 0) + '</td><td class="num">' + (r.signed || 0) + '</td><td class="num">' + fmt(r.whtGross || 0) + '</td><td class="num">' + fmt(r.whtTax || 0) + '</td><td class="num">' + (r.whtGross ? Z.r((r.whtTax || 0) / r.whtGross * 100) + '%' : '-') + '</td><td class="num">' + (r.lateDays || 0) + '</td><td class="num">' + (r.fails || 0) + '</td><td class="num">' + fmt(r.exposure || 0) + '</td>'; };
     return '<section class="paper flush"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Entity') + '</th><th class="num">' + t('Exercises') + '</th><th class="num">' + t('Signed off') + '</th><th class="num">' + t('Paid to non-residents') + '</th><th class="num">' + t('WHT declared') + '</th><th class="num">' + t('Effective rate') + '</th><th class="num">' + t('Days late, total') + '</th><th class="num">' + t('Failed checks') + '</th><th class="num">' + t('WHT exposure (SAR)') + '</th><th class="num">' + t('Average readiness') + '</th></tr></thead><tbody>' +
-      rows.map(function (r) { return '<tr><td><a href="#/entity/' + r.e.id + '">' + esc(Z.entName(r.e)) + '</a></td>' + cells(r) + '<td class="num">' + (r.avg == null ? '—' : r.avg + '%') + '</td></tr>'; }).join('') +
+      rows.map(function (r) { return '<tr><td><a href="#/entity/' + r.e.id + '">' + esc(Z.entName(r.e)) + '</a></td>' + cells(r) + '<td class="num">' + (r.avg == null ? '-' : r.avg + '%') + '</td></tr>'; }).join('') +
       '<tr class="total"><td>' + t('Total') + '</td>' + cells(tot) + '<td></td></tr></tbody></table></div></section>' +
       '<p class="faint" style="font-size:12.5px">' + t('From the WHT return figures each exercise saved. WHT is monthly; a quarterly VAT exercise carries the three months of WHT inside it.') + '</p>';
   }
@@ -125,7 +126,7 @@
     return '<div class="kpis"><div><b>' + rows.length + '</b><span>' + t('Beneficiaries') + '</span></div><div><b>' + fmt(tot.g, 0) + '</b><span>' + t('Paid to non-residents') + '</span></div><div><b>' + fmt(tot.w, 0) + '</b><span>' + t('WHT withheld') + '</span></div><div class="' + (tot.m ? 'bad' : '') + '"><b>' + tot.m + '</b><span>' + t('Payments without a certificate') + '</span></div></div>' +
       '<p class="muted" style="margin-top:12px">' + t('Use it to check certificates and the annual WHT figures; every beneficiary paid during the year appears once.') + '</p>' +
       '<section class="paper flush"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Beneficiary') + '</th><th>' + t('Entity') + '</th><th>' + t('Country') + '</th><th>' + t('Payment types') + '</th><th class="num">' + t('Payments') + '</th><th class="num">' + t('Gross paid') + '</th><th class="num">' + t('WHT') + '</th><th class="num">' + t('Effective rate') + '</th><th class="num">' + t('Treaty relief') + '</th><th class="num">' + t('No certificate') + '</th></tr></thead><tbody>' +
-      (rows.map(function (r) { return '<tr><td><b>' + esc(r.party || '—') + '</b></td><td>' + esc(Z.entName(Z.entity(r.entityId))) + '</td><td>' + esc(r.country) + '</td><td style="font-size:12.5px">' + esc(Object.keys(r.types).map(function (k) { var w = E.WHT_TYPES.filter(function (x) { return x[0] === k; })[0]; return w ? (S.lang === 'ar' ? w[2] : w[1]) : k; }).join(', ')) + '</td><td class="num">' + r.n + '</td><td class="num">' + fmt(r.gross) + '</td><td class="num">' + fmt(r.wht) + '</td><td class="num">' + (r.gross ? Z.r(r.wht / r.gross * 100) + '%' : '—') + '</td><td class="num">' + (r.treaty || '') + '</td><td class="num ' + (r.missingCert ? 'diff-bad' : '') + '">' + (r.missingCert || '') + '</td></tr>'; }).join('') || '<tr><td colspan="10" class="empty">' + t('No WHT registers loaded for this range.') + '</td></tr>') + '</tbody></table></div></section>';
+      (rows.map(function (r) { return '<tr><td><b>' + esc(r.party || '-') + '</b></td><td>' + esc(Z.entName(Z.entity(r.entityId))) + '</td><td>' + esc(r.country) + '</td><td style="font-size:12.5px">' + esc(Object.keys(r.types).map(function (k) { var w = E.WHT_TYPES.filter(function (x) { return x[0] === k; })[0]; return w ? (S.lang === 'ar' ? w[2] : w[1]) : k; }).join(', ')) + '</td><td class="num">' + r.n + '</td><td class="num">' + fmt(r.gross) + '</td><td class="num">' + fmt(r.wht) + '</td><td class="num">' + (r.gross ? Z.r(r.wht / r.gross * 100) + '%' : '-') + '</td><td class="num">' + (r.treaty || '') + '</td><td class="num ' + (r.missingCert ? 'diff-bad' : '') + '">' + (r.missingCert || '') + '</td></tr>'; }).join('') || '<tr><td colspan="10" class="empty">' + t('No WHT registers loaded for this range.') + '</td></tr>') + '</tbody></table></div></section>';
   }
 
   function keyFor(e, m) { return e.vatFreq === 'quarterly' ? m.slice(0, 4) + '-Q' + Math.ceil(+m.slice(5) / 3) : m; }
@@ -137,19 +138,19 @@
     var rows = ents().map(function (e) {
       return '<tr><th scope="row" style="text-align:start"><a href="#/entity/' + e.id + '">' + esc(Z.entName(e)) + '</a></th>' + ms.map(function (m) {
         var x = exOf(e, keyFor(e, m)), s2 = x && sc(x.summary);
-        return '<td class="num">' + (s2 && s2.score != null ? Z.pill(s2.grade, s2.score + '%') : '<span class="faint">—</span>') + '</td>';
+        return '<td class="num">' + (s2 && s2.score != null ? Z.pill(s2.grade, s2.score + '%') : '<span class="faint">-</span>') + '</td>';
       }).join('') + '</tr>';
     }).join('');
     return '<section class="paper flush"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Entity') + '</th>' + ms.map(function (m) { return '<th class="num">' + Z.ltr(m) + '</th>'; }).join('') + '</tr></thead><tbody>' + rows + '</tbody></table></div></section>';
   }
 
-  var BUCKETS = [['over90', 'Over 90 days overdue', 'fail'], ['d90', '61–90 days overdue', 'fail'], ['d60', '31–60 days overdue', 'warn'], ['d30', '1–30 days overdue', 'warn'], ['notDue', 'Not yet due', 'pass'], ['noDate', 'No due date', 'na']];
+  var BUCKETS = [['over90', 'Over 90 days overdue', 'fail'], ['d90', '61-90 days overdue', 'fail'], ['d60', '31-60 days overdue', 'warn'], ['d30', '1-30 days overdue', 'warn'], ['notDue', 'Not yet due', 'pass'], ['noDate', 'No due date', 'na']];
   function exName(id) { var x = S.exercises.filter(function (e) { return e.id === id; })[0]; return x ? Z.entName(Z.entity(x.entityId)) + ' · ' + x.period : ''; }
   function aging(fs) {
     var b = E.aging(findingsInRange(fs), asOf());
     var strip = '<div class="kpis">' + BUCKETS.map(function (k) { return '<div class="' + (k[2] === 'fail' && b[k[0]].length ? 'bad' : '') + '"><b>' + b[k[0]].length + '</b><span>' + t(k[1]) + '</span></div>'; }).join('') + '</div>';
     var rows = [];
-    BUCKETS.forEach(function (k) { b[k[0]].forEach(function (f) { rows.push('<tr class="clickable" data-act="gofinding" data-ex="' + f.parentId + '"><td>' + Z.pill(k[2], t(k[1])) + '</td><td>' + Z.pill(f.severity, t(Z.cap(f.severity))) + '</td><td><b>' + esc(f.title) + '</b><div class="faint" style="font-size:12.5px">' + esc(exName(f.parentId)) + '</div></td><td class="num">' + fmt(f.taxImpact) + '</td><td class="num">' + fmt(f.penalty) + '</td><td>' + esc(f.owner || '—') + '</td><td class="nowrap">' + esc(f.due || '') + '</td></tr>'); }); });
+    BUCKETS.forEach(function (k) { b[k[0]].forEach(function (f) { rows.push('<tr class="clickable" data-act="gofinding" data-ex="' + f.parentId + '"><td>' + Z.pill(k[2], t(k[1])) + '</td><td>' + Z.pill(f.severity, t(Z.cap(f.severity))) + '</td><td><b>' + esc(f.title) + '</b><div class="faint" style="font-size:12.5px">' + esc(exName(f.parentId)) + '</div></td><td class="num">' + fmt(f.taxImpact) + '</td><td class="num">' + fmt(f.penalty) + '</td><td>' + esc(f.owner || '-') + '</td><td class="nowrap">' + esc(f.due || '') + '</td></tr>'); }); });
     return strip + '<section class="paper flush" style="margin-top:16px"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Age') + '</th><th>' + t('Severity') + '</th><th>' + t('Finding') + '</th><th class="num">' + t('Tax impact') + '</th><th class="num">' + t('Penalty') + '</th><th>' + t('Owner') + '</th><th>' + t('Due') + '</th></tr></thead><tbody>' +
       (rows.join('') || '<tr><td colspan="7" class="empty">' + t('No open findings.') + '</td></tr>') + '</tbody></table></div></section>';
   }
@@ -176,7 +177,7 @@
       Z.setMain('<div class="pagehead"><div><h1>' + t('ZATCA requests and assessments') + '</h1><p>' + t('Every letter from ZATCA with its deadline: information requests, field visits, assessments (60 days to object) and committee decisions (30 days to appeal).') + '</p></div>' +
         (Z.can('preparer') ? '<button class="btn primary" data-act="editreq">' + t('Record a request') + '</button>' : '') + '</div>' +
         '<section class="paper flush"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Status') + '</th><th>' + t('Type') + '</th><th>' + t('Entity') + '</th><th>' + t('Reference') + '</th><th>' + t('Received') + '</th><th>' + t('Deadline') + '</th><th class="num">' + t('Amount') + '</th><th>' + t('Owner') + '</th></tr></thead><tbody>' +
-        (rows.map(function (r) { return '<tr class="clickable" data-act="editreq" data-id="' + r.id + '"><td>' + pill(r) + '</td><td>' + esc(t((QTYPES.filter(function (x) { return x[0] === r.type; })[0] || [0, r.type])[1])) + '</td><td>' + esc(Z.entName(Z.entity(r.entityId))) + '</td><td><b>' + esc(r.reference || '') + '</b><div class="faint" style="font-size:12.5px">' + esc(r.items || '') + '</div></td><td class="nowrap">' + Z.ltr(r.receivedOn || '') + '</td><td class="nowrap">' + Z.ltr(r.due || '—') + (r.state !== 'closed' && r.daysLeft != null ? ' <span class="' + (r.daysLeft <= 7 ? 'diff-bad' : 'faint') + '">(' + r.daysLeft + ' ' + t('days') + ')</span>' : '') + '</td><td class="num">' + (r.amount ? fmt(r.amount) : '') + '</td><td>' + esc(r.owner || '') + '</td></tr>'; }).join('') || '<tr><td colspan="8" class="empty">' + t('No requests recorded. When ZATCA writes, record it here so nobody misses the deadline.') + '</td></tr>') + '</tbody></table></div></section>');
+        (rows.map(function (r) { return '<tr class="clickable" data-act="editreq" data-id="' + r.id + '"><td>' + pill(r) + '</td><td>' + esc(t((QTYPES.filter(function (x) { return x[0] === r.type; })[0] || [0, r.type])[1])) + '</td><td>' + esc(Z.entName(Z.entity(r.entityId))) + '</td><td><b>' + esc(r.reference || '') + '</b><div class="faint" style="font-size:12.5px">' + esc(r.items || '') + '</div></td><td class="nowrap">' + Z.ltr(r.receivedOn || '') + '</td><td class="nowrap">' + Z.ltr(r.due || '-') + (r.state !== 'closed' && r.daysLeft != null ? ' <span class="' + (r.daysLeft <= 7 ? 'diff-bad' : 'faint') + '">(' + r.daysLeft + ' ' + t('days') + ')</span>' : '') + '</td><td class="num">' + (r.amount ? fmt(r.amount) : '') + '</td><td>' + esc(r.owner || '') + '</td></tr>'; }).join('') || '<tr><td colspan="8" class="empty">' + t('No requests recorded. When ZATCA writes, record it here so nobody misses the deadline.') + '</td></tr>') + '</tbody></table></div></section>');
     });
   };
   Z.ACT.editreq = function (el) {
@@ -205,7 +206,7 @@
     Z.list('requests').then(function (qs) {
       var cfg = S.settingsDoc ? S.settingsDoc.values : {}, hot = qs.map(function (q) { return Object.assign({}, q, E.requestDue(q, cfg, Z.today())); }).filter(function (r) { return r.state === 'urgent' || r.state === 'overdue'; });
       if (!hot.length || !document.getElementById('reqalert')) return;
-      box.innerHTML = '<section class="paper" style="border-color:var(--red);display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap"><div><h3>' + hot.length + ' ' + t('ZATCA deadlines within 7 days or overdue') + '</h3><p class="muted" style="margin:2px 0 0">' + hot.map(function (r) { return esc(r.reference) + ' — ' + Z.ltr(r.due); }).join(' · ') + '</p></div><a class="btn primary" href="#/requests">' + t('Open requests') + '</a></section>';
+      box.innerHTML = '<section class="paper alert-bar" role="alert"><i class="ph ph-alarm" aria-hidden="true"></i><div><h3>' + hot.length + ' ' + t('ZATCA deadlines within 7 days or overdue') + '</h3><p class="muted" style="margin:2px 0 0">' + hot.map(function (r) { return esc(r.reference) + ' - ' + Z.ltr(r.due); }).join(' · ') + '</p></div><a class="btn primary" href="#/requests">' + t('Open requests') + '</a></section>';
     }).catch(function () {});
   };
 
@@ -219,14 +220,14 @@
     });
     var tot = rows.reduce(function (a, r) { return { q: a.q + expo(r.sm), tax: a.tax + r.tax, pen: a.pen + r.pen }; }, { q: 0, tax: 0, pen: 0 });
     return '<section class="paper flush"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Entity') + '</th><th>' + t('Latest exercise') + '</th><th class="num">' + t('Readiness') + '</th><th class="num">' + (W() ? t('WHT exposure (SAR)') : t('VAT exposure (SAR)')) + '</th><th class="num">' + t('Open findings') + '</th><th class="num">' + t('Tax at stake (SAR)') + '</th><th class="num">' + t('Estimated penalties (SAR)') + '</th></tr></thead><tbody>' +
-      rows.map(function (r) { return '<tr><td><a href="#/entity/' + r.e.id + '">' + esc(Z.entName(r.e)) + '</a></td><td>' + (r.latest ? Z.ltr(r.latest.period) : '—') + '</td><td class="num">' + (sc(r.sm).score != null ? Z.pill(sc(r.sm).grade, sc(r.sm).score + '%') : '—') + '</td><td class="num">' + fmt(expo(r.sm)) + '</td><td class="num">' + r.open + '</td><td class="num">' + fmt(r.tax) + '</td><td class="num">' + fmt(r.pen) + '</td></tr>'; }).join('') +
+      rows.map(function (r) { return '<tr><td><a href="#/entity/' + r.e.id + '">' + esc(Z.entName(r.e)) + '</a></td><td>' + (r.latest ? Z.ltr(r.latest.period) : '-') + '</td><td class="num">' + (sc(r.sm).score != null ? Z.pill(sc(r.sm).grade, sc(r.sm).score + '%') : '-') + '</td><td class="num">' + fmt(expo(r.sm)) + '</td><td class="num">' + r.open + '</td><td class="num">' + fmt(r.tax) + '</td><td class="num">' + fmt(r.pen) + '</td></tr>'; }).join('') +
       '<tr class="total"><td colspan="3">' + t('Total') + '</td><td class="num">' + fmt(tot.q) + '</td><td></td><td class="num">' + fmt(tot.tax) + '</td><td class="num">' + fmt(tot.pen) + '</td></tr></tbody></table></div></section>';
   }
 
   function calendar() {
     var ms = months12();
     var cell = function (x, kind) {
-      if (!x) return '<td class="num faint">—</td>';
+      if (!x) return '<td class="num faint">-</td>';
       var F = x.filing || {}, dl = E.deadlines(x.period), filed = kind === 'vat' ? F.vatFiledOn : F.whtPaidOn || F.whtFiledOn, due = kind === 'vat' ? dl.vat : dl.wht;
       if (!filed) return '<td class="num">' + Z.tick(Z.today() > due ? 'fail' : 'na', t(Z.today() > due ? 'Not recorded and past due' : 'Not yet recorded')) + '</td>';
       var late = E.daysBetween(due, filed);
@@ -367,7 +368,7 @@
       docs.forEach(function (doc) { if (!doc) return; (doc.data || []).forEach(function (a) { var o = {}; doc.cols.forEach(function (c, i) { o[c] = a[i]; }); rows.push(o); }); });
       var by = {};
       rows.forEach(function (r) {
-        var k = String(r.party || '—');
+        var k = String(r.party || '-');
         var b = by[k] = by[k] || { party: k, country: r.country, types: {}, count: 0, gross: 0, wht: 0, noCert: 0 };
         b.count++; b.gross += +r.gross || 0; b.wht += +r.wht || 0; b.types[r.paymentType] = 1; if (!r.certificate) b.noCert++;
       });

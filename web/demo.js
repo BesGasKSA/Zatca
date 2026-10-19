@@ -20,6 +20,11 @@
  *     reported after 30 h and a B2B invoice cleared 3.5 h after issue, a skipped
  *     counter, a credit note with no reference, a simplified invoice to a
  *     VAT-registered customer, one accepted with a warning
+ *   - Fatoora portal: one standard sale shown as zero-rated, one invoice dated in
+ *     October on Fatoora but booked in September, one invoice reported twice,
+ *     one invoice to a different buyer TRN than the ERP, one issued under a
+ *     group company's VAT number; with the unreported and rejected invoices the
+ *     e-invoices hold less VAT than the return declares
  *   - input VAT on a staff dinner, a hotel stay and the GM's car; exempt sales
  *     with no apportionment; SAR 30,000 of gifts against a SAR 4,167 monthly relief
  *   - one export without a customs export declaration (plus the export to SA)
@@ -106,7 +111,7 @@
     var rev = sysBoxes[6].amount;
     var arOpen = 1840000, arClose = 2015500, apOpen = 1210000, apClose = 1176300;
     var tb = [
-      { account: '1100', name: 'Bank — SNB current', opening: 2650000, debit: 0, credit: 0, closing: 0 },
+      { account: '1100', name: 'Bank - SNB current', opening: 2650000, debit: 0, credit: 0, closing: 0 },
       { account: '1200', name: 'Trade receivables', opening: arOpen, debit: 0, credit: 0, closing: arClose },
       { account: '1410', name: 'Input VAT recoverable', opening: 0, debit: r2(inVat), credit: 0, closing: r2(inVat) },
       { account: '2100', name: 'Trade payables', opening: -apOpen, debit: 0, credit: 0, closing: -apClose },
@@ -114,7 +119,7 @@
       { account: '2220', name: 'VAT payable (settlement)', opening: -412880, debit: 412880, credit: 0, closing: 0 },
       { account: '2230', name: 'WHT payable', opening: -9840, debit: 9840, credit: 0, closing: 0 },
       { account: '4000', name: 'Sales revenue', opening: 0, debit: 0, credit: r2(rev), closing: -r2(rev) },
-      { account: '4100', name: 'Other income — scrap & insurance claims', opening: 0, debit: 0, credit: 12000, closing: -12000 },
+      { account: '4100', name: 'Other income - scrap & insurance claims', opening: 0, debit: 0, credit: 12000, closing: -12000 },
       { account: '5000', name: 'Cost of sales', opening: 0, debit: r2(sysBoxes[12].amount * 0.8), credit: 0, closing: r2(sysBoxes[12].amount * 0.8) },
       { account: '5300', name: 'Foreign professional services', opening: 0, debit: 160000, credit: 0, closing: 160000 },
       { account: '5400', name: 'Royalties & management fees', opening: 0, debit: 190000, credit: 0, closing: 190000 }
@@ -178,7 +183,7 @@
 
     // GL detail for WHT completeness (foreign expense lines)
     var gl = [
-      { date: '2026-09-03', account: '5300', doc: 'JV-901', description: 'Consulting — Deloitte UK', debit: 42000, credit: 0, party: 'Deloitte UK', country: 'GB' },
+      { date: '2026-09-03', account: '5300', doc: 'JV-901', description: 'Consulting - Deloitte UK', debit: 42000, credit: 0, party: 'Deloitte UK', country: 'GB' },
       { date: '2026-09-15', account: '5300', doc: 'JV-915', description: 'Design work', debit: 18000, credit: 0, party: 'Dubai Design Studio', country: 'AE' },
       { date: '2026-09-20', account: '5300', doc: 'JV-920', description: 'Software customisation', debit: 9500, credit: 0, party: 'Cairo Software', country: 'EG' },
       { date: '2026-09-26', account: '5300', doc: 'JV-926', description: 'Data analytics project', debit: 31000, credit: 0, party: 'Lisbon Analytics Lda', country: 'PT' },
@@ -190,10 +195,10 @@
     // draws below this line, so every figure above stays as the tests pin it.
     var pdesc = ['Raw materials', 'Packaging materials', 'Spare parts', 'Logistics services', 'Office supplies', 'IT equipment', 'Maintenance services', 'Utilities'], pi = 0;
     sys.forEach(function (x) { if (x.flow === 'P') x.description = x.category === 'RCM' ? 'Professional services' : x.category === 'IMP' ? 'Imported goods' : pdesc[pi++ % pdesc.length]; });
-    purch[30].description = 'Staff dinner — restaurant'; purch[31].description = 'Hotel accommodation for visiting directors'; purch[32].description = 'Purchase of Toyota Land Cruiser for the GM';
+    purch[30].description = 'Staff dinner - restaurant'; purch[31].description = 'Hotel accommodation for visiting directors'; purch[32].description = 'Purchase of Toyota Land Cruiser for the GM';
     var xi = 0;
     sys.forEach(function (x) { if (x.flow === 'S' && x.category === 'X' && x !== ex) { if (xi !== 2) x.exportRef = 'EXP-26-' + (7000 + xi); xi++; } });
-    gl.push({ date: '2026-09-17', account: '5600', doc: 'JV-917', description: 'Customer gifts — National Day giveaways', debit: 30000, credit: 0, party: '', country: 'SA' });
+    gl.push({ date: '2026-09-17', account: '5600', doc: 'JV-917', description: 'Customer gifts - National Day giveaways', debit: 30000, credit: 0, party: '', country: 'SA' });
 
     var salesAll = sys.filter(function (x) { return x.flow === 'S'; }), prov = [], ctr = { 'ERP-01': 5000, 'POS-02': 900 };
     salesAll.forEach(function (x, i) {
@@ -226,7 +231,16 @@
     });
 
     var einv = sys.filter(function (x) { return x.flow === 'S'; }).filter(function (x, i5) { return i5 !== 55 && i5 !== 233 && i5 !== 470; })
-      .map(function (x, i6) { return { invoice: x.invoice, date: x.date, uuid: 'uuid-' + i6, status: i6 === 101 ? 'REJECTED' : x.vatNo ? 'CLEARED' : 'REPORTED', net: x.net, vat: x.vat }; });
+      .map(function (x, i6) { return { invoice: x.invoice, date: x.date, uuid: 'uuid-' + i6, status: i6 === 101 ? 'REJECTED' : x.vatNo ? 'CLEARED' : 'REPORTED', net: x.net, vat: x.vat,
+        type: x.vatNo ? 'standard' : 'simplified', docType: x.docType || 'INV', category: x.category, buyerVat: x.vatNo || '', sellerVat: '310123456700003' }; });
+    // Fatoora portal plants (one each); indices are chosen among accepted standard-rated invoices
+    var fstd = einv.map(function (x, i) { return i; }).filter(function (i) { return einv[i].status !== 'REJECTED' && einv[i].category === 'S' && einv[i].docType === 'INV'; });
+    var fb2b = fstd.filter(function (i) { return einv[i].buyerVat; });
+    einv[fstd[10]].category = 'Z';                                   // E13: zero-rated on Fatoora, standard in the ERP and the return
+    einv[fstd[20]].date = '2026-10-01';                              // E14: dated in October on Fatoora, booked in September
+    einv.push(Object.assign({}, einv[fstd[30]]));                    // E15: reported twice (same number and UUID)
+    einv[fb2b[40]].buyerVat = '311111111100003';                     // E16: a different buyer TRN than the ERP
+    einv[fstd[50]].sellerVat = '310999888700003';                    // E17: issued under a group company's VAT number
     var customs = imports.slice(0, 9).map(function (x, i7) { return { declaration: 'BYN-26-' + (40100 + i7), date: x.date, party: x.party, value: x.net, vat: x.vat }; });
 
     return {
@@ -243,7 +257,7 @@
       exciseReturn: 195900,
       priorPurchaseKeys: (function () { var o = {}; o[E.purchaseKey(purch[50])] = '2026-08'; return o; })(),
       requests: [
-        { type: 'information', reference: 'ZATCA-IR-2026-55821', receivedOn: '2026-10-12', dueOn: '2026-10-22', items: 'Sales listing Q3 2026, bank statements Jul–Sep, 25 sample tax invoices', owner: 'Tax manager', status: 'open' },
+        { type: 'information', reference: 'ZATCA-IR-2026-55821', receivedOn: '2026-10-12', dueOn: '2026-10-22', items: 'Sales listing Q3 2026, bank statements Jul-Sep, 25 sample tax invoices', owner: 'Tax manager', status: 'open' },
         { type: 'assessment', reference: 'ZATCA-AS-2026-11402', period: '2025-Q4', receivedOn: '2026-08-25', amount: 46500, items: 'Assessment of input VAT on hospitality and vehicle expenses', owner: 'CFO', status: 'open' }
       ],
       zakat2025: { capital: 10000000, reserves: 2000000, retainedEarnings: 6500000, provisions: 800000, longTermFinancing: 3000000, adjustedNetProfit: 4200000,
@@ -254,11 +268,11 @@
           return { period: h[0], sales: r2(cur.sales * h[1]), inputVat: r2(cur.inputVat * h[2]), outputVat: r2(cur.outputVat * h[1]), zeroShare: cur.zeroShare, netVat: h[3] };
         });
       })(),
-      reconItems: [{ check: 'V6', description: 'Other income — scrap sales and insurance claims (out of scope)', amount: 12000 }],
+      reconItems: [{ check: 'V6', description: 'Other income - scrap sales and insurance claims (out of scope)', amount: 12000 }],
       datasets: { tb: tb, gl: gl, sys_vat: sys, xls_vat: xls, einv: einv, einv_provider: prov, pos: pos, customs: customs,
         rett: [
-          { date: '2026-09-14', deed: '4301928', property: 'Warehouse — Al Sulay, Riyadh', buyer: 'Gulf Logistics Parks', value: 3200000, rett: 128000, paidOn: '2026-10-20', exemption: '' },
-          { date: '2026-09-22', deed: '4302277', property: 'Land plot — Dammam 2nd Industrial', buyer: 'Al Noor Logistics LLC', value: 900000, rett: 0, paidOn: '', exemption: 'Transfer to a wholly owned subsidiary' }
+          { date: '2026-09-14', deed: '4301928', property: 'Warehouse - Al Sulay, Riyadh', buyer: 'Gulf Logistics Parks', value: 3200000, rett: 128000, paidOn: '2026-10-20', exemption: '' },
+          { date: '2026-09-22', deed: '4302277', property: 'Land plot - Dammam 2nd Industrial', buyer: 'Al Noor Logistics LLC', value: 900000, rett: 0, paidOn: '', exemption: 'Transfer to a wholly owned subsidiary' }
         ],
         excise: [
           { date: '2026-09-30', product: 'Energy drink 250 ml (24-pack)', category: 'Energy drinks', qty: 24000, retailPrice: 10, standardPrice: 0, rate: 0, excise: 120000 },

@@ -132,7 +132,7 @@
   };
   function planHero(p) {
     var nx = p.next;
-    var head = p.open.length ? (p.critical ? t('Fix the critical items first.') + ' ' : '') + t('Acting now instead of waiting for an inspection avoids about SAR') + ' <b class="num">' + fmt(p.avoided, 0) + '</b> ' + t('in penalties') + (nx ? ' — ' + t('next deadline') + ' ' + Z.ltr(nx.deadline) : '') + '.' : t('No open actions in this section.');
+    var head = p.open.length ? (p.critical ? t('Fix the critical items first.') + ' ' : '') + t('Acting now instead of waiting for an inspection avoids about SAR') + ' <b class="num">' + fmt(p.avoided, 0) + '</b> ' + t('in penalties') + (nx ? ' - ' + t('next deadline') + ' ' + Z.ltr(nx.deadline) : '') + '.' : t('No open actions in this section.');
     return '<section class="paper hero-plan"><div class="headline">' + Z.icon(p.open.length ? 'lightbulb' : 'seal-check') + '<p>' + head + '</p></div><div class="kpis">' +
       '<div class="' + (p.critical ? 'bad' : '') + '">' + Z.icon('warning-octagon') + '<b data-count="' + p.critical + '">' + p.critical + '</b><span>' + t('Critical actions') + '</span></div>' +
       '<div>' + Z.icon('scales') + money(p.impact) + '<span>' + t('Tax at stake (SAR)') + '</span></div>' +
@@ -146,7 +146,7 @@
   // ---------------------------------------------------------------- where the sources agree
   var PAIRS = {
     vat: [['Return', 'System report', 'V1'], ['Return', 'Excel workings', 'V2'], ['System report', 'Excel workings', 'V3'], ['Return', 'General ledger', 'V7'],
-      ['Revenue (TB)', 'Return box 6', 'V6'], ['Bank receipts', 'Declared sales', 'B1'], ['System sales', 'Fatoora', 'V9'], ['Card takings (POS / mada)', 'B2C sales declared', 'P1'], ['Customs declarations', 'Return box 8', 'V8']],
+      ['Revenue (TB)', 'Return box 6', 'V6'], ['Bank receipts', 'Declared sales', 'B1'], ['Fatoora', 'VAT return', 'E12'], ['System sales', 'Fatoora', 'V9'], ['Fatoora by category', 'Return boxes', 'E13'], ['Card takings (POS / mada)', 'B2C sales declared', 'P1'], ['Customs declarations', 'Return box 8', 'V8']],
     wht: [['WHT return', 'WHT register', 'W1'], ['WHT return', 'Excel workings', 'W2'], ['WHT return', 'WHT payable account', 'W4'], ['Foreign transfers', 'WHT register', 'B5'],
       ['GL non-resident expenses', 'WHT register', 'W8'], ['Reverse-charge purchases', 'WHT register', 'X1'], ['WHT payments', 'Reverse-charge VAT', 'X2']]
   };
@@ -176,7 +176,7 @@
     var exs = S.exercises.filter(function (x) { return x.entityId === e.id; }).sort(function (a, b) { return a.period < b.period ? 1 : -1; });
     var latest = exs.filter(function (x) { return x.status !== 'closed'; })[0] || exs[0];
     var picker = '<label class="ent-pick big">' + Z.icon('buildings') + '<select data-chg="insent" aria-label="' + t('Company') + '">' + ents.map(function (x) { return '<option value="' + x.id + '"' + (x.id === e.id ? ' selected' : '') + '>' + esc(Z.entName(x)) + '</option>'; }).join('') + '</select></label>';
-    var head = '<div class="pagehead"><div><p class="eyebrow">' + Z.taxName() + ' · ' + t('Company 360') + '</p><h1>' + esc(Z.entName(e)) + '</h1><p>' + t('TRN') + ' ' + esc(e.trn || '—') + ' · ' + t(Z.cap(e.vatFreq || 'monthly')) + ' ' + t('VAT filer') +
+    var head = '<div class="pagehead"><div><p class="eyebrow">' + Z.taxName() + ' · ' + t('Company 360') + '</p><h1>' + esc(Z.entName(e)) + '</h1><p>' + t('TRN') + ' ' + esc(e.trn || '-') + ' · ' + t(Z.cap(e.vatFreq || 'monthly')) + ' ' + t('VAT filer') +
       (latest ? ' · ' + t('Latest exercise') + ' ' + Z.ltr(latest.period) : '') + '</p></div>' + picker + '</div>';
     if (!latest) return Z.setMain(head + '<section class="paper empty">' + Z.icon('folder-open') + '<h2>' + t('No exercise yet for this company') + '</h2><p>' + t('Start one to see its returns, results and action plan here.') + '</p><a class="btn primary" href="#/entity/' + e.id + '">' + t('Start an exercise') + '</a></section>');
     return Z.loadExercise(latest.id).then(function () {
@@ -207,7 +207,7 @@
         '<div class="bad">' + Z.icon('hourglass-high') + money(p.costLater) + '<span>' + t('Penalties if left to an inspector (SAR)') + '</span></div>' +
         '<div class="good">' + Z.icon('shield-check') + money(p.avoided, 'good') + '<span>' + t('Saved by acting now (SAR)') + '</span></div>' +
         '<div class="' + (p.critical ? 'bad' : '') + '">' + Z.icon('list-checks') + '<b data-count="' + p.open.length + '">' + p.open.length + '</b><span>' + t('Open actions') + (p.critical ? ', ' + p.critical + ' ' + t('critical') : '') + '</span></div>' +
-        '<div>' + Z.icon('calendar-check') + '<b>' + (p.next ? (p.next.daysLeft < 0 ? t('Overdue') : p.next.daysLeft === 0 ? t('Today') : p.next.daysLeft + ' ' + t('days')) : '—') + '</b><span>' + t('To the next deadline') + (p.next ? ' · ' + Z.ltr(p.next.deadline) : '') + '</span></div></div></section>' +
+        '<div>' + Z.icon('calendar-check') + '<b>' + (p.next ? (p.next.daysLeft < 0 ? t('Overdue') : p.next.daysLeft === 0 ? t('Today') : p.next.daysLeft + ' ' + t('days')) : '-') + '</b><span>' + t('To the next deadline') + (p.next ? ' · ' + Z.ltr(p.next.deadline) : '') + '</span></div></div></section>' +
 
         '<section class="paper reveal span2" style="--i:1"><header><div><h2>' + (wht ? t('WHT returns, last 12 months') : t('VAT returns, last 12 months')) + '</h2><p>' + (wht ? t('Gross paid to non-residents and WHT declared, from each month\'s exercise.') : t('Output and input VAT with the net VAT due, from each month\'s exercise.')) + '</p></div></header>' + returns + '</section>' +
         '<section class="paper reveal" style="--i:2"><header><div><h2>' + t('Readiness over time') + '</h2><p>' + t('Green band: ready for an inspection.') + '</p></div></header>' + trend + '</section>' +
@@ -224,8 +224,8 @@
   Z.CHG.insent = function (el) { S.entityId = el.value; try { localStorage.setItem('zr_entity', el.value); } catch (e) {} location.hash = '#/' + S.tax + '/insights/' + el.value; };
 
   // ---------------------------------------------------------------- motion: count the headline figures up once they render
-  Z.animateCounts = function () {
-    var els = document.querySelectorAll('#main [data-count]');
+  Z.animateCounts = function (root) {
+    var els = (root || document.getElementById('main') || document).querySelectorAll('[data-count]');
     if (!els.length || reduced()) return;
     var t0 = performance.now(), dur = 900;
     var targets = [].map.call(els, function (el) { return { el: el, v: +el.dataset.count || 0 }; });
