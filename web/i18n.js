@@ -358,3 +358,7 @@ Object.assign(window.ZI18N, {
 ,
   'Last 12 months': 'آخر 12 شهراً'
 });
+
+Object.assign(window.ZI18N, { 'Google Sheet': 'Google Sheet' });
+Object.assign(window.ZI18N, { 'Keep me signed in on this device': 'تذكرني على هذا الجهاز' });
+Object.assign(window.ZI18N, { 'User guide (PDF)': 'دليل المستخدم (PDF)' });

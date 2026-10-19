@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Inspection Ready — Practitioner's Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Readex+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  @page { size: A4; margin: 18mm 17mm 20mm; }
+  @page :first { margin: 0; }
+  :root { --ink: #0f1a26; --ink2: #3b4a5a; --ink3: #6b7a8a; --line: #dde3ea; --soft: #f4f6f8; --vat: #0f766e; --vat-soft: #e6f4f2; --wht: #1d4ed8; --wht-soft: #e8eefc; --warn: #b45309; --warn-soft: #fdf3e3; --fail: #b91c1c; --fail-soft: #fdecec; }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; font: 10.4pt/1.6 'Manrope', system-ui, sans-serif; color: var(--ink); }
+  h1, h2, h3 { line-height: 1.2; letter-spacing: -.015em; margin: 0; }
+  h2 { font-size: 21pt; font-weight: 800; margin-bottom: 8pt; }
+  h3 { font-size: 13pt; font-weight: 800; margin: 18pt 0 6pt; }
+  p { margin: 0 0 8pt; }
+  ul, ol { margin: 0 0 8pt; padding-inline-start: 16pt; }
+  li { margin-bottom: 3pt; }
+  b { font-weight: 700; }
+  .num { font-variant-numeric: tabular-nums; }
+
+  /* cover */
+  .cover { height: 297mm; display: grid; grid-template-rows: 1fr auto; background: #0d2d2a; color: #fff; padding: 26mm 22mm 20mm; page-break-after: always; position: relative; overflow: hidden; }
+  .cover::after { content: ''; position: absolute; inset: auto -60mm -70mm auto; width: 190mm; height: 190mm; border-radius: 50%; border: 22mm solid rgba(111, 211, 196, .14); }
+  .cover .mark { width: 44pt; height: 44pt; border-radius: 11pt; background: #6fd3c4; color: #0d2d2a; display: grid; place-items: center; font-weight: 800; font-size: 20pt; }
+  .cover .kicker { margin-top: 40mm; font-size: 10pt; letter-spacing: .18em; text-transform: uppercase; color: #9fe0c6; font-weight: 700; }
+  .cover h1 { font-size: 40pt; font-weight: 800; margin: 8pt 0 12pt; max-width: 150mm; letter-spacing: -.03em; }
+  .cover .sub { font-size: 13pt; color: #cfe9e3; max-width: 130mm; }
+  .cover .ar { font-family: 'Readex Pro', sans-serif; direction: rtl; text-align: right; font-size: 15pt; color: #9fe0c6; margin-top: 18pt; max-width: 130mm; }
+  .cover .chips { display: flex; gap: 8pt; margin-top: 22pt; }
+  .cover .chips span { border: 1px solid rgba(255,255,255,.3); border-radius: 99pt; padding: 4pt 11pt; font-size: 9pt; font-weight: 600; }
+  .cover .foot { font-size: 9pt; color: #9fb9b4; display: flex; justify-content: space-between; position: relative; z-index: 1; }
+
+  /* parts and chapters */
+  .part { page-break-before: always; padding-top: 70mm; }
+  .part .n { font-size: 11pt; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: var(--vat); }
+  .part h2 { font-size: 34pt; margin-top: 6pt; }
+  .part p { font-size: 12pt; color: var(--ink2); max-width: 135mm; }
+  .part.wht .n { color: var(--wht); }
+  .chapter { page-break-before: always; }
+  .eyebrow { font-size: 8.5pt; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--vat); margin-bottom: 4pt; }
+  .wht-ch .eyebrow { color: var(--wht); }
+  .lead { font-size: 11.5pt; color: var(--ink2); margin-bottom: 12pt; }
+
+  /* step header */
+  .step { display: grid; grid-template-columns: 30pt 1fr; gap: 10pt; align-items: start; margin: 16pt 0 6pt; page-break-after: avoid; }
+  .step .no { width: 30pt; height: 30pt; border-radius: 50%; background: var(--vat); color: #fff; font-weight: 800; display: grid; place-items: center; font-size: 12pt; }
+  .wht-ch .step .no { background: var(--wht); }
+  .step h3 { margin: 4pt 0 0; }
+
+  /* callouts */
+  .box { border-radius: 8pt; padding: 9pt 12pt 4pt; margin: 8pt 0 10pt; page-break-inside: avoid; border: 1px solid var(--line); background: var(--soft); }
+  .box .t { font-size: 8.5pt; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 3pt; }
+  .box.why { background: var(--vat-soft); border-color: #bfe3dd; } .box.why .t { color: var(--vat); }
+  .wht-ch .box.why { background: var(--wht-soft); border-color: #c8d6f7; } .wht-ch .box.why .t { color: var(--wht); }
+  .box.tip { background: #fff; border-inline-start: 4pt solid var(--ink); } .box.tip .t { color: var(--ink); }
+  .box.mistake { background: var(--fail-soft); border-color: #f3caca; } .box.mistake .t { color: var(--fail); }
+  .box.law { background: var(--warn-soft); border-color: #f1dcb4; } .box.law .t { color: var(--warn); }
+
+  /* figures */
+  figure { margin: 10pt 0 14pt; page-break-inside: avoid; }
+  figure img { width: 100%; border: 1px solid var(--line); border-radius: 6pt; display: block; box-shadow: 0 2pt 10pt rgba(15, 26, 38, .08); }
+  figure.crop img { max-height: 115mm; object-fit: cover; object-position: top; }
+  figure.small { width: 62%; margin-inline: auto; }
+  figure.phone { width: 34%; float: right; margin: 0 0 8pt 14pt; }
+  figcaption { font-size: 8.6pt; color: var(--ink3); margin-top: 5pt; }
+  figcaption b { color: var(--ink); }
+
+  table { width: 100%; border-collapse: collapse; margin: 6pt 0 12pt; font-size: 9.2pt; page-break-inside: avoid; }
+  th { text-align: start; font-size: 8.2pt; text-transform: uppercase; letter-spacing: .06em; color: var(--ink3); font-weight: 700; padding: 5pt 7pt; border-bottom: 1.5pt solid var(--ink); }
+  td { padding: 5pt 7pt; border-bottom: 1px solid var(--line); vertical-align: top; }
+  td.c { white-space: nowrap; font-weight: 700; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 14pt; }
+  .toc { columns: 2; column-gap: 18mm; margin-top: 14pt; }
+  .toc div { break-inside: avoid; margin-bottom: 9pt; }
+  .toc b { display: block; font-size: 8.5pt; letter-spacing: .12em; text-transform: uppercase; color: var(--vat); }
+  .toc span { display: block; font-size: 10pt; color: var(--ink2); }
+  .pill { display: inline-block; border-radius: 99pt; padding: 0 7pt; font-size: 8.4pt; font-weight: 700; }
+  .p-ready { background: #e3f4e8; color: #166534; } .p-mostly { background: #fdf3e3; color: #92400e; } .p-risk { background: #fde7d7; color: #9a3412; } .p-not { background: var(--fail-soft); color: var(--fail); }
+  .kbd { font-weight: 700; border: 1px solid var(--line); border-radius: 4pt; padding: 0 5pt; background: var(--soft); white-space: nowrap; }
+  .clear { clear: both; }
+  .end { margin-top: 30pt; padding-top: 10pt; border-top: 1px solid var(--line); font-size: 8.6pt; color: var(--ink3); }
+</style>
+</head>
+<body>
+
+<!-- ============================================================ COVER -->
+<section class="cover">
+  <div>
+    <div class="mark">✓</div>
+    <div class="kicker">Practitioner's guide · Edition October 2026</div>
+    <h1>Be ready before ZATCA asks.</h1>
+    <p class="sub">A step-by-step course in running a monthly VAT and withholding tax inspection exercise with Inspection Ready — written the way an experienced tax instructor would teach it to a new team.</p>
+    <p class="ar">دليل عملي خطوة بخطوة لإعداد تمرين الجاهزية الشهري لفحص ضريبة القيمة المضافة وضريبة الاستقطاع</p>
+    <div class="chips"><span>VAT</span><span>Withholding tax</span><span>E-invoicing</span><span>Bank</span><span>Sampling</span><span>Sign-off</span></div>
+  </div>
+  <div class="foot"><span>Inspection Ready · besgasksa.github.io/Zatca</span><span>For tax teams, finance managers and reviewers</span></div>
+</section>
+
+<!-- ============================================================ HOW TO USE -->
+<section>
+  <div class="eyebrow">Before we start</div>
+  <h2>How to use this guide</h2>
+  <p class="lead">Think of this as a workshop, not a manual. Each chapter tells you what to click, then explains why an inspector cares — because once you see the file through the inspector's eyes, the screens explain themselves.</p>
+  <p>Every step uses four kinds of note:</p>
+  <div class="two">
+    <div class="box why"><div class="t">Why the inspector cares</div><p>What ZATCA compares, and what happens when the figures disagree.</p></div>
+    <div class="box tip"><div class="t">Instructor tip</div><p>What experienced reviewers do that new preparers miss.</p></div>
+    <div class="box mistake"><div class="t">Common mistake</div><p>The errors that turn a clean month into a finding.</p></div>
+    <div class="box law"><div class="t">The rule</div><p>The legal figure the system applies, with its source.</p></div>
+  </div>
+  <p>The screenshots come from the built-in demo company, <b>Al Noor Trading Co.</b>, whose September 2026 data has deliberate problems planted in it. Load it yourself (Dashboard → <span class="kbd">Load demo company</span>) and follow along: finding the planted problems is the best practice you can get.</p>
+
+  <div class="toc">
+    <div><b>Part 1 · Foundations</b><span>1. How an inspection really works</span><span>2. The two sections and the readiness score</span></div>
+    <div><b>Part 2 · Set up once</b><span>3. Sign in, your Google Sheet, users, signing out</span><span>4. Settings that drive every check</span><span>5. Legal entities</span></div>
+    <div><b>Part 3 · The monthly VAT exercise</b><span>Steps 1–12, from data to sign-off</span></div>
+    <div><b>Part 4 · The monthly WHT exercise</b><span>Steps 1–7 for payments to non-residents</span></div>
+    <div><b>Part 5 · Beyond the month</b><span>Reports, ZATCA requests, annual reconciliation and Zakat</span></div>
+    <div><b>Part 6 · Expert practice</b><span>The monthly calendar, the ten findings inspectors raise most, the rules reference</span></div>
+  </div>
+</section>
+
+<!-- ============================================================ PART 1 -->
+<section class="part"><div class="n">Part 1</div><h2>Foundations</h2><p>Two ideas carry the whole system: the inspector compares the same numbers from different sources, and VAT and withholding tax are inspected as separate files.</p></section>
+
+<section class="chapter">
+  <div class="eyebrow">Chapter 1</div>
+  <h2>How an inspection really works</h2>
+  <p class="lead">An inspector does not start by reading your invoices. They start by asking whether your numbers agree with each other — and with numbers ZATCA already has.</p>
+  <p>For any month, ZATCA can see your filed return, every e-invoice reported through Fatoora, your customs declarations, payments you made through SADAD, and — when they ask — your bank statements. Your own file holds the ERP tax report, the Excel workings used to prepare the return, the trial balance and the general ledger. The inspection is the comparison of the first set with the second.</p>
+  <table>
+    <tr><th>Source</th><th>Who holds it</th><th>What the inspector looks for</th></tr>
+    <tr><td class="c">VAT return</td><td>ZATCA</td><td>The 16 boxes as filed — the anchor everything is compared with.</td></tr>
+    <tr><td class="c">ERP tax report</td><td>You</td><td>The invoice listing the return should have come from.</td></tr>
+    <tr><td class="c">Excel workings</td><td>You</td><td>The bridge between ERP and return; manual adjustments live here.</td></tr>
+    <tr><td class="c">Trial balance / GL</td><td>You</td><td>Revenue and VAT accounts — they must tell the same story.</td></tr>
+    <tr><td class="c">Fatoora data</td><td>ZATCA</td><td>Every invoice your e-invoicing provider reported or cleared.</td></tr>
+    <tr><td class="c">Bank statements</td><td>Your bank</td><td>Money received that is not in sales is the classic assessment.</td></tr>
+  </table>
+  <div class="box why"><div class="t">Why the inspector cares</div><p>Disagreement between sources is cheap for ZATCA to find and expensive for you to explain a year later. A difference you explained in writing in the month it happened is a note in a file; the same difference found by an inspector is an assessment plus a 50% error penalty.</p></div>
+  <p>Inspection Ready runs these comparisons for you every month, as numbered <b>checks</b>. Each check shows its two figures (A and B), the difference, and a status:</p>
+  <table>
+    <tr><th>Mark</th><th>Meaning</th><th>What you do</th></tr>
+    <tr><td class="c" style="color:#166534">✓ Passed</td><td>The sources agree within tolerance.</td><td>Nothing.</td></tr>
+    <tr><td class="c" style="color:#92400e">! Needs explanation</td><td>A difference exists but may be legitimate (timing, rounding, a known item).</td><td>Write the explanation in the box under the check.</td></tr>
+    <tr><td class="c" style="color:#b91c1c">✕ Failed</td><td>A difference that would likely become a finding.</td><td>Correct it, or raise a finding with an owner and a date.</td></tr>
+    <tr><td class="c" style="color:#6b7a8a">– No data</td><td>The source is not loaded yet.</td><td>Load it on the Data tab.</td></tr>
+  </table>
+</section>
+
+<section class="chapter">
+  <div class="eyebrow">Chapter 2</div>
+  <h2>The two sections and the readiness score</h2>
+  <p class="lead">VAT and withholding tax are different taxes, filed on different returns, often by different people. The system keeps them apart.</p>
+  <p>The switch at the top of every screen — <span class="kbd">VAT</span> | <span class="kbd">Withholding tax</span> — changes the whole application: dashboard, exercise tabs, samples, documents, findings, report pack and the reports centre. VAT screens use <b style="color:var(--vat)">teal</b>; withholding tax screens use <b style="color:var(--wht)">blue</b>, so you always know which file you are in. Switching keeps your place: if you are in an exercise, you land on the same exercise in the other section.</p>
+  <figure><img src="img/01-vat-dashboard.png"><figcaption><b>The VAT dashboard.</b> Each square is one month's exercise for one entity; the number is the VAT readiness score. Click a <b>+</b> square to start an exercise.</figcaption></figure>
+  <h3>Reading the readiness score</h3>
+  <p>Each section has its own score out of 100, weighted from everything in that section's file: reconciliation checks, bank, e-invoicing, filing, analytics, sample testing, documents on file and open findings. The grades are:</p>
+  <p><span class="pill p-ready">Ready · 85+</span> &nbsp; <span class="pill p-mostly">Mostly ready · 70–84</span> &nbsp; <span class="pill p-risk">At risk · 50–69</span> &nbsp; <span class="pill p-not">Not ready · below 50</span></p>
+  <div class="box tip"><div class="t">Instructor tip</div><p>Do not chase the score; chase the <b>exposure</b> figure next to it. A month at 82% with SAR 300,000 of quantified exposure is in worse shape than a month at 70% with none. The score tells you how complete your file is; exposure tells you how much tax is at stake if an inspector arrived today.</p></div>
+</section>
+
+<!-- ============================================================ PART 2 -->
+<section class="part"><div class="n">Part 2</div><h2>Set up once</h2><p>Half an hour of setup decides whether every later check is meaningful. Do it carefully, with your tax manager in the room.</p></section>
+
+<section class="chapter">
+  <div class="eyebrow">Chapter 3</div>
+  <h2>Sign in, your Google Sheet, users</h2>
+  <div class="step"><div class="no">1</div><h3>Create your organisation</h3></div>
+  <p>Open the site and choose <b>Create an organisation</b>. Enter your company name, your name, your work email and a password. The system creates a private Google Sheet for your organisation — one tab per table — and shares it with you. Everything you load, every sample and finding, is stored there.</p>
+  <p>The site connects to its backend automatically — there is nothing to configure. Leave <b>Keep me signed in on this device</b> ticked on your own computer and the site opens straight into your dashboard for 30 days; untick it on a shared computer. The <b>Google Sheet</b> button in the top bar opens your organisation's sheet directly.</p>
+  <div class="step"><div class="no">2</div><h3>Invite your team with the right role</h3></div>
+  <table>
+    <tr><th>Role</th><th>Can do</th></tr>
+    <tr><td class="c">Owner</td><td>Everything, including users, deleting entities and the Google Sheet.</td></tr>
+    <tr><td class="c">Manager</td><td>Settings, audit trail, entity edits and <b>sign-off</b>.</td></tr>
+    <tr><td class="c">Preparer</td><td>Start exercises, load data, test samples, raise findings.</td></tr>
+    <tr><td class="c">Viewer</td><td>Read only — useful for auditors and the CFO.</td></tr>
+  </table>
+  <p>You can also limit a user to specific entities, so a branch accountant sees only their branch.</p>
+  <div class="step"><div class="no">3</div><h3>Signing out</h3></div>
+  <p>Use the <b>Sign out</b> button at the right end of the top bar (on a phone it shows as an arrow icon). It is also at the bottom of the left sidebar, under your name. Always sign out on a shared computer: your session otherwise stays valid in that browser.</p>
+  <div class="box mistake"><div class="t">Common mistake</div><p>Sharing one login across the team. The audit trail then shows one person doing everything, and sign-off loses its meaning. Give each person their own user and role.</p></div>
+</section>
+
+<section class="chapter">
+  <div class="eyebrow">Chapter 4</div>
+  <h2>Settings that drive every check</h2>
+  <p class="lead">Settings hold the rates, tolerances and legal thresholds every check uses. The defaults are the current rules; change them only with a reason you can write down.</p>
+  <figure class="crop"><img src="img/24-settings.png"><figcaption><b>Settings.</b> Materiality, tolerance, VAT and WHT rates, penalty rates, correction threshold, objection and appeal days, readiness weights.</figcaption></figure>
+  <ul>
+    <li><b>Tolerance</b> — the difference below which two figures count as equal (rounding). Keep it small: SAR 1–10.</li>
+    <li><b>Materiality</b> — drives sample sizes and which differences are "significant". A common starting point is 1–2% of monthly output VAT.</li>
+    <li><b>Correction threshold</b> — SAR 15,000 (VAT Implementing Regulations Art. 63). Above it, an error is corrected by amending the original return within 20 days of discovery.</li>
+    <li><b>WHT rates</b> — by payment type: 20% management fees; 15% royalties and services paid to a related party; 5% technical and consulting services, rent, air tickets and freight, telecoms, insurance, dividends and loan returns.</li>
+    <li><b>Readiness weights</b> — how much each area counts in the score.</li>
+  </ul>
+  <div class="box tip"><div class="t">Instructor tip</div><p>Record why you changed any default in the audit trail note. When an external auditor asks "why was tolerance SAR 50 in March?", the answer should be in the system, not in someone's memory.</p></div>
+</section>
+
+<section class="chapter">
+  <div class="eyebrow">Chapter 5</div>
+  <h2>Legal entities</h2>
+  <p class="lead">Add every company or branch that files its own VAT return. The entity holds what the checks need to know about it.</p>
+  <figure class="crop"><img src="img/02-entity.png"><figcaption><b>An entity.</b> Choose any period since 2018 — monthly or quarterly — and start an exercise.</figcaption></figure>
+  <ul>
+    <li><b>TRN</b> — 15 digits, starting and ending with 3. QR codes and e-invoices are checked against it.</li>
+    <li><b>VAT filing frequency</b> — monthly (supplies above SAR 40 million a year) or quarterly. Exercises follow it.</li>
+    <li><b>Registered for withholding tax</b> — switch on if the entity pays non-residents. Off hides the WHT section for this entity.</li>
+    <li><b>E-invoicing wave</b> — the Phase 2 integration date ZATCA notified; check E10 tests it.</li>
+    <li><b>Account mapping</b> — which GL accounts are revenue, output VAT, input VAT, VAT payable and WHT payable.</li>
+  </ul>
+  <div class="box mistake"><div class="t">Common mistake</div><p>Mapping only the VAT payable account. Map <b>all</b> VAT accounts (output, input, reverse charge, payable). Check V7 compares box 16 with the net of all of them, which works whether or not you post a settlement journal.</p></div>
+</section>
+
+<!-- ============================================================ PART 3 -->
+<section class="part"><div class="n">Part 3</div><h2>The monthly VAT exercise</h2><p>Twelve steps, in the order an experienced reviewer works. Most months take two to four hours once the data exports are routine.</p></section>
+
+<section class="chapter">
+  <div class="eyebrow">VAT · Step 1</div>
+  <div class="step"><div class="no">1</div><h3>Start the exercise and read the overview</h3></div>
+  <p>From the dashboard, click the empty square for the entity and month, or use <b>Start inspection exercise</b> on the entity page. The overview is your cockpit: the readiness ring and its parts on the left, <b>What needs attention</b> on the right (failures first, largest differences first), and the <b>Five sources, one picture</b> table at the bottom.</p>
+  <figure><img src="img/03-vat-overview.png"><figcaption><b>VAT overview, demo September 2026.</b> 27 of 44 checks fail with SAR 324,204 of exposure — exactly what the demo plants. Every line on the right links to its check.</figcaption></figure>
+  <div class="box tip"><div class="t">Instructor tip</div><p>Read the five-sources table before anything else. If total sales differ between return, system report, Excel and ledger, the box-level checks will all inherit that difference; find its cause once, at the top.</p></div>
+</section>
+
+<section class="chapter">
+  <div class="eyebrow">VAT · Step 2</div>
+  <div class="step"><div class="no">2</div><h3>Load the data</h3></div>
+  <p>On the <b>Data</b> tab, first copy the 16 boxes of the return exactly as filed on the ZATCA portal (or import them from Excel, or prefill from the system report if the return was filed from it). Then upload each source. Columns are matched automatically from English or Arabic headers; check the mapping preview before saving. Several files of the same kind add up — load one statement per bank account.</p>
+  <figure class="crop"><img src="img/04-data.png"><figcaption><b>Data tab.</b> Required sources show a red tag until loaded. Every card has a template you can download.</figcaption></figure>
+  <table>
+    <tr><th>Source</th><th>Export from</th><th>Feeds</th></tr>
+    <tr><td class="c">Trial balance, GL</td><td>ERP, period close</td><td>V4–V7, revenue tie-out</td></tr>
+    <tr><td class="c">System VAT report</td><td>ERP tax report, invoice level</td><td>Box-by-box, analytics, sampling</td></tr>
+    <tr><td class="c">Excel workings</td><td>Your return file</td><td>Box-by-box three-way</td></tr>
+    <tr><td class="c">Provider log, Fatoora export</td><td>E-invoicing provider; Fatoora portal</td><td>E1–E11</td></tr>
+    <tr><td class="c">Bank statements</td><td>Every account, full month</td><td>B1–B7, POS / mada</td></tr>
+    <tr><td class="c">Customs (Bayan)</td><td>Customs broker / FASAH</td><td>Import VAT, box 8</td></tr>
+  </table>
+  <div class="box mistake"><div class="t">Common mistake</div><p>Loading a summary instead of the invoice-level report. Analytics, duplicate detection and sampling all need one row per invoice.</p></div>
+</section>
+
+<section class="chapter">
+  <div class="eyebrow">VAT · Step 3</div>
+  <div class="step"><div class="no">3</div><h3>Filing and payment</h3></div>
+  <p>Record when the return was filed and paid, the amount and the SADAD reference. Check C1 tests filing on time, C2 payment on time and in full.</p>
+  <figure class="crop"><img src="img/05-filing.png"><figcaption><b>Filing &amp; payment, VAT section.</b> The WHT return has its own tab in the WHT section.</figcaption></figure>
+  <div class="box law"><div class="t">The rule</div><p>A VAT return is due by the last day of the month after the period. Late filing: 5% to 25% of the tax due. Late payment: 5% of the unpaid tax for each month or part of a month. The fine-cancellation initiative covered returns due before 1 January 2026 and closed on 30 June 2026 — it no longer protects new delays.</p></div>
+</section>
+
+<section class="chapter">
+  <div class="eyebrow">VAT · Step 4</div>
+  <div class="step"><div class="no">4</div><h3>VAT reconciliation, box by box</h3></div>
+  <p>This tab compares return, system report and Excel workings for every box, then runs the ledger checks. Red cells are differences beyond tolerance. Under each failing or warning check there is a box for your explanation — write it as if the inspector will read it, because they will: it prints in the report pack.</p>
+  <figure class="crop"><img src="img/06-vat-recon.png"><figcaption><b>VAT reconciliation.</b> Box-level matrix, then the V-checks with their A and B figures.</figcaption></figure>
+  <ul>
+    <li><b>V1–V3</b> — return vs system report vs Excel workings. <b>V4–V5</b> — output and input VAT vs the general ledger.</li>
+    <li><b>V6 — revenue per TB vs box 6.</b> Differences are normal (non-taxable income, deferred revenue) but must be listed. Use <b>reconciling items</b> to bridge them; the check passes when the bridge closes.</li>
+    <li><b>V7 — box 16 vs the VAT accounts.</b> The tax you declared must equal the net movement on your VAT accounts. <b>V8</b> ties import VAT to customs; <b>V9</b> ties Fatoora to system sales.</li>
+    <li><b>V10–V12</b> — blocked input VAT (entertainment, cars, personal use), apportionment when you make exempt supplies, deemed supplies (gifts and samples above SAR 200 per recipient per year).</li>
+    <li><b>V13–V14</b> — box 14 used only for corrections below SAR 15,000; box 15 carries forward the previous refund position.</li>
+  </ul>
+  <div class="box law"><div class="t">The rule</div><p>Reverse-charge VAT (box 9) is declared as output tax <b>and</b> recovered as input tax: box 13 = box 6 VAT + box 9 VAT − box 12 VAT. A missing box 9 is a finding even though the net effect is nil.</p></div>
+</section>
+
+<section class="chapter">
+  <div class="eyebrow">VAT · Step 5</div>
+  <div class="step"><div class="no">5</div><h3>E-invoicing: ERP, provider, ZATCA</h3></div>
+  <p>Your ERP issues the invoice, your e-invoicing provider signs it and sends it to Fatoora, ZATCA clears it (standard B2B) or records it (simplified B2C). An invoice missing anywhere along this chain is a finding. The tab counts each link and lists the breaks.</p>
+  <figure class="crop"><img src="img/07-einv.png"><figcaption><b>Three-way e-invoicing reconciliation.</b> Rejected, pending and not-sent invoices are red.</figcaption></figure>
+  <ul>
+    <li><b>E1–E4</b> — in the ERP but not at the provider; at the provider but not in the books; not cleared or reported by ZATCA; amounts that changed along the chain.</li>
+    <li><b>E5–E9</b> — clearance and reporting time limits (simplified invoices within 24 hours), invoice counter continuity, credit notes without a reference to the original, standard invoices for B2B customers, invoices accepted with warnings.</li>
+    <li><b>E10</b> — integrated by your notified wave date. <b>E11</b> — the QR code decodes to the right seller TRN, total, VAT and date.</li>
+  </ul>
+  <div class="box tip"><div class="t">Instructor tip</div><p>The provider is the hub. If you have a provider log, the checks use it; if not, they fall back to the Fatoora export. Ask your provider for a monthly status export — it is the single most useful file in this tab.</p></div>
+</section>
+
+<section class="chapter">
+  <div class="eyebrow">VAT · Step 6</div>
+  <div class="step"><div class="no">6</div><h3>Bank: where the money went</h3></div>
+  <p>Each bank line is classified automatically — customer receipt, supplier payment, ZATCA VAT, ZATCA WHT, Zakat, foreign transfer, payroll, internal transfer, financing. Reclassify any line with the drop-down; checks update immediately.</p>
+  <figure class="crop"><img src="img/08-bank.png"><figcaption><b>Bank.</b> Totals by class, then the B-checks, then every line.</figcaption></figure>
+  <ul>
+    <li><b>B1–B2</b> — customer receipts vs sales and supplier payments vs purchases, including VAT, adjusted for receivables and payables.</li>
+    <li><b>B3–B4</b> — the VAT and WHT you paid trace to the previous returns.</li>
+    <li><b>B5</b> — every foreign transfer appears in the WHT register (also shown in the WHT section).</li>
+    <li><b>B6–B7</b> — significant receipts trace to sales invoices; closing balances agree with the trial balance.</li>
+    <li><b>P1–P2</b> — card takings (POS, mada) against simplified sales declared.</li>
+  </ul>
+  <div class="box why"><div class="t">Why the inspector cares</div><p>Unexplained receipts are the most common basis for a VAT assessment. A finding raised from a bank check takes the VAT fraction of the difference — r ÷ (1 + r), 15/115 — because bank amounts include VAT.</p></div>
+</section>
+
+<section class="chapter">
+  <div class="eyebrow">VAT · Steps 7 and 8</div>
+  <div class="step"><div class="no">7</div><h3>Other taxes: marketplaces, real estate, excise</h3></div>
+  <p>Load only what applies. Marketplace payouts are detected in the bank automatically; if you operate a platform, answer the six deemed-supplier questions. Real estate disposals are tested for the 5% RETT, excise goods for the declared excise.</p>
+  <figure class="crop"><img src="img/09-other.png"><figcaption><b>Other taxes.</b> The Zakat worksheet opens from here.</figcaption></figure>
+  <div class="box law"><div class="t">The rule</div><p>From 1 January 2026 a platform is the deemed supplier for sales by unregistered residents (non-resident e-services since 18 April 2025), unless all six exception conditions hold. RETT is 5% of the value, due within 30 days. Sweetened drinks are taxed per litre from 1 January 2026 by sugar content.</p></div>
+  <div class="step"><div class="no">8</div><h3>Analytics</h3></div>
+  <p>The analytics tab runs eighteen tests over every invoice: duplicates (including against prior months), round amounts, weekend and holiday invoices, invalid VAT numbers, zero-rating without evidence, Benford's law on first digits, VAT rate errors and more. A test that finds items gives you <b>Raise finding</b> and feeds the risk-based sample.</p>
+  <figure class="crop"><img src="img/10-analytics.png"><figcaption><b>Analytics.</b> Effective rate, input-to-output ratio and zero/exempt share sit at the top.</figcaption></figure>
+</section>
+
+<section class="chapter">
+  <div class="eyebrow">VAT · Step 9</div>
+  <div class="step"><div class="no">9</div><h3>Sample testing</h3></div>
+  <p>Reconciliation proves totals; samples prove the invoices behind them. Select one sample of sales and one of purchases each month.</p>
+  <figure class="crop"><img src="img/11-sampling.png"><figcaption><b>Sampling.</b> The VAT section offers sales and purchases; WHT payments are sampled in the WHT section.</figcaption></figure>
+  <ol>
+    <li>Choose the method. <b>Monetary unit sampling</b> favours large invoices and is the default; use <b>risk-based</b> to test what analytics flagged.</li>
+    <li>Keep the default tolerable misstatement — the larger of materiality or 3% of the population value — unless your manager sets another.</li>
+    <li>Note the <b>seed</b>. Anyone re-running the selection with it gets the same items: that is your evidence the sample was not hand-picked.</li>
+    <li>Test each attribute (tax invoice content, VAT number valid, rate correct, period correct, recorded once, evidence on file) by clicking the cells: blank → ✓ → ✕ → –.</li>
+    <li>Conclude: accept the population, or extend testing and correct.</li>
+  </ol>
+  <div class="box tip"><div class="t">Instructor tip</div><p>Paste the Drive link to each invoice into the evidence column. On inspection day you open the sample and show the documents in seconds — that alone changes the tone of the meeting.</p></div>
+</section>
+
+<section class="chapter">
+  <div class="eyebrow">VAT · Steps 10 and 11</div>
+  <div class="step"><div class="no">10</div><h3>Documents: the inspection file</h3></div>
+  <p>The checklist lists what inspectors typically request — registration certificate, returns and payment receipts, the tax report, contracts for zero-rated supplies, export evidence, customs declarations, e-invoicing integration evidence. Mark each on file, requested or missing, name an owner and link it.</p>
+  <figure class="crop"><img src="img/12-checklist.png"><figcaption><b>Documents.</b> The WHT documents are in the WHT section.</figcaption></figure>
+  <div class="step"><div class="no">11</div><h3>Findings and corrections</h3></div>
+  <p>Raise a finding from any failed check: the title, the check and the tax at stake are filled in for you. Add the root cause, corrective action, owner and due date. The penalty estimate and the correction route are suggested from the settings.</p>
+  <figure class="crop"><img src="img/13-findings.png"><figcaption><b>Findings.</b> Open findings, tax at stake and estimated penalties.</figcaption></figure>
+  <div class="box law"><div class="t">The rule — VAT IR Art. 63</div><p>If the error changes the tax by <b>SAR 15,000 or more</b>, notify ZATCA and amend the original return within <b>20 days</b> of discovering it. Below SAR 15,000, correct it in the return for the period of discovery. Over-declarations can be corrected for 5 years. Record the discovery date on the finding: the corrections register counts the 20 days from it.</p></div>
+</section>
+
+<section class="chapter">
+  <div class="eyebrow">VAT · Step 12</div>
+  <div class="step"><div class="no">12</div><h3>Report and sign-off</h3></div>
+  <p>The report tab assembles the <b>VAT inspection readiness pack</b>: cover with the score, the return as filed, every check with its explanation, analytics exceptions, samples, findings and the document list, with signature blocks. Print it to PDF or export the VAT workbook to Excel.</p>
+  <figure class="crop"><img src="img/14-report.png"><figcaption><b>The VAT report pack.</b> The WHT pack is produced the same way from the WHT section.</figcaption></figure>
+  <p>When the preparer is done, <b>Send for review</b>. A manager reviews and clicks <b>Sign off exercise</b>; the exercise becomes read-only until a manager reopens it. Sign-off covers the whole exercise — VAT and withholding tax together — so sign off once both sections are complete.</p>
+  <div class="box mistake"><div class="t">Common mistake</div><p>Signing off with failed checks that have no explanation and no finding. Every red mark must end the month either explained or owned.</p></div>
+</section>
+
+<!-- ============================================================ PART 4 -->
+<section class="part wht"><div class="n">Part 4</div><h2>The monthly withholding tax exercise</h2><p>Switch to <b>Withholding tax</b> in the top bar. The same exercise, seen only through WHT: payments to non-residents, the WHT return, certificates and the bank trace.</p></section>
+
+<section class="chapter wht-ch">
+  <div class="eyebrow">WHT · Steps 1 and 2</div>
+  <div class="step"><div class="no">1</div><h3>The WHT dashboard and overview</h3></div>
+  <p>The WHT dashboard shows only entities registered for withholding tax, with their WHT score per month and the WHT return deadline — the 10th of the following month.</p>
+  <figure><img src="img/15-wht-dashboard.png"><figcaption><b>WHT dashboard.</b> Same layout, blue accent, WHT figures only.</figcaption></figure>
+  <figure class="crop"><img src="img/16-wht-overview.png"><figcaption><b>WHT overview.</b> Four sources: WHT return, payments register, Excel workings and the bank.</figcaption></figure>
+  <div class="step"><div class="no">2</div><h3>Load the WHT data</h3></div>
+  <p>On the WHT Data tab load the <b>payments register</b> (one line per payment: date, beneficiary, country, payment type, gross, rate, WHT, treaty, certificate number, date paid to ZATCA), the <b>WHT return as filed</b> and your <b>WHT workings</b>. The trial balance, GL and bank loaded in the VAT section are shared.</p>
+</section>
+
+<section class="chapter wht-ch">
+  <div class="eyebrow">WHT · Steps 3 and 4</div>
+  <div class="step"><div class="no">3</div><h3>WHT reconciliation</h3></div>
+  <figure class="crop"><img src="img/17-wht-recon.png"><figcaption><b>WHT by payment type.</b> Return vs register vs workings, then the W- and X-checks and the bank trace.</figcaption></figure>
+  <ul>
+    <li><b>W1–W4</b> — the return against the register by payment type, against your workings, against gross amounts paid, and against the WHT payable account.</li>
+    <li><b>W5</b> — the statutory rate applied, or treaty relief documented (residency certificate on file).</li>
+    <li><b>W6</b> — tax remitted by the 10th. <b>W7</b> — certificates issued. <b>W8</b> — non-resident expenses in the GL captured in the register.</li>
+    <li><b>X1–X2</b> — the cross-tax link: an imported service usually carries both reverse-charge VAT and WHT. One without the other is a finding in one of the two taxes.</li>
+    <li><b>Bank trace (B5)</b> — every foreign transfer is in the register, or has a reason it is not subject to WHT.</li>
+  </ul>
+  <div class="box why"><div class="t">Why the inspector cares</div><p>The payer is liable for WHT not withheld. Inspectors start from foreign transfers in the bank and from GL accounts like consultancy, royalties and management fees, and ask for the register line behind each one.</p></div>
+  <div class="step"><div class="no">4</div><h3>WHT filing and payment</h3></div>
+  <figure class="crop"><img src="img/18-wht-filing.png"><figcaption><b>WHT filing &amp; payment.</b> Check C3 measures the delay in full 30-day steps.</figcaption></figure>
+  <div class="box law"><div class="t">The rule — Income Tax IR Art. 68(2)</div><p>WHT is due by the 10th day of the month following payment. The delay fine is 1% of the unpaid tax for each 30 days of delay; a delay under 30 days carries no fine.</p></div>
+</section>
+
+<section class="chapter wht-ch">
+  <div class="eyebrow">WHT · Steps 5 to 7</div>
+  <div class="step"><div class="no">5</div><h3>Sample WHT payments</h3></div>
+  <p>In the WHT section the sampling tab offers WHT payments only. Test: beneficiary is a non-resident without a permanent establishment, payment type and rate correct, treaty relief supported, WHT paid on time, certificate issued.</p>
+  <div class="step"><div class="no">6</div><h3>WHT documents and findings</h3></div>
+  <p>The WHT documents list holds contracts with non-residents, residency certificates for treaty relief, WHT certificates issued and payment receipts. Findings raised in this section are tagged WHT and appear only in WHT reports.</p>
+  <div class="step"><div class="no">7</div><h3>The WHT report pack</h3></div>
+  <p>The report tab produces the <b>Withholding tax inspection readiness pack</b> — WHT return by payment type, WHT checks, filing, bank trace, WHT samples, WHT findings and documents — and a WHT-only Excel workbook.</p>
+  <div class="box tip"><div class="t">Instructor tip</div><p>Give the WHT pack to whoever handles treasury payments abroad. They see in one page which transfers lacked a register line or a certificate, and they fix the process, not just the month.</p></div>
+</section>
+
+<!-- ============================================================ PART 5 -->
+<section class="part"><div class="n">Part 5</div><h2>Beyond the month</h2><p>Reports across entities and dates, ZATCA's letters and their deadlines, and the annual cross-checks against the financial statements and Zakat.</p></section>
+
+<section class="chapter">
+  <div class="eyebrow">Chapter 5.1</div>
+  <h2>The reports centre</h2>
+  <p class="lead">Each section has its own reports. Pick any range of months since 2018 — or a quick range — and every report follows it. Each exports to Excel.</p>
+  <figure class="crop"><img src="img/19-vat-reports.png"><figcaption><b>VAT reports.</b> VAT summary, portfolio readiness, findings aging, exposure by entity, corrections register, filing compliance.</figcaption></figure>
+  <figure class="crop"><img src="img/21-wht-beneficiaries.png"><figcaption><b>WHT by beneficiary.</b> Every non-resident paid in the range, once — with country, payment types, gross, WHT, effective rate, treaty relief and payments without a certificate.</figcaption></figure>
+  <div class="box tip"><div class="t">Instructor tip</div><p>Run the <b>corrections register</b> every week. It lists every VAT finding with a tax impact, whether it needs an amended return or the next return, and the days left before the 20-day limit.</p></div>
+</section>
+
+<section class="chapter">
+  <div class="eyebrow">Chapter 5.2 and 5.3</div>
+  <h2>ZATCA requests, annual reconciliation and Zakat</h2>
+  <p>Record every letter from ZATCA on <b>ZATCA requests</b>: information requests and field visits with the deadline ZATCA gave, assessments (60 days to object) and committee decisions (30 days to appeal) with the deadline computed for you. Deadlines within 7 days appear as an alert on the dashboard.</p>
+  <figure class="crop"><img src="img/22-requests.png"><figcaption><b>ZATCA requests.</b> Overdue and urgent items sort to the top.</figcaption></figure>
+  <p>The <b>annual reconciliation</b> (from the entity page) puts a year of VAT returns against the audited financial statements and the Zakat or income tax return, with a Zakat worksheet prefilled from the trial balance.</p>
+  <figure class="crop"><img src="img/23-annual.png"><figcaption><b>Annual reconciliation.</b> Missing months, revenue per FS vs returns, and the Zakat base.</figcaption></figure>
+</section>
+
+<!-- ============================================================ PART 6 -->
+<section class="part"><div class="n">Part 6</div><h2>Expert practice</h2><p>The habits that make a team permanently inspection-ready, and the rules in one place.</p></section>
+
+<section class="chapter">
+  <div class="eyebrow">Chapter 6.1</div>
+  <h2>The monthly calendar</h2>
+  <table>
+    <tr><th>When</th><th>VAT</th><th>Withholding tax</th></tr>
+    <tr><td class="c">Days 1–5</td><td>Close the month; export TB, GL, tax report, provider log, bank.</td><td>Complete the payments register for last month's foreign payments.</td></tr>
+    <tr><td class="c">Days 5–9</td><td>—</td><td>Run the WHT exercise; file and pay by the <b>10th</b>; issue certificates.</td></tr>
+    <tr><td class="c">Days 10–20</td><td>Run the VAT exercise: steps 1–8 before filing.</td><td>Sign off the WHT section.</td></tr>
+    <tr><td class="c">Before month end</td><td>File and pay by the <b>last day</b>; finish samples and documents; sign off.</td><td>—</td></tr>
+    <tr><td class="c">Every week</td><td colspan="2">Corrections register and ZATCA requests.</td></tr>
+  </table>
+  <h3>The ten findings inspectors raise most</h3>
+  <ol>
+    <li>Bank receipts above declared sales with no reconciliation.</li>
+    <li>Revenue per financial statements above sales declared for the year.</li>
+    <li>Input VAT claimed without a valid tax invoice, or on blocked items.</li>
+    <li>Reverse-charge VAT not declared on imported services.</li>
+    <li>WHT not withheld on payments to non-residents, or at the wrong rate.</li>
+    <li>Zero-rated exports without customs or shipping evidence.</li>
+    <li>E-invoices issued in the ERP but never cleared or reported on Fatoora.</li>
+    <li>Credit notes without reference to the original invoice.</li>
+    <li>Import VAT claimed that does not match customs declarations.</li>
+    <li>Errors corrected in a later return when the amount required an amended return.</li>
+  </ol>
+  <p>Every one of these is a check in the system. A month in which none of them is red is a month you can defend.</p>
+</section>
+
+<section class="chapter">
+  <div class="eyebrow">Chapter 6.2</div>
+  <h2>Rules reference</h2>
+  <table>
+    <tr><th>Rule</th><th>Figure the system applies</th></tr>
+    <tr><td class="c">VAT rate</td><td>15%</td></tr>
+    <tr><td class="c">VAT return due</td><td>Last day of the month after the period</td></tr>
+    <tr><td class="c">Late filing / late payment</td><td>5–25% of tax due / 5% per month or part</td></tr>
+    <tr><td class="c">Error penalty</td><td>50% of the difference (settings)</td></tr>
+    <tr><td class="c">Correction threshold</td><td>SAR 15,000 — amend within 20 days (VAT IR Art. 63, since 23 June 2023)</td></tr>
+    <tr><td class="c">Over-declaration correction</td><td>Within 5 years</td></tr>
+    <tr><td class="c">Refund minimum</td><td>SAR 5,000</td></tr>
+    <tr><td class="c">WHT due</td><td>10th of the following month</td></tr>
+    <tr><td class="c">WHT delay fine</td><td>1% per 30 days; none under 30 days (Income Tax IR Art. 68(2))</td></tr>
+    <tr><td class="c">Fine-cancellation initiative</td><td>Returns due before 1 Jan 2026; closed 30 June 2026</td></tr>
+    <tr><td class="c">Marketplace deemed supplier</td><td>Non-resident e-services from 18 Apr 2025; unregistered residents from 1 Jan 2026</td></tr>
+    <tr><td class="c">RETT</td><td>5%, due within 30 days</td></tr>
+    <tr><td class="c">Excise</td><td>100% tobacco, energy drinks, e-cigarettes; sweetened drinks per litre from 1 Jan 2026</td></tr>
+    <tr><td class="c">Zakat</td><td>2.5% (Hijri year), base not below adjusted net profit; due 120 days after year end</td></tr>
+    <tr><td class="c">Objection / appeal</td><td>60 days from assessment / 30 days from committee decision</td></tr>
+  </table>
+  <div class="box law"><div class="t">Please note</div><p>The figures above were checked against published sources on 19 October 2026. A few rely on a single source (the RETT late rate, the Zakat late fine, the marketplace payment-collection condition) — confirm them with your tax adviser. Every rate and threshold can be changed in Settings if the rules change.</p></div>
+  <h3>The system in Arabic, in dark mode and on a phone</h3>
+  <p>Switch language from the top bar or the sidebar footer; layout, numbers and dates follow. Amounts stay in Latin digits with parentheses for negatives, as Saudi financial statements print them.</p>
+  <figure class="phone"><img src="img/27-phone.png"><figcaption><b>On a phone.</b> The menu button opens the sidebar.</figcaption></figure>
+  <figure style="width:62%"><img src="img/25-ar-overview.png"><figcaption><b>Arabic interface.</b></figcaption></figure>
+  <figure style="width:62%"><img src="img/26-dark-wht.png"><figcaption><b>Dark mode</b> follows your device setting.</figcaption></figure>
+  <div class="clear"></div>
+  <div class="end">Inspection Ready — Practitioner's Guide, October 2026. This guide explains how the software applies the rules; it is not legal advice. For decisions on a specific case, consult a licensed tax adviser.</div>
+</section>
+
+</body>
+</html>

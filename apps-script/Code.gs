@@ -23,6 +23,8 @@ var COLS = ['id', 'parentId', 'entityId', 'label', 'updatedAt', 'updatedBy', 'da
 var CELL_MAX = 45000;
 var ROLES = { owner: 4, manager: 3, preparer: 2, viewer: 1 };
 var TOKEN_TTL_MS = 12 * 3600 * 1000;
+// 'Keep me signed in': 30 days, renewed on use; a password change ends it everywhere
+var REMEMBER_TTL_MS = 30 * 24 * 3600 * 1000;
 
 // ---------------------------------------------------------------- entry points
 
@@ -90,7 +92,7 @@ function route_(req) {
     default: throw new Error('unknown_action');
   }
   out.ok = true;
-  out.token = issueToken_(s.user, s.tenant);
+  out.token = issueToken_(s.user, s.tenant, s.rm);
   return out;
 }
 
@@ -116,7 +118,7 @@ function signup_(req) {
     // through this script's checks). On by default; SHARE_SHEET_WITH_OWNER=false turns it off.
     if (prop_('SHARE_SHEET_WITH_OWNER') !== 'false') shareWith_(ss, email, tenant.id, user.id);
     regAudit_('signup', tenant.id, user.id, org);
-    return { ok: true, token: issueToken_(user, tenant), user: publicUser_(user), tenant: publicTenant_(tenant) };
+    return { ok: true, token: issueToken_(user, tenant, !!req.remember), user: publicUser_(user), tenant: publicTenant_(tenant) };
   });
 }
 
@@ -140,7 +142,7 @@ function login_(req) {
   cache.remove(key);
   u.lastLoginAt = now_(); regUpsert_(REGISTRY_SHEETS.USERS, u);
   regAudit_('login', t.id, u.id, '');
-  return { ok: true, token: issueToken_(u, t), user: publicUser_(u), tenant: publicTenant_(t) };
+  return { ok: true, token: issueToken_(u, t, !!req.remember), user: publicUser_(u), tenant: publicTenant_(t) };
 }
 
 function session_(token) {
@@ -150,11 +152,13 @@ function session_(token) {
   if (!u || u.active === false || u.tenantId !== c.tid || (u.epoch || 0) !== c.ep) throw new Error('auth_required');
   var t = regFind_(REGISTRY_SHEETS.TENANTS, u.tenantId);
   if (!t || t.status === 'suspended') throw new Error('tenant_suspended');
-  return { user: u, tenant: t, book: null };
+  return { user: u, tenant: t, book: null, rm: !!c.rm };
 }
 
-function issueToken_(u, t) {
-  var p = Utilities.base64EncodeWebSafe(JSON.stringify({ uid: u.id, tid: t.id, ep: u.epoch || 0, exp: Date.now() + TOKEN_TTL_MS }));
+function issueToken_(u, t, rm) {
+  var c = { uid: u.id, tid: t.id, ep: u.epoch || 0, exp: Date.now() + (rm ? REMEMBER_TTL_MS : TOKEN_TTL_MS) };
+  if (rm) c.rm = 1;
+  var p = Utilities.base64EncodeWebSafe(JSON.stringify(c));
   return p + '.' + hmac_(p);
 }
 function readToken_(tok) {

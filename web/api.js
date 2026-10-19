@@ -14,7 +14,8 @@
     this.mode = 'cloud';
     this.url = url;
     this.token = null;
-    try { this.token = sessionStorage.getItem('zr_token'); } catch (e) {}
+    // a remembered session lives in localStorage, a normal one only in this tab
+    try { this.token = sessionStorage.getItem('zr_token') || localStorage.getItem('zr_token'); } catch (e) {}
   }
   CloudBackend.prototype.call = function (action, payload) {
     var self = this, req = Object.assign({ action: action, token: this.token }, payload || {});
@@ -28,12 +29,12 @@
         .then(function (r) { return r.json(); });
     }
     return p.then(function (r) {
-      if (r.token) { self.token = r.token; try { sessionStorage.setItem('zr_token', r.token); } catch (e) {} }
+      if (r.token) { self.token = r.token; try { if (payload && payload.remember !== undefined) self.remember = !!payload.remember; else if (self.remember === undefined) self.remember = !!localStorage.getItem('zr_token'); (self.remember ? localStorage : sessionStorage).setItem('zr_token', r.token); } catch (e) {} }
       if (!r.ok) { var err = new Error(r.error || 'server_error'); err.code = r.error; throw err; }
       return r;
     });
   };
-  CloudBackend.prototype.logout = function () { this.token = null; try { sessionStorage.removeItem('zr_token'); } catch (e) {} };
+  CloudBackend.prototype.logout = function () { this.token = null; this.remember = undefined; try { sessionStorage.removeItem('zr_token'); localStorage.removeItem('zr_token'); } catch (e) {} };
 
   // ---------------------------------------------------------------- local
   var DB = 'zatca-readiness', STORE = 'docs';

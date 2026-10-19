@@ -153,7 +153,7 @@ p { margin: 0 0 .6em; max-width: 75ch; }
 }
 @media (max-width: 640px) {
   .top { gap: 6px; padding: 0 8px; }
-  .top select, .top .lang-btn { display: none; }
+  .top select, .top .lang-btn, .top .so-lbl { display: none; }
   .switch a { padding: 6px 10px; font-size: 13px; }
   .switch .lg { display: none; }
   .switch .sh { display: inline; }
@@ -375,6 +375,9 @@ table.matrix td.bl { border-inline-start: 1px solid var(--line); }
   .report h2 { break-after: avoid; }
   .report tr { break-inside: avoid; }
 }
+
+.top .so-lbl { margin-inline-start: 6px; }
+.top .sheet-btn { color: var(--accent); border-color: var(--accent); }
 
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -743,6 +746,10 @@ Object.assign(window.ZI18N, {
 ,
   'Last 12 months': 'آخر 12 شهراً'
 });
+
+Object.assign(window.ZI18N, { 'Google Sheet': 'Google Sheet' });
+Object.assign(window.ZI18N, { 'Keep me signed in on this device': 'تذكرني على هذا الجهاز' });
+Object.assign(window.ZI18N, { 'User guide (PDF)': 'دليل المستخدم (PDF)' });
 
 </script>
 <script>
@@ -2854,7 +2861,8 @@ Object.assign(window.ZI18N, {
     this.mode = 'cloud';
     this.url = url;
     this.token = null;
-    try { this.token = sessionStorage.getItem('zr_token'); } catch (e) {}
+    // a remembered session lives in localStorage, a normal one only in this tab
+    try { this.token = sessionStorage.getItem('zr_token') || localStorage.getItem('zr_token'); } catch (e) {}
   }
   CloudBackend.prototype.call = function (action, payload) {
     var self = this, req = Object.assign({ action: action, token: this.token }, payload || {});
@@ -2868,12 +2876,12 @@ Object.assign(window.ZI18N, {
         .then(function (r) { return r.json(); });
     }
     return p.then(function (r) {
-      if (r.token) { self.token = r.token; try { sessionStorage.setItem('zr_token', r.token); } catch (e) {} }
+      if (r.token) { self.token = r.token; try { if (payload && payload.remember !== undefined) self.remember = !!payload.remember; else if (self.remember === undefined) self.remember = !!localStorage.getItem('zr_token'); (self.remember ? localStorage : sessionStorage).setItem('zr_token', r.token); } catch (e) {} }
       if (!r.ok) { var err = new Error(r.error || 'server_error'); err.code = r.error; throw err; }
       return r;
     });
   };
-  CloudBackend.prototype.logout = function () { this.token = null; try { sessionStorage.removeItem('zr_token'); } catch (e) {} };
+  CloudBackend.prototype.logout = function () { this.token = null; this.remember = undefined; try { sessionStorage.removeItem('zr_token'); localStorage.removeItem('zr_token'); } catch (e) {} };
 
   // ---------------------------------------------------------------- local
   var DB = 'zatca-readiness', STORE = 'docs';
@@ -3424,12 +3432,13 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       (mode === 'signup' ? '<label class="f"><span>' + t('Organisation name') + '</span><input type="text" name="orgName" required autocomplete="organization"></label><label class="f"><span>' + t('Your name') + '</span><input type="text" name="name" required autocomplete="name"></label>' : '') +
       '<label class="f"><span>' + t('Email') + '</span><input type="email" name="email" required autocomplete="email"></label>' +
       '<label class="f"><span>' + t('Password') + '</span><input type="password" name="password" required minlength="' + (mode === 'signup' ? 10 : 1) + '" autocomplete="' + (mode === 'signup' ? 'new-password' : 'current-password') + '">' + (mode === 'signup' ? '<small>' + t('At least 10 characters.') + '</small>' : '') + '</label>' +
+      '<label class="row" style="gap:8px;margin:2px 0 4px;font-size:14px"><input type="checkbox" name="remember" value="1" checked style="width:auto"> ' + t('Keep me signed in on this device') + '</label>' +
       '<button class="btn primary" type="submit">' + (mode === 'login' ? t('Sign in') : t('Create organisation')) + '</button></form>' +
       '<p class="muted" style="margin-top:18px">' + (mode === 'login' ? t('New here?') + ' <a href="#" data-act="authmode" data-m="signup">' + t('Create an organisation') + '</a>' : '<a href="#" data-act="authmode" data-m="login">' + t('I already have an account') + '</a>') + '</p>' +
       '<p class="faint" style="font-size:13px">' + t('Want to look around first?') + ' <a href="#" data-act="localmode">' + t('Try it on this device with demo data') + '</a></p></div></section></div>';
     document.getElementById('authf').addEventListener('submit', function (e) {
       e.preventDefault();
-      var f = Object.fromEntries(new FormData(e.target));
+      var f = Object.fromEntries(new FormData(e.target)); f.remember = !!f.remember;
       Z.call(mode, f).then(function (r) { start(r); });
     });
   };
@@ -3485,6 +3494,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     });
     if (S.api.mode === 'cloud') h += nav('#/' + tx + '/platform', t('Platform'), 'globe-hemisphere-east', view === 'platform');
     if (S.api.mode === 'cloud' && S.tenant && S.tenant.spreadsheetUrl) h += '<a class="nav" href="' + esc(S.tenant.spreadsheetUrl) + '" target="_blank" rel="noopener noreferrer">' + Z.icon('table') + '<span>' + t('Google Sheet (your data)') + '</span></a>';
+    h += '<a class="nav" href="https://besgasksa.github.io/Zatca/Inspection-Ready-Guide.pdf" target="_blank" rel="noopener noreferrer">' + Z.icon('book-open-text') + '<span>' + t('User guide (PDF)') + '</span></a>';
     h += '<div class="foot"><b>' + esc(S.user.name) + '</b>' + esc(t(cap(S.user.role))) + (S.tenant ? ', ' + esc(S.tenant.name) : '') + '<br>' + (S.api.mode === 'cloud' ? '<button data-act="logout">' + t('Sign out') + '</button> ' : t('Stored on this device') + '<br>') + '<button data-act="lang">' + (S.lang === 'ar' ? 'English' : 'العربية') + '</button></div>';
     document.querySelector('.rail').innerHTML = h;
   }
@@ -3500,7 +3510,9 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       '<nav class="switch" aria-label="' + t('Tax') + '">' + sw('vat', '<span class="lg">' + t('VAT') + '</span><span class="sh">' + (S.lang === 'ar' ? 'القيمة المضافة' : 'VAT') + '</span>') + sw('wht', '<span class="lg">' + t('Withholding tax') + '</span><span class="sh">' + (S.lang === 'ar' ? 'الاستقطاع' : 'WHT') + '</span>') + '</nav>' +
       '<span class="grow"></span>' +
       (S.entities.length ? '<select data-chg="entity" aria-label="' + t('Entity') + '">' + opts + '</select>' : '') +
-      '<button class="btn ghost small" data-act="theme" aria-label="' + t('Switch light/dark') + '">' + Z.icon('circle-half') + '</button><button class="btn ghost small lang-btn" data-act="lang">' + (S.lang === 'ar' ? 'English' : 'العربية') + '</button>';
+      (S.api.mode === 'cloud' && S.tenant && S.tenant.spreadsheetUrl ? '<a class="btn small sheet-btn" href="' + esc(S.tenant.spreadsheetUrl) + '" target="_blank" rel="noopener noreferrer" title="' + esc(t('Open Google Sheet')) + '">' + Z.icon('microsoft-excel-logo') + '<span class="so-lbl">' + t('Google Sheet') + '</span></a>' : '') +
+      '<button class="btn ghost small" data-act="theme" aria-label="' + t('Switch light/dark') + '">' + Z.icon('circle-half') + '</button><button class="btn ghost small lang-btn" data-act="lang">' + (S.lang === 'ar' ? 'English' : 'العربية') + '</button>' +
+      (S.api.mode === 'cloud' ? '<button class="btn ghost small" data-act="logout" title="' + esc(t('Sign out')) + '" aria-label="' + esc(t('Sign out')) + '">' + Z.icon('sign-out') + '<span class="so-lbl">' + t('Sign out') + '</span></button>' : '');
   }
   Z.CHG.entity = function (el) { S.entityId = el.value; localStorage.setItem('zr_entity', el.value); location.hash = '#/' + S.tax + '/entity/' + el.value; };
   Z.entity = function (id) { return S.entities.filter(function (e) { return e.id === id; })[0]; };
@@ -4909,7 +4921,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     return '<div class="kpis"><div><b>' + rows.length + '</b><span>' + t('Beneficiaries') + '</span></div><div><b>' + fmt(tot.g, 0) + '</b><span>' + t('Paid to non-residents') + '</span></div><div><b>' + fmt(tot.w, 0) + '</b><span>' + t('WHT withheld') + '</span></div><div class="' + (tot.m ? 'bad' : '') + '"><b>' + tot.m + '</b><span>' + t('Payments without a certificate') + '</span></div></div>' +
       '<p class="muted" style="margin-top:12px">' + t('Use it to check certificates and the annual WHT figures; every beneficiary paid during the year appears once.') + '</p>' +
       '<section class="paper flush"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Beneficiary') + '</th><th>' + t('Entity') + '</th><th>' + t('Country') + '</th><th>' + t('Payment types') + '</th><th class="num">' + t('Payments') + '</th><th class="num">' + t('Gross paid') + '</th><th class="num">' + t('WHT') + '</th><th class="num">' + t('Effective rate') + '</th><th class="num">' + t('Treaty relief') + '</th><th class="num">' + t('No certificate') + '</th></tr></thead><tbody>' +
-      (rows.map(function (r) { return '<tr><td><b>' + esc(r.party || '—') + '</b></td><td>' + esc(Z.entName(Z.entity(r.entityId))) + '</td><td>' + esc(r.country) + '</td><td style="font-size:12.5px">' + esc(Object.keys(r.types).join(', ')) + '</td><td class="num">' + r.n + '</td><td class="num">' + fmt(r.gross) + '</td><td class="num">' + fmt(r.wht) + '</td><td class="num">' + (r.gross ? Z.r(r.wht / r.gross * 100) + '%' : '—') + '</td><td class="num">' + (r.treaty || '') + '</td><td class="num ' + (r.missingCert ? 'diff-bad' : '') + '">' + (r.missingCert || '') + '</td></tr>'; }).join('') || '<tr><td colspan="10" class="empty">' + t('No WHT registers loaded for this range.') + '</td></tr>') + '</tbody></table></div></section>';
+      (rows.map(function (r) { return '<tr><td><b>' + esc(r.party || '—') + '</b></td><td>' + esc(Z.entName(Z.entity(r.entityId))) + '</td><td>' + esc(r.country) + '</td><td style="font-size:12.5px">' + esc(Object.keys(r.types).map(function (k) { var w = E.WHT_TYPES.filter(function (x) { return x[0] === k; })[0]; return w ? (S.lang === 'ar' ? w[2] : w[1]) : k; }).join(', ')) + '</td><td class="num">' + r.n + '</td><td class="num">' + fmt(r.gross) + '</td><td class="num">' + fmt(r.wht) + '</td><td class="num">' + (r.gross ? Z.r(r.wht / r.gross * 100) + '%' : '—') + '</td><td class="num">' + (r.treaty || '') + '</td><td class="num ' + (r.missingCert ? 'diff-bad' : '') + '">' + (r.missingCert || '') + '</td></tr>'; }).join('') || '<tr><td colspan="10" class="empty">' + t('No WHT registers loaded for this range.') + '</td></tr>') + '</tbody></table></div></section>';
   }
 
   function keyFor(e, m) { return e.vatFreq === 'quarterly' ? m.slice(0, 4) + '-Q' + Math.ceil(+m.slice(5) / 3) : m; }

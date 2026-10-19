@@ -140,7 +140,7 @@ p { margin: 0 0 .6em; max-width: 75ch; }
 }
 @media (max-width: 640px) {
   .top { gap: 6px; padding: 0 8px; }
-  .top select, .top .lang-btn { display: none; }
+  .top select, .top .lang-btn, .top .so-lbl { display: none; }
   .switch a { padding: 6px 10px; font-size: 13px; }
   .switch .lg { display: none; }
   .switch .sh { display: inline; }
@@ -362,3 +362,6 @@ table.matrix td.bl { border-inline-start: 1px solid var(--line); }
   .report h2 { break-after: avoid; }
   .report tr { break-inside: avoid; }
 }
+
+.top .so-lbl { margin-inline-start: 6px; }
+.top .sheet-btn { color: var(--accent); border-color: var(--accent); }

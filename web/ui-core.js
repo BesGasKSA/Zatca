@@ -165,12 +165,13 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       (mode === 'signup' ? '<label class="f"><span>' + t('Organisation name') + '</span><input type="text" name="orgName" required autocomplete="organization"></label><label class="f"><span>' + t('Your name') + '</span><input type="text" name="name" required autocomplete="name"></label>' : '') +
       '<label class="f"><span>' + t('Email') + '</span><input type="email" name="email" required autocomplete="email"></label>' +
       '<label class="f"><span>' + t('Password') + '</span><input type="password" name="password" required minlength="' + (mode === 'signup' ? 10 : 1) + '" autocomplete="' + (mode === 'signup' ? 'new-password' : 'current-password') + '">' + (mode === 'signup' ? '<small>' + t('At least 10 characters.') + '</small>' : '') + '</label>' +
+      '<label class="row" style="gap:8px;margin:2px 0 4px;font-size:14px"><input type="checkbox" name="remember" value="1" checked style="width:auto"> ' + t('Keep me signed in on this device') + '</label>' +
       '<button class="btn primary" type="submit">' + (mode === 'login' ? t('Sign in') : t('Create organisation')) + '</button></form>' +
       '<p class="muted" style="margin-top:18px">' + (mode === 'login' ? t('New here?') + ' <a href="#" data-act="authmode" data-m="signup">' + t('Create an organisation') + '</a>' : '<a href="#" data-act="authmode" data-m="login">' + t('I already have an account') + '</a>') + '</p>' +
       '<p class="faint" style="font-size:13px">' + t('Want to look around first?') + ' <a href="#" data-act="localmode">' + t('Try it on this device with demo data') + '</a></p></div></section></div>';
     document.getElementById('authf').addEventListener('submit', function (e) {
       e.preventDefault();
-      var f = Object.fromEntries(new FormData(e.target));
+      var f = Object.fromEntries(new FormData(e.target)); f.remember = !!f.remember;
       Z.call(mode, f).then(function (r) { start(r); });
     });
   };
@@ -226,6 +227,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     });
     if (S.api.mode === 'cloud') h += nav('#/' + tx + '/platform', t('Platform'), 'globe-hemisphere-east', view === 'platform');
     if (S.api.mode === 'cloud' && S.tenant && S.tenant.spreadsheetUrl) h += '<a class="nav" href="' + esc(S.tenant.spreadsheetUrl) + '" target="_blank" rel="noopener noreferrer">' + Z.icon('table') + '<span>' + t('Google Sheet (your data)') + '</span></a>';
+    h += '<a class="nav" href="https://besgasksa.github.io/Zatca/Inspection-Ready-Guide.pdf" target="_blank" rel="noopener noreferrer">' + Z.icon('book-open-text') + '<span>' + t('User guide (PDF)') + '</span></a>';
     h += '<div class="foot"><b>' + esc(S.user.name) + '</b>' + esc(t(cap(S.user.role))) + (S.tenant ? ', ' + esc(S.tenant.name) : '') + '<br>' + (S.api.mode === 'cloud' ? '<button data-act="logout">' + t('Sign out') + '</button> ' : t('Stored on this device') + '<br>') + '<button data-act="lang">' + (S.lang === 'ar' ? 'English' : 'العربية') + '</button></div>';
     document.querySelector('.rail').innerHTML = h;
   }
@@ -241,7 +243,9 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       '<nav class="switch" aria-label="' + t('Tax') + '">' + sw('vat', '<span class="lg">' + t('VAT') + '</span><span class="sh">' + (S.lang === 'ar' ? 'القيمة المضافة' : 'VAT') + '</span>') + sw('wht', '<span class="lg">' + t('Withholding tax') + '</span><span class="sh">' + (S.lang === 'ar' ? 'الاستقطاع' : 'WHT') + '</span>') + '</nav>' +
       '<span class="grow"></span>' +
       (S.entities.length ? '<select data-chg="entity" aria-label="' + t('Entity') + '">' + opts + '</select>' : '') +
-      '<button class="btn ghost small" data-act="theme" aria-label="' + t('Switch light/dark') + '">' + Z.icon('circle-half') + '</button><button class="btn ghost small lang-btn" data-act="lang">' + (S.lang === 'ar' ? 'English' : 'العربية') + '</button>';
+      (S.api.mode === 'cloud' && S.tenant && S.tenant.spreadsheetUrl ? '<a class="btn small sheet-btn" href="' + esc(S.tenant.spreadsheetUrl) + '" target="_blank" rel="noopener noreferrer" title="' + esc(t('Open Google Sheet')) + '">' + Z.icon('microsoft-excel-logo') + '<span class="so-lbl">' + t('Google Sheet') + '</span></a>' : '') +
+      '<button class="btn ghost small" data-act="theme" aria-label="' + t('Switch light/dark') + '">' + Z.icon('circle-half') + '</button><button class="btn ghost small lang-btn" data-act="lang">' + (S.lang === 'ar' ? 'English' : 'العربية') + '</button>' +
+      (S.api.mode === 'cloud' ? '<button class="btn ghost small" data-act="logout" title="' + esc(t('Sign out')) + '" aria-label="' + esc(t('Sign out')) + '">' + Z.icon('sign-out') + '<span class="so-lbl">' + t('Sign out') + '</span></button>' : '');
   }
   Z.CHG.entity = function (el) { S.entityId = el.value; localStorage.setItem('zr_entity', el.value); location.hash = '#/' + S.tax + '/entity/' + el.value; };
   Z.entity = function (id) { return S.entities.filter(function (e) { return e.id === id; })[0]; };
