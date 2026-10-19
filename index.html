@@ -3553,21 +3553,24 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       if (more) { more.querySelectorAll('.menu a').forEach(function (a) { nav.insertBefore(a, more); }); more.remove(); }
       if (nav.scrollWidth <= nav.clientWidth + 1) return;
       more = document.createElement('details'); more.className = 'more';
-      more.innerHTML = '<summary>' + t('More') + ' <i class="ph ph-caret-down" aria-hidden="true"></i></summary><div class="menu" role="menu"></div>';
+      more.innerHTML = '<summary>' + t('More') + ' <i class="ph ph-caret-down" aria-hidden="true"></i><span class="count">00</span></summary><div class="menu" role="menu"></div>';  // the badge is measured too
       nav.appendChild(more);
       var menu = more.querySelector('.menu'), links = [].slice.call(nav.querySelectorAll(':scope > a'));
-      for (var i = links.length - 1; i > 0 && nav.scrollWidth > nav.clientWidth + 1; i--) {
+      for (var i = links.length - 1; i >= 0 && nav.scrollWidth > nav.clientWidth + 1; i--) {
         if (links[i].getAttribute('aria-current') === 'page') continue;
         menu.insertBefore(links[i], menu.firstChild);
       }
       var hidden = menu.querySelectorAll('a'), bad = 0;
       if (!hidden.length) { more.remove(); return; }
       hidden.forEach(function (a) { a.setAttribute('role', 'menuitem'); var c = a.querySelector('.count'); if (c) bad += +c.textContent || 0; });
-      if (bad) more.querySelector('summary').insertAdjacentHTML('beforeend', '<span class="count">' + bad + '</span>');
+      var badge = more.querySelector('summary .count');
+      if (bad) badge.textContent = bad; else badge.remove();
     });
   };
   var fitT;
   window.addEventListener('resize', function () { clearTimeout(fitT); fitT = setTimeout(Z.fitTabs, 120); });
+  // web fonts arrive after the first render and are wider than the fallback: measure again
+  if (document.fonts) { document.fonts.addEventListener('loadingdone', function () { Z.fitTabs(); }); if (document.fonts.ready) document.fonts.ready.then(function () { Z.fitTabs(); }); }
   document.addEventListener('click', function (e) { document.querySelectorAll('details.more[open]').forEach(function (d) { if (!d.contains(e.target) || e.target.closest('.menu a')) d.open = false; }); });
 
   function shell() {
@@ -3792,7 +3795,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       '<section class="paper flush"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Period') + '</th><th>' + t('Status') + '</th><th>' + t('Readiness') + '</th><th class="num">' + t('Net VAT due') + '</th><th class="num">' + t('WHT') + '</th><th class="num">' + t('Exposure') + '</th><th>' + t('Signed off') + '</th></tr></thead><tbody>' +
       (exs.map(function (x) {
         var s = x.summary || {};
-        return '<tr class="clickable" data-act="openex" data-id="' + x.id + '"><td><b>' + Z.ltr(x.period) + '</b></td><td>' + Z.statusPill(x.status) + '</td><td>' + (s.score != null ? Z.pill(s.grade, s.score + '% — ' + Z.gradeText(s.grade)) : '—') + '</td><td class="num">' + Z.fmt(s.netVat) + '</td><td class="num">' + Z.fmt(s.whtTax) + '</td><td class="num">' + Z.fmt(s.exposure) + '</td><td>' + esc(x.signedOffBy ? x.signedOffBy + ' ' + String(x.signedOffAt).slice(0, 10) : '') + '</td></tr>';
+        return '<tr class="clickable" data-act="openex" data-id="' + x.id + '"><td><b>' + Z.ltr(x.period) + '</b></td><td>' + Z.statusPill(x.status) + '</td><td>' + (Z.taxScore(s).score != null ? Z.pill(Z.taxScore(s).grade, Z.taxScore(s).score + '% — ' + Z.gradeText(Z.taxScore(s).grade)) : '—') + '</td><td class="num">' + Z.fmt(s.netVat) + '</td><td class="num">' + Z.fmt(s.whtTax) + '</td><td class="num">' + Z.fmt(s.exposure) + '</td><td>' + esc(x.signedOffBy ? x.signedOffBy + ' ' + String(x.signedOffAt).slice(0, 10) : '') + '</td></tr>';
       }).join('') || '<tr><td colspan="7" class="empty">' + t('No exercises yet. Pick a period and start one.') + '</td></tr>') + '</tbody></table></div></section></div>');
   };
   Z.ACT.newexsel = function (el) {
@@ -3836,9 +3839,9 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       var s = x.summary || {}, cx = pad + bw * i + bw / 2;
       var bh = Math.abs(s.netVat || 0) / maxV * (H - 60);
       bars += '<rect x="' + (cx - bw * 0.28) + '" y="' + (H - 26 - bh) + '" width="' + (bw * 0.56) + '" height="' + bh + '" fill="var(--rule)" rx="2"><title>' + esc(x.period + ': ' + Z.fmt(s.netVat)) + '</title></rect>';
-      var y = H - 26 - (s.score || 0) / 100 * (H - 50);
+      var sv = Z.taxScore(s).score || 0, y = H - 26 - sv / 100 * (H - 50);
       line += (i ? 'L' : 'M') + cx + ' ' + y;
-      dots += '<circle cx="' + cx + '" cy="' + y + '" r="4" fill="var(--green)"><title>' + esc(x.period + ': ' + (s.score || 0) + '%') + '</title></circle><text x="' + cx + '" y="' + (y - 9) + '" text-anchor="middle" font-size="11" fill="var(--ink)">' + (s.score || 0) + '</text>';
+      dots += '<circle cx="' + cx + '" cy="' + y + '" r="4" fill="var(--green)"><title>' + esc(x.period + ': ' + sv + '%') + '</title></circle><text x="' + cx + '" y="' + (y - 9) + '" text-anchor="middle" font-size="11" fill="var(--ink)">' + (s.score || 0) + '</text>';
       bars += '<text x="' + cx + '" y="' + (H - 8) + '" text-anchor="middle" font-size="11" fill="var(--ink-2)">' + esc(x.period.slice(2)) + '</text>';
     });
     return '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;height:auto" role="img" aria-label="' + t('Readiness and VAT due over time') + '">' + bars + '<path d="' + line + '" fill="none" stroke="var(--green)" stroke-width="2"/>' + dots + '</svg>' +

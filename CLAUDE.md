@@ -28,7 +28,7 @@ See README.md for the feature map and deployment.
 
 ## Tests
 
-`npm test` — engine (94) + backend (19). `npm run dev` serves `web/` with
+`npm test` — engine (94) + backend (19). `npm run e2e` (dev server running) drives the real UI in headless Chrome: a full first-month journey incl. a real file upload, then every page in both sections, EN/AR and phone width — 823 checks, fails on any JS error, overflow, NaN/undefined or English left in Arabic. `npm run dev` serves `web/` with
 no-cache headers on 127.0.0.1:5181 (Python's http.server caused stale-JS
 confusion during development; don't go back to it).
 
