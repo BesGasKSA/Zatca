@@ -16,9 +16,9 @@
  */
 
 var REGISTRY_SHEETS = { TENANTS: 'tenants', USERS: 'users', AUDIT: 'audit' };
-var TENANT_TABLES = ['entities', 'exercises', 'datasets', 'rows', 'samples', 'findings', 'checklists', 'settings', 'annual', 'requests', 'statements', 'refunds', 'disputes', 'events', 'audit'];
+var TENANT_TABLES = ['entities', 'exercises', 'datasets', 'rows', 'samples', 'findings', 'checklists', 'settings', 'annual', 'requests', 'statements', 'refunds', 'disputes', 'events', 'registers', 'audit'];
 // tables that belong to one entity but to no exercise
-var ENTITY_TABLES = { annual: 1, requests: 1, statements: 1, refunds: 1, disputes: 1, events: 1 };
+var ENTITY_TABLES = { annual: 1, requests: 1, statements: 1, refunds: 1, disputes: 1, events: 1, registers: 1 };
 // tables whose documents hang off an exercise (parentId = exerciseId)
 var CHILD_TABLES = { datasets: 1, rows: 1, samples: 1, findings: 1, checklists: 1 };
 var COLS = ['id', 'parentId', 'entityId', 'label', 'updatedAt', 'updatedBy', 'data'];

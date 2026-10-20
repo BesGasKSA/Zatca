@@ -28,14 +28,14 @@ See README.md for the feature map and deployment.
 
 ## Tests
 
-`npm test` — engine (123) + backend (22) + a 600-run random-data stress test
+`npm test` — engine (130) + backend (22) + a 600-run random-data stress test
 (`tests/fuzz.js`: messy values, bad dates, any period since 2018 — no NaN,
 no negative exposure, no crash). `npm run perf` — 20,000 invoices under 4 s.
 With `npm run dev` running, four browser suites drive the real UI in headless
-Chrome: `npm run e2e` (journeys, every page EN/AR/phone, 1,020 checks),
+Chrome: `npm run e2e` (journeys, every page EN/AR/phone, 1,055 checks),
 `e2e:edge` (quarterly/no-WHT/2018, empty exercise, signed-off read-only,
 deletes, broken links), `e2e:security` (script injection through every field),
-`e2e:a11y` (axe-core WCAG 2.1 AA on 102 screens; keep it at zero). Chrome must
+`e2e:a11y` (axe-core WCAG 2.1 AA on 105 screens; keep it at zero). Chrome must
 get an absolute `--user-data-dir`; a relative one silently fails to start.
 
 ## Domain decisions worth remembering
@@ -163,6 +163,22 @@ get an absolute `--user-data-dir`; a relative one silently fails to start.
   with an open note throws `open_review_notes` (LocalBackend mirrors it).
 - Numbers use the accounting format: `Z.fmt` = 2 decimals, (negatives), `-` for zero;
   `Z.count` for whole counts. Never `fmt(x, 0)` for money.
+
+## VAT adjustments (wave 2, 2026-10-20)
+
+- One `registers` doc per entity (id `<entityId>_reg`): arrays `capital`, `baddebts`,
+  `advances`, `fx`, `related`. `E.adjustments` gives AJ1-AJ5 with `exposure` (to pay) and
+  `recover` (to reclaim); `web/ui-adjust.js` at `#/vat/adjust` (VAT section only).
+- AJ1 capital assets: VAT IR Art. 52, 10 years immovable / 6 movable, shorter useful life
+  wins; each later year adjusts inputVat/period x (use - first-year use). Other registers'
+  rules (bad debt 12 months + write-off + notice, advance invoice 15 days after month end,
+  related-party market value when the buyer cannot fully recover) are adviser summaries:
+  settings `badDebt`, `advances`, `fx.usdPeg` 3.75, labelled "verify".
+- Register inputs go through `pos()` / `pct()`: never negative, percentages 0-100. The fuzz
+  test feeds junk to every wave 1-2 function.
+- Demo: 12,000 (warehouse 80% use in 2025) + 3,000 (early bad-debt claim) + 30,000 (advance
+  declared late) + 1,980 (EUR at 4.05 vs 4.38) + 7,500 (housing below market) = 54,480 to
+  pay; 15,000 bad debt to reclaim.
 
 ## Deployment (backend live since 2026-10-19)
 

@@ -31,7 +31,7 @@ async function ev(expr) { const r = await send('Runtime.evaluate', { expression:
   const pages = ['vat/dashboard', 'vat/insights/' + ent, 'vat/ex/' + ex + '/overview', 'vat/ex/' + ex + '/plan', 'vat/ex/' + ex + '/data', 'vat/ex/' + ex + '/filing', 'vat/ex/' + ex + '/vat', 'vat/ex/' + ex + '/einv', 'vat/ex/' + ex + '/bank',
     'vat/ex/' + ex + '/other', 'vat/ex/' + ex + '/analytics', 'vat/ex/' + ex + '/sampling', 'vat/ex/' + ex + '/checklist', 'vat/ex/' + ex + '/findings', 'vat/ex/' + ex + '/report',
     'wht/dashboard', 'wht/insights/' + ent, 'wht/ex/' + ex + '/overview', 'wht/ex/' + ex + '/wht', 'vat/reports/summary', 'vat/reports/corrections', 'wht/reports/beneficiaries', 'vat/entities', 'vat/entity/' + ent, 'vat/entity/' + ent + '/edit',
-    'vat/requests', 'vat/settings', 'vat/users', 'vat/audit', 'vat/annual/' + ent + '/2025', 'vat/account/' + ent, 'vat/refunds', 'vat/disputes', 'vat/calendar'];
+    'vat/requests', 'vat/settings', 'vat/users', 'vat/audit', 'vat/annual/' + ent + '/2025', 'vat/account/' + ent, 'vat/refunds', 'vat/disputes', 'vat/calendar', 'vat/adjust/' + ent];
   const found = {};
   async function scan(tag) {
     for (const p of pages) {

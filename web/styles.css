@@ -1006,3 +1006,30 @@ a.zk-it:hover { background: var(--surface-2); }
 .zk-run .chart .dot { stroke: var(--accent); }
 .zk-it.st-untracked .zk-st { background: var(--surface-2); color: var(--ink-3); } .zk-it.st-untracked .zk-it-t b { color: var(--ink-2); }
 @media (max-width: 1280px) { .zk-cal { grid-template-columns: 1fr; } .zk-month { position: static; max-width: 480px; } }
+
+/* ---------------------------------------------------------------- VAT adjustments (wave 2) */
+.zk-div { display: grid; gap: 6px; }
+.zk-div-row { display: grid; grid-template-columns: minmax(170px, 230px) 1fr 2px 1fr; gap: 0; align-items: center; min-height: 40px; padding: 4px 8px; border-radius: var(--r-s); color: inherit; text-decoration: none; transition: background .2s; animation: rise .45s var(--ease) both; animation-delay: calc(var(--i, 0) * 60ms); }
+.zk-div-row:hover { background: var(--surface-2); }
+.zk-div-l { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 650; padding-inline-end: 12px; }
+.zk-div-axis { align-self: stretch; background: var(--line-2); }
+.zk-div-rec, .zk-div-pay { display: flex; align-items: center; gap: 8px; height: 22px; }
+.zk-div-rec { flex-direction: row-reverse; padding-inline-end: 4px; }
+.zk-div-pay { padding-inline-start: 4px; }
+.zk-div-rec i, .zk-div-pay i { display: block; height: 14px; width: var(--w); min-width: 0; border-radius: 4px; transform-origin: right; animation: grow-x .7s var(--ease) both; animation-delay: calc(200ms + var(--i, 0) * 60ms); }
+.zk-div-pay i { background: var(--fail); transform-origin: left; }
+.zk-div-rec i { background: var(--pass); }
+[dir="rtl"] .zk-div-pay i { transform-origin: right; } [dir="rtl"] .zk-div-rec i { transform-origin: left; }
+.zk-div-rec b, .zk-div-pay b { font-size: 12.5px; white-space: nowrap; }
+.zk-legend .k-rec { width: 9px; height: 9px; border-radius: 50%; background: var(--pass); display: inline-block; }
+.zk-reg .zk-reg-h { padding: 14px 18px 4px; }
+.zk-reg .zk-reg-h .check { border-top: 0; padding: 0; }
+.zk-reg.flash { box-shadow: var(--shadow-1), 0 0 0 2px var(--accent); }
+.zk-yrs { display: inline-flex; gap: 3px; flex-wrap: wrap; }
+.zk-yr { display: block; width: 14px; height: 14px; border-radius: 4px; background: var(--surface-3, var(--surface-2)); border: 1px solid var(--line); }
+.zk-yr.base { background: var(--accent); border-color: var(--accent); }
+.zk-yr.ok, .zk-yr.done { background: var(--pass-soft); border-color: var(--pass); }
+.zk-yr.pay { background: var(--fail); border-color: var(--fail); } .zk-yr.rec { background: var(--pass); border-color: var(--pass); }
+.zk-yr.miss { background: var(--warn-soft); border: 1px dashed var(--warn); }
+.zk-cbx { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; }
+@media (max-width: 700px) { .zk-div-row { grid-template-columns: 1fr 2px 1fr; } .zk-div-l { grid-column: 1 / -1; padding: 0 0 2px; } }

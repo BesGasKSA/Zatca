@@ -213,7 +213,7 @@ async function audit(label) {
       await go('#/' + s + '/insights/' + demo.e, 3000); await audit(tag + ' ' + s + ' company 360');
       for (const tab of (s === 'vat' ? VAT : WHT)) { await go('#/' + s + '/ex/' + demo.x + '/' + tab, 1100); await audit(tag + ' ' + s + ' ex ' + tab); }
       for (const r of (s === 'vat' ? RV : RW)) { await go('#/' + s + '/reports/' + r, r === 'beneficiaries' || r === 'aging' ? 2200 : 1000); await audit(tag + ' ' + s + ' report ' + r); }
-      for (const v of ['entities', 'entity/' + demo.e, 'annual/' + demo.e + '/2025', 'requests', 'account/' + demo.e, 'refunds', 'disputes', 'calendar', 'settings', 'users', 'audit']) { await go('#/' + s + '/' + v, 1500); await audit(tag + ' ' + s + ' ' + v); }
+      for (const v of ['entities', 'entity/' + demo.e, 'annual/' + demo.e + '/2025', 'requests', 'account/' + demo.e, 'refunds', 'disputes', 'calendar', 'adjust/' + demo.e, 'settings', 'users', 'audit']) { await go('#/' + s + '/' + v, 1500); await audit(tag + ' ' + s + ' ' + v); }
     }
   }
   await sweep('EN');
@@ -259,6 +259,20 @@ async function audit(label) {
   ok(fs.readdirSync(dl).some((f) => /^tax-calendar-.*\.ics$/.test(f)), 'calendar exported as .ics');
   await click('[data-act="caltax"][data-k="WHT"]', 600);
   ok(await ev("return [].every.call(document.querySelectorAll('.zk-agenda .zk-it .tx'), function (i) { return i.classList.contains('tx-wht'); })"), 'tax filter shows WHT only');
+  step = 'VAT adjustments';
+  await go('#/vat/adjust/' + demo.e, 2000);
+  ok(await ev("var k = document.querySelector('.kpis').innerText; return /54,480\\.00/.test(k) && /15,000\\.00/.test(k)"), 'adjustments: 54,480.00 to pay, 15,000.00 to reclaim');
+  ok(await ev("return document.querySelectorAll('.zk-reg').length === 5 && document.querySelectorAll('.zk-div-row').length === 5 && document.querySelectorAll('.zk-yr.pay').length === 1"), 'five registers, the diverging chart and the warehouse year strip');
+  await click('[data-act="adjedit"][data-k="fx"]:not([data-i])', 800);
+  await setVal('#adjf [name=invoice]', 'INV-GB-1'); await setVal('#adjf [name=currency]', 'GBP'); await setVal('#adjf [name=amount]', '1000'); await setVal('#adjf [name=rateUsed]', '5'); await setVal('#adjf [name=samaRate]', '5.1');
+  await click('[data-act="adjsave"]', 1500);
+  ok(await ev("return /54,495\\.00/.test(document.querySelector('.kpis').innerText)"), 'a new FX line adds its VAT difference (15.00)');
+  await ev("var r = [].slice.call(document.querySelectorAll('tr[data-k=fx]')).filter(function (x) { return /INV-GB-1/.test(x.innerText); })[0]; r.click(); return 1"); await sleep(800);
+  await click('[data-act="adjdel"]', 1500);
+  ok(await ev("return /54,480\\.00/.test(document.querySelector('.kpis').innerText)"), 'and deleting it takes it back out');
+  await click('[data-drill="adj:due"]', 900);
+  ok(await ev("var d = document.querySelector('.drawer'); return !!d && d.querySelectorAll('.dr-row').length === 5"), 'VAT to pay drill lists the five items');
+  await ev('Z.closeDrawer(true); return 1');
   step = 'review notes';
   await go('#/vat/ex/' + demo.x + '/vat', 1500);
   await click('[data-act="rvadd"][data-id="V1"]', 800);
@@ -283,7 +297,7 @@ async function audit(label) {
   await ev("localStorage.setItem('zr_lang', 'en'); return 1");
   await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 2, mobile: true });
   await send('Page.reload'); await sleep(3000);
-  for (const h of ['#/vat/dashboard', '#/vat/ex/' + demo.x + '/overview', '#/vat/ex/' + demo.x + '/vat', '#/wht/ex/' + demo.x + '/wht', '#/vat/ex/' + demo.x + '/report', '#/wht/reports/beneficiaries', '#/vat/settings', '#/vat/account', '#/vat/refunds', '#/vat/disputes', '#/vat/calendar']) { await go(h, 1800); await audit('phone ' + h.split('/').slice(1, 4).join(' ')); }
+  for (const h of ['#/vat/dashboard', '#/vat/ex/' + demo.x + '/overview', '#/vat/ex/' + demo.x + '/vat', '#/wht/ex/' + demo.x + '/wht', '#/vat/ex/' + demo.x + '/report', '#/wht/reports/beneficiaries', '#/vat/settings', '#/vat/account', '#/vat/refunds', '#/vat/disputes', '#/vat/calendar', '#/vat/adjust']) { await go(h, 1800); await audit('phone ' + h.split('/').slice(1, 4).join(' ')); }
   await click('[data-act="menu"]', 600);
   ok(await ev("return getComputedStyle(document.querySelector('.rail')).visibility === 'visible'"), 'menu opens the sidebar on a phone');
 

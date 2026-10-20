@@ -122,5 +122,19 @@ for (var i = 0; i < 300; i++) {
     ['projected', 'actualMisstatement', 'rate'].forEach(function (k) { assert.ok(ev[k] == null || isFinite(ev[k]), 'evaluate ' + k + ' ' + ev[k]); });
   } catch (e) { failures++; if (failures <= 15) console.log('  FAIL sampling ' + i + ': ' + e.message); }
 }
+// ZATCA account and VAT adjustments: typed-in registers and statements, any junk
+var JUNK = [null, '', undefined, 'abc', '-5', '2026-02-30', '12/13/2026', -1000, 1e12, '١٢٣', {}, [], true, 'yes', 50, '2025-06-15', '2026-09'];
+for (var k = 0; k < 600; k++) {
+  try {
+    var o = {}; ['acquiredOn', 'inputVat', 'usefulYears', 'initialPct', 'kind', 'invoiceDate', 'vat', 'amount', 'writtenOffOn', 'claimedPeriod', 'recovered', 'receivedOn', 'declaredPeriod', 'invoiceOn', 'refundable', 'currency', 'rateUsed', 'samaRate', 'marketValue', 'consideration', 'buyerFullRecovery', 'notified', 'date', 'debit', 'credit', 'period', 'kind', 'description', 'stage', 'noticeOn', 'status', 'approvedOn'].forEach(function (f) { o[f] = pick(JUNK); });
+    o.uses = [{ year: 2025, pct: pick(JUNK), declared: pick(JUNK) }, pick(JUNK)];
+    var aj = E.adjustments({ capital: [o, pick(JUNK)], baddebts: [o], advances: [o], fx: [o], related: [o] }, {}, '2026-10-20');
+    var sr = E.statementRecon({ lines: [o, o, pick(JUNK)], glBalance: pick(JUNK) }, [{ id: 'X', period: '2026-08', summary: { netVat: pick(JUNK), whtTax: pick(JUNK) } }], [o], {}, '2026-10-20');
+    var cal = E.complianceCalendar({ entities: [{ id: 'A' }], events: [o], disputes: [o], refunds: [o], from: '2026-01-01', to: '2026-12-31', today: '2026-10-20' });
+    var js = JSON.stringify([aj, sr, cal, E.refundStatus(o, {}, '2026-10-20'), E.disputeStatus(o, {}, '2026-10-20')]);
+    assert.ok(!/NaN|Infinity/.test(js), 'no NaN');
+    assert.ok(aj.exposure >= 0 && aj.recover >= 0 && sr.exposure >= 0, 'no negative exposure');
+  } catch (e) { failures++; if (failures <= 15) console.log('  FAIL account ' + k + ': ' + e.message); }
+}
 console.log(RUNS + ' generated exercises + 300 samples in ' + ((Date.now() - t0) / 1000).toFixed(1) + 's (slowest run ' + slowest + ' ms): ' + (failures ? failures + ' FAILED' : 'all passed'));
 process.exitCode = failures ? 1 : 0;

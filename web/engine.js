@@ -53,6 +53,13 @@
     // approving a refund; document requests are answered within 20 working days.
     // Single-source: editable, labelled "verify".
     refunds: { payDays: 60, infoResponseDays: 20 },
+    // VAT adjustments (wave 2). Capital assets: VAT IR Art. 52 (10 / 6 years, shorter useful
+    // life wins). Bad-debt months, the notice condition, the advance-invoice days and the
+    // related-party rule come from adviser summaries: editable, labelled "verify".
+    capitalAssets: { immovableYears: 10, movableYears: 6 },
+    badDebt: { minMonths: 12, notifyCustomer: true },
+    advances: { invoiceDays: 15 },
+    fx: { usdPeg: 3.75 },
     materiality: 50000,
     benfordMin: 300,
     glBasis: 'movement',  // movement | gross - how TB VAT accounts are read when no GL is given
@@ -2499,12 +2506,14 @@
     if ((m = s.match(/(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s*[-\/ ]?\s*(20\d\d)/))) return m[2] + '-' + pad(MONS[m[1]]);
     return '';
   };
+  function objs(list) { return Array.isArray(list) ? list.filter(function (x) { return x && typeof x === 'object' && !Array.isArray(x); }) : []; }
   E.soaLines = function (lines) {
-    return (lines || []).map(function (l, i) {
+    return (Array.isArray(lines) ? lines : []).map(function (l, i) {
+      if (!l || typeof l !== 'object') return null;
       var text = [l.kind, l.description].join(' ');
       return { i: i, date: E.date(l.date) || '', taxType: l.taxType ? E.soaTax(l.taxType) : E.soaTax(text), kind: E.soaKind(l.kind || l.description), period: E.soaPeriod(l.period) || E.soaPeriod(l.description),
         description: E.str(l.description), reference: E.str(l.reference), debit: r2(Math.abs(E.num(l.debit))), credit: r2(Math.abs(E.num(l.credit))) };
-    }).filter(function (l) { return l.date || l.debit || l.credit; });
+    }).filter(function (l) { return l && (l.date || l.debit || l.credit); });
   };
   function within(p, ex) { var a = E.periodRange(p), b = E.periodRange(ex); return !!(a && b && a.start >= b.start && a.end <= b.end); }
 
@@ -2560,7 +2569,7 @@
       note: 'A higher amount on the statement usually means ZATCA assessed the period or posted an amendment you have not recorded. A lower one can mean a return was not accepted in full.' }));
     var pens = L.filter(function (l) { return l.kind === 'penalty' && l.debit > 0; });
     var refs = {};
-    (disputes || []).forEach(function (d) { [d.reference, d.soaRef].forEach(function (r) { if (r) refs[String(r).trim().toLowerCase()] = 1; }); });
+    objs(disputes).forEach(function (d) { [d.reference, d.soaRef].forEach(function (r) { if (r) refs[String(r).trim().toLowerCase()] = 1; }); });
     var unrec = pens.filter(function (l) { return !(l.reference && refs[l.reference.toLowerCase()]); });
     var pTot = r2(pens.reduce(function (a, l) { return a + l.debit; }, 0)), uTot = r2(unrec.reduce(function (a, l) { return a + l.debit; }, 0));
     checks.push(mk(T[2][0], T[2][1], T[2][2], { status: !pens.length ? 'pass' : unrec.length ? 'fail' : 'warn', a: pTot, aLabel: 'Penalties on the statement', exposure: uTot,
@@ -2661,11 +2670,11 @@
         if (fyEnd) push({ date: addD(fyEnd, S.zakat.dueDays), key: e.id + '-zakat-' + y, title: 'Zakat / income tax return', period: fyEnd, entityId: e.id, tax: 'ZAKAT', kind: 'return', done: !!zf, tracked: !!an });
       }
     });
-    (o.requests || []).forEach(function (q) { var r = E.requestDue(q, S, today); if (r.due) push({ date: r.due, key: 'req-' + q.id, title: 'Reply to ZATCA', period: q.reference || '', entityId: q.entityId, tax: 'ZATCA', kind: 'request', done: r.state === 'closed', href: 'requests' }); });
-    (o.disputes || []).forEach(function (d) { var r = E.disputeStatus(d, S, today); if (r.next && r.next.due) push({ date: r.next.due, key: 'dsp-' + d.id, title: r.next.label, period: d.reference || '', entityId: d.entityId, tax: d.tax || 'VAT', kind: 'dispute', done: false, zatca: !!r.next.zatca, href: 'disputes' }); });
-    (o.refunds || []).forEach(function (f) { var r = E.refundStatus(f, S, today); if (r.next && r.next.due) push({ date: r.next.due, key: 'rf-' + f.id, title: r.next.label, period: f.period || '', entityId: f.entityId, tax: 'VAT', kind: 'refund', done: false, zatca: !!r.next.zatca, href: 'refunds' }); });
-    (o.corrections || []).forEach(function (c) { if (c.state !== 'done') push({ date: c.dueBy, key: 'cor-' + c.id, title: c.route === 'amend' ? 'Amend the VAT return' : 'Correct in the next VAT return', period: c.title || '', entityId: c.entityId, tax: 'VAT', kind: 'correction', done: false, href: 'reports/corrections' }); });
-    (o.events || []).forEach(function (ev) {
+    objs(o.requests).forEach(function (q) { var r = E.requestDue(q, S, today); if (r.due) push({ date: r.due, key: 'req-' + q.id, title: 'Reply to ZATCA', period: q.reference || '', entityId: q.entityId, tax: 'ZATCA', kind: 'request', done: r.state === 'closed', href: 'requests' }); });
+    objs(o.disputes).forEach(function (d) { var r = E.disputeStatus(d, S, today); if (r.next && r.next.due) push({ date: r.next.due, key: 'dsp-' + d.id, title: r.next.label, period: d.reference || '', entityId: d.entityId, tax: d.tax || 'VAT', kind: 'dispute', done: false, zatca: !!r.next.zatca, href: 'disputes' }); });
+    objs(o.refunds).forEach(function (f) { var r = E.refundStatus(f, S, today); if (r.next && r.next.due) push({ date: r.next.due, key: 'rf-' + f.id, title: r.next.label, period: f.period || '', entityId: f.entityId, tax: 'VAT', kind: 'refund', done: false, zatca: !!r.next.zatca, href: 'refunds' }); });
+    objs(o.corrections).forEach(function (c) { if (c.state !== 'done') push({ date: c.dueBy, key: 'cor-' + c.id, title: c.route === 'amend' ? 'Amend the VAT return' : 'Correct in the next VAT return', period: c.title || '', entityId: c.entityId, tax: 'VAT', kind: 'correction', done: false, href: 'reports/corrections' }); });
+    objs(o.events).forEach(function (ev) {
       var d0 = E.date(ev.date); if (!d0) return;
       var step = { monthly: 1, quarterly: 3, yearly: 12 }[ev.repeat] || 0, dt = new Date(d0 + 'T00:00:00Z'), day = dt.getUTCDate();
       for (var n = 0, d = d0; d <= to && n < 400; n++) {
@@ -2693,6 +2702,130 @@
     });
     L.push('END:VCALENDAR');
     return L.map(fold).join('\r\n') + '\r\n';
+  };
+
+  // ================================================================== VAT adjustments (wave 2)
+  // Five registers kept per entity (table `registers`, id <entityId>_reg): capital assets,
+  // bad debts, advance payments, foreign-currency invoices and related-party supplies.
+  // Each yields one check (AJ1-AJ5) with tax to pay (exposure) or to reclaim (recover).
+  E.ADJ_REGS = ['capital', 'baddebts', 'advances', 'fx', 'related'];
+  // register inputs are typed by people: amounts are never negative, percentages stay 0-100
+  function pos(v) { var n = E.num(v); return isFinite(n) && n > 0 ? n : 0; }
+  function pct(v, d) { if (v === '' || v == null) return d; var n = E.num(v); return isFinite(n) ? Math.max(0, Math.min(100, n)) : d; }
+  function yrsBetween(a, b) { var d1 = new Date(a + 'T00:00:00Z'), d2 = new Date(b + 'T00:00:00Z'); var m = (d2.getUTCFullYear() - d1.getUTCFullYear()) * 12 + d2.getUTCMonth() - d1.getUTCMonth() - (d2.getUTCDate() < d1.getUTCDate() ? 1 : 0); return m; }
+
+  // AJ1. A capital asset's input VAT follows its taxable use over the adjustment period
+  // (VAT IR Art. 52: 10 years immovable, 6 movable, or the useful life if shorter).
+  // Each year after the first: adjustment = input VAT / period x (use this year - first-year use).
+  E.capitalAdjust = function (a, S, today) {
+    S = E.mergeSettings(S); today = today || new Date().toISOString().slice(0, 10);
+    var C = S.capitalAssets, acq = E.date(a.acquiredOn), vat = pos(a.inputVat);
+    var period = a.kind === 'immovable' ? C.immovableYears : C.movableYears;
+    var life = Math.round(pos(a.usefulYears)); if (life > 0 && life < period) period = life;
+    var first = pct(a.initialPct, 100), rows = [], y0 = acq ? +acq.slice(0, 4) : null;
+    if (!acq || !vat) return { period: period, rows: rows, due: 0, recover: 0, missing: [], endYear: null };
+    var lastDone = +today.slice(0, 4) - 1, uses = {};
+    (Array.isArray(a.uses) ? a.uses : []).forEach(function (u) { if (u && typeof u === 'object' && u.year) uses[+u.year] = u; });
+    var missing = [];
+    for (var y = y0 + 1; y < y0 + period && y <= lastDone; y++) {
+      var u = uses[y];
+      var up = pct(u && u.pct, null);
+      if (up == null) { missing.push(y); continue; }
+      var adj = r2(vat / period * (up - first) / 100);
+      rows.push({ year: y, pct: up, adj: adj, declared: u.declared === true || u.declared === 'yes' });
+    }
+    var open = rows.filter(function (r) { return !r.declared; });
+    return { period: period, rows: rows, missing: missing, endYear: y0 + period - 1,
+      due: r2(open.reduce(function (s, r) { return s + (r.adj < 0 ? -r.adj : 0); }, 0)), recover: r2(open.reduce(function (s, r) { return s + (r.adj > 0 ? r.adj : 0); }, 0)) };
+  };
+
+  // AJ2. Bad-debt relief: output VAT on a debt can be reduced once it is overdue long enough,
+  // written off in the books and the customer told (settings.badDebt; verify). A claim that does
+  // not meet them is tax due back; a debt later recovered brings its VAT back.
+  E.badDebtStatus = function (b, S, today) {
+    S = E.mergeSettings(S); today = today || new Date().toISOString().slice(0, 10);
+    var inv = E.date(b.invoiceDate), vat = pos(b.vat), age = inv ? Math.max(0, yrsBetween(inv, today)) : 0, wo = E.date(b.writtenOffOn);
+    var reasons = [];
+    if (age < S.badDebt.minMonths) reasons.push('overdue');
+    if (!wo) reasons.push('writeoff');
+    if (S.badDebt.notifyCustomer && !(b.notified === true || b.notified === 'yes')) reasons.push('notice');
+    var eligible = !reasons.length, claimed = !!String(b.claimedPeriod || '').trim(), back = r2(vat * Math.min(1, pos(b.recovered) / (pos(b.amount) || 1)));
+    return { months: age, eligible: eligible, reasons: reasons, claimed: claimed,
+      recover: eligible && !claimed ? r2(vat) : 0, due: r2((claimed && !eligible ? vat : 0) + (claimed && back > 0 ? back : 0)) };
+  };
+
+  // AJ3. Advance payments: VAT is due when the payment is received (to the extent received),
+  // not on delivery; the tax invoice follows within 15 days after the month end (verify).
+  E.advanceStatus = function (a, S, today) {
+    S = E.mergeSettings(S); today = today || new Date().toISOString().slice(0, 10);
+    var rec = E.date(a.receivedOn), r = S.vatRate, vat = r2(pos(a.amount) * r / (1 + r));
+    if (!rec || a.refundable === true || a.refundable === 'yes') return { vat: 0, period: '', issues: [], due: 0 };
+    var period = String(a.declaredPeriod || '').trim(), m = rec.slice(0, 7), issues = [];
+    var invDue = addD(new Date(Date.UTC(+m.slice(0, 4), +m.slice(5, 7), 0)).toISOString().slice(0, 10), S.advances.invoiceDays);
+    var declaredOk = !!period && (E.periodRange(period) || {}).end >= rec && (E.periodRange(period) || {}).start <= rec;
+    var late = !!period && !declaredOk && (E.periodRange(period) || {}).start > rec;
+    if (!period) issues.push('undeclared'); else if (late) issues.push('late'); else if (!declaredOk) issues.push('period');
+    var inv = E.date(a.invoiceOn);
+    if (!inv && today > invDue) issues.push('noinvoice'); else if (inv && inv > invDue) issues.push('lateinvoice');
+    return { vat: vat, invoiceDue: invDue, issues: issues, due: issues.indexOf('undeclared') >= 0 || issues.indexOf('late') >= 0 ? vat : 0 };
+  };
+
+  // AJ4. Foreign-currency invoices: SAR value at the SAMA rate for the date the tax is due
+  // (VAT IR; the riyal is pegged at 3.75 to the US dollar).
+  E.fxStatus = function (f, S) {
+    S = E.mergeSettings(S);
+    var cur = String(f.currency || '').toUpperCase().trim(), sama = pos(f.samaRate) || (cur === 'USD' ? S.fx.usdPeg : 0), used = pos(f.rateUsed), amt = pos(f.amount);
+    if (!sama || !used || !amt) return { sama: sama || null, diffSar: null, vatDiff: 0, status: 'na' };
+    var diffSar = r2(amt * (sama - used)), vatDiff = r2(diffSar * S.vatRate);
+    return { sama: sama, diffSar: diffSar, vatDiff: vatDiff, status: Math.abs(vatDiff) <= S.tolAbs ? 'pass' : 'fail', due: vatDiff > 0 ? vatDiff : 0, recover: vatDiff < 0 ? -vatDiff : 0 };
+  };
+
+  // AJ5. Related parties: when the buyer cannot recover all its input VAT, a supply below
+  // market value is taxed on the market value (verify the article for your case).
+  E.relatedStatus = function (p, S) {
+    S = E.mergeSettings(S);
+    var full = p.buyerFullRecovery === true || p.buyerFullRecovery === 'yes', gap = r2(pos(p.marketValue) - pos(p.consideration));
+    var applies = !full && gap > 0;
+    return { gap: gap, applies: applies, due: applies ? r2(gap * S.vatRate) : 0 };
+  };
+
+  E.adjustments = function (doc, S, today) {
+    S = E.mergeSettings(S); today = today || new Date().toISOString().slice(0, 10); doc = doc || {};
+    var L = function (k) { return (doc[k] || []).filter(function (x) { return x && typeof x === 'object'; }); };
+    var mk = function (id, title, titleAr, missing, list, due, recover, issues, note, noteAr) {
+      return { id: id, title: title, titleAr: titleAr, area: 'adjust', status: !list.length ? 'na' : issues ? (issues === true ? 'fail' : issues) : 'pass', missing: list.length ? '' : missing,
+        a: list.length, aLabel: 'Items in the register', exposure: r2(due), recover: r2(recover), issues: issues, note: note, noteAr: noteAr };
+    };
+    var cap = L('capital').map(function (a) { return { item: a, s: E.capitalAdjust(a, S, today) }; });
+    var cDue = cap.reduce(function (s, x) { return s + x.s.due; }, 0), cRec = cap.reduce(function (s, x) { return s + x.s.recover; }, 0), cMiss = cap.reduce(function (s, x) { return s + x.s.missing.length; }, 0);
+    var bd = L('baddebts').map(function (b) { return { item: b, s: E.badDebtStatus(b, S, today) }; });
+    var bDue = bd.reduce(function (s, x) { return s + x.s.due; }, 0), bRec = bd.reduce(function (s, x) { return s + x.s.recover; }, 0);
+    var adv = L('advances').map(function (a) { return { item: a, s: E.advanceStatus(a, S, today) }; });
+    var aDue = adv.reduce(function (s, x) { return s + x.s.due; }, 0), aIss = adv.filter(function (x) { return x.s.issues.length; }).length;
+    var fx = L('fx').map(function (f) { return { item: f, s: E.fxStatus(f, S) }; });
+    var fDue = fx.reduce(function (s, x) { return s + (x.s.due || 0); }, 0), fRec = fx.reduce(function (s, x) { return s + (x.s.recover || 0); }, 0), fIss = fx.filter(function (x) { return x.s.status === 'fail'; }).length;
+    var rp = L('related').map(function (p) { return { item: p, s: E.relatedStatus(p, S) }; });
+    var rDue = rp.reduce(function (s, x) { return s + x.s.due; }, 0);
+    var checks = [
+      mk('AJ1', 'Capital assets: input VAT follows taxable use', 'الأصول الرأسمالية: ضريبة المدخلات تتبع الاستخدام الخاضع', 'Capital assets register', cap, cDue, cRec, cDue > S.tolAbs ? true : cMiss > 0 ? 'warn' : false,
+        'Each year of the adjustment period (10 years for buildings, 6 for other assets) compare the taxable use with the first year and adjust 1/period of the input VAT in the return.' + (cMiss ? ' ' + cMiss + ' asset-years have no use recorded.' : ''),
+        'في كل سنة من فترة التعديل (10 سنوات للعقارات و6 لغيرها) قارن الاستخدام الخاضع بالسنة الأولى وعدّل جزءاً من ضريبة المدخلات في الإقرار.' + (cMiss ? ' ' + cMiss + ' سنة-أصل دون استخدام مسجل.' : '')),
+      mk('AJ2', 'Bad-debt relief claimed only when the conditions are met', 'تخفيض الديون المعدومة فقط عند استيفاء الشروط', 'Bad debts register', bd, bDue, bRec, bDue > S.tolAbs,
+        'Relief needs the debt overdue at least ' + S.badDebt.minMonths + ' months, written off in the books and the customer notified. A debt later recovered brings its VAT back.',
+        'يتطلب التخفيض أن يكون الدين متأخراً ' + S.badDebt.minMonths + ' شهراً على الأقل، ومشطوباً في الدفاتر، وإبلاغ العميل. والدين المحصل لاحقاً تعود ضريبته.'),
+      mk('AJ3', 'Advance payments taxed when received', 'الدفعات المقدمة تخضع للضريبة عند الاستلام', 'Advance payments register', adv, aDue, 0, aIss > 0,
+        'VAT on an advance is due in the return for the period it is received in, not on delivery. Issue the tax invoice within ' + S.advances.invoiceDays + ' days after that month ends.',
+        'ضريبة الدفعة المقدمة مستحقة في إقرار فترة استلامها لا عند التسليم. أصدر الفاتورة الضريبية خلال ' + S.advances.invoiceDays + ' يوماً من نهاية ذلك الشهر.'),
+      mk('AJ4', 'Foreign-currency invoices at the SAMA rate', 'فواتير العملات الأجنبية بسعر البنك المركزي', 'Foreign-currency invoices register', fx, fDue, fRec, fIss > 0,
+        'Convert at the SAMA rate for the day the tax is due. The riyal is pegged at ' + S.fx.usdPeg + ' to the US dollar.',
+        'حوّل بسعر البنك المركزي ليوم استحقاق الضريبة. الريال مربوط بالدولار الأمريكي عند ' + S.fx.usdPeg + '.'),
+      mk('AJ5', 'Related-party supplies at market value', 'التوريدات للأطراف ذات العلاقة بالقيمة السوقية', 'Related-party supplies register', rp, rDue, 0, rDue > S.tolAbs,
+        'When a related buyer cannot recover all its input VAT, a supply below market value is taxed on the market value.',
+        'عندما لا يستطيع الطرف ذو العلاقة استرداد كامل ضريبة مدخلاته، تخضع التوريدات الأقل من القيمة السوقية للضريبة على القيمة السوقية.')
+    ];
+    var due = r2(cDue + bDue + aDue + fDue + rDue), recover = r2(cRec + bRec + fRec);
+    return { checks: checks, capital: cap, baddebts: bd, advances: adv, fx: fx, related: rp, exposure: due, recover: recover,
+      issues: checks.filter(function (c) { return c.status === 'fail' || c.status === 'warn'; }).length };
   };
 
   root.ZEngine = E;

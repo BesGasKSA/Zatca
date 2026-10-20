@@ -347,6 +347,7 @@
       jobs.push(Z.save('statements', Object.assign({ id: entId + '_soa', entityId: entId, label: 'ZATCA statement of account' }, d.statement)));
       d.disputes.forEach(function (x) { jobs.push(Z.save('disputes', Object.assign({ entityId: entId, label: x.reference }, x))); });
       d.refunds.forEach(function (x) { jobs.push(Z.save('refunds', Object.assign({ entityId: entId, label: x.period }, x))); });
+      jobs.push(Z.save('registers', Object.assign({ id: entId + '_reg', entityId: entId, label: 'VAT adjustments' }, d.registers)));
       d.events.forEach(function (x) { jobs.push(Z.save('events', Object.assign({ entityId: entId, label: x.title }, x))); });
       var ent2 = { name: 'Al Noor Logistics LLC', nameAr: 'النور للخدمات اللوجستية', trn: '311987654300003', cr: '1010223344', vatFreq: 'quarterly', whtRegistered: false, erp: 'Odoo', active: true, demo: true, mapping: { outputVat: '2210', inputVat: '1410', revenue: '4*' } };
       jobs.push(Z.save('entities', ent2).then(function (e2) {

@@ -1020,6 +1020,33 @@ a.zk-it:hover { background: var(--surface-2); }
 .zk-it.st-untracked .zk-st { background: var(--surface-2); color: var(--ink-3); } .zk-it.st-untracked .zk-it-t b { color: var(--ink-2); }
 @media (max-width: 1280px) { .zk-cal { grid-template-columns: 1fr; } .zk-month { position: static; max-width: 480px; } }
 
+/* ---------------------------------------------------------------- VAT adjustments (wave 2) */
+.zk-div { display: grid; gap: 6px; }
+.zk-div-row { display: grid; grid-template-columns: minmax(170px, 230px) 1fr 2px 1fr; gap: 0; align-items: center; min-height: 40px; padding: 4px 8px; border-radius: var(--r-s); color: inherit; text-decoration: none; transition: background .2s; animation: rise .45s var(--ease) both; animation-delay: calc(var(--i, 0) * 60ms); }
+.zk-div-row:hover { background: var(--surface-2); }
+.zk-div-l { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 650; padding-inline-end: 12px; }
+.zk-div-axis { align-self: stretch; background: var(--line-2); }
+.zk-div-rec, .zk-div-pay { display: flex; align-items: center; gap: 8px; height: 22px; }
+.zk-div-rec { flex-direction: row-reverse; padding-inline-end: 4px; }
+.zk-div-pay { padding-inline-start: 4px; }
+.zk-div-rec i, .zk-div-pay i { display: block; height: 14px; width: var(--w); min-width: 0; border-radius: 4px; transform-origin: right; animation: grow-x .7s var(--ease) both; animation-delay: calc(200ms + var(--i, 0) * 60ms); }
+.zk-div-pay i { background: var(--fail); transform-origin: left; }
+.zk-div-rec i { background: var(--pass); }
+[dir="rtl"] .zk-div-pay i { transform-origin: right; } [dir="rtl"] .zk-div-rec i { transform-origin: left; }
+.zk-div-rec b, .zk-div-pay b { font-size: 12.5px; white-space: nowrap; }
+.zk-legend .k-rec { width: 9px; height: 9px; border-radius: 50%; background: var(--pass); display: inline-block; }
+.zk-reg .zk-reg-h { padding: 14px 18px 4px; }
+.zk-reg .zk-reg-h .check { border-top: 0; padding: 0; }
+.zk-reg.flash { box-shadow: var(--shadow-1), 0 0 0 2px var(--accent); }
+.zk-yrs { display: inline-flex; gap: 3px; flex-wrap: wrap; }
+.zk-yr { display: block; width: 14px; height: 14px; border-radius: 4px; background: var(--surface-3, var(--surface-2)); border: 1px solid var(--line); }
+.zk-yr.base { background: var(--accent); border-color: var(--accent); }
+.zk-yr.ok, .zk-yr.done { background: var(--pass-soft); border-color: var(--pass); }
+.zk-yr.pay { background: var(--fail); border-color: var(--fail); } .zk-yr.rec { background: var(--pass); border-color: var(--pass); }
+.zk-yr.miss { background: var(--warn-soft); border: 1px dashed var(--warn); }
+.zk-cbx { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; }
+@media (max-width: 700px) { .zk-div-row { grid-template-columns: 1fr 2px 1fr; } .zk-div-l { grid-column: 1 / -1; padding: 0 0 2px; } }
+
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
@@ -1482,6 +1509,7 @@ Object.assign(window.ZI18N, {"Box 14 corrections":"تصحيحات البند 14"
 Object.assign(window.ZI18N, {"ZATCA account":"حساب الهيئة","Tax calendar":"تقويم الضرائب","Statement of account":"كشف الحساب","Disputes and penalties":"الاعتراضات والغرامات","VAT refunds":"استرداد ضريبة القيمة المضافة","Clear every review note before signing off.":"أغلق كل ملاحظات المراجعة قبل الاعتماد.","ZATCA is past its date by":"تجاوزت الهيئة موعدها بـ","ZATCA, by":"الهيئة، بحلول","Show the items":"عرض البنود","Add an entity first.":"أضف منشأة أولاً.","Import statement":"استيراد الكشف","Add line":"إضافة سطر","Owed to ZATCA":"مستحق للهيئة","ZATCA owes you":"مستحق لك من الهيئة","as of":"حتى","Balance per general ledger":"الرصيد حسب دفتر الأستاذ","Net of all ZATCA accounts":"صافي كل حسابات الهيئة","Statement date":"تاريخ الكشف","Balance per ZATCA statement":"الرصيد حسب كشف الهيئة","Penalties on the statement":"الغرامات في الكشف","Unpaid after the due date":"غير مسدد بعد موعد الاستحقاق","Exposure (SAR)":"المخاطر (ريال)","What the statement says about your filings":"ما يقوله الكشف عن إقراراتك","ZATCA keeps its own ledger for the company. Inspectors start from it: every return, assessment, penalty and payment should agree with your books.":"تحتفظ الهيئة بسجل خاص للمنشأة ويبدأ منه الفاحصون: يجب أن يتطابق كل إقرار وربط وغرامة وسداد مع دفاترك.","Your return, what ZATCA posted, and what was paid.":"إقرارك، وما سجلته الهيئة، وما تم سداده.","VAT on the statement":"القيمة المضافة في الكشف","VAT paid":"القيمة المضافة المسددة","WHT on the statement":"الاستقطاع في الكشف","lines":"أسطر","Clear the statement":"مسح الكشف","No statement loaded yet":"لم يُحمّل كشف بعد","Download the statement of account from the ZATCA portal (Excel), then import it here. Columns are recognised in English or Arabic.":"نزّل كشف الحساب من بوابة الهيئة (Excel) ثم استورده هنا. تُتعرّف الأعمدة بالعربية أو الإنجليزية.","Reconcile what ZATCA has posted for the company with your returns, payments and general ledger.":"طابق ما سجلته الهيئة للمنشأة مع إقراراتك ومدفوعاتك ودفتر الأستاذ.","The balance over time appears once the statement has lines.":"يظهر الرصيد عبر الزمن بعد إضافة أسطر للكشف.","Balance with ZATCA over time":"الرصيد مع الهيئة عبر الزمن","Balance owed to ZATCA":"الرصيد المستحق للهيئة","Penalty posted":"غرامة مسجلة","Line removed":"تم حذف السطر","Remove every line of this statement?":"حذف كل أسطر هذا الكشف؟","Statement cleared":"تم مسح الكشف","Add a statement line":"إضافة سطر إلى الكشف","Debit (owed to ZATCA)":"مدين (مستحق للهيئة)","Credit (paid or refunded)":"دائن (مسدد أو مسترد)","Enter a debit or a credit.":"أدخل مبلغاً مديناً أو دائناً.","Line added":"تمت إضافة السطر","No date and amount columns were found in this file.":"لم يُعثر على أعمدة التاريخ والمبلغ في هذا الملف.","No lines were found in this file.":"لم يُعثر على أسطر في هذا الملف.","Replace the lines already loaded? Cancel adds to them.":"استبدال الأسطر المحملة؟ اختر إلغاء للإضافة إليها.","lines imported":"سطراً تم استيرادها","skipped":"تم تخطيها","By tax":"حسب الضريبة","No penalties on the statement.":"لا توجد غرامات في الكشف.","Record each penalty in Disputes and penalties with its reference so the decision and deadline are tracked.":"سجّل كل غرامة في الاعتراضات والغرامات بمرجعها لمتابعة القرار والموعد.","estimated fine":"الغرامة التقديرية","Nothing overdue.":"لا يوجد متأخر.","Each difference counted once":"كل فرق محسوب مرة واحدة","Nothing exposed.":"لا توجد مخاطر.","VAT refund":"استرداد القيمة المضافة","on":"في","days since submission":"يوماً منذ التقديم","Update":"تحديث","Every refund application from submission to payment: what ZATCA asked for, what you owe it back, and when the money is due.":"كل طلب استرداد من التقديم حتى الصرف: ما طلبته الهيئة، وما عليك تقديمه، ومتى يستحق المبلغ.","Record a refund":"تسجيل طلب استرداد","Refunds outstanding (SAR)":"استردادات قائمة (ريال)","Waiting on you":"بانتظارك","Refunds received (SAR)":"استردادات مستلمة (ريال)","Paid short of the claim (SAR)":"المصروف أقل من المطالبة (ريال)","Minimum application SAR":"الحد الأدنى للطلب بالريال","ZATCA pays within 60 days of approval and expects requested documents within 20 working days (adviser summaries of VAT IR Art. 69-70; verify, editable in Settings).":"تصرف الهيئة خلال 60 يوماً من الموافقة وتتوقع المستندات المطلوبة خلال 20 يوم عمل (ملخصات مستشارين للمادتين 69-70 من اللائحة؛ للتحقق، وقابلة للتعديل في الإعدادات).","No refund applications yet":"لا توجد طلبات استرداد بعد","When a return shows more input VAT than output VAT, record the refund application here to follow it to payment.":"عندما يُظهر الإقرار ضريبة مدخلات أكبر من المخرجات، سجّل طلب الاسترداد هنا لمتابعته حتى الصرف.","Amount claimed (SAR)":"المبلغ المطالب به (ريال)","Submitted on":"تاريخ التقديم","ZATCA asked for documents on":"تاريخ طلب الهيئة للمستندات","Documents due by (if ZATCA gave a date)":"موعد تقديم المستندات (إن حددته الهيئة)","Approved on":"تاريخ الموافقة","Amount received (SAR)":"المبلغ المستلم (ريال)","Notes":"ملاحظات","Delete this record?":"حذف هذا السجل؟","Deleted":"تم الحذف","Nothing outstanding.":"لا يوجد قائم.","applications":"طلبات","Nothing is waiting on you.":"لا شيء بانتظارك.","Every refund was paid in full.":"صُرف كل استرداد بالكامل.","period":"الفترة","Relief obtained":"التخفيض المحقق","Paid":"مسدد","Notice":"الإشعار","Assessments and penalties from notice to final decision: 60 days to object to ZATCA, then the GSTC committees. Missing a deadline makes the assessment final.":"الربوط والغرامات من الإشعار حتى القرار النهائي: 60 يوماً للاعتراض لدى الهيئة، ثم لجان الأمانة العامة للجان الضريبية. فوات الموعد يجعل الربط نهائياً.","Record a notice":"تسجيل إشعار","At stake in open cases (SAR)":"المبالغ المعرضة في القضايا المفتوحة (ريال)","Open cases":"قضايا مفتوحة","To your next deadline":"حتى موعدك القادم","Relief obtained (SAR)":"التخفيض المحقق (ريال)","deadlines in the next 30 days":"مواعيد خلال 30 يوماً القادمة","Deadlines from Settings: object within 60 days of the notice; ZATCA decides within 90 days; escalate to the GSTC within 30 days of a rejection; appeal within 30 days of a committee decision (verify the last three for your case).":"المواعيد من الإعدادات: الاعتراض خلال 60 يوماً من الإشعار؛ تبت الهيئة خلال 90 يوماً؛ التصعيد للأمانة العامة للجان الضريبية خلال 30 يوماً من الرفض؛ الاستئناف خلال 30 يوماً من قرار اللجنة (تحقق من الثلاثة الأخيرة لحالتك).","No disputes or penalties recorded":"لا توجد اعتراضات أو غرامات مسجلة","Record every assessment and penalty notice the day it arrives: the 60-day clock starts on notification.":"سجّل كل إشعار ربط أو غرامة يوم وصوله: تبدأ مهلة 60 يوماً من الإبلاغ.","Dispute":"اعتراض","What ZATCA says":"ما تقوله الهيئة","Notified on":"تاريخ الإبلاغ","Tax assessed (SAR)":"الضريبة المربوطة (ريال)","Penalty (SAR)":"الغرامة (ريال)","Our position":"موقفنا","Stage":"المرحلة","Objection filed on":"تاريخ تقديم الاعتراض","ZATCA decision on":"تاريخ قرار الهيئة","Committee hearing on":"تاريخ جلسة اللجنة","Committee decision on":"تاريخ قرار اللجنة","Paid so far (SAR)":"المسدد حتى الآن (ريال)","Paying the undisputed part stops late-payment fines on it.":"سداد الجزء غير المعترض عليه يوقف غرامات التأخير عليه.","Reference on the statement of account":"المرجع في كشف الحساب","Grounds and evidence":"الأسباب والأدلة","Tax plus penalty, less what is paid":"الضريبة والغرامة ناقص المسدد","No open cases.":"لا توجد قضايا مفتوحة.","cases":"قضايا","Your deadlines":"مواعيدك","No deadline is waiting on you.":"لا يوجد موعد بانتظارك.","No relief recorded yet.":"لم يُسجل تخفيض بعد.","This week":"هذا الأسبوع","Upcoming":"قادم","Waiting for ZATCA":"بانتظار الهيئة","Sun":"أحد","Mon":"اثنين","Tue":"ثلاثاء","Wed":"أربعاء","Thu":"خميس","Fri":"جمعة","Sat":"سبت","deadlines":"مواعيد","Agenda":"جدول المواعيد","From the month shown, the next 120 days, plus anything overdue.":"من الشهر المعروض ولمدة 120 يوماً، مع كل ما هو متأخر.","Nothing due in this window.":"لا شيء مستحق في هذه الفترة.","Every filing and payment deadline across taxes and companies, with ZATCA letters, dispute and refund dates. Export it to Outlook or Google Calendar.":"كل مواعيد الإقرار والسداد عبر الضرائب والشركات، مع خطابات الهيئة ومواعيد الاعتراضات والاسترداد. صدّره إلى Outlook أو تقويم Google.","Export to calendar (.ics)":"تصدير إلى التقويم (.ics)","Add a deadline":"إضافة موعد","Due in the next 30 days":"مستحق خلال 30 يوماً","Done this month":"منجز هذا الشهر","From Inspection Ready.":"من نظام جاهزية الفحص.","Nothing upcoming to export.":"لا مواعيد قادمة للتصدير.","deadlines exported":"موعداً تم تصديرها","What is due":"ما هو المستحق","e.g. Excise return, CIT advance payment, RETT on a sale":"مثال: إقرار الضريبة الانتقائية، دفعة ضريبة الدخل المعجلة، ضريبة التصرفات العقارية على بيع","Repeats":"التكرار","Mark as not done":"تعيين كغير منجز","Mark done for":"تعيين كمنجز في","Reviewer":"المراجع","Open review note":"ملاحظة مراجعة مفتوحة","Cleared":"مغلقة","Reply":"الرد","Reply to the reviewer: what you did or why no change is needed":"رد على المراجع: ما الذي فعلته أو لماذا لا يلزم تغيير","Review note":"ملاحظة مراجعة","Review note on":"ملاحظة مراجعة على","What should the preparer look at?":"ما الذي يجب أن يراجعه المُعد؟","The exercise cannot be signed off until every review note is cleared.":"لا يمكن اعتماد التمرين حتى تُغلق كل ملاحظات المراجعة.","Add note":"إضافة ملاحظة","Review note added":"تمت إضافة ملاحظة المراجعة","Review note reopened":"أعيد فتح ملاحظة المراجعة","Review note cleared":"أُغلقت ملاحظة المراجعة","Delete this review note?":"حذف ملاحظة المراجعة هذه؟","Review notes":"ملاحظات المراجعة","open: clear them before signing off.":"مفتوحة: أغلقها قبل الاعتماد.","Every review note is cleared.":"كل ملاحظات المراجعة مغلقة.","cleared":"مغلقة","replied":"تم الرد","Every return filed is on the statement":"كل إقرار مقدم يظهر في الكشف","Returns missing":"إقرارات مفقودة","Periods that differ":"فترات مختلفة","ZATCA statement of account":"كشف حساب الهيئة","Exercises for the periods on the statement":"تمارين للفترات الواردة في الكشف","GL balance of the ZATCA accounts":"رصيد حسابات الهيئة في دفتر الأستاذ","Enter it on this page":"أدخله في هذه الصفحة","A return you filed that ZATCA has not posted was either not submitted or posted to another period. Check the submission receipt.":"الإقرار الذي قدمته ولم تسجله الهيئة إما لم يُرسل أو سُجل لفترة أخرى. راجع إيصال التقديم.","A higher amount on the statement usually means ZATCA assessed the period or posted an amendment you have not recorded. A lower one can mean a return was not accepted in full.":"المبلغ الأعلى في الكشف يعني غالباً أن الهيئة أجرت ربطاً أو سجلت تعديلاً لم تسجله. والأقل قد يعني أن الإقرار لم يُقبل بالكامل.","Every penalty needs a decision: pay it, object within 60 days, or ask for a waiver. Record it in Disputes and penalties with the statement reference.":"كل غرامة تحتاج قراراً: السداد، أو الاعتراض خلال 60 يوماً، أو طلب الإعفاء. سجّلها في الاعتراضات والغرامات بمرجع الكشف.","A positive balance is tax owed to ZATCA. The general ledger figure is the net of every ZATCA payable and receivable account (VAT, WHT, penalties).":"الرصيد الموجب ضريبة مستحقة للهيئة. رقم دفتر الأستاذ هو صافي كل حسابات الهيئة الدائنة والمدينة (القيمة المضافة، الاستقطاع، الغرامات).","Below the minimum refund application of SAR 5,000: carry the credit forward instead.":"أقل من الحد الأدنى لطلب الاسترداد البالغ 5,000 ريال: رحّل الرصيد بدلاً من ذلك.","Paid less than claimed: ask ZATCA for the reason and object to the reduction within 60 days.":"صُرف أقل من المطالب به: اطلب من الهيئة السبب واعترض على التخفيض خلال 60 يوماً.","A rejection is a decision you can object to within 60 days.":"الرفض قرار يمكنك الاعتراض عليه خلال 60 يوماً.","Submit the application":"قدّم الطلب","Waiting for ZATCA review":"بانتظار مراجعة الهيئة","Send the requested documents":"أرسل المستندات المطلوبة","ZATCA pays the refund":"تصرف الهيئة الاسترداد","Preparing":"قيد الإعداد","Submitted":"مقدم","Documents requested":"مستندات مطلوبة","Approved":"معتمد","Rejected":"مرفوض","Pay the amount":"سدد المبلغ","Object to ZATCA":"اعترض لدى الهيئة","Ask for a waiver":"اطلب الإعفاء","ZATCA decides the objection":"تبت الهيئة في الاعتراض","Escalate to the GSTC committee":"صعّد إلى لجنة الأمانة العامة للجان الضريبية","Committee hearing":"جلسة اللجنة","Appeal to the appellate committee":"استأنف أمام لجنة الاستئناف","Appellate committee hearing":"جلسة لجنة الاستئناف","Notice received":"تم استلام الإشعار","Objection filed with ZATCA":"اعتراض مقدم للهيئة","ZATCA rejected the objection":"رفضت الهيئة الاعتراض","Before the first-level committee":"أمام لجنة الفصل","Committee decided":"قررت اللجنة","Before the appellate committee":"أمام لجنة الاستئناف","Objection":"اعتراض","Committee":"اللجنة","Appeal":"استئناف","Object":"الاعتراض","Accept and pay":"القبول والسداد","VAT return and payment":"إقرار وسداد القيمة المضافة","WHT return and payment":"إقرار وسداد الاستقطاع","Zakat / income tax return":"إقرار الزكاة / ضريبة الدخل","Reply to ZATCA":"الرد على الهيئة","Amend the VAT return":"عدّل إقرار القيمة المضافة","Correct in the next VAT return":"صحّح في إقرار القيمة المضافة التالي","Quarterly tax risk review with the board":"مراجعة ربع سنوية لمخاطر الضرائب مع المجلس","RETT payment: warehouse sale (deed 4301928)":"سداد ضريبة التصرفات العقارية: بيع المستودع (صك 4301928)","Progress":"التقدم","Due today":"مستحق اليوم","Overdue by":"متأخر بـ","In":"خلال","Done":"منجز","Previous month":"الشهر السابق","Next month":"الشهر التالي","Show":"عرض","ZATCA and disputes":"الهيئة والاعتراضات","Other taxes":"ضرائب أخرى","Zakat":"الزكاة","Excise":"الضريبة الانتقائية","RETT":"ضريبة التصرفات العقارية","Income tax":"ضريبة الدخل","ZATCA letter":"خطاب الهيئة","Other":"أخرى","ZATCA":"الهيئة","Return":"إقرار","Payment":"سداد","Refund":"استرداد","Adjustment":"تسوية","Once":"مرة واحدة","Every month":"كل شهر","Every quarter":"كل ربع سنة","Every year":"كل سنة","days late":"يوماً تأخير","Return period":"فترة الإقرار","Received":"تم الاستلام","Open":"فتح","Remove":"إزالة"});
 Object.assign(window.ZI18N, {"The balance over time appears once the statement covers two months.":"يظهر الرصيد عبر الزمن عندما يغطي الكشف شهرين.","Balance owed to ZATCA at month end":"الرصيد المستحق للهيئة في نهاية الشهر"});
 Object.assign(window.ZI18N, {"No exercise":"لا يوجد تمرين"});
+Object.assign(window.ZI18N, {"VAT adjustments":"تعديلات ضريبة القيمة المضافة","Days to escalate a rejected objection to the GSTC":"أيام التصعيد للأمانة العامة للجان الضريبية بعد رفض الاعتراض","Adviser summaries; verify.":"من ملخصات المستشارين؛ للتحقق.","Days ZATCA has to decide an objection":"أيام بت الهيئة في الاعتراض","Days ZATCA has to pay an approved refund":"أيام صرف الهيئة للاسترداد المعتمد","Working days to answer a refund document request":"أيام العمل للرد على طلب مستندات الاسترداد","Capital asset adjustment period, buildings (years)":"فترة تعديل الأصول الرأسمالية، العقارات (سنوات)","Capital asset adjustment period, other assets (years)":"فترة تعديل الأصول الرأسمالية، الأصول الأخرى (سنوات)","Bad-debt relief: months overdue":"تخفيض الديون المعدومة: أشهر التأخير","Advance payments: invoice within (days after month end)":"الدفعات المقدمة: الفاتورة خلال (أيام بعد نهاية الشهر)","SAR per US dollar (peg)":"ريال لكل دولار أمريكي (سعر الربط)","What the registers change in your VAT":"ما تغيره السجلات في ضريبتك","Tax to pay grows to the right, tax to reclaim to the left. Each bar opens its register.":"الضريبة المستحقة تمتد يميناً والمستردة يساراً. كل شريط يفتح سجله.","To reclaim":"للاسترداد","To pay":"للسداد","The adjustments an inspector looks for outside the monthly ledger: capital assets, bad debts, advance payments, foreign currency and related parties.":"التعديلات التي يبحث عنها الفاحص خارج الدفاتر الشهرية: الأصول الرأسمالية، الديون المعدومة، الدفعات المقدمة، العملات الأجنبية، والأطراف ذات العلاقة.","VAT to pay (SAR)":"ضريبة للسداد (ريال)","VAT to reclaim (SAR)":"ضريبة للاسترداد (ريال)","Registers with issues":"سجلات بها ملاحظات","Items in the registers":"بنود في السجلات","Items in the register":"بنود في السجل","Capital assets follow VAT IR Art. 52 (10 years for buildings, 6 for other assets). The bad-debt conditions, the 15-day invoice rule for advances and the related-party rule come from adviser summaries: verify for your case; they are editable in Settings.":"تتبع الأصول الرأسمالية المادة 52 من اللائحة (10 سنوات للعقارات و6 لغيرها). شروط الديون المعدومة وقاعدة فاتورة الدفعات المقدمة خلال 15 يوماً وقاعدة الأطراف ذات العلاقة من ملخصات المستشارين: تحقق منها لحالتك، وهي قابلة للتعديل في الإعدادات.","No items yet":"لا توجد بنود بعد","first year":"السنة الأولى","use not recorded":"الاستخدام غير مسجل","not yet":"لم يحن بعد","years":"سنوات","to":"حتى","Qualifies":"مستوفٍ للشروط","Does not qualify yet":"غير مستوفٍ بعد","Claimed in":"مطالب به في","Taxable use":"الاستخدام الخاضع","Adjusted in a return":"عُدّل في إقرار","Taxable use by year (%)":"الاستخدام الخاضع حسب السنة (%)","Edit":"تعديل","Nothing to pay.":"لا شيء للسداد.","Nothing to reclaim.":"لا شيء للاسترداد.","registers":"سجلات","Review":"مراجعة","No issues.":"لا توجد ملاحظات.","Capital assets":"الأصول الرأسمالية","Bad debts":"الديون المعدومة","Advance payments":"الدفعات المقدمة","Foreign-currency invoices":"فواتير العملات الأجنبية","Related-party supplies":"التوريدات للأطراف ذات العلاقة","Capital assets register":"سجل الأصول الرأسمالية","Bad debts register":"سجل الديون المعدومة","Advance payments register":"سجل الدفعات المقدمة","Foreign-currency invoices register":"سجل فواتير العملات الأجنبية","Related-party supplies register":"سجل توريدات الأطراف ذات العلاقة","Asset":"الأصل","Type":"النوع","Building or land improvement (10 years)":"عقار أو تحسينات أرض (10 سنوات)","Other asset (6 years)":"أصل آخر (6 سنوات)","Acquired on":"تاريخ الاقتناء","Cost excl. VAT (SAR)":"التكلفة دون الضريبة (ريال)","Input VAT deducted (SAR)":"ضريبة المدخلات المخصومة (ريال)","Useful life (years)":"العمر الإنتاجي (سنوات)","Taxable use in the first year (%)":"الاستخدام الخاضع في السنة الأولى (%)","Customer":"العميل","Invoice":"الفاتورة","Invoice date":"تاريخ الفاتورة","Amount incl. VAT (SAR)":"المبلغ شامل الضريبة (ريال)","VAT on the invoice (SAR)":"الضريبة في الفاتورة (ريال)","Written off in the books on":"تاريخ الشطب في الدفاتر","Customer notified":"تم إبلاغ العميل","Relief claimed in return":"التخفيض مطالب به في إقرار","Recovered later (SAR)":"المحصل لاحقاً (ريال)","Reference":"المرجع","Received on":"تاريخ الاستلام","Amount received incl. VAT (SAR)":"المبلغ المستلم شامل الضريبة (ريال)","Refundable security deposit":"تأمين مسترد","No, it pays for the supply":"لا، دفعة مقابل التوريد","Yes, refundable deposit":"نعم، تأمين مسترد","Declared in return":"مُقر في الإقرار","Tax invoice issued on":"تاريخ إصدار الفاتورة الضريبية","Customer or supplier":"العميل أو المورد","Date the tax is due":"تاريخ استحقاق الضريبة","Currency":"العملة","Amount excl. VAT (currency)":"المبلغ دون الضريبة (بالعملة)","Rate used in the books":"السعر المستخدم في الدفاتر","SAMA rate that day":"سعر البنك المركزي في ذلك اليوم","Related party":"الطرف ذو العلاقة","Relationship":"العلاقة","What was supplied":"ما تم توريده","Price charged excl. VAT (SAR)":"السعر المحمل دون الضريبة (ريال)","Market value excl. VAT (SAR)":"القيمة السوقية دون الضريبة (ريال)","Buyer recovers all its input VAT":"المشتري يسترد كامل ضريبة مدخلاته","Period":"الفترة","Input VAT":"ضريبة المدخلات","Year by year":"سنة بسنة","Months overdue":"أشهر التأخير","Received":"تم الاستلام","Amount":"المبلغ","Declared in":"مُقر في","Tax invoice":"الفاتورة الضريبية","Rate used":"السعر المستخدم","SAMA rate":"سعر البنك المركزي","SAR difference":"الفرق بالريال","VAT difference":"فرق الضريبة","Price charged":"السعر المحمل","Market value":"القيمة السوقية","Buyer recovers all VAT":"المشتري يسترد كامل الضريبة","VAT due":"الضريبة المستحقة","not overdue long enough":"لم يتأخر بما يكفي","not written off":"غير مشطوب","customer not notified":"لم يُبلغ العميل","Not declared":"غير مُقر","Declared late":"أُقر متأخراً","Declared in the wrong period":"أُقر في فترة خاطئة","No tax invoice":"لا توجد فاتورة ضريبية","Invoice late":"فاتورة متأخرة","Building":"عقار","Other asset":"أصل آخر","Yes":"نعم","No":"لا","Capital assets: input VAT follows taxable use":"الأصول الرأسمالية: ضريبة المدخلات تتبع الاستخدام الخاضع"});
 
 </script>
 <script>
@@ -1540,6 +1568,13 @@ Object.assign(window.ZI18N, {"No exercise":"لا يوجد تمرين"});
     // approving a refund; document requests are answered within 20 working days.
     // Single-source: editable, labelled "verify".
     refunds: { payDays: 60, infoResponseDays: 20 },
+    // VAT adjustments (wave 2). Capital assets: VAT IR Art. 52 (10 / 6 years, shorter useful
+    // life wins). Bad-debt months, the notice condition, the advance-invoice days and the
+    // related-party rule come from adviser summaries: editable, labelled "verify".
+    capitalAssets: { immovableYears: 10, movableYears: 6 },
+    badDebt: { minMonths: 12, notifyCustomer: true },
+    advances: { invoiceDays: 15 },
+    fx: { usdPeg: 3.75 },
     materiality: 50000,
     benfordMin: 300,
     glBasis: 'movement',  // movement | gross - how TB VAT accounts are read when no GL is given
@@ -3986,12 +4021,14 @@ Object.assign(window.ZI18N, {"No exercise":"لا يوجد تمرين"});
     if ((m = s.match(/(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s*[-\/ ]?\s*(20\d\d)/))) return m[2] + '-' + pad(MONS[m[1]]);
     return '';
   };
+  function objs(list) { return Array.isArray(list) ? list.filter(function (x) { return x && typeof x === 'object' && !Array.isArray(x); }) : []; }
   E.soaLines = function (lines) {
-    return (lines || []).map(function (l, i) {
+    return (Array.isArray(lines) ? lines : []).map(function (l, i) {
+      if (!l || typeof l !== 'object') return null;
       var text = [l.kind, l.description].join(' ');
       return { i: i, date: E.date(l.date) || '', taxType: l.taxType ? E.soaTax(l.taxType) : E.soaTax(text), kind: E.soaKind(l.kind || l.description), period: E.soaPeriod(l.period) || E.soaPeriod(l.description),
         description: E.str(l.description), reference: E.str(l.reference), debit: r2(Math.abs(E.num(l.debit))), credit: r2(Math.abs(E.num(l.credit))) };
-    }).filter(function (l) { return l.date || l.debit || l.credit; });
+    }).filter(function (l) { return l && (l.date || l.debit || l.credit); });
   };
   function within(p, ex) { var a = E.periodRange(p), b = E.periodRange(ex); return !!(a && b && a.start >= b.start && a.end <= b.end); }
 
@@ -4047,7 +4084,7 @@ Object.assign(window.ZI18N, {"No exercise":"لا يوجد تمرين"});
       note: 'A higher amount on the statement usually means ZATCA assessed the period or posted an amendment you have not recorded. A lower one can mean a return was not accepted in full.' }));
     var pens = L.filter(function (l) { return l.kind === 'penalty' && l.debit > 0; });
     var refs = {};
-    (disputes || []).forEach(function (d) { [d.reference, d.soaRef].forEach(function (r) { if (r) refs[String(r).trim().toLowerCase()] = 1; }); });
+    objs(disputes).forEach(function (d) { [d.reference, d.soaRef].forEach(function (r) { if (r) refs[String(r).trim().toLowerCase()] = 1; }); });
     var unrec = pens.filter(function (l) { return !(l.reference && refs[l.reference.toLowerCase()]); });
     var pTot = r2(pens.reduce(function (a, l) { return a + l.debit; }, 0)), uTot = r2(unrec.reduce(function (a, l) { return a + l.debit; }, 0));
     checks.push(mk(T[2][0], T[2][1], T[2][2], { status: !pens.length ? 'pass' : unrec.length ? 'fail' : 'warn', a: pTot, aLabel: 'Penalties on the statement', exposure: uTot,
@@ -4148,11 +4185,11 @@ Object.assign(window.ZI18N, {"No exercise":"لا يوجد تمرين"});
         if (fyEnd) push({ date: addD(fyEnd, S.zakat.dueDays), key: e.id + '-zakat-' + y, title: 'Zakat / income tax return', period: fyEnd, entityId: e.id, tax: 'ZAKAT', kind: 'return', done: !!zf, tracked: !!an });
       }
     });
-    (o.requests || []).forEach(function (q) { var r = E.requestDue(q, S, today); if (r.due) push({ date: r.due, key: 'req-' + q.id, title: 'Reply to ZATCA', period: q.reference || '', entityId: q.entityId, tax: 'ZATCA', kind: 'request', done: r.state === 'closed', href: 'requests' }); });
-    (o.disputes || []).forEach(function (d) { var r = E.disputeStatus(d, S, today); if (r.next && r.next.due) push({ date: r.next.due, key: 'dsp-' + d.id, title: r.next.label, period: d.reference || '', entityId: d.entityId, tax: d.tax || 'VAT', kind: 'dispute', done: false, zatca: !!r.next.zatca, href: 'disputes' }); });
-    (o.refunds || []).forEach(function (f) { var r = E.refundStatus(f, S, today); if (r.next && r.next.due) push({ date: r.next.due, key: 'rf-' + f.id, title: r.next.label, period: f.period || '', entityId: f.entityId, tax: 'VAT', kind: 'refund', done: false, zatca: !!r.next.zatca, href: 'refunds' }); });
-    (o.corrections || []).forEach(function (c) { if (c.state !== 'done') push({ date: c.dueBy, key: 'cor-' + c.id, title: c.route === 'amend' ? 'Amend the VAT return' : 'Correct in the next VAT return', period: c.title || '', entityId: c.entityId, tax: 'VAT', kind: 'correction', done: false, href: 'reports/corrections' }); });
-    (o.events || []).forEach(function (ev) {
+    objs(o.requests).forEach(function (q) { var r = E.requestDue(q, S, today); if (r.due) push({ date: r.due, key: 'req-' + q.id, title: 'Reply to ZATCA', period: q.reference || '', entityId: q.entityId, tax: 'ZATCA', kind: 'request', done: r.state === 'closed', href: 'requests' }); });
+    objs(o.disputes).forEach(function (d) { var r = E.disputeStatus(d, S, today); if (r.next && r.next.due) push({ date: r.next.due, key: 'dsp-' + d.id, title: r.next.label, period: d.reference || '', entityId: d.entityId, tax: d.tax || 'VAT', kind: 'dispute', done: false, zatca: !!r.next.zatca, href: 'disputes' }); });
+    objs(o.refunds).forEach(function (f) { var r = E.refundStatus(f, S, today); if (r.next && r.next.due) push({ date: r.next.due, key: 'rf-' + f.id, title: r.next.label, period: f.period || '', entityId: f.entityId, tax: 'VAT', kind: 'refund', done: false, zatca: !!r.next.zatca, href: 'refunds' }); });
+    objs(o.corrections).forEach(function (c) { if (c.state !== 'done') push({ date: c.dueBy, key: 'cor-' + c.id, title: c.route === 'amend' ? 'Amend the VAT return' : 'Correct in the next VAT return', period: c.title || '', entityId: c.entityId, tax: 'VAT', kind: 'correction', done: false, href: 'reports/corrections' }); });
+    objs(o.events).forEach(function (ev) {
       var d0 = E.date(ev.date); if (!d0) return;
       var step = { monthly: 1, quarterly: 3, yearly: 12 }[ev.repeat] || 0, dt = new Date(d0 + 'T00:00:00Z'), day = dt.getUTCDate();
       for (var n = 0, d = d0; d <= to && n < 400; n++) {
@@ -4180,6 +4217,130 @@ Object.assign(window.ZI18N, {"No exercise":"لا يوجد تمرين"});
     });
     L.push('END:VCALENDAR');
     return L.map(fold).join('\r\n') + '\r\n';
+  };
+
+  // ================================================================== VAT adjustments (wave 2)
+  // Five registers kept per entity (table `registers`, id <entityId>_reg): capital assets,
+  // bad debts, advance payments, foreign-currency invoices and related-party supplies.
+  // Each yields one check (AJ1-AJ5) with tax to pay (exposure) or to reclaim (recover).
+  E.ADJ_REGS = ['capital', 'baddebts', 'advances', 'fx', 'related'];
+  // register inputs are typed by people: amounts are never negative, percentages stay 0-100
+  function pos(v) { var n = E.num(v); return isFinite(n) && n > 0 ? n : 0; }
+  function pct(v, d) { if (v === '' || v == null) return d; var n = E.num(v); return isFinite(n) ? Math.max(0, Math.min(100, n)) : d; }
+  function yrsBetween(a, b) { var d1 = new Date(a + 'T00:00:00Z'), d2 = new Date(b + 'T00:00:00Z'); var m = (d2.getUTCFullYear() - d1.getUTCFullYear()) * 12 + d2.getUTCMonth() - d1.getUTCMonth() - (d2.getUTCDate() < d1.getUTCDate() ? 1 : 0); return m; }
+
+  // AJ1. A capital asset's input VAT follows its taxable use over the adjustment period
+  // (VAT IR Art. 52: 10 years immovable, 6 movable, or the useful life if shorter).
+  // Each year after the first: adjustment = input VAT / period x (use this year - first-year use).
+  E.capitalAdjust = function (a, S, today) {
+    S = E.mergeSettings(S); today = today || new Date().toISOString().slice(0, 10);
+    var C = S.capitalAssets, acq = E.date(a.acquiredOn), vat = pos(a.inputVat);
+    var period = a.kind === 'immovable' ? C.immovableYears : C.movableYears;
+    var life = Math.round(pos(a.usefulYears)); if (life > 0 && life < period) period = life;
+    var first = pct(a.initialPct, 100), rows = [], y0 = acq ? +acq.slice(0, 4) : null;
+    if (!acq || !vat) return { period: period, rows: rows, due: 0, recover: 0, missing: [], endYear: null };
+    var lastDone = +today.slice(0, 4) - 1, uses = {};
+    (Array.isArray(a.uses) ? a.uses : []).forEach(function (u) { if (u && typeof u === 'object' && u.year) uses[+u.year] = u; });
+    var missing = [];
+    for (var y = y0 + 1; y < y0 + period && y <= lastDone; y++) {
+      var u = uses[y];
+      var up = pct(u && u.pct, null);
+      if (up == null) { missing.push(y); continue; }
+      var adj = r2(vat / period * (up - first) / 100);
+      rows.push({ year: y, pct: up, adj: adj, declared: u.declared === true || u.declared === 'yes' });
+    }
+    var open = rows.filter(function (r) { return !r.declared; });
+    return { period: period, rows: rows, missing: missing, endYear: y0 + period - 1,
+      due: r2(open.reduce(function (s, r) { return s + (r.adj < 0 ? -r.adj : 0); }, 0)), recover: r2(open.reduce(function (s, r) { return s + (r.adj > 0 ? r.adj : 0); }, 0)) };
+  };
+
+  // AJ2. Bad-debt relief: output VAT on a debt can be reduced once it is overdue long enough,
+  // written off in the books and the customer told (settings.badDebt; verify). A claim that does
+  // not meet them is tax due back; a debt later recovered brings its VAT back.
+  E.badDebtStatus = function (b, S, today) {
+    S = E.mergeSettings(S); today = today || new Date().toISOString().slice(0, 10);
+    var inv = E.date(b.invoiceDate), vat = pos(b.vat), age = inv ? Math.max(0, yrsBetween(inv, today)) : 0, wo = E.date(b.writtenOffOn);
+    var reasons = [];
+    if (age < S.badDebt.minMonths) reasons.push('overdue');
+    if (!wo) reasons.push('writeoff');
+    if (S.badDebt.notifyCustomer && !(b.notified === true || b.notified === 'yes')) reasons.push('notice');
+    var eligible = !reasons.length, claimed = !!String(b.claimedPeriod || '').trim(), back = r2(vat * Math.min(1, pos(b.recovered) / (pos(b.amount) || 1)));
+    return { months: age, eligible: eligible, reasons: reasons, claimed: claimed,
+      recover: eligible && !claimed ? r2(vat) : 0, due: r2((claimed && !eligible ? vat : 0) + (claimed && back > 0 ? back : 0)) };
+  };
+
+  // AJ3. Advance payments: VAT is due when the payment is received (to the extent received),
+  // not on delivery; the tax invoice follows within 15 days after the month end (verify).
+  E.advanceStatus = function (a, S, today) {
+    S = E.mergeSettings(S); today = today || new Date().toISOString().slice(0, 10);
+    var rec = E.date(a.receivedOn), r = S.vatRate, vat = r2(pos(a.amount) * r / (1 + r));
+    if (!rec || a.refundable === true || a.refundable === 'yes') return { vat: 0, period: '', issues: [], due: 0 };
+    var period = String(a.declaredPeriod || '').trim(), m = rec.slice(0, 7), issues = [];
+    var invDue = addD(new Date(Date.UTC(+m.slice(0, 4), +m.slice(5, 7), 0)).toISOString().slice(0, 10), S.advances.invoiceDays);
+    var declaredOk = !!period && (E.periodRange(period) || {}).end >= rec && (E.periodRange(period) || {}).start <= rec;
+    var late = !!period && !declaredOk && (E.periodRange(period) || {}).start > rec;
+    if (!period) issues.push('undeclared'); else if (late) issues.push('late'); else if (!declaredOk) issues.push('period');
+    var inv = E.date(a.invoiceOn);
+    if (!inv && today > invDue) issues.push('noinvoice'); else if (inv && inv > invDue) issues.push('lateinvoice');
+    return { vat: vat, invoiceDue: invDue, issues: issues, due: issues.indexOf('undeclared') >= 0 || issues.indexOf('late') >= 0 ? vat : 0 };
+  };
+
+  // AJ4. Foreign-currency invoices: SAR value at the SAMA rate for the date the tax is due
+  // (VAT IR; the riyal is pegged at 3.75 to the US dollar).
+  E.fxStatus = function (f, S) {
+    S = E.mergeSettings(S);
+    var cur = String(f.currency || '').toUpperCase().trim(), sama = pos(f.samaRate) || (cur === 'USD' ? S.fx.usdPeg : 0), used = pos(f.rateUsed), amt = pos(f.amount);
+    if (!sama || !used || !amt) return { sama: sama || null, diffSar: null, vatDiff: 0, status: 'na' };
+    var diffSar = r2(amt * (sama - used)), vatDiff = r2(diffSar * S.vatRate);
+    return { sama: sama, diffSar: diffSar, vatDiff: vatDiff, status: Math.abs(vatDiff) <= S.tolAbs ? 'pass' : 'fail', due: vatDiff > 0 ? vatDiff : 0, recover: vatDiff < 0 ? -vatDiff : 0 };
+  };
+
+  // AJ5. Related parties: when the buyer cannot recover all its input VAT, a supply below
+  // market value is taxed on the market value (verify the article for your case).
+  E.relatedStatus = function (p, S) {
+    S = E.mergeSettings(S);
+    var full = p.buyerFullRecovery === true || p.buyerFullRecovery === 'yes', gap = r2(pos(p.marketValue) - pos(p.consideration));
+    var applies = !full && gap > 0;
+    return { gap: gap, applies: applies, due: applies ? r2(gap * S.vatRate) : 0 };
+  };
+
+  E.adjustments = function (doc, S, today) {
+    S = E.mergeSettings(S); today = today || new Date().toISOString().slice(0, 10); doc = doc || {};
+    var L = function (k) { return (doc[k] || []).filter(function (x) { return x && typeof x === 'object'; }); };
+    var mk = function (id, title, titleAr, missing, list, due, recover, issues, note, noteAr) {
+      return { id: id, title: title, titleAr: titleAr, area: 'adjust', status: !list.length ? 'na' : issues ? (issues === true ? 'fail' : issues) : 'pass', missing: list.length ? '' : missing,
+        a: list.length, aLabel: 'Items in the register', exposure: r2(due), recover: r2(recover), issues: issues, note: note, noteAr: noteAr };
+    };
+    var cap = L('capital').map(function (a) { return { item: a, s: E.capitalAdjust(a, S, today) }; });
+    var cDue = cap.reduce(function (s, x) { return s + x.s.due; }, 0), cRec = cap.reduce(function (s, x) { return s + x.s.recover; }, 0), cMiss = cap.reduce(function (s, x) { return s + x.s.missing.length; }, 0);
+    var bd = L('baddebts').map(function (b) { return { item: b, s: E.badDebtStatus(b, S, today) }; });
+    var bDue = bd.reduce(function (s, x) { return s + x.s.due; }, 0), bRec = bd.reduce(function (s, x) { return s + x.s.recover; }, 0);
+    var adv = L('advances').map(function (a) { return { item: a, s: E.advanceStatus(a, S, today) }; });
+    var aDue = adv.reduce(function (s, x) { return s + x.s.due; }, 0), aIss = adv.filter(function (x) { return x.s.issues.length; }).length;
+    var fx = L('fx').map(function (f) { return { item: f, s: E.fxStatus(f, S) }; });
+    var fDue = fx.reduce(function (s, x) { return s + (x.s.due || 0); }, 0), fRec = fx.reduce(function (s, x) { return s + (x.s.recover || 0); }, 0), fIss = fx.filter(function (x) { return x.s.status === 'fail'; }).length;
+    var rp = L('related').map(function (p) { return { item: p, s: E.relatedStatus(p, S) }; });
+    var rDue = rp.reduce(function (s, x) { return s + x.s.due; }, 0);
+    var checks = [
+      mk('AJ1', 'Capital assets: input VAT follows taxable use', 'الأصول الرأسمالية: ضريبة المدخلات تتبع الاستخدام الخاضع', 'Capital assets register', cap, cDue, cRec, cDue > S.tolAbs ? true : cMiss > 0 ? 'warn' : false,
+        'Each year of the adjustment period (10 years for buildings, 6 for other assets) compare the taxable use with the first year and adjust 1/period of the input VAT in the return.' + (cMiss ? ' ' + cMiss + ' asset-years have no use recorded.' : ''),
+        'في كل سنة من فترة التعديل (10 سنوات للعقارات و6 لغيرها) قارن الاستخدام الخاضع بالسنة الأولى وعدّل جزءاً من ضريبة المدخلات في الإقرار.' + (cMiss ? ' ' + cMiss + ' سنة-أصل دون استخدام مسجل.' : '')),
+      mk('AJ2', 'Bad-debt relief claimed only when the conditions are met', 'تخفيض الديون المعدومة فقط عند استيفاء الشروط', 'Bad debts register', bd, bDue, bRec, bDue > S.tolAbs,
+        'Relief needs the debt overdue at least ' + S.badDebt.minMonths + ' months, written off in the books and the customer notified. A debt later recovered brings its VAT back.',
+        'يتطلب التخفيض أن يكون الدين متأخراً ' + S.badDebt.minMonths + ' شهراً على الأقل، ومشطوباً في الدفاتر، وإبلاغ العميل. والدين المحصل لاحقاً تعود ضريبته.'),
+      mk('AJ3', 'Advance payments taxed when received', 'الدفعات المقدمة تخضع للضريبة عند الاستلام', 'Advance payments register', adv, aDue, 0, aIss > 0,
+        'VAT on an advance is due in the return for the period it is received in, not on delivery. Issue the tax invoice within ' + S.advances.invoiceDays + ' days after that month ends.',
+        'ضريبة الدفعة المقدمة مستحقة في إقرار فترة استلامها لا عند التسليم. أصدر الفاتورة الضريبية خلال ' + S.advances.invoiceDays + ' يوماً من نهاية ذلك الشهر.'),
+      mk('AJ4', 'Foreign-currency invoices at the SAMA rate', 'فواتير العملات الأجنبية بسعر البنك المركزي', 'Foreign-currency invoices register', fx, fDue, fRec, fIss > 0,
+        'Convert at the SAMA rate for the day the tax is due. The riyal is pegged at ' + S.fx.usdPeg + ' to the US dollar.',
+        'حوّل بسعر البنك المركزي ليوم استحقاق الضريبة. الريال مربوط بالدولار الأمريكي عند ' + S.fx.usdPeg + '.'),
+      mk('AJ5', 'Related-party supplies at market value', 'التوريدات للأطراف ذات العلاقة بالقيمة السوقية', 'Related-party supplies register', rp, rDue, 0, rDue > S.tolAbs,
+        'When a related buyer cannot recover all its input VAT, a supply below market value is taxed on the market value.',
+        'عندما لا يستطيع الطرف ذو العلاقة استرداد كامل ضريبة مدخلاته، تخضع التوريدات الأقل من القيمة السوقية للضريبة على القيمة السوقية.')
+    ];
+    var due = r2(cDue + bDue + aDue + fDue + rDue), recover = r2(cRec + bRec + fRec);
+    return { checks: checks, capital: cap, baddebts: bd, advances: adv, fx: fx, related: rp, exposure: due, recover: recover,
+      issues: checks.filter(function (c) { return c.status === 'fail' || c.status === 'warn'; }).length };
   };
 
   root.ZEngine = E;
@@ -4381,6 +4542,13 @@ Object.assign(window.ZI18N, {"No exercise":"لا يوجد تمرين"});
  *     in 60 days of notice), one closed with SAR 3,000 relief
  *   - refunds: one waiting on documents ZATCA asked for, one paid SAR 2,550
  *     short, one draft below the SAR 5,000 minimum
+ *   - VAT adjustments (as of 2026): the warehouse's taxable use fell to 80% in 2025
+ *     once part was let exempt, so SAR 12,000 of input VAT is due back; the 2025 use of
+ *     the forklift was never recorded; a SAR 15,000 bad debt qualifies but was not
+ *     claimed, and SAR 3,000 was claimed on a 7-month-old debt; a SAR 230,000 advance
+ *     was declared a month late (VAT 30,000) with a late invoice; a EUR invoice at 4.05
+ *     against a SAMA rate of 4.38 (VAT 1,980); housing let below market to an
+ *     exempt related company (VAT 7,500 on the SAR 50,000 gap)
  *   - management fees to the parent with no reverse-charge VAT; a reverse-charged
  *     training service with no WHT line
  *   - WHT filed and paid 2 days late (late, but under 30 days: no fine)
@@ -4644,6 +4812,28 @@ Object.assign(window.ZI18N, {"No exercise":"لا يوجد تمرين"});
         { title: 'Quarterly tax risk review with the board', tax: 'OTHER', date: '2026-10-25', repeat: 'quarterly', note: 'Exposure, open findings, disputes and refunds' },
         { title: 'RETT payment: warehouse sale (deed 4301928)', tax: 'RETT', date: '2026-10-14', repeat: '', doneDates: ['2026-10-14'] }
       ],
+      registers: {
+        capital: [
+          { name: 'Warehouse, Al Sulay', kind: 'immovable', acquiredOn: '2023-03-01', cost: 4000000, inputVat: 600000, usefulYears: 25, initialPct: 100, uses: [{ year: 2024, pct: 100, declared: true }, { year: 2025, pct: 80, declared: false }] },
+          { name: 'Forklift fleet', kind: 'movable', acquiredOn: '2024-06-10', cost: 300000, inputVat: 45000, usefulYears: 8, initialPct: 100, uses: [] }
+        ],
+        baddebts: [
+          { customer: 'Gulf Retail Est.', invoice: 'INV-25-0611', invoiceDate: '2025-06-15', amount: 115000, vat: 15000, writtenOffOn: '2026-07-31', notified: true, claimedPeriod: '' },
+          { customer: 'Coastal Foods', invoice: 'INV-26-0302', invoiceDate: '2026-03-02', amount: 23000, vat: 3000, writtenOffOn: '2026-08-31', notified: false, claimedPeriod: '2026-08' }
+        ],
+        advances: [
+          { customer: 'Red Sea Projects', reference: 'ADV-2608-01', receivedOn: '2026-08-20', amount: 230000, declaredPeriod: '2026-09', invoiceOn: '2026-09-25', refundable: false },
+          { customer: 'Al Majd Contracting', reference: 'ADV-2609-04', receivedOn: '2026-09-05', amount: 57500, declaredPeriod: '2026-09', invoiceOn: '2026-09-05', refundable: false }
+        ],
+        fx: [
+          { invoice: 'INV-EU-2609-01', date: '2026-09-12', party: 'Hansa Maschinen GmbH', currency: 'EUR', amount: 40000, rateUsed: 4.05, samaRate: 4.38 },
+          { invoice: 'INV-US-2609-02', date: '2026-09-03', party: 'Atlas Supply Inc.', currency: 'USD', amount: 10000, rateUsed: 3.75, samaRate: '' }
+        ],
+        related: [
+          { party: 'Al Noor Logistics LLC', relation: 'Sister company', description: 'Management services', date: '2026-09-30', consideration: 50000, marketValue: 120000, buyerFullRecovery: true },
+          { party: 'Al Noor Family Housing Co.', relation: 'Common owner', description: 'Staff housing let', date: '2026-09-30', consideration: 10000, marketValue: 60000, buyerFullRecovery: false }
+        ]
+      },
       zakat2025: { capital: 10000000, reserves: 2000000, retainedEarnings: 6500000, provisions: 800000, longTermFinancing: 3000000, adjustedNetProfit: 4200000,
         netFixedAssets: 9500000, longTermInvestments: 2000000, yearType: 'gregorian', fyEnd: '2025-12-31', filedOn: '2026-04-28', declared: 380000 },
       history: (function () {
@@ -4961,6 +5151,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     h += nav('#/' + tx + '/dashboard', t('Dashboard'), 'squares-four', view === 'dashboard');
     h += nav('#/' + tx + '/insights', t('Company 360'), 'chart-line-up', view === 'insights');
     h += nav('#/' + tx + '/reports', t('Reports'), 'chart-bar', view === 'reports');
+    if (!wht) h += nav('#/' + tx + '/adjust', t('VAT adjustments'), 'sliders-horizontal', view === 'adjust');
     if (ex) {
       var ent = Z.entity(ex.entityId) || {}, sc = Z.taxScore(ex.summary), crit = Z.planFor && S.R ? Z.planFor().critical : 0;
       h += '<a class="current" href="#/' + tx + '/ex/' + ex.id + '/' + (crit ? 'plan' : 'overview') + '"' + (view === 'ex' ? ' aria-current="page"' : '') + ' data-tip="' + esc(Z.entName(ent) + ' ' + ex.period) + '">' + miniRing(sc.score, sc.grade) +
@@ -5004,7 +5195,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       '<button class="btn ghost small" data-act="theme" aria-label="' + t('Switch light/dark') + '">' + Z.icon('circle-half') + '</button><button class="btn ghost small lang-btn" data-act="lang">' + (S.lang === 'ar' ? 'English' : 'العربية') + '</button>' +
       Z.exitButton('btn small exit-btn');
   }
-  Z.CHG.entity = function (el) { S.entityId = el.value; localStorage.setItem('zr_entity', el.value); location.hash = '#/' + S.tax + '/' + ({ insights: 'insights', account: 'account' }[(S.route || [])[0]] || 'entity') + '/' + el.value; };
+  Z.CHG.entity = function (el) { S.entityId = el.value; localStorage.setItem('zr_entity', el.value); location.hash = '#/' + S.tax + '/' + ({ insights: 'insights', account: 'account', adjust: 'adjust' }[(S.route || [])[0]] || 'entity') + '/' + el.value; };
   Z.entity = function (id) { return S.entities.filter(function (e) { return e.id === id; })[0]; };
   Z.entName = function (e) { return e ? (S.lang === 'ar' && e.nameAr ? e.nameAr : e.name) : ''; };
 
@@ -5266,6 +5457,15 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       fld('zakat_dueDays', t('Zakat return due (days after year end)'), V.zakat.dueDays, 'number', 'step="1"') +
       fld('disp_objectionDays', t('Days to object to an assessment'), V.disputes.objectionDays, 'number', 'step="1"') +
       fld('disp_appealDays', t('Days to appeal a committee decision'), V.disputes.appealDays, 'number', 'step="1"') +
+      fld('disp_escalateDays', t('Days to escalate a rejected objection to the GSTC'), V.disputes.escalateDays, 'number', 'step="1"', t('Adviser summaries; verify.')) +
+      fld('disp_zatcaDecisionDays', t('Days ZATCA has to decide an objection'), V.disputes.zatcaDecisionDays, 'number', 'step="1"', t('Adviser summaries; verify.')) +
+      fld('rfd_payDays', t('Days ZATCA has to pay an approved refund'), V.refunds.payDays, 'number', 'step="1"', t('Adviser summaries; verify.')) +
+      fld('rfd_infoResponseDays', t('Working days to answer a refund document request'), V.refunds.infoResponseDays, 'number', 'step="1"', t('Adviser summaries; verify.')) +
+      fld('cap_immovableYears', t('Capital asset adjustment period, buildings (years)'), V.capitalAssets.immovableYears, 'number', 'step="1"') +
+      fld('cap_movableYears', t('Capital asset adjustment period, other assets (years)'), V.capitalAssets.movableYears, 'number', 'step="1"') +
+      fld('bd_minMonths', t('Bad-debt relief: months overdue'), V.badDebt.minMonths, 'number', 'step="1"', t('Adviser summaries; verify.')) +
+      fld('adv_invoiceDays', t('Advance payments: invoice within (days after month end)'), V.advances.invoiceDays, 'number', 'step="1"', t('Adviser summaries; verify.')) +
+      fld('fx_usdPeg', t('SAR per US dollar (peg)'), V.fx.usdPeg, 'number', 'step="0.0001"') +
       fld('zakatp_latePctPer30Days', t('Zakat late fine % per 30 days (estimate)'), Z.r(V.zakat.latePctPer30Days * 100), 'number', 'step="0.01"') +
       fld('sugar_mid', t('Sweetened drinks 5-7.99 g sugar: SAR per litre'), V.sugarTiers.tiers[1][2], 'number', 'step="0.01"') +
       fld('sugar_high', t('Sweetened drinks 8 g sugar or more: SAR per litre'), V.sugarTiers.tiers[2][2], 'number', 'step="0.01"', t('Per-litre tiers since 1 Jan 2026; under 5 g and sugar-free pay nothing.')) +
@@ -5299,6 +5499,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
         else if (k.indexOf('rett_') === 0) { v.rett = v.rett || {}; v.rett[k.slice(5)] = +val / 100; }
         else if (k.indexOf('rettd_') === 0) { v.rett = v.rett || {}; v.rett[k.slice(6)] = +val; }
         else if (k.indexOf('disp_') === 0) { v.disputes = v.disputes || {}; v.disputes[k.slice(5)] = +val; }
+        else if (/^(rfd|cap|bd|adv|fx)_/.test(k)) { var grp = { rfd: 'refunds', cap: 'capitalAssets', bd: 'badDebt', adv: 'advances', fx: 'fx' }[k.split('_')[0]]; v[grp] = v[grp] || {}; v[grp][k.slice(k.indexOf('_') + 1)] = +val; }
         else if (k.indexOf('zakatp_') === 0) { v.zakat = v.zakat || {}; v.zakat[k.slice(7)] = +val / 100; }
         else if (k.indexOf('sugar_') === 0) { v.sugarTiers = v.sugarTiers || { tiers: [[0, 5, 0], [5, 8, 0.79], [8, 1000, 1.09]] }; v.sugarTiers.tiers[k === 'sugar_mid' ? 1 : 2][2] = +val; }
         else if (k.indexOf('zakat_') === 0) { v.zakat = v.zakat || {}; v.zakat[k.slice(6)] = +val; }
@@ -6672,6 +6873,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       jobs.push(Z.save('statements', Object.assign({ id: entId + '_soa', entityId: entId, label: 'ZATCA statement of account' }, d.statement)));
       d.disputes.forEach(function (x) { jobs.push(Z.save('disputes', Object.assign({ entityId: entId, label: x.reference }, x))); });
       d.refunds.forEach(function (x) { jobs.push(Z.save('refunds', Object.assign({ entityId: entId, label: x.period }, x))); });
+      jobs.push(Z.save('registers', Object.assign({ id: entId + '_reg', entityId: entId, label: 'VAT adjustments' }, d.registers)));
       d.events.forEach(function (x) { jobs.push(Z.save('events', Object.assign({ entityId: entId, label: x.title }, x))); });
       var ent2 = { name: 'Al Noor Logistics LLC', nameAr: 'النور للخدمات اللوجستية', trn: '311987654300003', cr: '1010223344', vatFreq: 'quarterly', whtRegistered: false, erp: 'Odoo', active: true, demo: true, mapping: { outputVat: '2210', inputVat: '1410', revenue: '4*' } };
       jobs.push(Z.save('entities', ent2).then(function (e2) {
@@ -7947,6 +8149,150 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     var tabOf = function (id) { if (!S.R) return 'overview'; var g = [['vat', S.R.vat.checks], ['bank', S.R.bank.checks], ['einv', S.R.einv.checks], ['filing', S.R.filing.checks], ['other', S.R.other.checks], ['wht', S.R.wht.checks]]; for (var i = 0; i < g.length; i++) if (g[i][1].some(function (c) { return c.id === id; })) return g[i][0]; return 'overview'; };
     return '<section class="paper zk-rvsum noprint' + (open.length ? ' open' : '') + '"><header><div><h2>' + Z.icon(open.length ? 'chat-circle-dots' : 'check-circle') + ' ' + t('Review notes') + '</h2><p>' + (open.length ? open.length + ' ' + t('open: clear them before signing off.') : t('Every review note is cleared.')) + '</p></div><span class="score-chip">' + (all.length - open.length) + ' / ' + all.length + ' ' + t('cleared') + '</span></header>' +
       (open.length ? '<ul>' + open.map(function (r) { return '<li><a href="#" data-act="gocheck" data-id="' + esc(r.checkId) + '" data-tab="' + tabOf(r.checkId) + '"><b>' + esc(r.checkId) + '</b> ' + esc(r.text) + '</a>' + (r.reply ? ' <span class="faint">(' + t('replied') + ')</span>' : '') + '</li>'; }).join('') + '</ul>' : '') + '</section>';
+  };
+})();
+
+</script>
+<script>
+/* VAT adjustments: capital assets, bad debts, advance payments, foreign-currency
+   invoices and related-party supplies, kept per entity in one `registers` doc.
+   The engine (E.adjustments) works out what each register means for the return;
+   this file shows it and edits the registers. */
+(function () {
+  'use strict';
+  var E = window.ZEngine, S = Z.S, t = Z.t, esc = Z.esc, fmt = Z.fmt, D = Z.DRILL;
+  var cfg = function () { return S.settingsDoc ? S.settingsDoc.values : {}; };
+  var ar = function () { return S.lang === 'ar'; };
+  var YN = [['yes', 'Yes'], ['no', 'No']];
+  // field: [key, label, type, options|attrs]
+  var REG = {
+    capital: { title: 'Capital assets', icon: 'buildings', check: 'AJ1', fields: [['name', 'Asset', 'text', 'required'], ['kind', 'Type', 'select', [['immovable', 'Building or land improvement (10 years)'], ['movable', 'Other asset (6 years)']]],
+      ['acquiredOn', 'Acquired on', 'date', 'required'], ['cost', 'Cost excl. VAT (SAR)', 'number'], ['inputVat', 'Input VAT deducted (SAR)', 'number', 'required'], ['usefulYears', 'Useful life (years)', 'number'], ['initialPct', 'Taxable use in the first year (%)', 'number']] },
+    baddebts: { title: 'Bad debts', icon: 'receipt-x', check: 'AJ2', fields: [['customer', 'Customer', 'text', 'required'], ['invoice', 'Invoice', 'text'], ['invoiceDate', 'Invoice date', 'date', 'required'], ['amount', 'Amount incl. VAT (SAR)', 'number'],
+      ['vat', 'VAT on the invoice (SAR)', 'number', 'required'], ['writtenOffOn', 'Written off in the books on', 'date'], ['notified', 'Customer notified', 'select', YN], ['claimedPeriod', 'Relief claimed in return', 'text', 'placeholder="2026-09"'], ['recovered', 'Recovered later (SAR)', 'number']] },
+    advances: { title: 'Advance payments', icon: 'hand-deposit', check: 'AJ3', fields: [['customer', 'Customer', 'text', 'required'], ['reference', 'Reference', 'text'], ['receivedOn', 'Received on', 'date', 'required'], ['amount', 'Amount received incl. VAT (SAR)', 'number', 'required'],
+      ['refundable', 'Refundable security deposit', 'select', [['no', 'No, it pays for the supply'], ['yes', 'Yes, refundable deposit']]], ['declaredPeriod', 'Declared in return', 'text', 'placeholder="2026-09"'], ['invoiceOn', 'Tax invoice issued on', 'date']] },
+    fx: { title: 'Foreign-currency invoices', icon: 'currency-circle-dollar', check: 'AJ4', fields: [['invoice', 'Invoice', 'text', 'required'], ['party', 'Customer or supplier', 'text'], ['date', 'Date the tax is due', 'date'], ['currency', 'Currency', 'text', 'required placeholder="EUR"'],
+      ['amount', 'Amount excl. VAT (currency)', 'number', 'required'], ['rateUsed', 'Rate used in the books', 'number', 'required step="0.0001"'], ['samaRate', 'SAMA rate that day', 'number', 'step="0.0001"']] },
+    related: { title: 'Related-party supplies', icon: 'users-four', check: 'AJ5', fields: [['party', 'Related party', 'text', 'required'], ['relation', 'Relationship', 'text'], ['description', 'What was supplied', 'text'], ['date', 'Date', 'date'],
+      ['consideration', 'Price charged excl. VAT (SAR)', 'number', 'required'], ['marketValue', 'Market value excl. VAT (SAR)', 'number', 'required'], ['buyerFullRecovery', 'Buyer recovers all its input VAT', 'select', YN]] }
+  };
+  var BOOL = { notified: 1, refundable: 1, buyerFullRecovery: 1 };
+  var A = { e: null, doc: null, res: null };
+  var kpi = function (icon, val, label, drill, tone) { return '<div class="' + (tone || '') + '"' + (drill ? ' data-drill="' + drill + '"' : '') + '>' + Z.icon(icon) + '<b>' + val + '</b><span>' + esc(label) + '</span></div>'; };
+
+  Z.views.adjust = function (h) {
+    var e = Z.entity(h[1]) || Z.entity(S.entityId) || S.entities[0];
+    if (!e) return Z.setMain('<div class="empty"><h2>' + t('Add an entity first.') + '</h2></div>');
+    return Z.get('registers', e.id + '_reg').then(function (doc) {
+      A.e = e; A.doc = doc || { id: e.id + '_reg', entityId: e.id, label: 'VAT adjustments' };
+      E.ADJ_REGS.forEach(function (k) { A.doc[k] = Array.isArray(A.doc[k]) ? A.doc[k] : []; });
+      render();
+    });
+  };
+  function render() {
+    var e = A.e, res = A.res = E.adjustments(A.doc, cfg(), Z.today()), can = Z.can('preparer');
+    var items = E.ADJ_REGS.reduce(function (s, k) { return s + A.doc[k].length; }, 0);
+    var right = S.entities.length > 1 ? '<label class="f inline"><span class="sr-only">' + t('Entity') + '</span><select data-chg="adjent" aria-label="' + esc(t('Entity')) + '">' + S.entities.map(function (x) { return '<option value="' + x.id + '"' + (x.id === e.id ? ' selected' : '') + '>' + esc(Z.entName(x)) + '</option>'; }).join('') + '</select></label>' : '';
+    var max = Math.max.apply(null, res.checks.map(function (c) { return Math.max(c.exposure || 0, c.recover || 0); }).concat([1]));
+    var chart = '<section class="paper"><header><div><h2>' + t('What the registers change in your VAT') + '</h2><p>' + t('Tax to pay grows to the right, tax to reclaim to the left. Each bar opens its register.') + '</p></div></header><div class="zk-div" role="list">' +
+      res.checks.map(function (c, i) {
+        return '<a class="zk-div-row" role="listitem" href="#reg-' + REG[E.ADJ_REGS[i]].check + '" data-act="adjjump" data-k="' + E.ADJ_REGS[i] + '" style="--i:' + i + '"><span class="zk-div-l">' + Z.tick(c.status) + esc(t(REG[E.ADJ_REGS[i]].title)) + '</span>' +
+          '<span class="zk-div-rec"><i style="--w:' + ((c.recover || 0) / max * 100).toFixed(1) + '%"></i>' + (c.recover ? '<b class="num">' + fmt(c.recover) + '</b>' : '') + '</span><span class="zk-div-axis" aria-hidden="true"></span>' +
+          '<span class="zk-div-pay"><i style="--w:' + ((c.exposure || 0) / max * 100).toFixed(1) + '%"></i>' + (c.exposure ? '<b class="num">' + fmt(c.exposure) + '</b>' : '') + '</span></a>';
+      }).join('') + '<p class="zk-legend"><span><i class="k-rec"></i>' + t('To reclaim') + '</span><span><i class="k-pen"></i>' + t('To pay') + '</span></p></div></section>';
+    var sections = E.ADJ_REGS.map(function (k, i) { return section(k, res.checks[i], res[k], can); }).join('');
+    Z.setMain('<div class="pagehead"><div><p class="eyebrow">' + Z.icon('sliders-horizontal') + ' ' + t('VAT') + '</p><h1>' + t('VAT adjustments') + ': ' + esc(Z.entName(e)) + '</h1><p>' + t('The adjustments an inspector looks for outside the monthly ledger: capital assets, bad debts, advance payments, foreign currency and related parties.') + '</p></div>' + (right ? '<div class="row">' + right + '</div>' : '') + '</div>' +
+      '<div class="stack"><div class="kpis">' + kpi('arrow-fat-line-up', fmt(res.exposure), t('VAT to pay (SAR)'), 'adj:due', res.exposure ? 'bad' : '') + kpi('arrow-u-up-left', fmt(res.recover), t('VAT to reclaim (SAR)'), 'adj:rec', res.recover ? 'good' : '') +
+      kpi('warning-circle', res.issues, t('Registers with issues'), 'adj:issues', res.issues ? 'bad' : '') + kpi('list-bullets', items, t('Items in the registers'), null) + '</div>' +
+      '<p class="muted zk-src">' + Z.icon('info') + t('Capital assets follow VAT IR Art. 52 (10 years for buildings, 6 for other assets). The bad-debt conditions, the 15-day invoice rule for advances and the related-party rule come from adviser summaries: verify for your case; they are editable in Settings.') + '</p>' +
+      chart + sections + '</div>');
+  }
+  function section(k, c, list, can) {
+    var R = REG[k], rows = list.map(function (x, i) { return rowHtml(k, x.item, x.s, i, can); }).join('');
+    var head = colHead(k);
+    return '<section class="paper flush zk-reg" id="reg-' + R.check + '"><div class="zk-reg-h"><div class="check">' + Z.tick(c.status) + '<div><h3>' + esc(c.id) + ' · ' + esc(ar() ? c.titleAr : c.title) + '</h3><div class="figs">' +
+      (c.status === 'na' ? '<span>' + t('No items yet') + '</span>' : '<span>' + t('Items') + ': <b>' + Z.count(list.length) + '</b></span>' + (c.exposure ? '<span class="d fail">' + t('To pay') + ': <b>' + fmt(c.exposure) + '</b></span>' : '') + (c.recover ? '<span class="d pass">' + t('To reclaim') + ': <b>' + fmt(c.recover) + '</b></span>' : '')) +
+      '</div><p class="faint" style="font-size:12.5px;margin:4px 0 0">' + esc(ar() ? c.noteAr : c.note) + '</p></div><div class="acts">' + (can ? '<button class="btn small" data-act="adjedit" data-k="' + k + '">' + Z.icon('plus') + ' ' + t('Add') + '</button>' : '') + '</div></div></div>' +
+      (rows ? '<div class="tbl-wrap"><table class="t zk-tbl"><thead><tr>' + head + '</tr></thead><tbody>' + rows + '</tbody></table></div>' : '') + '</section>';
+  }
+  var th = function (l, num) { return '<th' + (num ? ' class="num"' : '') + '>' + esc(t(l)) + '</th>'; };
+  function colHead(k) {
+    return {
+      capital: th('Asset') + th('Period') + th('Input VAT', 1) + th('Year by year') + th('To pay', 1) + th('To reclaim', 1),
+      baddebts: th('Customer') + th('Invoice date') + th('Months overdue', 1) + th('VAT', 1) + th('Status') + th('To pay', 1) + th('To reclaim', 1),
+      advances: th('Customer') + th('Received') + th('Amount', 1) + th('VAT', 1) + th('Declared in') + th('Tax invoice') + th('To pay', 1),
+      fx: th('Invoice') + th('Currency') + th('Rate used', 1) + th('SAMA rate', 1) + th('SAR difference', 1) + th('VAT difference', 1),
+      related: th('Related party') + th('What was supplied') + th('Price charged', 1) + th('Market value', 1) + th('Buyer recovers all VAT') + th('VAT due', 1)
+    }[k];
+  }
+  var REASON = { overdue: 'not overdue long enough', writeoff: 'not written off', notice: 'customer not notified' };
+  var AISS = { undeclared: 'Not declared', late: 'Declared late', period: 'Declared in the wrong period', noinvoice: 'No tax invoice', lateinvoice: 'Invoice late' };
+  function rowHtml(k, it, s, i, can) {
+    var open = can ? ' class="clickable" data-act="adjedit" data-k="' + k + '" data-i="' + i + '"' : '';
+    var who = function (a, b) { return '<td><b>' + esc(a || '-') + '</b>' + (b ? '<div class="faint" style="font-size:12.5px">' + esc(b) + '</div>' : '') + '</td>'; };
+    var num = function (v, cls) { return '<td class="num' + (cls ? ' ' + cls : '') + '">' + fmt(v) + '</td>'; };
+    if (k === 'capital') {
+      var y0 = it.acquiredOn ? +String(E.date(it.acquiredOn) || '').slice(0, 4) : null, cells = '';
+      if (y0) for (var y = y0; y < y0 + s.period; y++) {
+        var r = s.rows.filter(function (x) { return x.year === y; })[0], st = y === y0 ? 'base' : r ? (r.adj < 0 ? (r.declared ? 'done' : 'pay') : r.adj > 0 ? (r.declared ? 'done' : 'rec') : 'ok') : s.missing.indexOf(y) >= 0 ? 'miss' : 'future';
+        cells += '<i class="zk-yr ' + st + '" title="' + esc(y + ': ' + (y === y0 ? t('first year') : r ? r.pct + '%, ' + fmt(r.adj) : s.missing.indexOf(y) >= 0 ? t('use not recorded') : t('not yet'))) + '"></i>';
+      }
+      return '<tr' + open + '>' + who(it.name, t(it.kind === 'immovable' ? 'Building' : 'Other asset') + ', ' + (it.acquiredOn || '')) + '<td class="nowrap">' + s.period + ' ' + t('years') + (s.endYear ? ', ' + t('to') + ' ' + s.endYear : '') + '</td>' + num(it.inputVat) + '<td><span class="zk-yrs">' + cells + '</span></td>' + num(s.due, s.due ? 'diff-bad' : '') + num(s.recover) + '</tr>';
+    }
+    if (k === 'baddebts') return '<tr' + open + '>' + who(it.customer, it.invoice) + '<td class="nowrap">' + Z.ltr(it.invoiceDate || '') + '</td><td class="num">' + Z.count(s.months) + '</td>' + num(it.vat) +
+      '<td>' + (s.eligible ? Z.pill('pass', t('Qualifies')) : Z.pill('warn', t('Does not qualify yet'))) + (s.reasons.length ? '<div class="faint" style="font-size:12px">' + s.reasons.map(function (x) { return esc(t(REASON[x])); }).join(', ') + '</div>' : '') + (s.claimed ? '<div class="faint" style="font-size:12px">' + t('Claimed in') + ' ' + esc(it.claimedPeriod) + '</div>' : '') + '</td>' + num(s.due, s.due ? 'diff-bad' : '') + num(s.recover) + '</tr>';
+    if (k === 'advances') return '<tr' + open + '>' + who(it.customer, it.reference) + '<td class="nowrap">' + Z.ltr(it.receivedOn || '') + '</td>' + num(it.amount) + num(s.vat) + '<td>' + Z.ltr(it.declaredPeriod || '-') + '</td><td>' + Z.ltr(it.invoiceOn || '-') +
+      (s.issues.length ? '<div>' + s.issues.map(function (x) { return Z.pill('fail', t(AISS[x])); }).join(' ') + '</div>' : '') + '</td>' + num(s.due, s.due ? 'diff-bad' : '') + '</tr>';
+    if (k === 'fx') return '<tr' + open + '>' + who(it.invoice, it.party) + '<td>' + esc(String(it.currency || '').toUpperCase()) + ' ' + fmt(it.amount) + '</td><td class="num">' + fmt(it.rateUsed, 4) + '</td><td class="num">' + fmt(s.sama, 4) + '</td>' + num(s.diffSar) + num(s.vatDiff, s.status === 'fail' ? 'diff-bad' : '') + '</tr>';
+    return '<tr' + open + '>' + who(it.party, it.relation) + '<td>' + esc(it.description || '') + '</td>' + num(it.consideration) + num(it.marketValue) + '<td>' + (it.buyerFullRecovery === true ? t('Yes') : t('No')) + '</td>' + num(s.due, s.due ? 'diff-bad' : '') + '</tr>';
+  }
+  function save(msg) { return Z.save('registers', A.doc).then(function (d) { A.doc = d; E.ADJ_REGS.forEach(function (k) { A.doc[k] = Array.isArray(A.doc[k]) ? A.doc[k] : []; }); render(); if (msg) Z.toast(msg); }); }
+  Z.CHG.adjent = function (el) { location.hash = '#/' + S.tax + '/adjust/' + el.value; };
+  Z.ACT.adjjump = function (el) { var x = document.getElementById('reg-' + REG[el.dataset.k].check); if (x) { x.scrollIntoView({ behavior: 'smooth', block: 'start' }); x.classList.add('flash'); setTimeout(function () { x.classList.remove('flash'); }, 1600); } };
+  Z.ACT.adjedit = function (el) {
+    if (Z.closeDrawer) Z.closeDrawer(true);
+    var k = el.dataset.k, i = el.dataset.i == null ? -1 : +el.dataset.i, R = REG[k], it = i >= 0 ? A.doc[k][i] : {};
+    A.edit = { k: k, i: i };
+    var f = R.fields.map(function (fd) {
+      var v = it[fd[0]]; if (BOOL[fd[0]]) v = v === true ? 'yes' : v === false ? 'no' : v;
+      if (fd[2] === 'select') return '<label class="f"><span>' + esc(t(fd[1])) + '</span><select name="' + fd[0] + '">' + fd[3].map(function (o) { return '<option value="' + o[0] + '"' + (String(v == null ? '' : v) === o[0] ? ' selected' : '') + '>' + esc(t(o[1])) + '</option>'; }).join('') + '</select></label>';
+      return Z.fld(fd[0], t(fd[1]), v, fd[2], (fd[3] || '') + (fd[2] === 'number' && !/step=/.test(fd[3] || '') ? ' step="0.01"' : ''));
+    }).join('');
+    var uses = '';
+    if (k === 'capital' && i >= 0) {
+      var s = E.capitalAdjust(it, cfg(), Z.today()), y0 = +String(E.date(it.acquiredOn) || '').slice(0, 4), last = Math.min(y0 + s.period - 1, +Z.today().slice(0, 4) - 1), byY = {};
+      (it.uses || []).forEach(function (u) { if (u) byY[u.year] = u; });
+      for (var y = y0 + 1; y0 && y <= last; y++) uses += '<tr><td>' + y + '</td><td><input type="number" step="0.01" min="0" max="100" name="use-' + y + '" value="' + esc(byY[y] && byY[y].pct != null ? byY[y].pct : '') + '" aria-label="' + esc(t('Taxable use') + ' ' + y) + '"></td><td><label class="zk-cbx"><input type="checkbox" name="dec-' + y + '"' + (byY[y] && byY[y].declared ? ' checked' : '') + '> ' + t('Adjusted in a return') + '</label></td></tr>';
+      uses = uses ? '<h3 style="grid-column:1/-1;margin:8px 0 0">' + t('Taxable use by year (%)') + '</h3><table class="t" style="grid-column:1/-1"><tbody>' + uses + '</tbody></table>' : '';
+    }
+    Z.modal((i >= 0 ? t('Edit') : t('Add')) + ': ' + t(R.title), '<form id="adjf" class="grid g2">' + f + uses + '</form>',
+      (i >= 0 ? '<button class="btn danger" data-act="adjdel">' + t('Delete') + '</button>' : '') + '<button class="btn" data-act="closemodal">' + t('Cancel') + '</button><button class="btn primary" data-act="adjsave">' + t('Save') + '</button>');
+  };
+  Z.ACT.adjsave = function () {
+    var f = document.getElementById('adjf'); if (!f.reportValidity()) return;
+    var k = A.edit.k, i = A.edit.i, prev = i >= 0 ? A.doc[k][i] : {}, d = Object.assign({}, prev), fd = new FormData(f);
+    REG[k].fields.forEach(function (x) { var v = fd.get(x[0]); if (v == null) return; d[x[0]] = BOOL[x[0]] ? v === 'yes' : x[2] === 'number' ? (v === '' ? null : +v) : v.trim(); });
+    if (k === 'capital') {
+      var uses = []; fd.forEach(function (v, key) { var m = /^use-(\d{4})$/.exec(key); if (m && v !== '') uses.push({ year: +m[1], pct: +v, declared: fd.get('dec-' + m[1]) === 'on' }); });
+      var keep = (prev.uses || []).filter(function (u) { return u && !fd.has('use-' + u.year); });
+      if (i >= 0) d.uses = keep.concat(uses).sort(function (a, b) { return a.year - b.year; }); else d.uses = [];
+    }
+    if (i >= 0) A.doc[k][i] = d; else A.doc[k].push(d);
+    Z.closeModal(); save(t('Saved'));
+  };
+  Z.ACT.adjdel = function () { if (!confirm(t('Delete this record?'))) return; A.doc[A.edit.k].splice(A.edit.i, 1); Z.closeModal(); save(t('Deleted')); };
+  D.adj = function (k) {
+    var res = A.res; if (!res) return null;
+    var lines = [];
+    E.ADJ_REGS.forEach(function (rk) { res[rk].forEach(function (x, i) {
+      var label = x.item.name || x.item.customer || x.item.invoice || x.item.party || '-';
+      lines.push({ label: label, sub: t(REG[rk].title), due: x.s.due || 0, rec: x.s.recover || 0, act: 'adjedit', data: { k: rk, i: i }, bad: rk === 'capital' ? x.s.missing.length || x.s.due : rk === 'advances' ? x.s.issues.length : x.s.due });
+    }); });
+    if (k === 'due') return { title: t('VAT to pay (SAR)'), total: res.exposure, totalLabel: 'SAR', rows: lines.filter(function (l) { return l.due; }).map(function (l) { return { label: l.label, sub: l.sub, value: l.due, tone: 'fail', act: l.act, data: l.data }; }).sort(function (a, b) { return b.value - a.value; }), empty: t('Nothing to pay.') };
+    if (k === 'rec') return { title: t('VAT to reclaim (SAR)'), total: res.recover, totalLabel: 'SAR', rows: lines.filter(function (l) { return l.rec; }).map(function (l) { return { label: l.label, sub: l.sub, value: l.rec, tone: 'pass', act: l.act, data: l.data }; }), empty: t('Nothing to reclaim.') };
+    if (k === 'issues') return { title: t('Registers with issues'), money: false, total: res.issues, totalLabel: t('registers'), rows: res.checks.filter(function (c) { return c.status === 'fail' || c.status === 'warn'; }).map(function (c, i) { return { label: c.id + ' ' + (ar() ? c.titleAr : c.title), value: c.exposure || 0, display: c.exposure ? fmt(c.exposure) : t('Review'), tone: c.status === 'fail' ? 'fail' : 'warn', href: '#reg-' + c.id }; }), empty: t('No issues.') };
+    return null;
   };
 })();
 

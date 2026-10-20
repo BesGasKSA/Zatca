@@ -197,7 +197,7 @@ t('an open review note blocks sign-off; a preparer can only reply', function () 
   err(call({ action: 'save', token: A.token, table: 'exercises', doc: bad }), 'bad_id');
 });
 t('statements, refunds, disputes and calendar events are scoped to an accessible entity', function () {
-  ['statements', 'refunds', 'disputes', 'events'].forEach(function (tb) {
+  ['statements', 'refunds', 'disputes', 'events', 'registers'].forEach(function (tb) {
     var d = ok(call({ action: 'save', token: A.token, table: tb, doc: { entityId: ent.id, label: tb } })).doc;
     assert.strictEqual(d.entityId, ent.id);
     err(call({ action: 'save', token: B.token, table: tb, doc: { entityId: ent.id } }), 'forbidden');

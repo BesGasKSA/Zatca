@@ -283,6 +283,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     h += nav('#/' + tx + '/dashboard', t('Dashboard'), 'squares-four', view === 'dashboard');
     h += nav('#/' + tx + '/insights', t('Company 360'), 'chart-line-up', view === 'insights');
     h += nav('#/' + tx + '/reports', t('Reports'), 'chart-bar', view === 'reports');
+    if (!wht) h += nav('#/' + tx + '/adjust', t('VAT adjustments'), 'sliders-horizontal', view === 'adjust');
     if (ex) {
       var ent = Z.entity(ex.entityId) || {}, sc = Z.taxScore(ex.summary), crit = Z.planFor && S.R ? Z.planFor().critical : 0;
       h += '<a class="current" href="#/' + tx + '/ex/' + ex.id + '/' + (crit ? 'plan' : 'overview') + '"' + (view === 'ex' ? ' aria-current="page"' : '') + ' data-tip="' + esc(Z.entName(ent) + ' ' + ex.period) + '">' + miniRing(sc.score, sc.grade) +
@@ -326,7 +327,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       '<button class="btn ghost small" data-act="theme" aria-label="' + t('Switch light/dark') + '">' + Z.icon('circle-half') + '</button><button class="btn ghost small lang-btn" data-act="lang">' + (S.lang === 'ar' ? 'English' : 'العربية') + '</button>' +
       Z.exitButton('btn small exit-btn');
   }
-  Z.CHG.entity = function (el) { S.entityId = el.value; localStorage.setItem('zr_entity', el.value); location.hash = '#/' + S.tax + '/' + ({ insights: 'insights', account: 'account' }[(S.route || [])[0]] || 'entity') + '/' + el.value; };
+  Z.CHG.entity = function (el) { S.entityId = el.value; localStorage.setItem('zr_entity', el.value); location.hash = '#/' + S.tax + '/' + ({ insights: 'insights', account: 'account', adjust: 'adjust' }[(S.route || [])[0]] || 'entity') + '/' + el.value; };
   Z.entity = function (id) { return S.entities.filter(function (e) { return e.id === id; })[0]; };
   Z.entName = function (e) { return e ? (S.lang === 'ar' && e.nameAr ? e.nameAr : e.name) : ''; };
 
@@ -588,6 +589,15 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       fld('zakat_dueDays', t('Zakat return due (days after year end)'), V.zakat.dueDays, 'number', 'step="1"') +
       fld('disp_objectionDays', t('Days to object to an assessment'), V.disputes.objectionDays, 'number', 'step="1"') +
       fld('disp_appealDays', t('Days to appeal a committee decision'), V.disputes.appealDays, 'number', 'step="1"') +
+      fld('disp_escalateDays', t('Days to escalate a rejected objection to the GSTC'), V.disputes.escalateDays, 'number', 'step="1"', t('Adviser summaries; verify.')) +
+      fld('disp_zatcaDecisionDays', t('Days ZATCA has to decide an objection'), V.disputes.zatcaDecisionDays, 'number', 'step="1"', t('Adviser summaries; verify.')) +
+      fld('rfd_payDays', t('Days ZATCA has to pay an approved refund'), V.refunds.payDays, 'number', 'step="1"', t('Adviser summaries; verify.')) +
+      fld('rfd_infoResponseDays', t('Working days to answer a refund document request'), V.refunds.infoResponseDays, 'number', 'step="1"', t('Adviser summaries; verify.')) +
+      fld('cap_immovableYears', t('Capital asset adjustment period, buildings (years)'), V.capitalAssets.immovableYears, 'number', 'step="1"') +
+      fld('cap_movableYears', t('Capital asset adjustment period, other assets (years)'), V.capitalAssets.movableYears, 'number', 'step="1"') +
+      fld('bd_minMonths', t('Bad-debt relief: months overdue'), V.badDebt.minMonths, 'number', 'step="1"', t('Adviser summaries; verify.')) +
+      fld('adv_invoiceDays', t('Advance payments: invoice within (days after month end)'), V.advances.invoiceDays, 'number', 'step="1"', t('Adviser summaries; verify.')) +
+      fld('fx_usdPeg', t('SAR per US dollar (peg)'), V.fx.usdPeg, 'number', 'step="0.0001"') +
       fld('zakatp_latePctPer30Days', t('Zakat late fine % per 30 days (estimate)'), Z.r(V.zakat.latePctPer30Days * 100), 'number', 'step="0.01"') +
       fld('sugar_mid', t('Sweetened drinks 5-7.99 g sugar: SAR per litre'), V.sugarTiers.tiers[1][2], 'number', 'step="0.01"') +
       fld('sugar_high', t('Sweetened drinks 8 g sugar or more: SAR per litre'), V.sugarTiers.tiers[2][2], 'number', 'step="0.01"', t('Per-litre tiers since 1 Jan 2026; under 5 g and sugar-free pay nothing.')) +
@@ -621,6 +631,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
         else if (k.indexOf('rett_') === 0) { v.rett = v.rett || {}; v.rett[k.slice(5)] = +val / 100; }
         else if (k.indexOf('rettd_') === 0) { v.rett = v.rett || {}; v.rett[k.slice(6)] = +val; }
         else if (k.indexOf('disp_') === 0) { v.disputes = v.disputes || {}; v.disputes[k.slice(5)] = +val; }
+        else if (/^(rfd|cap|bd|adv|fx)_/.test(k)) { var grp = { rfd: 'refunds', cap: 'capitalAssets', bd: 'badDebt', adv: 'advances', fx: 'fx' }[k.split('_')[0]]; v[grp] = v[grp] || {}; v[grp][k.slice(k.indexOf('_') + 1)] = +val; }
         else if (k.indexOf('zakatp_') === 0) { v.zakat = v.zakat || {}; v.zakat[k.slice(7)] = +val / 100; }
         else if (k.indexOf('sugar_') === 0) { v.sugarTiers = v.sugarTiers || { tiers: [[0, 5, 0], [5, 8, 0.79], [8, 1000, 1.09]] }; v.sugarTiers.tiers[k === 'sugar_mid' ? 1 : 2][2] = +val; }
         else if (k.indexOf('zakat_') === 0) { v.zakat = v.zakat || {}; v.zakat[k.slice(6)] = +val; }

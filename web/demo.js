@@ -36,6 +36,13 @@
  *     in 60 days of notice), one closed with SAR 3,000 relief
  *   - refunds: one waiting on documents ZATCA asked for, one paid SAR 2,550
  *     short, one draft below the SAR 5,000 minimum
+ *   - VAT adjustments (as of 2026): the warehouse's taxable use fell to 80% in 2025
+ *     once part was let exempt, so SAR 12,000 of input VAT is due back; the 2025 use of
+ *     the forklift was never recorded; a SAR 15,000 bad debt qualifies but was not
+ *     claimed, and SAR 3,000 was claimed on a 7-month-old debt; a SAR 230,000 advance
+ *     was declared a month late (VAT 30,000) with a late invoice; a EUR invoice at 4.05
+ *     against a SAMA rate of 4.38 (VAT 1,980); housing let below market to an
+ *     exempt related company (VAT 7,500 on the SAR 50,000 gap)
  *   - management fees to the parent with no reverse-charge VAT; a reverse-charged
  *     training service with no WHT line
  *   - WHT filed and paid 2 days late (late, but under 30 days: no fine)
@@ -299,6 +306,28 @@
         { title: 'Quarterly tax risk review with the board', tax: 'OTHER', date: '2026-10-25', repeat: 'quarterly', note: 'Exposure, open findings, disputes and refunds' },
         { title: 'RETT payment: warehouse sale (deed 4301928)', tax: 'RETT', date: '2026-10-14', repeat: '', doneDates: ['2026-10-14'] }
       ],
+      registers: {
+        capital: [
+          { name: 'Warehouse, Al Sulay', kind: 'immovable', acquiredOn: '2023-03-01', cost: 4000000, inputVat: 600000, usefulYears: 25, initialPct: 100, uses: [{ year: 2024, pct: 100, declared: true }, { year: 2025, pct: 80, declared: false }] },
+          { name: 'Forklift fleet', kind: 'movable', acquiredOn: '2024-06-10', cost: 300000, inputVat: 45000, usefulYears: 8, initialPct: 100, uses: [] }
+        ],
+        baddebts: [
+          { customer: 'Gulf Retail Est.', invoice: 'INV-25-0611', invoiceDate: '2025-06-15', amount: 115000, vat: 15000, writtenOffOn: '2026-07-31', notified: true, claimedPeriod: '' },
+          { customer: 'Coastal Foods', invoice: 'INV-26-0302', invoiceDate: '2026-03-02', amount: 23000, vat: 3000, writtenOffOn: '2026-08-31', notified: false, claimedPeriod: '2026-08' }
+        ],
+        advances: [
+          { customer: 'Red Sea Projects', reference: 'ADV-2608-01', receivedOn: '2026-08-20', amount: 230000, declaredPeriod: '2026-09', invoiceOn: '2026-09-25', refundable: false },
+          { customer: 'Al Majd Contracting', reference: 'ADV-2609-04', receivedOn: '2026-09-05', amount: 57500, declaredPeriod: '2026-09', invoiceOn: '2026-09-05', refundable: false }
+        ],
+        fx: [
+          { invoice: 'INV-EU-2609-01', date: '2026-09-12', party: 'Hansa Maschinen GmbH', currency: 'EUR', amount: 40000, rateUsed: 4.05, samaRate: 4.38 },
+          { invoice: 'INV-US-2609-02', date: '2026-09-03', party: 'Atlas Supply Inc.', currency: 'USD', amount: 10000, rateUsed: 3.75, samaRate: '' }
+        ],
+        related: [
+          { party: 'Al Noor Logistics LLC', relation: 'Sister company', description: 'Management services', date: '2026-09-30', consideration: 50000, marketValue: 120000, buyerFullRecovery: true },
+          { party: 'Al Noor Family Housing Co.', relation: 'Common owner', description: 'Staff housing let', date: '2026-09-30', consideration: 10000, marketValue: 60000, buyerFullRecovery: false }
+        ]
+      },
       zakat2025: { capital: 10000000, reserves: 2000000, retainedEarnings: 6500000, provisions: 800000, longTermFinancing: 3000000, adjustedNetProfit: 4200000,
         netFixedAssets: 9500000, longTermInvestments: 2000000, yearType: 'gregorian', fyEnd: '2025-12-31', filedOn: '2026-04-28', declared: 380000 },
       history: (function () {

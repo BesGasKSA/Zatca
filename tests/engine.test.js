@@ -389,4 +389,36 @@ t('calendar exports as a valid iCalendar file with escaped text and folded lines
   ics.split('\r\n').forEach(function (l) { assert.ok(l.length <= 75, 'line folded: ' + l.length); });
 });
 
+console.log('VAT adjustments');
+var adj = E.adjustments(demo.registers, {}, '2026-10-20');
+t('AJ1: the warehouse fell to 80% taxable use in 2025, so 1/10 of 20% of its VAT is due back', function () {
+  var w = adj.capital[0].s; assert.strictEqual(w.period, 10); assert.strictEqual(w.rows[1].adj, -12000); assert.strictEqual(w.due, 12000);
+  assert.strictEqual(byId(adj.checks, 'AJ1').status, 'fail');
+});
+t('AJ1: a movable asset uses 6 years, a shorter useful life wins, and a missing year is flagged', function () {
+  assert.strictEqual(adj.capital[1].s.period, 6); assert.deepStrictEqual(adj.capital[1].s.missing, [2025]);
+  assert.strictEqual(E.capitalAdjust({ kind: 'movable', acquiredOn: '2024-01-01', inputVat: 6000, usefulYears: 3, initialPct: 50, uses: [{ year: 2025, pct: 100 }] }, {}, '2026-06-01').rows[0].adj, 1000, 'more taxable use is a reclaim');
+  assert.strictEqual(E.capitalAdjust({ kind: 'immovable', acquiredOn: '2010-01-01', inputVat: 1000, uses: [{ year: 2025, pct: 0 }] }, {}, '2026-06-01').due, 0, 'after the period nothing is adjusted');
+});
+t('AJ2: a qualifying bad debt is VAT to reclaim; a claim on a 7-month debt is VAT due back', function () {
+  assert.strictEqual(adj.baddebts[0].s.recover, 15000); assert.ok(adj.baddebts[0].s.eligible);
+  assert.strictEqual(adj.baddebts[1].s.due, 3000); assert.deepStrictEqual(adj.baddebts[1].s.reasons, ['overdue', 'notice']);
+  assert.strictEqual(E.badDebtStatus({ invoiceDate: '2025-01-01', vat: 1500, amount: 11500, writtenOffOn: '2026-01-01', notified: true, claimedPeriod: '2026-02', recovered: 11500 }, {}, '2026-10-20').due, 1500, 'a recovered debt brings its VAT back');
+});
+t('AJ3: VAT on an advance belongs to the month it was received; the invoice is due 15 days after month end', function () {
+  var a = adj.advances[0].s; assert.strictEqual(a.vat, 30000); assert.deepStrictEqual(a.issues, ['late', 'lateinvoice']); assert.strictEqual(a.invoiceDue, '2026-09-15');
+  assert.strictEqual(adj.advances[1].s.due, 0); assert.strictEqual(E.advanceStatus({ receivedOn: '2026-09-01', amount: 1150, refundable: true }, {}).vat, 0, 'a refundable security deposit is not a payment for a supply');
+});
+t('AJ4: EUR at 4.05 against SAMA 4.38 under-declares VAT by 1,980; USD falls back to the 3.75 peg', function () {
+  assert.strictEqual(adj.fx[0].s.vatDiff, 1980); assert.strictEqual(adj.fx[1].s.sama, 3.75); assert.strictEqual(adj.fx[1].s.status, 'pass');
+});
+t('AJ5: below-market supply to an exempt related party is taxed on market value; a fully recovering buyer is not', function () {
+  assert.strictEqual(adj.related[0].s.due, 0); assert.strictEqual(adj.related[1].s.due, 7500);
+});
+t('adjustments total: 54,480 to pay and 15,000 to reclaim, settings editable', function () {
+  assert.strictEqual(adj.exposure, 54480); assert.strictEqual(adj.recover, 15000);
+  assert.strictEqual(E.badDebtStatus(demo.registers.baddebts[1], { badDebt: { minMonths: 6, notifyCustomer: false } }, '2026-10-20').eligible, true);
+  var empty = E.adjustments({}, {}, '2026-10-20'); assert.ok(empty.checks.every(function (c) { return c.status === 'na'; })); assert.strictEqual(empty.exposure, 0);
+});
+
 console.log('\n' + passed + ' passed' + (process.exitCode ? ', some FAILED' : ''));

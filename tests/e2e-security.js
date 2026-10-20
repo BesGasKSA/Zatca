@@ -115,6 +115,13 @@ async function clean(where) {
   await click('[data-act="soalinesave"]', 1500);
   await go('#/vat/ex/' + ex + '/vat', 1500); await click('[data-act="rvadd"]', 800); await setVal('#rvf [name=text]', X('review')); await click('[data-act="rvsave"]', 1500);
 
+  await go('#/vat/adjust', 1500);
+  for (const k of ['capital', 'baddebts', 'related']) {
+    await click('[data-act="adjedit"][data-k="' + k + '"]:not([data-i])', 800);
+    await ev("document.querySelectorAll('#adjf input[type=text]').forEach(function (i, n) { i.value = " + JSON.stringify(X('reg')) + "; }); document.querySelectorAll('#adjf input[type=number]').forEach(function (i) { i.value = '100'; }); document.querySelectorAll('#adjf input[type=date]').forEach(function (i) { i.value = '2024-02-01'; }); return 1");
+    await click('[data-act="adjsave"]', 1500);
+  }
+
   step = 'users';
   await go('#/vat/users');
   await click('.pagehead [data-act="edituser"]', 800);
@@ -132,7 +139,7 @@ async function clean(where) {
   for (const lang of ['en', 'ar']) {
     await ev("localStorage.setItem('zr_lang','" + lang + "'); return 1"); await send('Page.reload'); await sleep(3000);
     for (const s of ['vat', 'wht']) {
-      for (const v of ['dashboard', 'insights/' + ent, 'entities', 'entity/' + ent, 'entity/' + ent + '/edit', 'requests', 'account/' + ent, 'refunds', 'disputes', 'calendar', 'users', 'audit', 'settings', 'annual/' + ent + '/2026']) { await go('#/' + s + '/' + v, 1500); await clean(lang + ' ' + s + ' ' + v); }
+      for (const v of ['dashboard', 'insights/' + ent, 'entities', 'entity/' + ent, 'entity/' + ent + '/edit', 'requests', 'account/' + ent, 'refunds', 'disputes', 'calendar', 'adjust/' + ent, 'users', 'audit', 'settings', 'annual/' + ent + '/2026']) { await go('#/' + s + '/' + v, 1500); await clean(lang + ' ' + s + ' ' + v); }
       for (const tab of (s === 'vat' ? VAT : WHT)) { await go('#/' + s + '/ex/' + ex + '/' + tab, 1300); await clean(lang + ' ' + s + ' ex ' + tab); }
       for (const r of ['summary', 'portfolio', 'aging', 'exposure', 'corrections', 'calendar', 'beneficiaries']) { await go('#/' + s + '/reports/' + r, 1800); await clean(lang + ' ' + s + ' report ' + r); }
     }
