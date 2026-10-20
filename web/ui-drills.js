@@ -148,6 +148,51 @@
     return { title: { active: t('Active users'), signoff: t('Can sign off'), none: t('Without any company') }[k], total: l.length, totalLabel: t('people'), money: false, rows: l.map(function (u) { var n = all(u) ? S.entities.length : (u.entityIds || []).length; return { label: Z.userLabel ? Z.userLabel(u) : u.name, sub: t(Z.cap(u.role)) + ', ' + u.email, value: n, display: all(u) ? t('All companies') : n + ' ' + t('companies'), href: '#/users' }; }).sort(desc) };
   };
 
+  // ---------------------------------------------------------------- analytics: what the ratios are made of
+  var CATN = { S: 'Standard rated', Z: 'Zero rated', X: 'Exports', E: 'Exempt', IMP: 'Imports', RCM: 'Reverse charge', SC: 'Sales to citizens' };
+  var byCat = function (flow) {
+    var o = {}; (S.data.sys_vat || []).forEach(function (r) { if (r.flow !== flow) return; var k = r.category || '?', x = o[k] = o[k] || { n: 0, net: 0, vat: 0 }; x.n++; x.net += +r.net || 0; x.vat += +r.vat || 0; });
+    return o;
+  };
+  var hist = function () {
+    var ex = S.ex; if (!ex) return [];
+    return S.exercises.filter(function (x) { return x.entityId === ex.entityId && x.summary; }).sort(function (a, b) { return a.period < b.period ? 1 : -1; }).slice(0, 12);
+  };
+  D.an = function (k) {
+    if (k === 'rate') { var c = byCat('S'); return { title: t('Effective VAT rate on standard sales'), sub: t('VAT divided by net, by category'), money: false, rows: Object.keys(c).map(function (x) { var v = c[x]; return { label: t(CATN[x] || x), sub: Z.count(v.n) + ' ' + t('invoices') + ', ' + t('net') + ' ' + Z.fmt(v.net) + ', ' + t('VAT') + ' ' + Z.fmt(v.vat), value: v.net ? v.vat / v.net * 100 : 0, display: v.net ? Z.fmt(v.vat / v.net * 100, 3) + '%' : '-', tone: x === 'S' && v.net && Math.abs(v.vat / v.net - S.settings.vatRate) >= 0.00001 ? 'fail' : '', href: exHref('analytics') }; }).sort(desc), note: t('Standard-rated sales should come out at exactly the VAT rate; anything else means a wrong rate on some invoices.') }; }
+    if (k === 'io') return { title: t('Input VAT as % of output VAT'), sub: t('Period by period'), money: false, rows: hist().map(function (x) { var s = x.summary, v = s.outputVat ? s.inputVat / s.outputVat * 100 : null; return { label: x.period, sub: t('Input VAT') + ' ' + Z.fmt(s.inputVat) + ', ' + t('Output VAT') + ' ' + Z.fmt(s.outputVat), value: v || 0, display: v == null ? '-' : Z.fmt(v, 1) + '%', tone: v > ((S.settings.trend || {}).inputOutputMax || 90) ? 'warn' : '', href: '#/ex/' + x.id + '/analytics' }; }), empty: t('No earlier periods yet.') };
+    if (k === 'zero') { var s = byCat('S'), tot = Object.keys(s).reduce(function (a, x) { return a + s[x].net; }, 0); return { title: t('Zero-rated, export and exempt share of sales'), sub: t('Sales by VAT category'), total: tot, totalLabel: 'SAR', rows: Object.keys(s).map(function (x) { return { label: t(CATN[x] || x), sub: Z.count(s[x].n) + ' ' + t('invoices') + ', ' + (tot ? Z.fmt(s[x].net / tot * 100, 1) : '0') + '%', value: s[x].net, tone: x === 'S' ? '' : 'warn', href: exHref('vat') }; }).sort(desc) }; }
+    if (k === 'inv') { var rows = []; ['S', 'P'].forEach(function (f) { var c2 = byCat(f); Object.keys(c2).forEach(function (x) { rows.push({ label: (f === 'S' ? t('Sales') : t('Purchases')) + ': ' + t(CATN[x] || x), sub: t('net') + ' ' + Z.fmt(c2[x].net), value: c2[x].n, href: exHref('data') }); }); }); return { title: t('Invoices analysed'), total: (S.data.sys_vat || []).length, totalLabel: t('invoices'), money: false, rows: rows.sort(desc) }; }
+    return null;
+  };
+
+  // ---------------------------------------------------------------- sample detail: the items behind the evaluation
+  D.smp = function (k) {
+    var s = (S.samples || []).filter(function (x) { return x.id === S.sampleId; })[0]; if (!s) return null;
+    var ev = E.evaluateSample(s, s.confidence), A = E.ATTRIBUTES[s.flow] || [], items = s.items || [];
+    var tested = function (x) { return x.tests && Object.keys(x.tests).length; }, failed = function (x) { return x.tests && Object.keys(x.tests).some(function (q) { return x.tests[q] === 'fail'; }); };
+    var item = function (x, v, disp, tone) { return { label: x.ref, sub: [x.date, x.party].filter(Boolean).join(', '), value: v, display: disp, tone: tone }; };
+    if (k === 'tested') return { title: t('Items tested'), money: false, total: ev.tested + ' / ' + ev.total, totalLabel: t('items'), rows: items.map(function (x) { return item(x, tested(x) ? 1 : 0, tested(x) ? (failed(x) ? t('Deviation') : t('Passed')) : t('Not tested'), tested(x) ? (failed(x) ? 'fail' : 'pass') : 'warn'); }) };
+    if (k === 'dev') return { title: t('Deviation rate'), sub: t('By attribute tested'), money: false, rows: A.map(function (a, i) { var b = ev.byAttr[i] || {}; return { label: S.lang === 'ar' ? a[2] : a[1], sub: (b.fails || 0) + ' / ' + (b.tested || 0) + ' ' + t('items') + (b.upper != null ? ', ' + t('upper limit') + ' ' + b.upper + '%' : ''), value: b.rate || 0, display: (b.rate || 0) + '%', tone: b.fails ? 'fail' : 'pass' }; }) };
+    if (k === 'mis') { var mis = items.filter(function (x) { return x.audited != null && x.audited !== '' && Math.abs((+x.book || 0) - (+x.audited)) > 0.005; }); return { title: t('Misstatement found'), sub: t('Book value less audited value'), total: ev.actualMisstatement, totalLabel: 'SAR', rows: mis.map(function (x) { return item(x, (+x.book || 0) - (+x.audited), null, 'fail'); }), empty: t('No misstatement in the items tested.') }; }
+    if (k === 'proj') return { title: t('Projected to population'), total: ev.projected, totalLabel: 'SAR', rows: [{ label: t('Misstatement found'), value: ev.actualMisstatement }, { label: t('Projected to population'), value: ev.projected, tone: ev.projected ? 'warn' : 'pass' }].concat(ev.upperLimit != null ? [{ label: t('upper limit'), value: ev.upperLimit, tone: 'fail' }] : []), note: t('Monetary-unit samples project each item\'s tainting over its sampling interval; other samples scale the misstatement by population over sample value.') };
+    return null;
+  };
+
+  // ---------------------------------------------------------------- Zakat worksheet: how the base and the amount are built
+  var ZL = [['capital', 'Capital'], ['reserves', 'Reserves'], ['retainedEarnings', 'Retained earnings'], ['provisions', 'Provisions'], ['longTermFinancing', 'Long-term financing'], ['otherAdditions', 'Other additions'], ['adjustedNetProfit', 'Adjusted net profit']];
+  var ZD = [['netFixedAssets', 'Net fixed assets'], ['longTermInvestments', 'Long-term investments'], ['accumulatedLosses', 'Accumulated losses'], ['otherDeductions', 'Other deductions']];
+  D.zk = function (k) {
+    var z = (S.annual && S.annual.zakat) || {}, res = E.zakat(z, S.settingsDoc ? S.settingsDoc.values : {});
+    var line = function (l, sign) { return { label: t(l[1]), sub: sign > 0 ? t('Addition') : t('Deduction'), value: +z[l[0]] || 0, tone: sign > 0 ? '' : 'warn' }; };
+    if (k === 'base') return { title: t('Computed Zakat base'), sub: t('Additions less deductions'), total: res.base, totalLabel: 'SAR', rows: ZL.map(function (l) { return line(l, 1); }).concat(ZD.map(function (l) { return line(l, -1); })).filter(function (r) { return r.value; }), note: t('Additions') + ' ' + Z.fmt(res.additions) + ' - ' + t('deductions') + ' ' + Z.fmt(res.deductions) + ' = ' + Z.fmt(res.base) };
+    if (k === 'used') return { title: t('Base used (not below adjusted net profit)'), total: res.baseUsed, totalLabel: 'SAR', rows: [{ label: t('Computed Zakat base'), value: res.base, tone: res.baseUsed === res.base ? 'pass' : '' }, { label: t('Adjusted net profit'), value: res.adjustedNetProfit, tone: res.baseUsed === res.adjustedNetProfit && res.base < res.adjustedNetProfit ? 'pass' : '' }], note: t('The larger of the two is used.') };
+    if (k === 'rate') return { title: t('Rate applied'), money: false, rows: [{ label: t('Zakat rate'), value: 2.5, display: '2.5%' }, { label: t('Year type'), value: 0, display: z.yearType === 'hijri' ? t('Hijri') : t('Gregorian') }, { label: t('Rate applied'), value: res.rate * 100, display: Z.r(res.rate * 100) + '%' }], note: t('A Gregorian year is 11 days longer than a Hijri one, so the rate is raised by 365/354, except when the base is the adjusted net profit.') };
+    if (k === 'due') return { title: t('Zakat due (SAR)'), total: res.zakat, totalLabel: 'SAR', rows: [{ label: t('Base used'), value: res.baseUsed }, { label: t('Rate applied'), value: res.rate * 100, display: Z.r(res.rate * 100) + '%' }, { label: t('Declared in the return'), value: +z.declared || 0, tone: z.declared != null && z.declared !== '' && Math.abs(+z.declared - res.zakat) > 1 ? 'fail' : '' }] };
+    if (k === 'when') return { title: t('Return due'), money: false, rows: [{ label: t('Year end'), value: 0, display: z.fyEnd || '-' }, { label: t('Due (120 days later)'), value: 0, display: res.dueDate || '-' }, { label: t('Filed and paid on'), value: 0, display: z.filedOn || '-', tone: z.filedOn && res.dueDate && z.filedOn > res.dueDate ? 'fail' : 'pass' }] };
+    return null;
+  };
+
   // ---------------------------------------------------------------- recognise cards by their label
   var view = function () { return (S.route || [])[0] || 'dashboard'; }, tab = function () { return (S.route || [])[2] || 'overview'; };
   var RULES = [
@@ -170,7 +215,7 @@
     main.querySelectorAll('.kpis > div:not([data-drill])').forEach(function (tile) {
       var sp = tile.querySelector(':scope > span'); if (!sp) return;
       var label = sp.textContent.trim(), key = null;
-      RULES.some(function (r) { var en = t(r[0]); if (label === en || label.indexOf(en + ',') === 0) { key = typeof r[1] === 'function' ? r[1]() : r[1]; return true; } return false; });
+      RULES.some(function (r) { var en = t(r[0]); if (label === en || label.indexOf(en + ',') === 0 || label.indexOf(en + ' ·') === 0) { key = typeof r[1] === 'function' ? r[1]() : r[1]; return true; } return false; });
       if (!key) Object.keys(EST).some(function (en) { if (label === t(en)) { key = 'einvstatus:' + EST[en]; return true; } return false; });
       if (!key && view() === 'ex' && tab() === 'einv' && /^[A-Z_]+$/.test(label)) key = 'einvstatus:' + label;
       if (key) tile.setAttribute('data-drill', key);

@@ -32,7 +32,7 @@ See README.md for the feature map and deployment.
 (`tests/fuzz.js`: messy values, bad dates, any period since 2018 — no NaN,
 no negative exposure, no crash). `npm run perf` — 20,000 invoices under 4 s.
 With `npm run dev` running, four browser suites drive the real UI in headless
-Chrome: `npm run e2e` (journeys, every page EN/AR/phone, 1,181 checks),
+Chrome: `npm run e2e` (journeys, every page EN/AR/phone, 1,366 checks; every KPI card must open a breakdown),
 `e2e:edge` (quarterly/no-WHT/2018, empty exercise, signed-off read-only,
 deletes, broken links), `e2e:security` (script injection through every field),
 `e2e:a11y` (axe-core WCAG 2.1 AA on 117 screens; keep it at zero). Chrome must

@@ -70,7 +70,7 @@
       '<div class="zk-gl"><label class="f"><span>' + t('Balance per general ledger') + '</span><input type="number" step="0.01" data-chg="soagl" value="' + (gl == null ? '' : gl) + '"' + (can ? '' : ' disabled') + ' placeholder="' + esc(t('Net of all ZATCA accounts')) + '"></label>' +
       '<label class="f"><span>' + t('Statement date') + '</span><input type="date" data-chg="soaasof" value="' + esc(doc.asOf || '') + '"' + (can ? '' : ' disabled') + '></label></div></div>' +
       '<div class="zk-run">' + runChart(rec.lines) + '</div></section>';
-    var kp = '<div class="kpis">' + kpi('scales', fmt(rec.balance), t('Balance per ZATCA statement'), 'soa:tax') + kpi('book-open', gl == null ? '-' : fmt(gl), t('Balance per general ledger'), null) +
+    var kp = '<div class="kpis">' + kpi('scales', fmt(rec.balance), t('Balance per ZATCA statement'), 'soa:tax') + kpi('book-open', gl == null ? '-' : fmt(gl), t('Balance per general ledger'), 'soa:gl') +
       kpi('gavel', fmt(rec.penalties), t('Penalties on the statement'), 'soa:pen', sa('SA3').status === 'fail' ? 'bad' : '') + kpi('alarm', fmt(rec.overdue), t('Unpaid after the due date'), 'soa:over', rec.overdue ? 'bad' : '') +
       kpi('shield-warning', fmt(rec.exposure), t('Exposure (SAR)'), 'soa:expo', rec.exposure ? 'bad' : '') + '</div>';
     var checks = '<section class="paper"><header><div><h2>' + t('What the statement says about your filings') + '</h2><p>' + t('ZATCA keeps its own ledger for the company. Inspectors start from it: every return, assessment, penalty and payment should agree with your books.') + '</p></div>' +
@@ -164,7 +164,14 @@
     if (k === 'tax') return { title: t('Balance per ZATCA statement'), sub: t('By tax'), total: rec.balance, totalLabel: 'SAR', rows: Object.keys(rec.byTax).map(function (x) { var b = rec.byTax[x]; return { label: taxName(x), sub: t('Debit') + ' ' + fmt(b.debit) + ', ' + t('Credit') + ' ' + fmt(b.credit), value: b.balance, tone: b.balance > 0 ? 'warn' : 'pass' }; }) };
     if (k === 'pen') { var p = rec.lines.filter(function (l) { return l.kind === 'penalty' && l.debit; }); return { title: t('Penalties on the statement'), total: rec.penalties, totalLabel: 'SAR', rows: p.map(function (l) { return Object.assign(lineRow(l, l.debit), { href: '#/' + S.tax + '/disputes' }); }), empty: t('No penalties on the statement.'), note: t('Record each penalty in Disputes and penalties with its reference so the decision and deadline are tracked.') }; }
     if (k === 'over') { var o = (rec.checks[4].exceptions || {}).list || []; return { title: t('Unpaid after the due date'), total: rec.overdue, totalLabel: 'SAR', rows: o.map(function (x) { return { label: taxName(x.tax) + ' ' + x.period, sub: t('Due') + ' ' + x.due + ', ' + x.overdue + ' ' + t('days') + ', ' + t('estimated fine') + ' ' + fmt(x.penalty), value: x.amount, tone: 'fail' }; }), empty: t('Nothing overdue.') }; }
-    if (k === 'expo') return { title: t('Exposure (SAR)'), sub: t('Each difference counted once'), total: rec.exposure, totalLabel: 'SAR', rows: rec.checks.filter(function (c) { return c.exposure; }).map(function (c) { return { label: c.id + ' ' + (ar() ? c.titleAr : c.title), value: c.exposure, tone: 'fail', href: '#c-' + c.id }; }), empty: t('Nothing exposed.') };
+    if (k === 'gl') {
+      var g = SOA.doc.glBalance == null || SOA.doc.glBalance === '' ? null : +SOA.doc.glBalance, diff = g == null ? null : rec.balance - g, sa = function (id) { return rec.checks.filter(function (c) { return c.id === id; })[0] || {}; };
+      var pen = sa('SA3').exposure || 0, ret = sa('SA2').diff || 0, rest = diff == null ? 0 : Math.round((diff - pen - ret) * 100) / 100;
+      return { title: t('Balance per general ledger'), sub: t('Against the ZATCA statement'), total: g, totalLabel: 'SAR', rows: g == null ? [] : [{ label: t('Balance per ZATCA statement'), value: rec.balance }, { label: t('Balance per general ledger'), value: g }, { label: t('Difference'), value: diff, tone: Math.abs(diff) > 1 ? 'fail' : 'pass' },
+        { label: t('Penalties not booked'), sub: 'SA3', value: pen, tone: pen ? 'warn' : '', act: 'gocheck', data: { id: 'SA3' } }, { label: t('Returns posted at a different amount'), sub: 'SA2', value: ret, tone: ret ? 'warn' : '', act: 'gocheck', data: { id: 'SA2' } }, { label: t('Not explained'), value: rest, tone: Math.abs(rest) > 1 ? 'fail' : 'pass' }],
+        empty: t('Enter the GL balance of the ZATCA accounts on this page.') };
+    }
+    if (k === 'expo') return { title: t('Exposure (SAR)'), sub: t('Each difference counted once'), total: rec.exposure, totalLabel: 'SAR', rows: rec.checks.filter(function (c) { return c.exposure; }).map(function (c) { return { label: c.id + ' ' + (ar() ? c.titleAr : c.title), value: c.exposure, tone: 'fail', act: 'gocheck', data: { id: c.id } }; }), empty: t('Nothing exposed.') };
     return null;
   };
 

@@ -37,13 +37,14 @@ async function audit(label) {
     var tabInfo = tabs ? '' : [].slice.call(document.querySelectorAll('#main nav.tabs')).map(function (n) { return n.clientWidth + '/' + n.scrollWidth + ' ' + [].slice.call(n.children).map(function (c) { return (c.tagName === 'DETAILS' ? 'MORE' : c.textContent.trim().slice(0, 12)) + ':' + Math.round(c.getBoundingClientRect().width); }).join(' | '); }).join(' ;; ');
     var untranslated = 0;
     if (document.documentElement.lang === 'ar') { untranslated = (txt.match(/\\b(Loading|Save|Cancel|Delete|Upload|Status|Total|Period|Entity)\\b/g) || []).length; }
-    return { len: txt.trim().length, bad: bad.slice(0, 3), sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth, tabs: tabs, notFound: /not found|غير موجود/i.test(txt.slice(0, 200)), untranslated: untranslated, tabInfo: tabInfo };`);
+    return { len: txt.trim().length, bad: bad.slice(0, 3), sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth, tabs: tabs, notFound: /not found|غير موجود/i.test(txt.slice(0, 200)), untranslated: untranslated, tabInfo: tabInfo, nodrill: [].slice.call(document.querySelectorAll('#main .kpis > div:not([data-drill])')).map(function (d) { return (d.querySelector(':scope > span') || {}).textContent; }) };`);
   ok(a.len > 40, label + ': page is empty');
   ok(!a.bad.length, label + ': shows ' + a.bad.join(', '));
   ok(a.sw <= a.cw + 1, label + ': horizontal overflow ' + a.sw + ' > ' + a.cw);
   ok(a.tabs, label + ': tab strip wraps or scrolls ' + a.tabInfo);
   ok(!a.notFound, label + ': says not found');
   ok(!a.untranslated, label + ': English words left in Arabic (' + a.untranslated + ')');
+  ok(!a.nodrill.length, label + ': cards without a breakdown: ' + a.nodrill.join(' / '));
   return a;
 }
 
@@ -244,7 +245,7 @@ async function audit(label) {
   ok(await ev("var t = document.querySelector('#main').innerText; return t.indexOf('59,325.00') >= 0 && t.indexOf('56,500.00') >= 0 && t.indexOf('2,830.00') >= 0"), 'statement balance, GL and exposure in accounting format');
   ok(await ev("return document.querySelectorAll('#main .check').length === 5 && /1 \\/ 5/.test(document.querySelector('.score-chip').textContent)"), 'five statement checks, one agrees');
   ok(await ev("return document.querySelectorAll('.zk-run svg .pen').length >= 1"), 'penalties marked on the balance chart');
-  await click('[data-drill="soa:pen"]', 900);
+  await click('[data-drill="soa:pen"]', 1500);
   ok(await ev("var d = document.querySelector('.drawer'); return !!d && d.querySelectorAll('.dr-row').length === 2 && /12,325\\.00/.test(d.innerText)"), 'penalties drill lists both penalties');
   await ev('Z.closeDrawer(true); return 1');
   await click('[data-act="soaline"]', 800);

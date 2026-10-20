@@ -468,6 +468,7 @@
   }
   // jump to a check, on this tab or another
   Z.ACT.gocheck = function (el) {
+    if (Z.closeDrawer) Z.closeDrawer(true);
     var id = el.dataset.id, tab = el.dataset.tab, go = function () { var c = document.getElementById('c-' + id); if (c) { c.scrollIntoView({ behavior: 'smooth', block: 'center' }); c.classList.add('flash'); setTimeout(function () { c.classList.remove('flash'); }, 1600); } };
     if (tab && (S.route || [])[2] !== tab) { location.hash = '#/ex/' + S.ex.id + '/' + tab; setTimeout(go, 600); } else go();
   };
@@ -534,9 +535,9 @@
   // ---------------------------------------------------------------- analytics
   Z.tabs.analytics = function () {
     var A = S.R.analytics, ra = A.ratios;
-    var tiles = '<div class="kpis"><div class="' + (ra.effectiveRate != null && Math.abs(ra.effectiveRate - S.settings.vatRate * 100) >= 0.001 ? 'bad' : '') + '"><b>' + (ra.effectiveRate == null ? '-' : ra.effectiveRate + '%') + '</b><span>' + t('Effective VAT rate on standard sales') + '</span></div>' +
-      '<div><b>' + (ra.inputToOutput == null ? '-' : ra.inputToOutput + '%') + '</b><span>' + t('Input VAT as % of output VAT') + '</span></div><div><b>' + (ra.zeroExemptShare == null ? '-' : ra.zeroExemptShare + '%') + '</b><span>' + t('Zero-rated, export and exempt share of sales') + '</span></div>' +
-      '<div><b>' + Z.count((S.data.sys_vat || []).length) + '</b><span>' + t('Invoices analysed') + '</span></div></div>';
+    var tiles = '<div class="kpis"><div class="' + (ra.effectiveRate != null && Math.abs(ra.effectiveRate - S.settings.vatRate * 100) >= 0.001 ? 'bad' : '') + '" data-drill="an:rate"><b>' + (ra.effectiveRate == null ? '-' : ra.effectiveRate + '%') + '</b><span>' + t('Effective VAT rate on standard sales') + '</span></div>' +
+      '<div data-drill="an:io"><b>' + (ra.inputToOutput == null ? '-' : ra.inputToOutput + '%') + '</b><span>' + t('Input VAT as % of output VAT') + '</span></div><div data-drill="an:zero"><b>' + (ra.zeroExemptShare == null ? '-' : ra.zeroExemptShare + '%') + '</b><span>' + t('Zero-rated, export and exempt share of sales') + '</span></div>' +
+      '<div data-drill="an:inv"><b>' + Z.count((S.data.sys_vat || []).length) + '</b><span>' + t('Invoices analysed') + '</span></div></div>';
     var list = A.tests.map(function (x) {
       var extra = x.dist ? benford(x.dist) : x.items.length ? '<details><summary>' + t('Show') + ' ' + Z.count(x.count) + '</summary>' + Z.rowsTable(x.items.slice(0, 200), ['invoice', 'date', 'party', 'vatNo', 'country', 'category', 'net', 'vat', 'reason'].filter(function (c) { return x.items[0][c] !== undefined; })) + '</details>' : '';
       return '<div class="check">' + Z.tick(x.status) + '<div><h3>' + esc(x.id) + ' · ' + esc(Z.tt(x, 'title')) + ' ' + Z.pill(x.severity, t(Z.cap(x.severity))) + '</h3><div class="figs">' + (x.status === 'na' ? '' : '<span>' + t('Items') + ': <b>' + Z.count(x.count) + '</b></span>' + (x.amount ? '<span>' + t('Amount') + ': <b>' + fmt(x.amount) + '</b></span>' : '')) + '</div><p class="faint" style="font-size:12.5px;margin:4px 0 0">' + esc(t(x.desc || '')) + '</p>' + extra + '</div>' +

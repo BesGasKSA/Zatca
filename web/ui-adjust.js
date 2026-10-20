@@ -48,7 +48,7 @@
     var sections = E.ADJ_REGS.map(function (k, i) { return section(k, res.checks[i], res[k], can); }).join('');
     Z.setMain('<div class="pagehead"><div><p class="eyebrow">' + Z.icon('sliders-horizontal') + ' ' + t('VAT') + '</p><h1>' + t('VAT adjustments') + ': ' + esc(Z.entName(e)) + '</h1><p>' + t('The adjustments an inspector looks for outside the monthly ledger: capital assets, bad debts, advance payments, foreign currency and related parties.') + '</p></div>' + (right ? '<div class="row">' + right + '</div>' : '') + '</div>' +
       '<div class="stack"><div class="kpis">' + kpi('arrow-fat-line-up', fmt(res.exposure), t('VAT to pay (SAR)'), 'adj:due', res.exposure ? 'bad' : '') + kpi('arrow-u-up-left', fmt(res.recover), t('VAT to reclaim (SAR)'), 'adj:rec', res.recover ? 'good' : '') +
-      kpi('warning-circle', res.issues, t('Registers with issues'), 'adj:issues', res.issues ? 'bad' : '') + kpi('list-bullets', items, t('Items in the registers'), null) + '</div>' +
+      kpi('warning-circle', res.issues, t('Registers with issues'), 'adj:issues', res.issues ? 'bad' : '') + kpi('list-bullets', items, t('Items in the registers'), 'adj:items') + '</div>' +
       '<p class="muted zk-src">' + Z.icon('info') + t('Capital assets follow VAT IR Art. 52 (10 years for buildings, 6 for other assets). The bad-debt conditions, the 15-day invoice rule for advances and the related-party rule come from adviser summaries: verify for your case; they are editable in Settings.') + '</p>' +
       chart + sections + '</div>');
   }
@@ -93,7 +93,7 @@
   }
   function save(msg) { return Z.save('registers', A.doc).then(function (d) { A.doc = d; E.ADJ_REGS.forEach(function (k) { A.doc[k] = Array.isArray(A.doc[k]) ? A.doc[k] : []; }); render(); if (msg) Z.toast(msg); }); }
   Z.CHG.adjent = function (el) { location.hash = '#/' + S.tax + '/adjust/' + el.value; };
-  Z.ACT.adjjump = function (el) { var x = document.getElementById('reg-' + REG[el.dataset.k].check); if (x) { x.scrollIntoView({ behavior: 'smooth', block: 'start' }); x.classList.add('flash'); setTimeout(function () { x.classList.remove('flash'); }, 1600); } };
+  Z.ACT.adjjump = function (el) { if (Z.closeDrawer) Z.closeDrawer(true); var x = document.getElementById('reg-' + REG[el.dataset.k].check); if (x) { x.scrollIntoView({ behavior: 'smooth', block: 'start' }); x.classList.add('flash'); setTimeout(function () { x.classList.remove('flash'); }, 1600); } };
   Z.ACT.adjedit = function (el) {
     if (Z.closeDrawer) Z.closeDrawer(true);
     var k = el.dataset.k, i = el.dataset.i == null ? -1 : +el.dataset.i, R = REG[k], it = i >= 0 ? A.doc[k][i] : {};
@@ -135,7 +135,8 @@
     }); });
     if (k === 'due') return { title: t('VAT to pay (SAR)'), total: res.exposure, totalLabel: 'SAR', rows: lines.filter(function (l) { return l.due; }).map(function (l) { return { label: l.label, sub: l.sub, value: l.due, tone: 'fail', act: l.act, data: l.data }; }).sort(function (a, b) { return b.value - a.value; }), empty: t('Nothing to pay.') };
     if (k === 'rec') return { title: t('VAT to reclaim (SAR)'), total: res.recover, totalLabel: 'SAR', rows: lines.filter(function (l) { return l.rec; }).map(function (l) { return { label: l.label, sub: l.sub, value: l.rec, tone: 'pass', act: l.act, data: l.data }; }), empty: t('Nothing to reclaim.') };
-    if (k === 'issues') return { title: t('Registers with issues'), money: false, total: res.issues, totalLabel: t('registers'), rows: res.checks.filter(function (c) { return c.status === 'fail' || c.status === 'warn'; }).map(function (c, i) { return { label: c.id + ' ' + (ar() ? c.titleAr : c.title), value: c.exposure || 0, display: c.exposure ? fmt(c.exposure) : t('Review'), tone: c.status === 'fail' ? 'fail' : 'warn', href: '#reg-' + c.id }; }), empty: t('No issues.') };
+    if (k === 'items') return { title: t('Items in the registers'), money: false, total: E.ADJ_REGS.reduce(function (s, rk) { return s + A.doc[rk].length; }, 0), totalLabel: t('items'), rows: E.ADJ_REGS.map(function (rk) { return { label: t(REG[rk].title), value: A.doc[rk].length, act: 'adjjump', data: { k: rk } }; }) };
+    if (k === 'issues') return { title: t('Registers with issues'), money: false, total: res.issues, totalLabel: t('registers'), rows: res.checks.filter(function (c) { return c.status === 'fail' || c.status === 'warn'; }).map(function (c, i) { return { label: c.id + ' ' + (ar() ? c.titleAr : c.title), value: c.exposure || 0, display: c.exposure ? fmt(c.exposure) : t('Review'), tone: c.status === 'fail' ? 'fail' : 'warn', act: 'adjjump', data: { k: E.ADJ_REGS[['AJ1','AJ2','AJ3','AJ4','AJ5'].indexOf(c.id)] } }; }), empty: t('No issues.') };
     return null;
   };
 })();
