@@ -28,6 +28,14 @@
  *   - input VAT on a staff dinner, a hotel stay and the GM's car; exempt sales
  *     with no apportionment; SAR 30,000 of gifts against a SAR 4,167 monthly relief
  *   - one export without a customs export declaration (plus the export to SA)
+ *   - ZATCA statement of account (Jun-Sep 2026): the August WHT return posted at
+ *     SAR 10,340 against 9,840 filed and only 9,840 paid (SAR 500 overdue), a
+ *     SAR 2,325 late-payment penalty nobody recorded, so the statement is SAR 2,825
+ *     above the GL; the disputed assessment and e-invoicing penalty are booked
+ *   - disputes: an assessment under objection, a penalty still to object to (due
+ *     in 60 days of notice), one closed with SAR 3,000 relief
+ *   - refunds: one waiting on documents ZATCA asked for, one paid SAR 2,550
+ *     short, one draft below the SAR 5,000 minimum
  *   - management fees to the parent with no reverse-charge VAT; a reverse-charged
  *     training service with no WHT line
  *   - WHT filed and paid 2 days late (late, but under 30 days: no fine)
@@ -259,6 +267,37 @@
       requests: [
         { type: 'information', reference: 'ZATCA-IR-2026-55821', receivedOn: '2026-10-12', dueOn: '2026-10-22', items: 'Sales listing Q3 2026, bank statements Jul-Sep, 25 sample tax invoices', owner: 'Tax manager', status: 'open' },
         { type: 'assessment', reference: 'ZATCA-AS-2026-11402', period: '2025-Q4', receivedOn: '2026-08-25', amount: 46500, items: 'Assessment of input VAT on hospitality and vehicle expenses', owner: 'CFO', status: 'open' }
+      ],
+      statement: { asOf: '2026-10-08', glBalance: 56500, lines: [
+        { date: '2026-07-10', taxType: 'Withholding tax', period: '2026-06', kind: 'Return', description: 'WHT return June 2026', reference: 'WHT-2606', debit: 7650, credit: 0 },
+        { date: '2026-07-10', taxType: 'Withholding tax', period: '2026-06', kind: 'Payment', description: 'SADAD payment', reference: 'SD-770121', debit: 0, credit: 7650 },
+        { date: '2026-07-30', taxType: 'VAT', period: '2026-06', kind: 'Payment', description: 'SADAD payment', reference: 'SD-771940', debit: 0, credit: 318400 },
+        { date: '2026-07-31', taxType: 'VAT', period: '2026-06', kind: 'Return', description: 'VAT return June 2026', reference: 'VAT-2606', debit: 318400, credit: 0 },
+        { date: '2026-08-10', taxType: 'Withholding tax', period: '2026-07', kind: 'Return', description: 'WHT return July 2026', reference: 'WHT-2607', debit: 8920, credit: 0 },
+        { date: '2026-08-10', taxType: 'Withholding tax', period: '2026-07', kind: 'Payment', description: 'SADAD payment', reference: 'SD-780433', debit: 0, credit: 8920 },
+        { date: '2026-08-25', taxType: 'VAT', period: '2025-Q4', kind: 'Assessment', description: 'Assessment - input VAT on hospitality and vehicles', reference: 'ZATCA-AS-2026-11402', debit: 46500, credit: 0 },
+        { date: '2026-08-31', taxType: 'VAT', period: '2026-07', kind: 'Return', description: 'VAT return July 2026', reference: 'VAT-2607', debit: 401220, credit: 0 },
+        { date: '2026-08-31', taxType: 'VAT', period: '2026-07', kind: 'Payment', description: 'SADAD payment', reference: 'SD-781002', debit: 0, credit: 401220 },
+        { date: '2026-09-10', taxType: 'Withholding tax', period: '2026-08', kind: 'Return', description: 'WHT return August 2026 (amended by ZATCA)', reference: 'WHT-2608', debit: 10340, credit: 0 },
+        { date: '2026-09-10', taxType: 'Withholding tax', period: '2026-08', kind: 'Payment', description: 'SADAD payment', reference: 'SD-790118', debit: 0, credit: 9840 },
+        { date: '2026-09-15', taxType: 'VAT', period: '2025-12', kind: 'Penalty', description: 'Late payment penalty VAT December 2025', reference: 'ZATCA-PN-2026-0912', debit: 2325, credit: 0 },
+        { date: '2026-09-20', taxType: 'VAT', period: '2026-08', kind: 'Penalty', description: 'E-invoicing violation - simplified invoices reported late', reference: 'ZATCA-PN-2026-0877', debit: 10000, credit: 0 },
+        { date: '2026-09-29', taxType: 'VAT', period: '2026-08', kind: 'Payment', description: 'SADAD payment', reference: 'SD-799310', debit: 0, credit: 412880 },
+        { date: '2026-09-30', taxType: 'VAT', period: '2026-08', kind: 'Return', description: 'VAT return August 2026', reference: 'VAT-2608', debit: 412880, credit: 0 }
+      ] },
+      disputes: [
+        { kind: 'assessment', tax: 'VAT', reference: 'ZATCA-AS-2026-11402', period: '2025-Q4', title: 'Input VAT on hospitality and vehicles disallowed', amount: 46500, penalty: 23250, noticeOn: '2026-08-25', stage: 'objection', objectionOn: '2026-10-05', decision: 'object', owner: 'CFO', grounds: 'Vehicles are pool cars used for deliveries (log books attached); hospitality was for customer events.' },
+        { kind: 'penalty', tax: 'VAT', reference: 'ZATCA-PN-2026-0877', period: '2026-08', title: 'E-invoicing: simplified invoices reported after 24 hours', amount: 0, penalty: 10000, noticeOn: '2026-09-20', stage: 'notice', decision: 'object', owner: 'Tax manager', grounds: 'First violation: a warning is due before a fine. Ask for cancellation.' },
+        { kind: 'penalty', tax: 'WHT', reference: 'ZATCA-PN-2025-4410', period: '2025-03', title: 'WHT late filing penalty', amount: 0, penalty: 6000, noticeOn: '2025-05-02', stage: 'closed', objectionOn: '2025-06-10', decision: 'object', paidAmount: 3000, reliefAmount: 3000, outcome: 'partial', owner: 'Tax manager' }
+      ],
+      refunds: [
+        { period: '2025-11', amount: 38400, status: 'info_requested', submittedOn: '2026-09-02', infoRequestedOn: '2026-10-08', owner: 'Tax manager', note: 'Customs declarations for the November machinery imports' },
+        { period: '2025-06', amount: 21750, status: 'paid', submittedOn: '2025-07-20', approvedOn: '2025-09-14', paidOn: '2025-10-30', paidAmount: 19200, owner: 'Tax manager', note: 'ZATCA disallowed input VAT on two invoices without the buyer TRN' },
+        { period: '2026-02', amount: 3900, status: 'draft', owner: 'Accountant' }
+      ],
+      events: [
+        { title: 'Quarterly tax risk review with the board', tax: 'OTHER', date: '2026-10-25', repeat: 'quarterly', note: 'Exposure, open findings, disputes and refunds' },
+        { title: 'RETT payment: warehouse sale (deed 4301928)', tax: 'RETT', date: '2026-10-14', repeat: '', doneDates: ['2026-10-14'] }
       ],
       zakat2025: { capital: 10000000, reserves: 2000000, retainedEarnings: 6500000, provisions: 800000, longTermFinancing: 3000000, adjustedNetProfit: 4200000,
         netFixedAssets: 9500000, longTermInvestments: 2000000, yearType: 'gregorian', fyEnd: '2025-12-31', filedOn: '2026-04-28', declared: 380000 },

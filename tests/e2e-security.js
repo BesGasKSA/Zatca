@@ -100,6 +100,21 @@ async function clean(where) {
   await setVal('#qf [name=reference]', X('ref')); await setVal('#qf [name=items]', X('items')); await setVal('#qf [name=owner]', X('rowner'));
   await click('[data-act="savereq"]', 1500);
 
+  step = 'ZATCA account';
+  await go('#/vat/disputes', 1500); await click('.pagehead [data-act="editdispute"]', 800);
+  await setVal('#dsf [name=reference]', X('dref')); await setVal('#dsf [name=title]', X('dtitle')); await setVal('#dsf [name=grounds]', X('dgrounds')); await setVal('#dsf [name=owner]', X('downer'));
+  await click('[data-act="savedispute"]', 1500);
+  await go('#/vat/refunds', 1500); await click('.pagehead [data-act="editrefund"]', 800);
+  await setVal('#rff [name=period]', X('rperiod')); await setVal('#rff [name=amount]', '9000'); await setVal('#rff [name=note]', X('rnote')); await setVal('#rff [name=owner]', X('rfowner'));
+  await click('[data-act="saverefund"]', 1500);
+  await go('#/vat/calendar', 2000); await click('.pagehead [data-act="editevent"]', 800);
+  await setVal('#evf [name=title]', X('evtitle')); await setVal('#evf [name=note]', X('evnote'));
+  await click('[data-act="saveevent"]', 1500);
+  await go('#/vat/account', 1500); await click('[data-act="soaline"]', 800);
+  await setVal('#sf [name=description]', X('soadesc')); await setVal('#sf [name=reference]', X('soaref')); await setVal('#sf [name=period]', X('soaper')); await setVal('#sf [name=debit]', '50');
+  await click('[data-act="soalinesave"]', 1500);
+  await go('#/vat/ex/' + ex + '/vat', 1500); await click('[data-act="rvadd"]', 800); await setVal('#rvf [name=text]', X('review')); await click('[data-act="rvsave"]', 1500);
+
   step = 'users';
   await go('#/vat/users');
   await click('.pagehead [data-act="edituser"]', 800);
@@ -117,12 +132,14 @@ async function clean(where) {
   for (const lang of ['en', 'ar']) {
     await ev("localStorage.setItem('zr_lang','" + lang + "'); return 1"); await send('Page.reload'); await sleep(3000);
     for (const s of ['vat', 'wht']) {
-      for (const v of ['dashboard', 'insights/' + ent, 'entities', 'entity/' + ent, 'entity/' + ent + '/edit', 'requests', 'users', 'audit', 'settings', 'annual/' + ent + '/2026']) { await go('#/' + s + '/' + v, 1500); await clean(lang + ' ' + s + ' ' + v); }
+      for (const v of ['dashboard', 'insights/' + ent, 'entities', 'entity/' + ent, 'entity/' + ent + '/edit', 'requests', 'account/' + ent, 'refunds', 'disputes', 'calendar', 'users', 'audit', 'settings', 'annual/' + ent + '/2026']) { await go('#/' + s + '/' + v, 1500); await clean(lang + ' ' + s + ' ' + v); }
       for (const tab of (s === 'vat' ? VAT : WHT)) { await go('#/' + s + '/ex/' + ex + '/' + tab, 1300); await clean(lang + ' ' + s + ' ex ' + tab); }
       for (const r of ['summary', 'portfolio', 'aging', 'exposure', 'corrections', 'calendar', 'beneficiaries']) { await go('#/' + s + '/reports/' + r, 1800); await clean(lang + ' ' + s + ' report ' + r); }
     }
     await go('#/vat/ex/' + ex + '/findings', 1200); await click('[data-act="editfinding"][data-id]', 900); await clean(lang + ' finding dialog'); await click('[data-act="closemodal"]', 400);
     await go('#/vat/requests', 1500); await click('[data-act="editreq"][data-id]', 900); await clean(lang + ' request dialog'); await click('[data-act="closemodal"]', 400);
+    await go('#/vat/disputes', 1500); await click('[data-act="editdispute"][data-id]', 900); await clean(lang + ' dispute dialog'); await click('[data-act="closemodal"]', 400);
+    await go('#/vat/refunds', 1500); await click('[data-act="editrefund"][data-id]', 900); await clean(lang + ' refund dialog'); await click('[data-act="closemodal"]', 400);
     await go('#/vat/ex/' + ex + '/sampling', 1200); await click('[data-act="opensample"]', 900); await clean(lang + ' sample detail'); await click('[data-act="closesample"]', 400);
   }
   step = 'exports';

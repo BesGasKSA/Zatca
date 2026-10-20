@@ -172,6 +172,41 @@ t('preparer cannot sign off; manager can, and then the exercise is locked', func
   var re = ok(call({ action: 'get', token: A.token, table: 'exercises', id: ex.id })).doc; re.status = 'in_progress';
   ok(call({ action: 'save', token: A.token, table: 'exercises', doc: re }));
 });
+t('an open review note blocks sign-off; a preparer can only reply', function () {
+  var cur = ok(call({ action: 'get', token: A.token, table: 'exercises', id: ex.id })).doc;
+  cur.reviews = [{ id: 'RV-1', checkId: 'V1', text: 'Explain the box 6 gap', by: 'Aisha', at: '2026-10-19', status: 'open' }];
+  cur = ok(call({ action: 'save', token: A.token, table: 'exercises', doc: cur })).doc;
+  var mine = ok(call({ action: 'get', token: P.token, table: 'exercises', id: ex.id })).doc;
+  mine.reviews[0].reply = 'Timing: invoice 1043 posted in October'; mine.reviews[0].status = 'cleared'; mine.reviews[0].text = 'changed';
+  mine.reviews.push({ id: 'RV-2', text: 'self-made', status: 'cleared' });
+  var back = ok(call({ action: 'save', token: P.token, table: 'exercises', doc: mine })).doc;
+  assert.strictEqual(back.reviews.length, 1, 'a preparer cannot add a note');
+  assert.strictEqual(back.reviews[0].status, 'open', 'nor clear one');
+  assert.strictEqual(back.reviews[0].text, 'Explain the box 6 gap', 'nor rewrite it');
+  assert.strictEqual(back.reviews[0].reply, 'Timing: invoice 1043 posted in October');
+  assert.strictEqual(back.reviews[0].repliedBy, 'Pat');
+  back.status = 'closed';
+  err(call({ action: 'save', token: A.token, table: 'exercises', doc: back }), 'open_review_notes');
+  back.reviews[0].status = 'cleared'; back.reviews[0].clearedBy = 'Aisha';
+  var signed = ok(call({ action: 'save', token: A.token, table: 'exercises', doc: back })).doc;
+  assert.strictEqual(signed.status, 'closed');
+  signed.status = 'in_progress';
+  ok(call({ action: 'save', token: A.token, table: 'exercises', doc: signed }));
+  var bad = ok(call({ action: 'get', token: A.token, table: 'exercises', id: ex.id })).doc;
+  bad.reviews = [{ id: '../x', text: 'y' }];
+  err(call({ action: 'save', token: A.token, table: 'exercises', doc: bad }), 'bad_id');
+});
+t('statements, refunds, disputes and calendar events are scoped to an accessible entity', function () {
+  ['statements', 'refunds', 'disputes', 'events'].forEach(function (tb) {
+    var d = ok(call({ action: 'save', token: A.token, table: tb, doc: { entityId: ent.id, label: tb } })).doc;
+    assert.strictEqual(d.entityId, ent.id);
+    err(call({ action: 'save', token: B.token, table: tb, doc: { entityId: ent.id } }), 'forbidden');
+    err(call({ action: 'save', token: A.token, table: tb, doc: { label: 'no entity' } }), 'forbidden');
+    assert.strictEqual(ok(call({ action: 'list', token: B.token, table: tb })).docs.length, 0);
+    assert.strictEqual(ok(call({ action: 'list', token: P.token, table: tb })).docs.length, 1, 'preparer with access sees it');
+    ok(call({ action: 'remove', token: A.token, table: tb, id: d.id }));
+  });
+});
 t('disabling a user ends their session', function () {
   var users = ok(call({ action: 'usersList', token: A.token })).users, pat = users.filter(function (u) { return u.email === 'pat@alpha.sa'; })[0];
   ok(call({ action: 'userSave', token: A.token, user: { id: pat.id, name: 'Pat', email: 'pat@alpha.sa', role: 'preparer', entityIds: [ent.id], active: false } }));

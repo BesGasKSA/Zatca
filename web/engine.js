@@ -46,7 +46,13 @@
     // Zakat IR Art. 17: return and payment within 120 days of the year end.
     zakat: { rate: 0.025, gregorianDays: 365, dueDays: 120, latePctPer30Days: 0.01, lateCap: 0.25 },
     // Objection to ZATCA within 60 days of an assessment; appeal of a committee decision within 30.
-    disputes: { objectionDays: 60, appealDays: 30 },
+    // Escalation to the GSTC after ZATCA rejects an objection, and ZATCA's 90 days to
+    // decide, come from secondary sources: editable, labelled "verify".
+    disputes: { objectionDays: 60, appealDays: 30, escalateDays: 30, zatcaDecisionDays: 90 },
+    // VAT IR Art. 69/70 as summarised by advisers (2024-2025): ZATCA pays within 60 days of
+    // approving a refund; document requests are answered within 20 working days.
+    // Single-source: editable, labelled "verify".
+    refunds: { payDays: 60, infoResponseDays: 20 },
     materiality: 50000,
     benfordMin: 300,
     glBasis: 'movement',  // movement | gross - how TB VAT accounts are read when no GL is given
@@ -279,6 +285,20 @@
         { k: 'gross', t: 'n', req: 1, syn: ['gross', 'sales', 'total', 'amount', 'الإجمالي', 'المبيعات'] },
         { k: 'fees', t: 'n', syn: ['fees', 'commission', 'mdr', 'الرسوم', 'العمولة'] },
         { k: 'net', t: 'n', syn: ['net', 'settled', 'net amount', 'الصافي', 'المبلغ المسوى'] }
+      ]
+    },
+    // the taxpayer's account on the ZATCA portal
+    soa: {
+      en: 'ZATCA statement of account', ar: 'كشف حساب الهيئة', group: 'zatca',
+      fields: [
+        { k: 'date', t: 'd', req: 1, syn: ['date', 'transaction date', 'posting date', 'التاريخ', 'تاريخ العملية'] },
+        { k: 'taxType', t: 's', syn: ['tax type', 'tax', 'type of tax', 'نوع الضريبة', 'الضريبة'] },
+        { k: 'period', t: 's', syn: ['period', 'tax period', 'return period', 'الفترة', 'الفترة الضريبية'] },
+        { k: 'kind', t: 's', syn: ['transaction type', 'transaction', 'kind', 'نوع العملية', 'العملية'] },
+        { k: 'description', t: 's', syn: ['description', 'details', 'narration', 'البيان', 'الوصف', 'التفاصيل'] },
+        { k: 'reference', t: 's', syn: ['reference', 'ref', 'document no', 'sadad', 'المرجع', 'رقم المرجع'] },
+        { k: 'debit', t: 'n', syn: ['debit', 'dr', 'amount due', 'مدين', 'المستحق'] },
+        { k: 'credit', t: 'n', syn: ['credit', 'cr', 'amount paid', 'دائن', 'المدفوع'] }
       ]
     },
     xls_vat: {
@@ -2444,6 +2464,235 @@
     res.exposure = r2(exp);
     res.plan = E.remediate(res, ctx);
     return res;
+  };
+
+  // ================================================================== ZATCA account (wave 1)
+  // Statement of account, refunds, disputes and the compliance calendar. Pure:
+  // the UI passes in the documents it has loaded and today's date.
+
+  E.soaTax = function (s) {
+    s = String(s || '').toLowerCase();
+    if (/withh|wht|استقطاع/.test(s)) return 'WHT';
+    if (/zakat|زكاة|زكاه/.test(s)) return 'ZAKAT';
+    if (/excise|انتقائي/.test(s)) return 'EXCISE';
+    if (/rett|real estate|تصرفات عقارية|التصرفات العقارية/.test(s)) return 'RETT';
+    if (/income tax|ضريبة الدخل/.test(s)) return 'CIT';
+    return 'VAT';
+  };
+  E.soaKind = function (s) {
+    s = String(s || '').toLowerCase();
+    if (/penalt|fine|غرام/.test(s)) return 'penalty';
+    if (/refund|استرد|استرجاع/.test(s)) return 'refund';
+    if (/assess|ربط|تقييم|تعديل الهيئة/.test(s)) return 'assessment';
+    if (/pay|paid|sadad|سداد|دفع|مدفوع/.test(s)) return 'payment';
+    if (/return|declar|filing|إقرار|اقرار/.test(s)) return 'return';
+    return 'adjustment';
+  };
+  // "2026-09", "09/2026", "Sep 2026", "2026-Q3", "Q3 2026" - also inside a description
+  var MONS = { jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12 };
+  E.soaPeriod = function (s) {
+    s = String(s || '').toLowerCase(); var m;
+    if ((m = s.match(/(20\d\d)\s*[-\/ ]?\s*q([1-4])/))) return m[1] + '-Q' + m[2];
+    if ((m = s.match(/q([1-4])\s*[-\/ ]?\s*(20\d\d)/))) return m[2] + '-Q' + m[1];
+    if ((m = s.match(/(20\d\d)[-\/.](0?[1-9]|1[0-2])(?!\d)/))) return m[1] + '-' + pad(+m[2]);
+    if ((m = s.match(/(?:^|\D)(0?[1-9]|1[0-2])[-\/.](20\d\d)/))) return m[2] + '-' + pad(+m[1]);
+    if ((m = s.match(/(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s*[-\/ ]?\s*(20\d\d)/))) return m[2] + '-' + pad(MONS[m[1]]);
+    return '';
+  };
+  E.soaLines = function (lines) {
+    return (lines || []).map(function (l, i) {
+      var text = [l.kind, l.description].join(' ');
+      return { i: i, date: E.date(l.date) || '', taxType: l.taxType ? E.soaTax(l.taxType) : E.soaTax(text), kind: E.soaKind(l.kind || l.description), period: E.soaPeriod(l.period) || E.soaPeriod(l.description),
+        description: E.str(l.description), reference: E.str(l.reference), debit: r2(Math.abs(E.num(l.debit))), credit: r2(Math.abs(E.num(l.credit))) };
+    }).filter(function (l) { return l.date || l.debit || l.credit; });
+  };
+  function within(p, ex) { var a = E.periodRange(p), b = E.periodRange(ex); return !!(a && b && a.start >= b.start && a.end <= b.end); }
+
+  // SA1 every return on the statement, SA2 liabilities equal the returns, SA3 penalties
+  // recorded in the disputes register, SA4 balance agrees with the GL, SA5 nothing overdue.
+  E.statementRecon = function (doc, exercises, disputes, S, today) {
+    S = E.mergeSettings(S); today = today || new Date().toISOString().slice(0, 10); doc = doc || {};
+    var L = E.soaLines(doc.lines || []), tol = S.tolAbs || 1;
+    var bal = r2(L.reduce(function (a, l) { return a + l.debit - l.credit; }, 0));
+    var byTax = {};
+    L.forEach(function (l) { var b = byTax[l.taxType] = byTax[l.taxType] || { debit: 0, credit: 0, balance: 0 }; b.debit = r2(b.debit + l.debit); b.credit = r2(b.credit + l.credit); b.balance = r2(b.debit - b.credit); });
+    var xs = (exercises || []).filter(function (x) { var r = E.periodRange(x.period); return x.summary && r && r.end < today; }).sort(function (a, b) { return a.period < b.period ? -1 : 1; });
+    var periods = xs.map(function (x) {
+      var sm = x.summary;
+      var lines = function (tax, kinds) { return L.filter(function (l) { return l.taxType === tax && kinds.indexOf(l.kind) >= 0 && l.period && within(l.period, x.period); }); };
+      var net = function (ls) { return ls.length ? r2(ls.reduce(function (a, l) { return a + l.debit - l.credit; }, 0)) : null; };
+      var paid = function (tax) { return r2(lines(tax, ['payment', 'refund']).reduce(function (a, l) { return a + l.credit - l.debit; }, 0)); };
+      var dl = E.deadlines(x.period) || {};
+      return { period: x.period, exId: x.id,
+        vatReturn: sm.netVat == null ? null : r2(sm.netVat), vatSoa: net(lines('VAT', ['return', 'assessment'])), vatPaid: paid('VAT'), vatDue: dl.vat,
+        whtReturn: sm.whtTax == null ? null : r2(sm.whtTax), whtSoa: net(lines('WHT', ['return', 'assessment'])), whtPaid: paid('WHT'), whtDue: dl.wht };
+    });
+    var checks = [];
+    var mk = function (id, title, titleAr, o) { return Object.assign({ id: id, title: title, titleAr: titleAr, area: 'zatca' }, o); };
+    var T = [['SA1', 'Every return filed is on the statement', 'كل إقرار مقدم يظهر في الكشف'], ['SA2', 'Liabilities on the statement equal the returns', 'الالتزامات في الكشف تساوي الإقرارات'],
+      ['SA3', 'Penalties on the statement are recorded and followed up', 'الغرامات في الكشف مسجلة ومتابعة'], ['SA4', 'Statement balance agrees with the general ledger', 'رصيد الكشف يطابق دفتر الأستاذ'],
+      ['SA5', 'Nothing overdue on the statement', 'لا مبالغ متأخرة في الكشف']];
+    if (!L.length) {
+      T.forEach(function (c) { checks.push(mk(c[0], c[1], c[2], { status: 'na', missing: 'ZATCA statement of account' })); });
+      return { lines: L, balance: 0, byTax: byTax, periods: periods, checks: checks, exposure: 0, penalties: 0, overdue: 0, fines: 0 };
+    }
+    // the statement covers the returns that fell due between its first line and its date
+    var first = L.reduce(function (a, l) { return l.date && (!a || l.date < a) ? l.date : a; }, ''), last = L.reduce(function (a, l) { return l.date > a ? l.date : a; }, '');
+    var asOf = E.date(doc.asOf) || last;
+    var due = function (d) { return !!d && d >= first && d <= asOf; };
+    var inScope = periods.filter(function (p) { return due(p.vatDue) || due(p.whtDue); });
+    var noScope = inScope.length ? '' : 'Exercises for the periods on the statement';
+    var missing = [];
+    inScope.forEach(function (p) {
+      if (due(p.vatDue) && p.vatReturn != null && p.vatSoa == null) missing.push({ period: p.period, tax: 'VAT', amount: p.vatReturn });
+      if (due(p.whtDue) && p.whtReturn && p.whtSoa == null) missing.push({ period: p.period, tax: 'WHT', amount: p.whtReturn });
+    });
+    checks.push(mk(T[0][0], T[0][1], T[0][2], { status: noScope ? 'na' : missing.length ? 'fail' : 'pass', missing: noScope, a: missing.length, aLabel: 'Returns missing', exceptions: { list: missing },
+      note: 'A return you filed that ZATCA has not posted was either not submitted or posted to another period. Check the submission receipt.' }));
+    var diffs = [];
+    inScope.forEach(function (p) {
+      if (p.vatReturn != null && p.vatSoa != null && Math.abs(p.vatSoa - p.vatReturn) > tol) diffs.push({ period: p.period, tax: 'VAT', amount: p.vatReturn, other: p.vatSoa, diff: r2(p.vatSoa - p.vatReturn) });
+      if (p.whtReturn != null && p.whtSoa != null && Math.abs(p.whtSoa - p.whtReturn) > tol) diffs.push({ period: p.period, tax: 'WHT', amount: p.whtReturn, other: p.whtSoa, diff: r2(p.whtSoa - p.whtReturn) });
+    });
+    var dTot = r2(diffs.reduce(function (a, d) { return a + d.diff; }, 0));
+    checks.push(mk(T[1][0], T[1][1], T[1][2], { status: noScope ? 'na' : diffs.length ? 'fail' : 'pass', missing: noScope, a: diffs.length, aLabel: 'Periods that differ', diff: diffs.length ? dTot : null,
+      exposure: dTot > 0 ? dTot : 0, exceptions: { list: diffs },
+      note: 'A higher amount on the statement usually means ZATCA assessed the period or posted an amendment you have not recorded. A lower one can mean a return was not accepted in full.' }));
+    var pens = L.filter(function (l) { return l.kind === 'penalty' && l.debit > 0; });
+    var refs = {};
+    (disputes || []).forEach(function (d) { [d.reference, d.soaRef].forEach(function (r) { if (r) refs[String(r).trim().toLowerCase()] = 1; }); });
+    var unrec = pens.filter(function (l) { return !(l.reference && refs[l.reference.toLowerCase()]); });
+    var pTot = r2(pens.reduce(function (a, l) { return a + l.debit; }, 0)), uTot = r2(unrec.reduce(function (a, l) { return a + l.debit; }, 0));
+    checks.push(mk(T[2][0], T[2][1], T[2][2], { status: !pens.length ? 'pass' : unrec.length ? 'fail' : 'warn', a: pTot, aLabel: 'Penalties on the statement', exposure: uTot,
+      exceptions: { list: unrec.map(function (l) { return { date: l.date, tax: l.taxType, period: l.period, reference: l.reference, description: l.description, amount: l.debit }; }) },
+      note: pens.length ? 'Every penalty needs a decision: pay it, object within 60 days, or ask for a waiver. Record it in Disputes and penalties with the statement reference.' : 'No penalties on the statement.' }));
+    var gl = doc.glBalance != null && doc.glBalance !== '' && isFinite(+doc.glBalance) ? r2(+doc.glBalance) : null;
+    checks.push(mk(T[3][0], T[3][1], T[3][2], gl == null ? { status: 'na', missing: 'GL balance of the ZATCA accounts', missingHint: 'Enter it on this page' } :
+      { a: bal, aLabel: 'Balance per ZATCA statement', b: gl, bLabel: 'Balance per general ledger', diff: r2(bal - gl), status: E.status(bal - gl, Math.abs(gl), S), exposure: bal - gl > tol ? r2(bal - gl) : 0,
+        note: 'A positive balance is tax owed to ZATCA. The general ledger figure is the net of every ZATCA payable and receivable account (VAT, WHT, penalties).' }));
+    var over = [];
+    periods.forEach(function (p) {
+      [['VAT', p.vatSoa, p.vatPaid, p.vatDue], ['WHT', p.whtSoa, p.whtPaid, p.whtDue]].forEach(function (z) {
+        var owed = r2((z[1] || 0) - (z[2] || 0));
+        if (z[1] != null && owed > tol && z[3] && today > z[3]) {
+          var days = daysBetween(z[3], today);
+          var fine = z[0] === 'WHT' ? r2(owed * S.penalties.whtLatePctPer30Days * Math.floor(days / 30)) : r2(owed * S.penalties.vatLatePaymentPctPerMonth * Math.ceil(days / 30));
+          over.push({ period: p.period, tax: z[0], due: z[3], amount: owed, overdue: days, penalty: fine });
+        }
+      });
+    });
+    var oTot = r2(over.reduce(function (a, o) { return a + o.amount; }, 0)), fTot = r2(over.reduce(function (a, o) { return a + o.penalty; }, 0));
+    checks.push(mk(T[4][0], T[4][1], T[4][2], { status: over.length ? 'fail' : 'pass', a: oTot, aLabel: 'Unpaid after the due date', exposure: r2(oTot + fTot), exceptions: { list: over },
+      note: over.length ? 'Late-payment fines keep accruing every month (VAT 5% a month, WHT 1% per 30 days) until paid. Estimated fines so far: SAR ' + fTot.toLocaleString('en-US') + '.' : 'Every liability on the statement was paid by its due date.',
+      noteAr: over.length ? 'غرامات التأخير تستمر شهرياً حتى السداد (القيمة المضافة 5% شهرياً، الاستقطاع 1% لكل 30 يوماً). الغرامات التقديرية حتى الآن: ' + fTot.toLocaleString('en-US') + ' ريال.' : 'سُدد كل التزام في الكشف في موعده.' }));
+    checks.forEach(function (c) { if (c.exposure != null) c.exposure = isFinite(c.exposure) && c.exposure > 0 ? r2(c.exposure) : 0; });
+    // SA4 (the whole balance) already holds what SA2, SA3 and SA5 find: count the larger view
+    var ex = function (i) { return checks[i].exposure || 0; };
+    var expo = Math.max(ex(1) + ex(2), ex(3), ex(4) + ex(2));
+    return { lines: L, balance: bal, byTax: byTax, periods: periods, checks: checks, exposure: r2(expo), first: first, last: last, asOf: asOf, penalties: pTot, overdue: oTot, fines: fTot };
+  };
+
+  function addD(d, n) { return d ? new Date(Date.parse(d + 'T00:00:00Z') + n * 86400000).toISOString().slice(0, 10) : ''; }
+  // working days in Saudi Arabia: Sunday to Thursday
+  function addWork(d, n) { if (!d) return ''; var x = new Date(d + 'T00:00:00Z'); while (n > 0) { x.setUTCDate(x.getUTCDate() + 1); var w = x.getUTCDay(); if (w !== 5 && w !== 6) n--; } return x.toISOString().slice(0, 10); }
+  E.addWorkDays = addWork;
+
+  // Refund applications: what happens next and by when.
+  E.REFUND_STEPS = [['draft', 'Preparing'], ['submitted', 'Submitted'], ['info_requested', 'Documents requested'], ['approved', 'Approved'], ['paid', 'Paid'], ['rejected', 'Rejected']];
+  E.refundStatus = function (r, S, today) {
+    S = E.mergeSettings(S); today = today || new Date().toISOString().slice(0, 10);
+    var amt = r2(+r.amount || 0), st = r.status || 'draft', next = null, issues = [];
+    if (amt > 0 && amt < (S.refundMin || 5000)) issues.push({ code: 'below_min', text: 'Below the minimum refund application of SAR ' + (S.refundMin || 5000).toLocaleString('en-US') + ': carry the credit forward instead.' });
+    if (st === 'draft') next = { label: 'Submit the application', due: '' };
+    if (st === 'submitted') next = { label: 'Waiting for ZATCA review', due: '', zatca: true };
+    if (st === 'info_requested') next = { label: 'Send the requested documents', due: E.date(r.infoDueOn) || addWork(E.date(r.infoRequestedOn), S.refunds.infoResponseDays) };
+    if (st === 'approved') next = { label: 'ZATCA pays the refund', due: addD(E.date(r.approvedOn), S.refunds.payDays), zatca: true };
+    var paid = st === 'paid' ? r2(r.paidAmount === '' || r.paidAmount == null ? amt : +r.paidAmount) : 0;
+    if (st === 'paid' && paid < amt - 1) issues.push({ code: 'short', text: 'Paid less than claimed: ask ZATCA for the reason and object to the reduction within 60 days.' });
+    if (st === 'rejected') issues.push({ code: 'rejected', text: 'A rejection is a decision you can object to within 60 days.' });
+    var days = next && next.due ? daysBetween(today, next.due) : null;
+    var state = st === 'paid' || st === 'rejected' ? 'closed' : days != null && days < 0 ? (next.zatca ? 'chase' : 'overdue') : days != null && days <= 7 && !next.zatca ? 'urgent' : 'open';
+    var outstanding = st === 'submitted' || st === 'info_requested' || st === 'approved' ? amt : 0;
+    var sub = E.date(r.submittedOn);
+    return { amount: amt, paid: paid, outstanding: outstanding, next: next, daysLeft: days, state: state, issues: issues, age: sub ? Math.max(0, daysBetween(sub, st === 'paid' && E.date(r.paidOn) ? E.date(r.paidOn) : today)) : null,
+      stepIdx: E.REFUND_STEPS.map(function (s) { return s[0]; }).indexOf(st) };
+  };
+
+  // Disputes and penalties: an assessment or penalty moves through an objection to
+  // ZATCA, the first-level committee (GSTC) and the appellate committee.
+  E.DISPUTE_STAGES = [['notice', 'Notice received'], ['objection', 'Objection filed with ZATCA'], ['zatca_rejected', 'ZATCA rejected the objection'], ['committee', 'Before the first-level committee'],
+    ['committee_decided', 'Committee decided'], ['appeal', 'Before the appellate committee'], ['closed', 'Closed']];
+  E.disputeStatus = function (d, S, today) {
+    S = E.mergeSettings(S); today = today || new Date().toISOString().slice(0, 10);
+    var D = S.disputes, st = d.stage || 'notice', next = null;
+    if (st === 'notice') next = { label: d.decision === 'accept' ? 'Pay the amount' : 'Object to ZATCA', due: addD(E.date(d.noticeOn), D.objectionDays) };
+    if (st === 'objection') next = { label: 'ZATCA decides the objection', due: addD(E.date(d.objectionOn), D.zatcaDecisionDays), zatca: true };
+    if (st === 'zatca_rejected') next = { label: 'Escalate to the GSTC committee', due: addD(E.date(d.zatcaDecisionOn), D.escalateDays) };
+    if (st === 'committee') next = { label: 'Committee hearing', due: E.date(d.hearingOn) || '', zatca: true };
+    if (st === 'committee_decided') next = { label: 'Appeal to the appellate committee', due: addD(E.date(d.committeeDecisionOn), D.appealDays) };
+    if (st === 'appeal') next = { label: 'Appellate committee hearing', due: E.date(d.hearingOn) || '', zatca: true };
+    var closed = st === 'closed', days = !closed && next && next.due ? daysBetween(today, next.due) : null;
+    var state = closed ? 'closed' : days != null && days < 0 ? (next.zatca ? 'waiting' : 'overdue') : days != null && days <= 7 && !next.zatca ? 'urgent' : 'open';
+    var stake = r2((+d.amount || 0) + (+d.penalty || 0)), paid = r2(+d.paidAmount || 0);
+    return { next: closed ? null : next, daysLeft: days, state: state, atStake: closed ? 0 : r2(Math.max(0, stake - paid)), stake: stake, paid: paid, relief: closed ? r2(+d.reliefAmount || 0) : 0,
+      stageIdx: E.DISPUTE_STAGES.map(function (s) { return s[0]; }).indexOf(st) };
+  };
+
+  // A past return with no exercise in the app is 'untracked', not overdue: nothing says
+  // it was missed. Zakat counts as done when the annual worksheet has a filing date.
+  // One list of dated obligations across taxes and entities, plus what ZATCA letters,
+  // disputes, refunds and corrections add. Items: { date, key, title, entityId, tax, kind, state }.
+  E.complianceCalendar = function (o) {
+    var S = E.mergeSettings(o.settings), today = o.today || new Date().toISOString().slice(0, 10), from = o.from, to = o.to, out = [];
+    var push = function (it) { if (it.date && it.date >= from && it.date <= to) out.push(it); };
+    var exs = o.exercises || [];
+    (o.entities || []).forEach(function (e) {
+      for (var y = +from.slice(0, 4) - 1; y <= +to.slice(0, 4); y++) {
+        E.periodsOfYear(y, e.vatFreq || 'monthly').forEach(function (p) {
+          var x = exs.filter(function (z) { return z.entityId === e.id && z.period === p; })[0], F = (x && x.filing) || {};
+          push({ date: E.deadlines(p).vat, key: e.id + '-vat-' + p, title: 'VAT return and payment', period: p, entityId: e.id, tax: 'VAT', kind: 'return', done: !!(F.vatFiledOn && F.vatPaidOn), exId: x && x.id, tracked: !!x });
+        });
+        if (e.whtRegistered !== false) for (var m = 1; m <= 12; m++) {
+          var mk = y + '-' + pad(m), xw = exs.filter(function (z) { return z.entityId === e.id && within(mk, z.period); })[0], Fw = (xw && xw.filing) || {};
+          push({ date: E.deadlines(mk).wht, key: e.id + '-wht-' + mk, title: 'WHT return and payment', period: mk, entityId: e.id, tax: 'WHT', kind: 'return', done: !!Fw.whtFiledOn, exId: xw && xw.id, tracked: !!xw });
+        }
+        var fyEnd = E.date(y + '-' + (e.fyEnd ? String(e.fyEnd).slice(5, 10) : '12-31'));
+        var an = (o.annual || []).filter(function (a) { return a.entityId === e.id && +a.year === y; })[0], zf = an && an.zakat && an.zakat.filedOn;
+        if (fyEnd) push({ date: addD(fyEnd, S.zakat.dueDays), key: e.id + '-zakat-' + y, title: 'Zakat / income tax return', period: fyEnd, entityId: e.id, tax: 'ZAKAT', kind: 'return', done: !!zf, tracked: !!an });
+      }
+    });
+    (o.requests || []).forEach(function (q) { var r = E.requestDue(q, S, today); if (r.due) push({ date: r.due, key: 'req-' + q.id, title: 'Reply to ZATCA', period: q.reference || '', entityId: q.entityId, tax: 'ZATCA', kind: 'request', done: r.state === 'closed', href: 'requests' }); });
+    (o.disputes || []).forEach(function (d) { var r = E.disputeStatus(d, S, today); if (r.next && r.next.due) push({ date: r.next.due, key: 'dsp-' + d.id, title: r.next.label, period: d.reference || '', entityId: d.entityId, tax: d.tax || 'VAT', kind: 'dispute', done: false, zatca: !!r.next.zatca, href: 'disputes' }); });
+    (o.refunds || []).forEach(function (f) { var r = E.refundStatus(f, S, today); if (r.next && r.next.due) push({ date: r.next.due, key: 'rf-' + f.id, title: r.next.label, period: f.period || '', entityId: f.entityId, tax: 'VAT', kind: 'refund', done: false, zatca: !!r.next.zatca, href: 'refunds' }); });
+    (o.corrections || []).forEach(function (c) { if (c.state !== 'done') push({ date: c.dueBy, key: 'cor-' + c.id, title: c.route === 'amend' ? 'Amend the VAT return' : 'Correct in the next VAT return', period: c.title || '', entityId: c.entityId, tax: 'VAT', kind: 'correction', done: false, href: 'reports/corrections' }); });
+    (o.events || []).forEach(function (ev) {
+      var d0 = E.date(ev.date); if (!d0) return;
+      var step = { monthly: 1, quarterly: 3, yearly: 12 }[ev.repeat] || 0, dt = new Date(d0 + 'T00:00:00Z'), day = dt.getUTCDate();
+      for (var n = 0, d = d0; d <= to && n < 400; n++) {
+        push({ date: d, key: 'ev-' + ev.id + '-' + d, title: ev.title || 'Event', period: '', entityId: ev.entityId, tax: ev.tax || 'OTHER', kind: 'custom', done: (ev.doneDates || []).indexOf(d) >= 0, evId: ev.id, note: ev.note || '' });
+        if (!step) break;
+        var t2 = new Date(Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth() + step * (n + 1), 1)), last = new Date(Date.UTC(t2.getUTCFullYear(), t2.getUTCMonth() + 1, 0)).getUTCDate();
+        d = iso(t2.getUTCFullYear(), t2.getUTCMonth() + 1, Math.min(day, last));
+      }
+    });
+    out.forEach(function (it) { var dd = daysBetween(today, it.date); it.daysLeft = dd; it.state = it.done ? 'done' : dd < 0 ? (it.zatca ? 'waiting' : it.tracked === false ? 'untracked' : 'overdue') : dd <= 7 ? 'soon' : 'upcoming'; });
+    return out.sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : a.key < b.key ? -1 : 1; });
+  };
+
+  // RFC 5545 calendar of all-day events with a reminder 3 days before. Text is escaped
+  // and lines are folded at 73 characters.
+  E.ics = function (items, name) {
+    var esc = function (s) { return String(s == null ? '' : s).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n'); };
+    var fold = function (l) { var o = [], i = 0; while (l.length - i > 73) { o.push((i ? ' ' : '') + l.slice(i, i + 73)); i += 73; } o.push((i ? ' ' : '') + l.slice(i)); return o.join('\r\n'); };
+    var day = function (d) { return d.replace(/-/g, ''); };
+    var L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Inspection Ready//Tax calendar//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'X-WR-CALNAME:' + esc(name || 'Tax calendar')];
+    (items || []).forEach(function (it) {
+      if (!E.date(it.date)) return;
+      L.push('BEGIN:VEVENT', 'UID:' + String(it.key).replace(/[^A-Za-z0-9_.-]/g, '-') + '@inspection-ready', 'DTSTAMP:20260101T000000Z', 'DTSTART;VALUE=DATE:' + day(it.date), 'DTEND;VALUE=DATE:' + day(addD(it.date, 1)),
+        'SUMMARY:' + esc(it.summary || it.title), 'DESCRIPTION:' + esc(it.description || ''), 'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + esc(it.summary || it.title), 'TRIGGER:-P3D', 'END:VALARM', 'END:VEVENT');
+    });
+    L.push('END:VCALENDAR');
+    return L.map(fold).join('\r\n') + '\r\n';
   };
 
   root.ZEngine = E;

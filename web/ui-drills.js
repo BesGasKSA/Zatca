@@ -88,7 +88,7 @@
   D.xexpo = function () { var l = secChecks().filter(function (c) { return c.exposure; }); return { title: isW() ? t('WHT exposure (SAR)') : t('VAT exposure (SAR)'), sub: t('By check'), total: l.reduce(function (s, c) { return s + c.exposure; }, 0), totalLabel: 'SAR', rows: l.map(function (c) { return checkRow(c, c.exposure); }).sort(desc) }; };
   D.xfails = function () {
     var l = secChecks().filter(function (c) { return c.status === 'fail'; });
-    return { title: t('Checks failed'), sub: sec(), total: l.length, totalLabel: t('of') + ' ' + secChecks().length, money: false, rows: l.map(function (c) { var r = checkRow(c, Math.abs(c.diff || c.exposure || 0)); r.display = c.diff != null && c.bLabel ? Z.fmt(c.diff, 0) : (c.a != null ? String(c.a) : ''); return r; }).sort(desc) };
+    return { title: t('Checks failed'), sub: sec(), total: l.length, totalLabel: t('of') + ' ' + secChecks().length, money: false, rows: l.map(function (c) { var r = checkRow(c, Math.abs(c.diff || c.exposure || 0)); r.display = c.diff != null && c.bLabel ? Z.fmt(c.diff) : (c.a != null ? String(c.a) : ''); return r; }).sort(desc) };
   };
   D.xsamples = function () {
     var flows = isW() ? ['W'] : ['S', 'P'], l = (S.samples || []).filter(function (s) { return flows.indexOf(s.flow) >= 0; });
@@ -99,7 +99,7 @@
     var name = t(Z.partName(k)), groups = { recon: isW() ? ['wht'] : ['vat'], bank: ['bank'], einv: ['einv'], filing: ['filing'], other: ['other'] }[k];
     if (groups) {
       var l = secChecks().filter(function (c) { return groups.indexOf(c.group) >= 0; }).sort(function (a, b) { var o = { fail: 0, warn: 1, na: 2, pass: 3 }; return o[a.status] - o[b.status]; });
-      return { title: name, sub: t('Every check in this part'), money: false, rows: l.map(function (c) { var r = checkRow(c, c.status === 'pass' ? 100 : c.status === 'warn' ? 50 : c.status === 'fail' ? 15 : 0); r.display = r.sub; r.sub = c.diff != null && c.bLabel ? t('Difference') + ' ' + Z.fmt(c.diff, 0) : ''; return r; }) };
+      return { title: name, sub: t('Every check in this part'), money: false, rows: l.map(function (c) { var r = checkRow(c, c.status === 'pass' ? 100 : c.status === 'warn' ? 50 : c.status === 'fail' ? 15 : 0); r.display = r.sub; r.sub = c.diff != null && c.bLabel ? t('Difference') + ' ' + Z.fmt(c.diff) : ''; return r; }) };
     }
     if (k === 'analytics') return { title: name, money: false, rows: R.analytics.tests.filter(function (x) { return x.status !== 'pass'; }).map(function (x) { return { label: x.id + '  ' + Z.tt(x, 'title'), sub: x.count + ' ' + t('items'), value: x.count, display: String(x.count), tone: x.status === 'fail' ? 'fail' : 'warn', href: exHref('analytics') }; }).sort(desc), empty: t('No exceptions.') };
     if (k === 'checklist') { var cl = (S.checklist && S.checklist.items || []).filter(function (x) { return (x.area === 'WHT') === isW() && x.status !== 'na'; }); return { title: name, total: cl.filter(function (x) { return x.status === 'available'; }).length, totalLabel: t('of') + ' ' + cl.length + ' ' + t('on file'), money: false, rows: cl.map(function (x) { return { label: S.lang === 'ar' ? x.ar : x.en, sub: x.owner || '', value: x.status === 'available' ? 100 : x.status === 'requested' ? 50 : 10, display: t({ available: 'On file', requested: 'Requested', missing: 'Missing' }[x.status] || x.status), tone: x.status === 'available' ? 'pass' : x.status === 'requested' ? 'warn' : 'fail', href: exHref('checklist') }; }) }; }

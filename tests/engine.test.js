@@ -320,4 +320,73 @@ t('e-invoicing fines are shown as a ceiling, not added to the totals', function 
 });
 t('critical actions come first', function () { assert.strictEqual(plan.actions[0].level, 'critical'); });
 
+console.log('ZATCA account: statement, refunds, disputes, calendar');
+var soaEx = [['2026-06', 318400, 7650], ['2026-07', 401220, 8920], ['2026-08', 412880, 9840], ['2026-09', 250000, 11000]].map(function (h, i) { return { id: 'X' + i, entityId: 'E', period: h[0], summary: { netVat: h[1], whtTax: h[2] } }; });
+var soa = E.statementRecon(demo.statement, soaEx, demo.disputes, {}, '2026-10-19');
+t('statement lines are read: tax, kind and period from the text', function () {
+  assert.strictEqual(E.soaPeriod('VAT return Sep 2026'), '2026-09'); assert.strictEqual(E.soaPeriod('Q3 2026'), '2026-Q3'); assert.strictEqual(E.soaPeriod('09/2026'), '2026-09'); assert.strictEqual(E.soaPeriod('2026-09-30'), '2026-09');
+  assert.strictEqual(E.soaTax('ضريبة الاستقطاع'), 'WHT'); assert.strictEqual(E.soaKind('غرامة تأخير'), 'penalty'); assert.strictEqual(E.soaKind('SADAD payment'), 'payment');
+});
+t('SA1: every return in the statement window is posted (September WHT falls after the statement date)', function () { assert.strictEqual(byId(soa.checks, 'SA1').status, 'pass'); });
+t('SA1: a filed return missing from the statement is caught', function () {
+  var st = { asOf: '2026-10-08', lines: demo.statement.lines.filter(function (l) { return l.reference !== 'VAT-2607'; }) };
+  var c = byId(E.statementRecon(st, soaEx, demo.disputes, {}, '2026-10-19').checks, 'SA1'); assert.strictEqual(c.status, 'fail'); assert.strictEqual(c.exceptions.list[0].period, '2026-07');
+});
+t('SA2: the August WHT return posted SAR 500 above what was filed', function () {
+  var c = byId(soa.checks, 'SA2'); assert.strictEqual(c.status, 'fail'); assert.strictEqual(c.diff, 500); assert.strictEqual(c.exceptions.list[0].period, '2026-08');
+});
+t('SA3: the penalty without a dispute record is flagged; the recorded one is not', function () {
+  var c = byId(soa.checks, 'SA3'); assert.strictEqual(c.status, 'fail'); assert.strictEqual(c.a, 12325); assert.strictEqual(c.exposure, 2325);
+  assert.deepStrictEqual(c.exceptions.list.map(function (x) { return x.reference; }), ['ZATCA-PN-2026-0912']);
+});
+t('SA4: the statement is SAR 2,825 above the GL: the penalty plus the WHT difference', function () {
+  var c = byId(soa.checks, 'SA4'); assert.strictEqual(soa.balance, 59325); assert.strictEqual(c.diff, 2825); assert.strictEqual(c.diff, 2325 + 500);
+});
+t('SA5: the unpaid SAR 500 is overdue and accrues 1% per full 30 days', function () {
+  var c = byId(soa.checks, 'SA5'); assert.strictEqual(c.a, 500); assert.strictEqual(c.exceptions.list[0].penalty, 5); assert.strictEqual(c.exceptions.list[0].overdue, 39);
+});
+t('statement exposure counts the same riyal once (2,830, not the sum of the checks)', function () { assert.strictEqual(soa.exposure, 2830); });
+t('no statement: every SA check waits for data and nothing is exposed', function () {
+  var n = E.statementRecon(null, soaEx, [], {}, '2026-10-19'); assert.ok(n.checks.every(function (c) { return c.status === 'na'; })); assert.strictEqual(n.exposure, 0);
+});
+t('refunds: documents due in 20 working days, a short payment and the SAR 5,000 minimum', function () {
+  var a = E.refundStatus(demo.refunds[0], {}, '2026-10-19'), b = E.refundStatus(demo.refunds[1], {}, '2026-10-19'), c = E.refundStatus(demo.refunds[2], {}, '2026-10-19');
+  assert.strictEqual(a.next.due, '2026-11-05'); assert.strictEqual(a.outstanding, 38400);
+  assert.strictEqual(b.state, 'closed'); assert.ok(b.issues.some(function (i) { return i.code === 'short'; }));
+  assert.ok(c.issues.some(function (i) { return i.code === 'below_min'; })); assert.strictEqual(c.outstanding, 0);
+  assert.strictEqual(E.refundStatus({ amount: 9000, status: 'approved', approvedOn: '2026-07-01' }, {}, '2026-10-19').state, 'chase', 'ZATCA is late paying');
+});
+t('working days skip Friday and Saturday', function () { assert.strictEqual(E.addWorkDays('2026-10-15', 1), '2026-10-18'); });
+t('disputes: 60 days to object, 90 for ZATCA, 30 to escalate and to appeal', function () {
+  var D = function (d) { return E.disputeStatus(d, {}, '2026-10-19'); };
+  assert.strictEqual(D(demo.disputes[1]).next.due, '2026-11-19'); assert.strictEqual(D(demo.disputes[0]).next.due, '2027-01-03'); assert.ok(D(demo.disputes[0]).next.zatca);
+  assert.strictEqual(D({ stage: 'zatca_rejected', zatcaDecisionOn: '2026-10-01' }).next.due, '2026-10-31');
+  assert.strictEqual(D({ stage: 'committee_decided', committeeDecisionOn: '2026-09-01' }).state, 'overdue');
+  assert.strictEqual(D(demo.disputes[0]).atStake, 69750); assert.strictEqual(D(demo.disputes[2]).relief, 3000); assert.strictEqual(D(demo.disputes[2]).atStake, 0);
+  assert.strictEqual(E.disputeStatus({ stage: 'notice', noticeOn: '2026-10-01' }, { disputes: { objectionDays: 45 } }, '2026-10-19').next.due, '2026-11-15', 'editable in settings');
+});
+t('calendar: VAT, WHT, Zakat, ZATCA letters and repeating events, in date order', function () {
+  var c = E.complianceCalendar({ entities: [{ id: 'A', vatFreq: 'monthly' }, { id: 'B', vatFreq: 'quarterly', whtRegistered: false }],
+    exercises: [{ entityId: 'A', period: '2026-09', filing: { vatFiledOn: '2026-10-20', vatPaidOn: '2026-10-21', whtFiledOn: '2026-10-09' } }],
+    events: demo.events, disputes: demo.disputes, refunds: demo.refunds, requests: demo.requests, from: '2026-10-01', to: '2027-04-30', today: '2026-10-19' });
+  var find = function (k) { return c.filter(function (i) { return i.key === k; })[0]; };
+  assert.ok(find('A-vat-2026-09').done && find('A-wht-2026-09').done); assert.strictEqual(find('A-vat-2026-09').date, '2026-10-31');
+  assert.ok(find('B-vat-2026-Q3') && !c.some(function (i) { return i.key.indexOf('B-wht') === 0; }), 'no WHT for an entity that pays no non-residents');
+  assert.strictEqual(find('A-zakat-2026').date, '2027-04-30');
+  assert.ok(c.filter(function (i) { return i.title === 'Quarterly tax risk review with the board'; }).length >= 3, 'the quarterly event repeats');
+  assert.ok(c.some(function (i) { return i.kind === 'dispute' && i.date === '2026-11-19'; }), 'objection deadline');
+  assert.ok(c.some(function (i) { return i.kind === 'refund' && i.date === '2026-11-05'; }), 'refund documents');
+  assert.ok(c.some(function (i) { return i.kind === 'request' && i.date === '2026-10-22'; }), 'ZATCA information request');
+  assert.strictEqual(E.complianceCalendar({ entities: [{ id: 'A' }], from: '2026-07-01', to: '2026-08-31', today: '2026-10-19' }).filter(function (i) { return i.key === 'A-vat-2026-06'; })[0].state, 'untracked', 'a past period with no exercise is not called overdue');
+  for (var i = 1; i < c.length; i++) assert.ok(c[i - 1].date <= c[i].date);
+  assert.strictEqual(find('A-wht-2026-10').state, 'upcoming');
+});
+t('calendar exports as a valid iCalendar file with escaped text and folded lines', function () {
+  var ics = E.ics([{ date: '2026-10-31', key: 'A vat/2026-09', title: 'VAT return, payment; ' + 'x'.repeat(120) }], 'Al Noor');
+  assert.ok(/^BEGIN:VCALENDAR\r\n/.test(ics) && /END:VCALENDAR\r\n$/.test(ics));
+  assert.ok(ics.indexOf('DTSTART;VALUE=DATE:20261031') > 0 && ics.indexOf('DTEND;VALUE=DATE:20261101') > 0);
+  assert.ok(ics.indexOf('VAT return\\, payment\\;') > 0 && ics.indexOf('UID:A-vat-2026-09@inspection-ready') > 0);
+  ics.split('\r\n').forEach(function (l) { assert.ok(l.length <= 75, 'line folded: ' + l.length); });
+});
+
 console.log('\n' + passed + ' passed' + (process.exitCode ? ', some FAILED' : ''));

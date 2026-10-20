@@ -28,14 +28,14 @@ See README.md for the feature map and deployment.
 
 ## Tests
 
-`npm test` — engine (102) + backend (20) + a 600-run random-data stress test
+`npm test` — engine (123) + backend (22) + a 600-run random-data stress test
 (`tests/fuzz.js`: messy values, bad dates, any period since 2018 — no NaN,
 no negative exposure, no crash). `npm run perf` — 20,000 invoices under 4 s.
 With `npm run dev` running, four browser suites drive the real UI in headless
-Chrome: `npm run e2e` (journeys, every page EN/AR/phone, 886 checks),
+Chrome: `npm run e2e` (journeys, every page EN/AR/phone, 1,020 checks),
 `e2e:edge` (quarterly/no-WHT/2018, empty exercise, signed-off read-only,
 deletes, broken links), `e2e:security` (script injection through every field),
-`e2e:a11y` (axe-core WCAG 2.1 AA on 90 screens; keep it at zero). Chrome must
+`e2e:a11y` (axe-core WCAG 2.1 AA on 102 screens; keep it at zero). Chrome must
 get an absolute `--user-data-dir`; a relative one silently fails to start.
 
 ## Domain decisions worth remembering
@@ -142,6 +142,27 @@ get an absolute `--user-data-dir`; a relative one silently fails to start.
   first thing ZATCA's own engine does), by category (E13), cut-off (E14),
   duplicates (E15), buyer TRN (E16), seller TRN (E17). Checks with live
   figures in their note carry `noteAr`.
+
+## ZATCA account (wave 1, 2026-10-20)
+
+- Entity-scoped tables (`ENTITY_TABLES` in Code.gs): `statements` (one doc per entity,
+  id `<entityId>_soa`, lines from the portal export, kind `soa` in `E.KINDS`), `refunds`,
+  `disputes`, `events`. Screens in `web/ui-zatca.js`: `#/<tax>/account`, `refunds`,
+  `disputes`, `calendar`; classes are prefixed `zk-`.
+- `E.statementRecon`: SA1 returns posted, SA2 amounts equal, SA3 penalties recorded in
+  disputes (by reference), SA4 balance vs GL, SA5 overdue with fines. Exposure is
+  max(SA2+SA3, SA4, SA5+SA3): SA4 already holds the others. Demo: the GL gap 2,825 is
+  exactly the unrecorded penalty 2,325 + the WHT difference 500.
+- `E.disputeStatus` / `E.refundStatus` deadlines come from `settings.disputes`
+  (objection 60, ZATCA 90, escalate 30, appeal 30) and `settings.refunds` (pay 60 days,
+  documents 20 working days Sun-Thu). Only the 60-day objection is primary-sourced.
+- `E.complianceCalendar`: a past return with no exercise is `untracked`, never overdue.
+  `E.ics` writes RFC 5545 (escaped, folded at 73).
+- Review notes live on the exercise (`ex.reviews`). Code.gs `guardReviews_`: managers
+  add/clear; anyone else's save keeps the stored notes and takes only replies. Closing
+  with an open note throws `open_review_notes` (LocalBackend mirrors it).
+- Numbers use the accounting format: `Z.fmt` = 2 decimals, (negatives), `-` for zero;
+  `Z.count` for whole counts. Never `fmt(x, 0)` for money.
 
 ## Deployment (backend live since 2026-10-19)
 

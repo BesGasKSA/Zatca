@@ -152,7 +152,7 @@
       '<tr class="total"><td>' + t('Net VAT due') + '</td><td class="num">' + fmt(ret && ret[16].vat) + '</td><td class="num">' + fmt(sys && sys[13].vat) + '</td><td class="num">' + fmt(xls && xls[13].vat) + '</td><td></td><td class="num">' + fmt(-((R.bank.summary || {}).zatca_vat || 0) || null) + '</td>' + (fz ? '<td></td>' : '') + '</tr></tbody></table>';
     return '<div class="grid g2" style="align-items:start"><section class="paper"><header><div><h2>' + t('Readiness') + '</h2><p>' + t('Weighted from every check, sample, document and open finding in this exercise.') + '</p></div></header>' +
       '<div class="row ready-row">' + Z.seal(sc.score, sc.grade) + '<div class="parts" style="flex:1">' + parts + '</div></div>' +
-      '<div class="kpis" style="margin-top:18px"><div class="' + (R.vatExposure ? 'bad' : '') + '"><b>' + fmt(R.vatExposure || 0, 0) + '</b><span>' + t('VAT exposure (SAR)') + '</span></div><div><b>' + checks.filter(function (c) { return c.status === 'fail'; }).length + ' / ' + checks.length + '</b><span>' + t('Checks failed') + '</span></div><div><b>' + S.samples.filter(function (x) { return x.flow !== 'W'; }).length + '</b><span>' + t('Samples') + '</span></div></div></section>' +
+      '<div class="kpis" style="margin-top:18px"><div class="' + (R.vatExposure ? 'bad' : '') + '"><b>' + fmt(R.vatExposure || 0) + '</b><span>' + t('VAT exposure (SAR)') + '</span></div><div><b>' + checks.filter(function (c) { return c.status === 'fail'; }).length + ' / ' + checks.length + '</b><span>' + t('Checks failed') + '</span></div><div><b>' + S.samples.filter(function (x) { return x.flow !== 'W'; }).length + '</b><span>' + t('Samples') + '</span></div></div></section>' +
       '<section class="paper"><header><div><h2>' + t('What needs attention') + '</h2><p>' + t('Failures first, largest differences first.') + '</p></div></header>' +
       (missing.length ? '<p><b>' + t('Missing data:') + '</b> ' + missing.map(function (k) { return '<a href="#/ex/' + S.ex.id + '/data">' + esc(k === 'return' ? t('VAT return as filed') : t(E.KINDS[k].en)) + '</a>'; }).join(', ') + '</p>' : '') +
       (attention.slice(0, 9).map(function (c) {
@@ -179,7 +179,7 @@
       '<tr class="total"><td>' + t('WHT due') + '</td><td class="num">' + fmt(sum(ret, 't')) + '</td><td class="num">' + fmt(sum(reg, 't')) + '</td><td class="num">' + fmt(sum(xls, 't')) + '</td><td class="num" title="' + esc(t('Paid to ZATCA for withholding tax')) + '">' + fmt(paid || null) + '</td></tr></tbody></table>';
     return '<div class="grid g2" style="align-items:start"><section class="paper"><header><div><h2>' + t('WHT readiness') + '</h2><p>' + t('Weighted from the WHT checks, WHT samples, WHT documents and open WHT findings only.') + '</p></div></header>' +
       '<div class="row ready-row">' + Z.seal(sc.score, sc.grade) + '<div class="parts" style="flex:1">' + parts + '</div></div>' +
-      '<div class="kpis" style="margin-top:18px"><div class="' + (R.whtExposure ? 'bad' : '') + '"><b>' + fmt(R.whtExposure || 0, 0) + '</b><span>' + t('WHT exposure (SAR)') + '</span></div><div><b>' + checks.filter(function (c) { return c.status === 'fail'; }).length + ' / ' + checks.length + '</b><span>' + t('Checks failed') + '</span></div><div><b>' + S.samples.filter(function (x) { return x.flow === 'W'; }).length + '</b><span>' + t('Samples') + '</span></div></div></section>' +
+      '<div class="kpis" style="margin-top:18px"><div class="' + (R.whtExposure ? 'bad' : '') + '"><b>' + fmt(R.whtExposure || 0) + '</b><span>' + t('WHT exposure (SAR)') + '</span></div><div><b>' + checks.filter(function (c) { return c.status === 'fail'; }).length + ' / ' + checks.length + '</b><span>' + t('Checks failed') + '</span></div><div><b>' + S.samples.filter(function (x) { return x.flow === 'W'; }).length + '</b><span>' + t('Samples') + '</span></div></div></section>' +
       '<section class="paper"><header><div><h2>' + t('What needs attention') + '</h2><p>' + t('Failures first, largest differences first.') + '</p></div></header>' +
       (missing.length ? '<p><b>' + t('Missing data:') + '</b> ' + missing.map(function (k) { return '<a href="#/ex/' + S.ex.id + '/data">' + esc(t(E.KINDS[k].en)) + '</a>'; }).join(', ') + '</p>' : '') +
       (attention.slice(0, 9).map(function (c) {
@@ -196,7 +196,7 @@
       return Object.keys(E.KINDS).filter(function (k) { return E.KINDS[k].group === g && !(g === 'wht' && ent.whtRegistered === false); }).map(function (k) {
         var K = E.KINDS[k], files = S.datasets.filter(function (d) { return d.kind === k; });
         return '<div class="paper"><div class="spread" style="align-items:flex-start"><h3>' + esc(S.lang === 'ar' ? K.ar : K.en) + '</h3>' + (K.required ? '<span class="req">' + (files.length ? Z.tick('pass') : t('Required')) + '</span>' : '') + '</div>' +
-          '<div class="files">' + (files.map(function (d) { return '<div><span>' + esc(d.fileName) + '</span><span class="nowrap">' + fmt(d.rowCount, 0) + ' ' + t('rows') + (lk ? '' : ' <a href="#" data-act="deldata" data-id="' + d.id + '" aria-label="' + t('Remove') + ' ' + esc(d.fileName) + '">✕</a>') + '</span></div>'; }).join('') || '<span class="faint">' + t('Nothing loaded') + '</span>') + '</div>' +
+          '<div class="files">' + (files.map(function (d) { return '<div><span>' + esc(d.fileName) + '</span><span class="nowrap">' + Z.count(d.rowCount) + ' ' + t('rows') + (lk ? '' : ' <a href="#" data-act="deldata" data-id="' + d.id + '" aria-label="' + t('Remove') + ' ' + esc(d.fileName) + '">✕</a>') + '</span></div>'; }).join('') || '<span class="faint">' + t('Nothing loaded') + '</span>') + '</div>' +
           '<div class="row" style="margin-top:auto">' + (lk ? '' : '<button class="btn small primary" data-act="upload" data-k="' + k + '">' + t('Upload Excel / CSV') + '</button>') + '<button class="btn small ghost" data-act="template" data-k="' + k + '">' + t('Template') + '</button>' + (files.length ? '<button class="btn small ghost" data-act="viewdata" data-k="' + k + '">' + t('View') + '</button>' : '') + '</div></div>';
       }).join('');
     };
@@ -278,12 +278,12 @@
       '<h3 style="margin:16px 0 8px">' + t('Match the columns') + '</h3><div class="grid g3">' + K.fields.map(function (f) {
         return '<label class="f"><span>' + esc(fieldLabel(f.k)) + (f.req ? ' *' : '') + '</span><select data-chg="upmap" data-f="' + f.k + '">' + colOpts(UP.map[f.k]) + '</select></label>';
       }).join('') + '</div>' +
-      '<h3 style="margin:18px 0 8px">' + t('Preview') + ' - ' + fmt(res.rows.length, 0) + ' ' + t('rows') + (res.errors.length ? ' · <span class="diff-bad">' + res.errors.length + ' ' + t('with missing required values') + '</span>' : '') + '</h3>' +
+      '<h3 style="margin:18px 0 8px">' + t('Preview') + ' - ' + Z.count(res.rows.length) + ' ' + t('rows') + (res.errors.length ? ' · <span class="diff-bad">' + res.errors.length + ' ' + t('with missing required values') + '</span>' : '') + '</h3>' +
       '<div class="tbl-wrap"><table class="t"><thead><tr>' + K.fields.map(function (f) { return '<th>' + esc(fieldLabel(f.k)) + '</th>'; }).join('') + '</tr></thead><tbody>' +
       prev.map(function (r) { return '<tr>' + K.fields.map(function (f) { return '<td' + (f.t === 'n' ? ' class="num"' : '') + '>' + esc(f.t === 'n' ? fmt(r[f.k]) : r[f.k]) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table></div>' +
       (res.errors.length ? '<p class="diff-bad" style="margin-top:8px">' + t('Rows') + ' ' + res.errors.slice(0, 12).map(function (e) { return e.row; }).join(', ') + (res.errors.length > 12 ? '…' : '') + ' ' + t('are missing required values. They are kept and will show in the checks.') + '</p>' : '');
     Z.modal(t('Load') + ' - ' + (S.lang === 'ar' ? K.ar : K.en), body,
-      '<button class="btn" data-act="closemodal">' + t('Cancel') + '</button><button class="btn primary" data-act="upsave"' + (missingReq.length || !res.rows.length ? ' disabled title="' + esc(t('Map every required column')) + '"' : '') + '>' + (UP.toReturn ? t('Use as VAT return') : t('Save') + ' ' + fmt(res.rows.length, 0) + ' ' + t('rows')) + '</button>', true);
+      '<button class="btn" data-act="closemodal">' + t('Cancel') + '</button><button class="btn primary" data-act="upsave"' + (missingReq.length || !res.rows.length ? ' disabled title="' + esc(t('Map every required column')) + '"' : '') + '>' + (UP.toReturn ? t('Use as VAT return') : t('Save') + ' ' + Z.count(res.rows.length) + ' ' + t('rows')) + '</button>', true);
   }
   Z.CHG.upsheet = function (el) { UP.sheet = el.value; prepSheet(); mapModal(); };
   Z.CHG.uphdr = function (el) { UP.headerRow = Math.max(0, +el.value - 1); UP.map = E.autoMap(UP.aoa[UP.headerRow] || [], UP.kind); mapModal(); };
@@ -297,7 +297,7 @@
     var ds = { parentId: S.ex.id, kind: UP.kind, fileName: UP.fileName, sheet: UP.sheet, headerRow: UP.headerRow, mapping: UP.map, rowCount: rows.length, errors: UP.result.errors.length, uploadedAt: new Date().toISOString(), label: UP.fileName };
     Z.save('datasets', ds).then(function (d) {
       return Z.save('rows', Object.assign({ id: d.id, parentId: S.ex.id }, pack(rows))).then(function () {
-        Z.closeModal(); Z.toast(fmt(rows.length, 0) + ' ' + t('rows saved')); S.loaded = false; Z.route();
+        Z.closeModal(); Z.toast(Z.count(rows.length) + ' ' + t('rows saved')); S.loaded = false; Z.route();
       });
     });
   };
@@ -315,7 +315,7 @@
   };
   Z.ACT.viewdata = function (el) {
     var k = el.dataset.k, rows = S.data[k] || [], K = E.KINDS[k];
-    Z.modal(S.lang === 'ar' ? K.ar : K.en, '<p class="muted">' + fmt(rows.length, 0) + ' ' + t('rows') + (rows.length > 300 ? ' - ' + t('first 300 shown') : '') + '</p>' + Z.rowsTable(rows.slice(0, 300), K.fields.map(function (f) { return f.k; })), '', true);
+    Z.modal(S.lang === 'ar' ? K.ar : K.en, '<p class="muted">' + Z.count(rows.length) + ' ' + t('rows') + (rows.length > 300 ? ' - ' + t('first 300 shown') : '') + '</p>' + Z.rowsTable(rows.slice(0, 300), K.fields.map(function (f) { return f.k; })), '', true);
   };
 
   var FIELD_LABELS = { account: 'Account', name: 'Account name', opening: 'Opening', debit: 'Debit', credit: 'Credit', closing: 'Closing', date: 'Date', doc: 'Document', description: 'Description', party: 'Counterparty', country: 'Country', flow: 'Sales / purchase', invoice: 'Invoice no.', vatNo: 'VAT no.', category: 'Tax category', docType: 'Document type', net: 'Net', vat: 'VAT', total: 'Total', box: 'Box', amount: 'Amount', adj: 'Adjustment', uuid: 'UUID', status: 'Status', declaration: 'Declaration no.', value: 'Customs value', reference: 'Reference', balance: 'Balance', paymentType: 'Payment type', gross: 'Gross', rate: 'Rate', wht: 'WHT', dtt: 'Treaty relief', certificate: 'Certificate', paidDate: 'Paid to ZATCA', tax: 'Tax', cls: 'Class', reason: 'Why', expected: 'Expected', statutory: 'Statutory rate', applied: 'Applied rate', shortfall: 'Shortfall', due: 'Due', daysLate: 'Days late', penalty: 'Fine', missing: 'Missing',
@@ -341,14 +341,15 @@
         (c.diff != null && c.bLabel ? '<span class="d ' + c.status + '">' + t('Difference') + ': <b>' + fmt(c.diff) + '</b></span>' : '') + (c.exposure ? '<span class="d fail">' + t('Exposure') + ': <b>' + fmt(c.exposure) + '</b></span>' : '') + (c.source ? '<span class="faint">' + esc(c.source) + '</span>' : '');
     return '<div class="check" id="c-' + c.id + '">' + Z.tick(c.status) + '<div><h3>' + esc(c.id) + ' · ' + esc(Z.tt(c, 'title')) + '</h3><div class="figs">' + figs + '</div>' +
       (c.note ? '<p class="faint" style="font-size:12.5px;margin:4px 0 0">' + esc(S.lang === 'ar' && c.noteAr ? c.noteAr : t(c.note)) + '</p>' : '') + (extra || '') +
-      (c.status !== 'pass' && c.status !== 'na' || note ? '<textarea data-chg="cnote" data-id="' + c.id + '" placeholder="' + esc(t('Explanation for the inspector (what causes the difference, evidence reference)')) + '"' + (lk ? ' disabled' : '') + '>' + esc(note) + '</textarea>' : '') + '</div>' +
-      '<div class="acts">' + (c.status === 'fail' || c.status === 'warn' ? (lk ? '' : '<button class="btn small" data-act="raise" data-id="' + c.id + '">' + t('Raise finding') + '</button>') : '') + '</div></div>';
+      (c.status !== 'pass' && c.status !== 'na' || note ? '<textarea data-chg="cnote" data-id="' + c.id + '" placeholder="' + esc(t('Explanation for the inspector (what causes the difference, evidence reference)')) + '"' + (lk ? ' disabled' : '') + '>' + esc(note) + '</textarea>' : '') +
+      (Z.reviewHtml ? Z.reviewHtml(c.id) : '') +
+      '</div><div class="acts">' + (c.status === 'fail' || c.status === 'warn' ? (lk ? '' : '<button class="btn small" data-act="raise" data-id="' + c.id + '">' + t('Raise finding') + '</button>') : '') + (Z.reviewButton ? Z.reviewButton(c.id) : '') + '</div></div>';
   };
   Z.CHG.cnote = function (el) { S.ex.checkNotes[el.dataset.id] = el.value; Z.saveEx(); };
   Z.exceptionsHtml = function (c) {
     if (!c.exceptions) return '';
     return Object.keys(c.exceptions).filter(function (k) { return c.exceptions[k].length; }).map(function (k) {
-      return '<details><summary>' + esc(t(EXC[k] || k)) + ' (' + fmt((c.counts || {})[k] || c.exceptions[k].length, 0) + ')</summary>' + Z.rowsTable(c.exceptions[k].slice(0, 200), excCols(k, c.exceptions[k][0])) + '</details>';
+      return '<details><summary>' + esc(t(EXC[k] || k)) + ' (' + Z.count((c.counts || {})[k] || c.exceptions[k].length) + ')</summary>' + Z.rowsTable(c.exceptions[k].slice(0, 200), excCols(k, c.exceptions[k][0])) + '</details>';
     }).join('');
   };
   var EXC = { notReported: 'Sales invoices not reported to Fatoora', notInSystem: 'Fatoora invoices not in the system', rejected: 'Rejected by Fatoora', mismatch: 'VAT differs from Fatoora', unmatched: 'Unmatched lines', rate: 'Rate exceptions', late: 'Late remittances', noCert: 'Lines without a certificate', missing: 'Not in the WHT register', list: 'Exceptions' };
@@ -457,7 +458,7 @@
     var ok = rows.filter(function (r) { return r.c.status === 'pass'; }).length, known = rows.filter(function (r) { return r.c.status !== 'na'; }).length;
     return '<section class="paper" style="margin-top:18px"><header><div><h2>' + t('Fatoora against everything') + '</h2><p>' + t('What ZATCA holds on the e-invoicing portal compared with each of your sources. ZATCA runs these comparisons itself.') + '</p></div><span class="score-chip">' + ok + ' / ' + known + ' ' + t('agree') + '</span></header><div class="pairs">' +
       rows.map(function (r, i) {
-        var c = r.c, figure = c.status === 'na' ? t('No data') : c.status === 'pass' ? t('Agrees') : c.bLabel ? fmt(c.diff, 0) : c.a + ' ' + (c.a === 1 ? t('item') : t('items'));
+        var c = r.c, figure = c.status === 'na' ? t('No data') : c.status === 'pass' ? t('Agrees') : c.bLabel ? fmt(c.diff) : c.a + ' ' + (c.a === 1 ? t('item') : t('items'));
         return '<a class="pair st-' + c.status + '" style="--i:' + i + '" href="#" data-act="gocheck" data-id="' + c.id + '" data-tab="' + r.m[2] + '"><span class="node">' + t('Fatoora') + '</span><span class="link"><i></i>' + Z.tick(c.status) + '</span><span class="node">' + esc(t(r.m[1])) + '</span><span class="gap num">' + figure + '</span></a>';
       }).join('') + '</div></section>';
   }
@@ -468,8 +469,8 @@
   };
   Z.tabs.einv = function () {
     var EI = S.R.einv, sm = EI.summary;
-    var counts = sm ? '<div class="kpis"><div><b>' + fmt(sm.erp, 0) + '</b><span>' + t('Sales documents in the ERP') + '</span></div><div><b>' + fmt(sm.provider, 0) + '</b><span>' + t('Received by the e-invoicing provider') + '</span></div><div><b>' + fmt(sm.zatca, 0) + '</b><span>' + t('Held by ZATCA (Fatoora export)') + '</span></div>' +
-      Object.keys(sm.byStatus).map(function (k) { return '<div class="' + (/REJECT|PEND|NOT_/.test(k) ? 'bad' : '') + '"><b>' + fmt(sm.byStatus[k], 0) + '</b><span>' + esc(t(EST[k] || k)) + '</span></div>'; }).join('') + '</div>' : '';
+    var counts = sm ? '<div class="kpis"><div><b>' + Z.count(sm.erp) + '</b><span>' + t('Sales documents in the ERP') + '</span></div><div><b>' + Z.count(sm.provider) + '</b><span>' + t('Received by the e-invoicing provider') + '</span></div><div><b>' + Z.count(sm.zatca) + '</b><span>' + t('Held by ZATCA (Fatoora export)') + '</span></div>' +
+      Object.keys(sm.byStatus).map(function (k) { return '<div class="' + (/REJECT|PEND|NOT_/.test(k) ? 'bad' : '') + '"><b>' + Z.count(sm.byStatus[k]) + '</b><span>' + esc(t(EST[k] || k)) + '</span></div>'; }).join('') + '</div>' : '';
     return '<section class="paper area-vat"><header><div><h2>' + t('Three-way e-invoicing reconciliation') + '</h2><p>' + t('Your ERP issues the invoice, the e-invoicing provider signs it and sends it to Fatoora, ZATCA clears or records it. An inspector compares all three: an invoice missing anywhere along the chain is a finding.') + '</p></div>' +
       '<a class="btn small" href="#/ex/' + S.ex.id + '/data">' + t('Load provider or Fatoora export') + '</a></header>' + counts + '</section>' + fatooraMap() +
       '<section class="paper" style="margin-top:18px"><header><div><h2>' + t('E-invoicing checks') + '</h2></div></header>' + EI.checks.map(function (c) { return Z.checkHtml(c, Z.exceptionsHtml(c)); }).join('') + '</section>';
@@ -531,10 +532,10 @@
     var A = S.R.analytics, ra = A.ratios;
     var tiles = '<div class="kpis"><div class="' + (ra.effectiveRate != null && Math.abs(ra.effectiveRate - S.settings.vatRate * 100) >= 0.001 ? 'bad' : '') + '"><b>' + (ra.effectiveRate == null ? '-' : ra.effectiveRate + '%') + '</b><span>' + t('Effective VAT rate on standard sales') + '</span></div>' +
       '<div><b>' + (ra.inputToOutput == null ? '-' : ra.inputToOutput + '%') + '</b><span>' + t('Input VAT as % of output VAT') + '</span></div><div><b>' + (ra.zeroExemptShare == null ? '-' : ra.zeroExemptShare + '%') + '</b><span>' + t('Zero-rated, export and exempt share of sales') + '</span></div>' +
-      '<div><b>' + fmt((S.data.sys_vat || []).length, 0) + '</b><span>' + t('Invoices analysed') + '</span></div></div>';
+      '<div><b>' + Z.count((S.data.sys_vat || []).length) + '</b><span>' + t('Invoices analysed') + '</span></div></div>';
     var list = A.tests.map(function (x) {
-      var extra = x.dist ? benford(x.dist) : x.items.length ? '<details><summary>' + t('Show') + ' ' + fmt(x.count, 0) + '</summary>' + Z.rowsTable(x.items.slice(0, 200), ['invoice', 'date', 'party', 'vatNo', 'country', 'category', 'net', 'vat', 'reason'].filter(function (c) { return x.items[0][c] !== undefined; })) + '</details>' : '';
-      return '<div class="check">' + Z.tick(x.status) + '<div><h3>' + esc(x.id) + ' · ' + esc(Z.tt(x, 'title')) + ' ' + Z.pill(x.severity, t(Z.cap(x.severity))) + '</h3><div class="figs">' + (x.status === 'na' ? '' : '<span>' + t('Items') + ': <b>' + fmt(x.count, 0) + '</b></span>' + (x.amount ? '<span>' + t('Amount') + ': <b>' + fmt(x.amount) + '</b></span>' : '')) + '</div><p class="faint" style="font-size:12.5px;margin:4px 0 0">' + esc(t(x.desc || '')) + '</p>' + extra + '</div>' +
+      var extra = x.dist ? benford(x.dist) : x.items.length ? '<details><summary>' + t('Show') + ' ' + Z.count(x.count) + '</summary>' + Z.rowsTable(x.items.slice(0, 200), ['invoice', 'date', 'party', 'vatNo', 'country', 'category', 'net', 'vat', 'reason'].filter(function (c) { return x.items[0][c] !== undefined; })) + '</details>' : '';
+      return '<div class="check">' + Z.tick(x.status) + '<div><h3>' + esc(x.id) + ' · ' + esc(Z.tt(x, 'title')) + ' ' + Z.pill(x.severity, t(Z.cap(x.severity))) + '</h3><div class="figs">' + (x.status === 'na' ? '' : '<span>' + t('Items') + ': <b>' + Z.count(x.count) + '</b></span>' + (x.amount ? '<span>' + t('Amount') + ': <b>' + fmt(x.amount) + '</b></span>' : '')) + '</div><p class="faint" style="font-size:12.5px;margin:4px 0 0">' + esc(t(x.desc || '')) + '</p>' + extra + '</div>' +
         '<div class="acts">' + (x.count && !locked() ? '<button class="btn small" data-act="raisea" data-id="' + x.id + '">' + t('Raise finding') + '</button>' : '') + '</div></div>';
     }).join('');
     return tiles + '<section class="paper" style="margin-top:18px"><header><div><h2>' + t('Tests on every invoice') + '</h2><p>' + t('Run over the full system VAT report, not a sample. Flagged items are good candidates for risk-based samples.') + '</p></div></header>' + list + '</section>';

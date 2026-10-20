@@ -904,6 +904,122 @@ div.dr-row .dr-bar { grid-column: 1 / -1; }
 table.matrix td.bl, table.matrix td.bl ~ td { background: color-mix(in srgb, var(--surface-2) 70%, transparent); }
 table.matrix th.grp, table.matrix th.grp ~ th { color: var(--ink-2); }
 
+/* ---------------------------------------------------------------- ZATCA account (wave 1): zk- prefix, no shared names */
+.tx { display: inline-block; width: 9px; height: 9px; border-radius: 3px; background: var(--info); flex: none; }
+.tx-vat { background: #0f766e; } .tx-wht { background: #1d4ed8; } .tx-zakat { background: #a16207; } .tx-zatca { background: #7c3aed; }
+.tx-excise { background: #be185d; } .tx-rett { background: #c2410c; } .tx-cit, .tx-other { background: #64748b; }
+.zk-tx { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.zk-hero { display: grid; grid-template-columns: minmax(240px, 340px) 1fr; gap: 26px; align-items: center; }
+.zk-bal { display: grid; gap: 4px; align-content: start; }
+.zk-bal .zk-k { font-size: 13px; font-weight: 700; color: var(--ink-2); }
+.zk-bal > b { text-align: start; font-size: 40px; font-weight: 800; letter-spacing: -.03em; line-height: 1.05; font-variant-numeric: tabular-nums; }
+.zk-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.zk-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: var(--surface-2); font-size: 12.5px; font-weight: 600; color: var(--ink-2); }
+.zk-chip b { color: var(--ink); }
+.zk-gl { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+.zk-run .chart .ln { stroke: var(--accent); }
+.zk-run .chart .pen { fill: var(--fail); stroke: var(--surface); stroke-width: 2; animation: pop .4s var(--ease) both; animation-delay: calc(500ms + var(--i, 0) * 80ms); }
+.zk-run-empty { padding: 40px 10px; text-align: center; border: 1px dashed var(--line-2); border-radius: var(--r-m); }
+.zk-legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 8px 0 0; font-size: 12px; color: var(--ink-3); }
+.zk-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.zk-legend .k-ln { width: 16px; height: 3px; border-radius: 2px; background: var(--accent); display: inline-block; }
+.zk-legend .k-pen { width: 9px; height: 9px; border-radius: 50%; background: var(--fail); display: inline-block; }
+.zk-tbl tr.k-penalty td { background: color-mix(in srgb, var(--fail-soft) 55%, transparent); }
+.zk-src { display: flex; gap: 8px; align-items: flex-start; font-size: 12.5px; margin: 0; }
+.zk-src i { color: var(--accent); margin-top: 2px; }
+/* case cards: refunds and disputes */
+.zk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 14px; }
+.zk-case { position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-m); box-shadow: var(--shadow-1); padding: 16px 18px 12px; display: flex; flex-direction: column; gap: 12px; overflow: hidden; animation: rise .5s var(--ease) both; animation-delay: calc(var(--i, 0) * 50ms); }
+.zk-case::before { content: ''; position: absolute; inset-block: 0; inset-inline-start: 0; width: 4px; background: var(--accent); }
+.zk-case.st-overdue::before, .zk-case.st-urgent::before { background: var(--fail); } .zk-case.st-chase::before, .zk-case.st-waiting::before { background: var(--warn); }
+.zk-case.closed::before { background: var(--line-2); }
+.zk-case header { display: flex; gap: 12px; justify-content: space-between; align-items: flex-start; }
+.zk-case h3 { margin: 0; font-size: 15px; line-height: 1.35; }
+.zk-case header p { margin: 3px 0 0; font-size: 12.5px; }
+.zk-case .zk-kind { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 6px; font-size: 12px; color: var(--ink-2); }
+.zk-amt { font-size: 20px; font-weight: 800; letter-spacing: -.02em; white-space: nowrap; }
+.zk-case footer { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 12.5px; border-top: 1px solid var(--line); padding-top: 10px; }
+.zk-next { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; font-size: 13.5px; font-weight: 650; }
+.zk-note { font-size: 12.5px; margin: 0; }
+.zk-rej { margin: 0; color: var(--fail); font-weight: 700; display: inline-flex; gap: 6px; align-items: center; }
+.zk-issues { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; font-size: 12.5px; }
+.zk-issues li { display: flex; gap: 6px; align-items: flex-start; color: var(--ink); background: var(--warn-soft); padding: 6px 9px; border-radius: var(--r-s); }
+.zk-issues li i { color: var(--warn); margin-top: 2px; }
+.zk-due { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; background: var(--surface-2); color: var(--ink-2); white-space: nowrap; }
+.zk-due.soon { background: var(--warn-soft); color: var(--ink); } .zk-due.bad { background: var(--fail-soft); color: var(--fail); }
+.zk-due.ok { background: var(--pass-soft); color: var(--pass); } .zk-due.wait { background: var(--info-soft); color: var(--info); }
+/* progress stepper */
+.zk-steps { list-style: none; margin: 0; padding: 0; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; }
+.zk-steps li { position: relative; display: grid; justify-items: center; gap: 6px; text-align: center; font-size: 11px; font-weight: 650; color: var(--ink-3); }
+.zk-steps li::before { content: ''; position: absolute; top: 6px; inset-inline-start: -50%; width: 100%; height: 2px; background: var(--line); z-index: 0; }
+.zk-steps li:first-child::before { display: none; }
+.zk-steps li i { position: relative; z-index: 1; width: 14px; height: 14px; border-radius: 50%; background: var(--surface); border: 2px solid var(--line-2); }
+.zk-steps li.done { color: var(--ink-2); } .zk-steps li.done i { background: var(--accent); border-color: var(--accent); }
+.zk-steps li.done::before, .zk-steps li.cur::before { background: var(--accent); transform-origin: left; animation: grow-x .6s var(--ease) both; }
+[dir="rtl"] .zk-steps li.done::before, [dir="rtl"] .zk-steps li.cur::before { transform-origin: right; }
+.zk-steps li.cur { color: var(--ink); } .zk-steps li.cur i { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+/* calendar */
+.zk-filter { display: flex; flex-wrap: wrap; gap: 8px; }
+.zk-fchip { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); padding: 6px 13px; border-radius: 999px; font: inherit; font-size: 13px; font-weight: 650; cursor: pointer; min-height: 36px; transition: background .2s, color .2s, border-color .2s; }
+.zk-fchip:hover { border-color: var(--accent-line); }
+.zk-fchip.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink, #fff); }
+.zk-cal { display: grid; grid-template-columns: minmax(300px, 400px) 1fr; gap: 16px; align-items: start; }
+.zk-month { position: sticky; top: 76px; }
+.zk-month .cal-nav-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.zk-month h2 { font-size: 16px; margin: 0; }
+.zk-wd, .zk-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.zk-wd span { text-align: center; font-size: 11px; font-weight: 700; color: var(--ink-3); padding: 4px 0; }
+.zk-d { aspect-ratio: 1; border-radius: 10px; display: grid; place-items: center; align-content: center; gap: 3px; font-size: 13px; color: var(--ink-2); text-decoration: none; position: relative; }
+.zk-d.pad { visibility: hidden; }
+.zk-d b { font-weight: 650; }
+.zk-d.has { background: var(--surface-2); color: var(--ink); cursor: pointer; transition: transform .15s var(--ease), background .2s; }
+.zk-d.has:hover { transform: translateY(-1px); background: var(--accent-soft); }
+.zk-d.overdue { background: var(--fail-soft); color: var(--fail); } .zk-d.soon { background: var(--warn-soft); }
+.zk-d.today { outline: 2px solid var(--accent); outline-offset: -2px; }
+.zk-d .dots { display: flex; gap: 2px; } .zk-d .dots i { width: 5px; height: 5px; border-radius: 50%; display: block; background: #64748b; }
+.zk-d .dots i.tx-vat { background: #0f766e; } .zk-d .dots i.tx-wht { background: #1d4ed8; } .zk-d .dots i.tx-zakat { background: #a16207; } .zk-d .dots i.tx-zatca { background: #7c3aed; }
+.zk-d .dots i.tx-excise { background: #be185d; } .zk-d .dots i.tx-rett { background: #c2410c; }
+.zk-agenda > ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.zk-agenda > ol > li { display: grid; grid-template-columns: 54px 1fr; gap: 14px; padding: 10px 0; border-top: 1px solid var(--line); animation: rise .45s var(--ease) both; animation-delay: calc(min(var(--i, 0), 12) * 35ms); border-radius: var(--r-s); transition: background .6s; }
+.zk-agenda > ol > li:first-child { border-top: 0; }
+.zk-agenda > ol > li.flash { background: var(--accent-soft); }
+.zk-date { display: grid; justify-items: center; align-content: start; padding: 6px 0; border-radius: 12px; background: var(--surface-2); }
+.zk-date b { font-size: 20px; font-weight: 800; line-height: 1; } .zk-date span { font-size: 11px; font-weight: 700; color: var(--ink-2); }
+.zk-date.today { background: var(--accent); color: var(--accent-ink, #fff); } .zk-date.today span { color: inherit; }
+.zk-agenda ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.zk-it { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 8px 10px; border-radius: var(--r-s); color: inherit; text-decoration: none; transition: background .2s; }
+a.zk-it:hover { background: var(--surface-2); }
+.zk-it-t { display: grid; gap: 1px; } .zk-it-t b { font-size: 13.5px; font-weight: 650; } .zk-it-t small { font-size: 12px; color: var(--ink-3); }
+.zk-st { font-size: 11.5px; font-weight: 700; padding: 2px 9px; border-radius: 999px; background: var(--surface-2); color: var(--ink-2); white-space: nowrap; }
+.zk-it.st-overdue .zk-st { background: var(--fail-soft); color: var(--fail); } .zk-it.st-soon .zk-st { background: var(--warn-soft); color: var(--ink); }
+.zk-it.st-done .zk-st { background: var(--pass-soft); color: var(--pass); } .zk-it.st-done .zk-it-t b { text-decoration: line-through; color: var(--ink-3); }
+.zk-it.st-waiting .zk-st { background: var(--info-soft); color: var(--info); }
+/* reviewer notes */
+.zk-reviews { display: grid; gap: 8px; margin-top: 10px; }
+.zk-rv { border: 1px solid var(--line); border-radius: var(--r-s); padding: 10px 12px; background: var(--surface-2); }
+.zk-rv.open { border-color: var(--warn); background: var(--warn-soft); }
+.zk-rv p { margin: 0; }
+.zk-rv-h { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 12.5px; }
+.zk-rv-t { margin-top: 6px !important; font-size: 13.5px; }
+.zk-rv-r { margin-top: 6px !important; font-size: 13px; color: var(--ink-2); display: flex; gap: 6px; }
+.zk-rv textarea { margin-top: 8px; min-height: 40px; }
+.zk-rv .row { margin-top: 8px; gap: 6px; }
+.zk-rvsum { margin-bottom: 16px; } .zk-rvsum.open { box-shadow: var(--shadow-1), inset 0 3px 0 var(--warn); }
+.zk-rvsum h2 { display: inline-flex; gap: 8px; align-items: center; }
+.zk-rvsum ul { margin: 6px 0 0; padding-inline-start: 18px; display: grid; gap: 4px; font-size: 13.5px; }
+@media (max-width: 1180px) { .zk-hero { grid-template-columns: 1fr; } }
+@media (max-width: 960px) {
+  .zk-cal { grid-template-columns: 1fr; }
+  .zk-month { position: static; }
+  .zk-grid { grid-template-columns: 1fr; }
+  .zk-bal > b { font-size: 32px; }
+}
+@media (max-width: 520px) { .zk-gl { grid-template-columns: 1fr; } .zk-steps li span { font-size: 10px; } }
+.zk-run .chart .vl { fill: var(--ink); font-size: 12px; font-weight: 750; font-family: var(--font); }
+.zk-run .chart .dot { stroke: var(--accent); }
+.zk-it.st-untracked .zk-st { background: var(--surface-2); color: var(--ink-3); } .zk-it.st-untracked .zk-it-t b { color: var(--ink-2); }
+@media (max-width: 1280px) { .zk-cal { grid-template-columns: 1fr; } .zk-month { position: static; max-width: 480px; } }
+
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
@@ -1363,6 +1479,9 @@ Object.assign(window.ZI18N, {
 Object.assign(window.ZI18N, { 'item': 'بند' });
 Object.assign(window.ZI18N, {"VAT on accepted e-invoices": "الضريبة على الفواتير الإلكترونية المعتمدة", "Output VAT on the return (box 6)": "ضريبة المخرجات في الإقرار (البند 6)", "ZATCA holds every cleared and reported invoice and compares it with the return automatically. VAT on e-invoices above the return is treated as undeclared; below it means sales were declared that ZATCA has no invoice for.": "تحتفظ الهيئة بكل فاتورة معتمدة أو مبلغ عنها وتقارنها بالإقرار تلقائياً. الضريبة على الفواتير الإلكترونية التي تزيد عن الإقرار تُعامل كغير مقرة، وإذا كانت أقل فهناك مبيعات مقرة لا توجد لها فواتير لدى الهيئة.", "A sale zero-rated on the e-invoice but standard-rated in the return (or the reverse) moves tax between boxes; ZATCA compares each category separately.": "البيع المسجل بنسبة صفرية في الفاتورة الإلكترونية وبالنسبة الأساسية في الإقرار (أو العكس) ينقل الضريبة بين البنود، والهيئة تقارن كل فئة على حدة.", "VAT is due in the period of the tax invoice date. An invoice dated in one month on Fatoora and booked in another is either under-declared now or declared twice.": "تستحق الضريبة في فترة تاريخ الفاتورة الضريبية. الفاتورة المؤرخة بشهر في فاتورة والمسجلة في شهر آخر إما غير مقرة الآن أو مقرة مرتين.", "A duplicate inflates the sales ZATCA sees. Cancel it on the e-invoicing system with a credit note referencing it.": "التكرار يضخم المبيعات التي تراها الهيئة. ألغِ النسخة المكررة في نظام الفوترة بإشعار دائن يشير إليها.", "The customer can only recover VAT on an invoice issued to its own VAT number, and ZATCA matches it against the customer's input VAT.": "لا يستطيع العميل استرداد الضريبة إلا على فاتورة صادرة برقمه الضريبي، والهيئة تطابقها مع ضريبة مدخلات العميل.", "An EGS unit onboarded under another VAT number (a branch or a group company) reports these sales to the wrong taxpayer.": "وحدة إصدار مسجلة برقم ضريبي آخر (فرع أو شركة شقيقة) تبلغ عن هذه المبيعات باسم مكلف آخر."});
 Object.assign(window.ZI18N, {"Box 14 corrections":"تصحيحات البند 14","Threshold":"الحد","POS gross takings":"إجمالي مقبوضات نقاط البيع","Simplified (B2C) sales incl. VAT":"المبيعات المبسطة (B2C) شاملة الضريبة","POS net settlements":"صافي تسويات نقاط البيع","Bank credits from POS / mada":"إيداعات البنك من نقاط البيع / مدى","Card takings above simplified-invoice sales are the classic retail finding: sales rung up without an invoice. If business customers also pay by card, those must appear as standard invoices.":"زيادة مقبوضات البطاقات عن مبيعات الفواتير المبسطة هي الملاحظة المعتادة في التجزئة: مبيعات سُجلت دون فاتورة. وإذا دفع عملاء من الشركات بالبطاقة فيجب أن تظهر مبيعاتهم كفواتير ضريبية.","Late, but under 30 days: no delay fine (IR Art. 68).":"متأخر لكن أقل من 30 يوماً: لا غرامة تأخير (المادة 68 من اللائحة).","1% of the tax for each 30 days of delay.":"1% من الضريبة عن كل 30 يوم تأخير."});
+Object.assign(window.ZI18N, {"ZATCA account":"حساب الهيئة","Tax calendar":"تقويم الضرائب","Statement of account":"كشف الحساب","Disputes and penalties":"الاعتراضات والغرامات","VAT refunds":"استرداد ضريبة القيمة المضافة","Clear every review note before signing off.":"أغلق كل ملاحظات المراجعة قبل الاعتماد.","ZATCA is past its date by":"تجاوزت الهيئة موعدها بـ","ZATCA, by":"الهيئة، بحلول","Show the items":"عرض البنود","Add an entity first.":"أضف منشأة أولاً.","Import statement":"استيراد الكشف","Add line":"إضافة سطر","Owed to ZATCA":"مستحق للهيئة","ZATCA owes you":"مستحق لك من الهيئة","as of":"حتى","Balance per general ledger":"الرصيد حسب دفتر الأستاذ","Net of all ZATCA accounts":"صافي كل حسابات الهيئة","Statement date":"تاريخ الكشف","Balance per ZATCA statement":"الرصيد حسب كشف الهيئة","Penalties on the statement":"الغرامات في الكشف","Unpaid after the due date":"غير مسدد بعد موعد الاستحقاق","Exposure (SAR)":"المخاطر (ريال)","What the statement says about your filings":"ما يقوله الكشف عن إقراراتك","ZATCA keeps its own ledger for the company. Inspectors start from it: every return, assessment, penalty and payment should agree with your books.":"تحتفظ الهيئة بسجل خاص للمنشأة ويبدأ منه الفاحصون: يجب أن يتطابق كل إقرار وربط وغرامة وسداد مع دفاترك.","Your return, what ZATCA posted, and what was paid.":"إقرارك، وما سجلته الهيئة، وما تم سداده.","VAT on the statement":"القيمة المضافة في الكشف","VAT paid":"القيمة المضافة المسددة","WHT on the statement":"الاستقطاع في الكشف","lines":"أسطر","Clear the statement":"مسح الكشف","No statement loaded yet":"لم يُحمّل كشف بعد","Download the statement of account from the ZATCA portal (Excel), then import it here. Columns are recognised in English or Arabic.":"نزّل كشف الحساب من بوابة الهيئة (Excel) ثم استورده هنا. تُتعرّف الأعمدة بالعربية أو الإنجليزية.","Reconcile what ZATCA has posted for the company with your returns, payments and general ledger.":"طابق ما سجلته الهيئة للمنشأة مع إقراراتك ومدفوعاتك ودفتر الأستاذ.","The balance over time appears once the statement has lines.":"يظهر الرصيد عبر الزمن بعد إضافة أسطر للكشف.","Balance with ZATCA over time":"الرصيد مع الهيئة عبر الزمن","Balance owed to ZATCA":"الرصيد المستحق للهيئة","Penalty posted":"غرامة مسجلة","Line removed":"تم حذف السطر","Remove every line of this statement?":"حذف كل أسطر هذا الكشف؟","Statement cleared":"تم مسح الكشف","Add a statement line":"إضافة سطر إلى الكشف","Debit (owed to ZATCA)":"مدين (مستحق للهيئة)","Credit (paid or refunded)":"دائن (مسدد أو مسترد)","Enter a debit or a credit.":"أدخل مبلغاً مديناً أو دائناً.","Line added":"تمت إضافة السطر","No date and amount columns were found in this file.":"لم يُعثر على أعمدة التاريخ والمبلغ في هذا الملف.","No lines were found in this file.":"لم يُعثر على أسطر في هذا الملف.","Replace the lines already loaded? Cancel adds to them.":"استبدال الأسطر المحملة؟ اختر إلغاء للإضافة إليها.","lines imported":"سطراً تم استيرادها","skipped":"تم تخطيها","By tax":"حسب الضريبة","No penalties on the statement.":"لا توجد غرامات في الكشف.","Record each penalty in Disputes and penalties with its reference so the decision and deadline are tracked.":"سجّل كل غرامة في الاعتراضات والغرامات بمرجعها لمتابعة القرار والموعد.","estimated fine":"الغرامة التقديرية","Nothing overdue.":"لا يوجد متأخر.","Each difference counted once":"كل فرق محسوب مرة واحدة","Nothing exposed.":"لا توجد مخاطر.","VAT refund":"استرداد القيمة المضافة","on":"في","days since submission":"يوماً منذ التقديم","Update":"تحديث","Every refund application from submission to payment: what ZATCA asked for, what you owe it back, and when the money is due.":"كل طلب استرداد من التقديم حتى الصرف: ما طلبته الهيئة، وما عليك تقديمه، ومتى يستحق المبلغ.","Record a refund":"تسجيل طلب استرداد","Refunds outstanding (SAR)":"استردادات قائمة (ريال)","Waiting on you":"بانتظارك","Refunds received (SAR)":"استردادات مستلمة (ريال)","Paid short of the claim (SAR)":"المصروف أقل من المطالبة (ريال)","Minimum application SAR":"الحد الأدنى للطلب بالريال","ZATCA pays within 60 days of approval and expects requested documents within 20 working days (adviser summaries of VAT IR Art. 69-70; verify, editable in Settings).":"تصرف الهيئة خلال 60 يوماً من الموافقة وتتوقع المستندات المطلوبة خلال 20 يوم عمل (ملخصات مستشارين للمادتين 69-70 من اللائحة؛ للتحقق، وقابلة للتعديل في الإعدادات).","No refund applications yet":"لا توجد طلبات استرداد بعد","When a return shows more input VAT than output VAT, record the refund application here to follow it to payment.":"عندما يُظهر الإقرار ضريبة مدخلات أكبر من المخرجات، سجّل طلب الاسترداد هنا لمتابعته حتى الصرف.","Amount claimed (SAR)":"المبلغ المطالب به (ريال)","Submitted on":"تاريخ التقديم","ZATCA asked for documents on":"تاريخ طلب الهيئة للمستندات","Documents due by (if ZATCA gave a date)":"موعد تقديم المستندات (إن حددته الهيئة)","Approved on":"تاريخ الموافقة","Amount received (SAR)":"المبلغ المستلم (ريال)","Notes":"ملاحظات","Delete this record?":"حذف هذا السجل؟","Deleted":"تم الحذف","Nothing outstanding.":"لا يوجد قائم.","applications":"طلبات","Nothing is waiting on you.":"لا شيء بانتظارك.","Every refund was paid in full.":"صُرف كل استرداد بالكامل.","period":"الفترة","Relief obtained":"التخفيض المحقق","Paid":"مسدد","Notice":"الإشعار","Assessments and penalties from notice to final decision: 60 days to object to ZATCA, then the GSTC committees. Missing a deadline makes the assessment final.":"الربوط والغرامات من الإشعار حتى القرار النهائي: 60 يوماً للاعتراض لدى الهيئة، ثم لجان الأمانة العامة للجان الضريبية. فوات الموعد يجعل الربط نهائياً.","Record a notice":"تسجيل إشعار","At stake in open cases (SAR)":"المبالغ المعرضة في القضايا المفتوحة (ريال)","Open cases":"قضايا مفتوحة","To your next deadline":"حتى موعدك القادم","Relief obtained (SAR)":"التخفيض المحقق (ريال)","deadlines in the next 30 days":"مواعيد خلال 30 يوماً القادمة","Deadlines from Settings: object within 60 days of the notice; ZATCA decides within 90 days; escalate to the GSTC within 30 days of a rejection; appeal within 30 days of a committee decision (verify the last three for your case).":"المواعيد من الإعدادات: الاعتراض خلال 60 يوماً من الإشعار؛ تبت الهيئة خلال 90 يوماً؛ التصعيد للأمانة العامة للجان الضريبية خلال 30 يوماً من الرفض؛ الاستئناف خلال 30 يوماً من قرار اللجنة (تحقق من الثلاثة الأخيرة لحالتك).","No disputes or penalties recorded":"لا توجد اعتراضات أو غرامات مسجلة","Record every assessment and penalty notice the day it arrives: the 60-day clock starts on notification.":"سجّل كل إشعار ربط أو غرامة يوم وصوله: تبدأ مهلة 60 يوماً من الإبلاغ.","Dispute":"اعتراض","What ZATCA says":"ما تقوله الهيئة","Notified on":"تاريخ الإبلاغ","Tax assessed (SAR)":"الضريبة المربوطة (ريال)","Penalty (SAR)":"الغرامة (ريال)","Our position":"موقفنا","Stage":"المرحلة","Objection filed on":"تاريخ تقديم الاعتراض","ZATCA decision on":"تاريخ قرار الهيئة","Committee hearing on":"تاريخ جلسة اللجنة","Committee decision on":"تاريخ قرار اللجنة","Paid so far (SAR)":"المسدد حتى الآن (ريال)","Paying the undisputed part stops late-payment fines on it.":"سداد الجزء غير المعترض عليه يوقف غرامات التأخير عليه.","Reference on the statement of account":"المرجع في كشف الحساب","Grounds and evidence":"الأسباب والأدلة","Tax plus penalty, less what is paid":"الضريبة والغرامة ناقص المسدد","No open cases.":"لا توجد قضايا مفتوحة.","cases":"قضايا","Your deadlines":"مواعيدك","No deadline is waiting on you.":"لا يوجد موعد بانتظارك.","No relief recorded yet.":"لم يُسجل تخفيض بعد.","This week":"هذا الأسبوع","Upcoming":"قادم","Waiting for ZATCA":"بانتظار الهيئة","Sun":"أحد","Mon":"اثنين","Tue":"ثلاثاء","Wed":"أربعاء","Thu":"خميس","Fri":"جمعة","Sat":"سبت","deadlines":"مواعيد","Agenda":"جدول المواعيد","From the month shown, the next 120 days, plus anything overdue.":"من الشهر المعروض ولمدة 120 يوماً، مع كل ما هو متأخر.","Nothing due in this window.":"لا شيء مستحق في هذه الفترة.","Every filing and payment deadline across taxes and companies, with ZATCA letters, dispute and refund dates. Export it to Outlook or Google Calendar.":"كل مواعيد الإقرار والسداد عبر الضرائب والشركات، مع خطابات الهيئة ومواعيد الاعتراضات والاسترداد. صدّره إلى Outlook أو تقويم Google.","Export to calendar (.ics)":"تصدير إلى التقويم (.ics)","Add a deadline":"إضافة موعد","Due in the next 30 days":"مستحق خلال 30 يوماً","Done this month":"منجز هذا الشهر","From Inspection Ready.":"من نظام جاهزية الفحص.","Nothing upcoming to export.":"لا مواعيد قادمة للتصدير.","deadlines exported":"موعداً تم تصديرها","What is due":"ما هو المستحق","e.g. Excise return, CIT advance payment, RETT on a sale":"مثال: إقرار الضريبة الانتقائية، دفعة ضريبة الدخل المعجلة، ضريبة التصرفات العقارية على بيع","Repeats":"التكرار","Mark as not done":"تعيين كغير منجز","Mark done for":"تعيين كمنجز في","Reviewer":"المراجع","Open review note":"ملاحظة مراجعة مفتوحة","Cleared":"مغلقة","Reply":"الرد","Reply to the reviewer: what you did or why no change is needed":"رد على المراجع: ما الذي فعلته أو لماذا لا يلزم تغيير","Review note":"ملاحظة مراجعة","Review note on":"ملاحظة مراجعة على","What should the preparer look at?":"ما الذي يجب أن يراجعه المُعد؟","The exercise cannot be signed off until every review note is cleared.":"لا يمكن اعتماد التمرين حتى تُغلق كل ملاحظات المراجعة.","Add note":"إضافة ملاحظة","Review note added":"تمت إضافة ملاحظة المراجعة","Review note reopened":"أعيد فتح ملاحظة المراجعة","Review note cleared":"أُغلقت ملاحظة المراجعة","Delete this review note?":"حذف ملاحظة المراجعة هذه؟","Review notes":"ملاحظات المراجعة","open: clear them before signing off.":"مفتوحة: أغلقها قبل الاعتماد.","Every review note is cleared.":"كل ملاحظات المراجعة مغلقة.","cleared":"مغلقة","replied":"تم الرد","Every return filed is on the statement":"كل إقرار مقدم يظهر في الكشف","Returns missing":"إقرارات مفقودة","Periods that differ":"فترات مختلفة","ZATCA statement of account":"كشف حساب الهيئة","Exercises for the periods on the statement":"تمارين للفترات الواردة في الكشف","GL balance of the ZATCA accounts":"رصيد حسابات الهيئة في دفتر الأستاذ","Enter it on this page":"أدخله في هذه الصفحة","A return you filed that ZATCA has not posted was either not submitted or posted to another period. Check the submission receipt.":"الإقرار الذي قدمته ولم تسجله الهيئة إما لم يُرسل أو سُجل لفترة أخرى. راجع إيصال التقديم.","A higher amount on the statement usually means ZATCA assessed the period or posted an amendment you have not recorded. A lower one can mean a return was not accepted in full.":"المبلغ الأعلى في الكشف يعني غالباً أن الهيئة أجرت ربطاً أو سجلت تعديلاً لم تسجله. والأقل قد يعني أن الإقرار لم يُقبل بالكامل.","Every penalty needs a decision: pay it, object within 60 days, or ask for a waiver. Record it in Disputes and penalties with the statement reference.":"كل غرامة تحتاج قراراً: السداد، أو الاعتراض خلال 60 يوماً، أو طلب الإعفاء. سجّلها في الاعتراضات والغرامات بمرجع الكشف.","A positive balance is tax owed to ZATCA. The general ledger figure is the net of every ZATCA payable and receivable account (VAT, WHT, penalties).":"الرصيد الموجب ضريبة مستحقة للهيئة. رقم دفتر الأستاذ هو صافي كل حسابات الهيئة الدائنة والمدينة (القيمة المضافة، الاستقطاع، الغرامات).","Below the minimum refund application of SAR 5,000: carry the credit forward instead.":"أقل من الحد الأدنى لطلب الاسترداد البالغ 5,000 ريال: رحّل الرصيد بدلاً من ذلك.","Paid less than claimed: ask ZATCA for the reason and object to the reduction within 60 days.":"صُرف أقل من المطالب به: اطلب من الهيئة السبب واعترض على التخفيض خلال 60 يوماً.","A rejection is a decision you can object to within 60 days.":"الرفض قرار يمكنك الاعتراض عليه خلال 60 يوماً.","Submit the application":"قدّم الطلب","Waiting for ZATCA review":"بانتظار مراجعة الهيئة","Send the requested documents":"أرسل المستندات المطلوبة","ZATCA pays the refund":"تصرف الهيئة الاسترداد","Preparing":"قيد الإعداد","Submitted":"مقدم","Documents requested":"مستندات مطلوبة","Approved":"معتمد","Rejected":"مرفوض","Pay the amount":"سدد المبلغ","Object to ZATCA":"اعترض لدى الهيئة","Ask for a waiver":"اطلب الإعفاء","ZATCA decides the objection":"تبت الهيئة في الاعتراض","Escalate to the GSTC committee":"صعّد إلى لجنة الأمانة العامة للجان الضريبية","Committee hearing":"جلسة اللجنة","Appeal to the appellate committee":"استأنف أمام لجنة الاستئناف","Appellate committee hearing":"جلسة لجنة الاستئناف","Notice received":"تم استلام الإشعار","Objection filed with ZATCA":"اعتراض مقدم للهيئة","ZATCA rejected the objection":"رفضت الهيئة الاعتراض","Before the first-level committee":"أمام لجنة الفصل","Committee decided":"قررت اللجنة","Before the appellate committee":"أمام لجنة الاستئناف","Objection":"اعتراض","Committee":"اللجنة","Appeal":"استئناف","Object":"الاعتراض","Accept and pay":"القبول والسداد","VAT return and payment":"إقرار وسداد القيمة المضافة","WHT return and payment":"إقرار وسداد الاستقطاع","Zakat / income tax return":"إقرار الزكاة / ضريبة الدخل","Reply to ZATCA":"الرد على الهيئة","Amend the VAT return":"عدّل إقرار القيمة المضافة","Correct in the next VAT return":"صحّح في إقرار القيمة المضافة التالي","Quarterly tax risk review with the board":"مراجعة ربع سنوية لمخاطر الضرائب مع المجلس","RETT payment: warehouse sale (deed 4301928)":"سداد ضريبة التصرفات العقارية: بيع المستودع (صك 4301928)","Progress":"التقدم","Due today":"مستحق اليوم","Overdue by":"متأخر بـ","In":"خلال","Done":"منجز","Previous month":"الشهر السابق","Next month":"الشهر التالي","Show":"عرض","ZATCA and disputes":"الهيئة والاعتراضات","Other taxes":"ضرائب أخرى","Zakat":"الزكاة","Excise":"الضريبة الانتقائية","RETT":"ضريبة التصرفات العقارية","Income tax":"ضريبة الدخل","ZATCA letter":"خطاب الهيئة","Other":"أخرى","ZATCA":"الهيئة","Return":"إقرار","Payment":"سداد","Refund":"استرداد","Adjustment":"تسوية","Once":"مرة واحدة","Every month":"كل شهر","Every quarter":"كل ربع سنة","Every year":"كل سنة","days late":"يوماً تأخير","Return period":"فترة الإقرار","Received":"تم الاستلام","Open":"فتح","Remove":"إزالة"});
+Object.assign(window.ZI18N, {"The balance over time appears once the statement covers two months.":"يظهر الرصيد عبر الزمن عندما يغطي الكشف شهرين.","Balance owed to ZATCA at month end":"الرصيد المستحق للهيئة في نهاية الشهر"});
+Object.assign(window.ZI18N, {"No exercise":"لا يوجد تمرين"});
 
 </script>
 <script>
@@ -1414,7 +1533,13 @@ Object.assign(window.ZI18N, {"Box 14 corrections":"تصحيحات البند 14"
     // Zakat IR Art. 17: return and payment within 120 days of the year end.
     zakat: { rate: 0.025, gregorianDays: 365, dueDays: 120, latePctPer30Days: 0.01, lateCap: 0.25 },
     // Objection to ZATCA within 60 days of an assessment; appeal of a committee decision within 30.
-    disputes: { objectionDays: 60, appealDays: 30 },
+    // Escalation to the GSTC after ZATCA rejects an objection, and ZATCA's 90 days to
+    // decide, come from secondary sources: editable, labelled "verify".
+    disputes: { objectionDays: 60, appealDays: 30, escalateDays: 30, zatcaDecisionDays: 90 },
+    // VAT IR Art. 69/70 as summarised by advisers (2024-2025): ZATCA pays within 60 days of
+    // approving a refund; document requests are answered within 20 working days.
+    // Single-source: editable, labelled "verify".
+    refunds: { payDays: 60, infoResponseDays: 20 },
     materiality: 50000,
     benfordMin: 300,
     glBasis: 'movement',  // movement | gross - how TB VAT accounts are read when no GL is given
@@ -1647,6 +1772,20 @@ Object.assign(window.ZI18N, {"Box 14 corrections":"تصحيحات البند 14"
         { k: 'gross', t: 'n', req: 1, syn: ['gross', 'sales', 'total', 'amount', 'الإجمالي', 'المبيعات'] },
         { k: 'fees', t: 'n', syn: ['fees', 'commission', 'mdr', 'الرسوم', 'العمولة'] },
         { k: 'net', t: 'n', syn: ['net', 'settled', 'net amount', 'الصافي', 'المبلغ المسوى'] }
+      ]
+    },
+    // the taxpayer's account on the ZATCA portal
+    soa: {
+      en: 'ZATCA statement of account', ar: 'كشف حساب الهيئة', group: 'zatca',
+      fields: [
+        { k: 'date', t: 'd', req: 1, syn: ['date', 'transaction date', 'posting date', 'التاريخ', 'تاريخ العملية'] },
+        { k: 'taxType', t: 's', syn: ['tax type', 'tax', 'type of tax', 'نوع الضريبة', 'الضريبة'] },
+        { k: 'period', t: 's', syn: ['period', 'tax period', 'return period', 'الفترة', 'الفترة الضريبية'] },
+        { k: 'kind', t: 's', syn: ['transaction type', 'transaction', 'kind', 'نوع العملية', 'العملية'] },
+        { k: 'description', t: 's', syn: ['description', 'details', 'narration', 'البيان', 'الوصف', 'التفاصيل'] },
+        { k: 'reference', t: 's', syn: ['reference', 'ref', 'document no', 'sadad', 'المرجع', 'رقم المرجع'] },
+        { k: 'debit', t: 'n', syn: ['debit', 'dr', 'amount due', 'مدين', 'المستحق'] },
+        { k: 'credit', t: 'n', syn: ['credit', 'cr', 'amount paid', 'دائن', 'المدفوع'] }
       ]
     },
     xls_vat: {
@@ -3814,6 +3953,235 @@ Object.assign(window.ZI18N, {"Box 14 corrections":"تصحيحات البند 14"
     return res;
   };
 
+  // ================================================================== ZATCA account (wave 1)
+  // Statement of account, refunds, disputes and the compliance calendar. Pure:
+  // the UI passes in the documents it has loaded and today's date.
+
+  E.soaTax = function (s) {
+    s = String(s || '').toLowerCase();
+    if (/withh|wht|استقطاع/.test(s)) return 'WHT';
+    if (/zakat|زكاة|زكاه/.test(s)) return 'ZAKAT';
+    if (/excise|انتقائي/.test(s)) return 'EXCISE';
+    if (/rett|real estate|تصرفات عقارية|التصرفات العقارية/.test(s)) return 'RETT';
+    if (/income tax|ضريبة الدخل/.test(s)) return 'CIT';
+    return 'VAT';
+  };
+  E.soaKind = function (s) {
+    s = String(s || '').toLowerCase();
+    if (/penalt|fine|غرام/.test(s)) return 'penalty';
+    if (/refund|استرد|استرجاع/.test(s)) return 'refund';
+    if (/assess|ربط|تقييم|تعديل الهيئة/.test(s)) return 'assessment';
+    if (/pay|paid|sadad|سداد|دفع|مدفوع/.test(s)) return 'payment';
+    if (/return|declar|filing|إقرار|اقرار/.test(s)) return 'return';
+    return 'adjustment';
+  };
+  // "2026-09", "09/2026", "Sep 2026", "2026-Q3", "Q3 2026" - also inside a description
+  var MONS = { jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12 };
+  E.soaPeriod = function (s) {
+    s = String(s || '').toLowerCase(); var m;
+    if ((m = s.match(/(20\d\d)\s*[-\/ ]?\s*q([1-4])/))) return m[1] + '-Q' + m[2];
+    if ((m = s.match(/q([1-4])\s*[-\/ ]?\s*(20\d\d)/))) return m[2] + '-Q' + m[1];
+    if ((m = s.match(/(20\d\d)[-\/.](0?[1-9]|1[0-2])(?!\d)/))) return m[1] + '-' + pad(+m[2]);
+    if ((m = s.match(/(?:^|\D)(0?[1-9]|1[0-2])[-\/.](20\d\d)/))) return m[2] + '-' + pad(+m[1]);
+    if ((m = s.match(/(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s*[-\/ ]?\s*(20\d\d)/))) return m[2] + '-' + pad(MONS[m[1]]);
+    return '';
+  };
+  E.soaLines = function (lines) {
+    return (lines || []).map(function (l, i) {
+      var text = [l.kind, l.description].join(' ');
+      return { i: i, date: E.date(l.date) || '', taxType: l.taxType ? E.soaTax(l.taxType) : E.soaTax(text), kind: E.soaKind(l.kind || l.description), period: E.soaPeriod(l.period) || E.soaPeriod(l.description),
+        description: E.str(l.description), reference: E.str(l.reference), debit: r2(Math.abs(E.num(l.debit))), credit: r2(Math.abs(E.num(l.credit))) };
+    }).filter(function (l) { return l.date || l.debit || l.credit; });
+  };
+  function within(p, ex) { var a = E.periodRange(p), b = E.periodRange(ex); return !!(a && b && a.start >= b.start && a.end <= b.end); }
+
+  // SA1 every return on the statement, SA2 liabilities equal the returns, SA3 penalties
+  // recorded in the disputes register, SA4 balance agrees with the GL, SA5 nothing overdue.
+  E.statementRecon = function (doc, exercises, disputes, S, today) {
+    S = E.mergeSettings(S); today = today || new Date().toISOString().slice(0, 10); doc = doc || {};
+    var L = E.soaLines(doc.lines || []), tol = S.tolAbs || 1;
+    var bal = r2(L.reduce(function (a, l) { return a + l.debit - l.credit; }, 0));
+    var byTax = {};
+    L.forEach(function (l) { var b = byTax[l.taxType] = byTax[l.taxType] || { debit: 0, credit: 0, balance: 0 }; b.debit = r2(b.debit + l.debit); b.credit = r2(b.credit + l.credit); b.balance = r2(b.debit - b.credit); });
+    var xs = (exercises || []).filter(function (x) { var r = E.periodRange(x.period); return x.summary && r && r.end < today; }).sort(function (a, b) { return a.period < b.period ? -1 : 1; });
+    var periods = xs.map(function (x) {
+      var sm = x.summary;
+      var lines = function (tax, kinds) { return L.filter(function (l) { return l.taxType === tax && kinds.indexOf(l.kind) >= 0 && l.period && within(l.period, x.period); }); };
+      var net = function (ls) { return ls.length ? r2(ls.reduce(function (a, l) { return a + l.debit - l.credit; }, 0)) : null; };
+      var paid = function (tax) { return r2(lines(tax, ['payment', 'refund']).reduce(function (a, l) { return a + l.credit - l.debit; }, 0)); };
+      var dl = E.deadlines(x.period) || {};
+      return { period: x.period, exId: x.id,
+        vatReturn: sm.netVat == null ? null : r2(sm.netVat), vatSoa: net(lines('VAT', ['return', 'assessment'])), vatPaid: paid('VAT'), vatDue: dl.vat,
+        whtReturn: sm.whtTax == null ? null : r2(sm.whtTax), whtSoa: net(lines('WHT', ['return', 'assessment'])), whtPaid: paid('WHT'), whtDue: dl.wht };
+    });
+    var checks = [];
+    var mk = function (id, title, titleAr, o) { return Object.assign({ id: id, title: title, titleAr: titleAr, area: 'zatca' }, o); };
+    var T = [['SA1', 'Every return filed is on the statement', 'كل إقرار مقدم يظهر في الكشف'], ['SA2', 'Liabilities on the statement equal the returns', 'الالتزامات في الكشف تساوي الإقرارات'],
+      ['SA3', 'Penalties on the statement are recorded and followed up', 'الغرامات في الكشف مسجلة ومتابعة'], ['SA4', 'Statement balance agrees with the general ledger', 'رصيد الكشف يطابق دفتر الأستاذ'],
+      ['SA5', 'Nothing overdue on the statement', 'لا مبالغ متأخرة في الكشف']];
+    if (!L.length) {
+      T.forEach(function (c) { checks.push(mk(c[0], c[1], c[2], { status: 'na', missing: 'ZATCA statement of account' })); });
+      return { lines: L, balance: 0, byTax: byTax, periods: periods, checks: checks, exposure: 0, penalties: 0, overdue: 0, fines: 0 };
+    }
+    // the statement covers the returns that fell due between its first line and its date
+    var first = L.reduce(function (a, l) { return l.date && (!a || l.date < a) ? l.date : a; }, ''), last = L.reduce(function (a, l) { return l.date > a ? l.date : a; }, '');
+    var asOf = E.date(doc.asOf) || last;
+    var due = function (d) { return !!d && d >= first && d <= asOf; };
+    var inScope = periods.filter(function (p) { return due(p.vatDue) || due(p.whtDue); });
+    var noScope = inScope.length ? '' : 'Exercises for the periods on the statement';
+    var missing = [];
+    inScope.forEach(function (p) {
+      if (due(p.vatDue) && p.vatReturn != null && p.vatSoa == null) missing.push({ period: p.period, tax: 'VAT', amount: p.vatReturn });
+      if (due(p.whtDue) && p.whtReturn && p.whtSoa == null) missing.push({ period: p.period, tax: 'WHT', amount: p.whtReturn });
+    });
+    checks.push(mk(T[0][0], T[0][1], T[0][2], { status: noScope ? 'na' : missing.length ? 'fail' : 'pass', missing: noScope, a: missing.length, aLabel: 'Returns missing', exceptions: { list: missing },
+      note: 'A return you filed that ZATCA has not posted was either not submitted or posted to another period. Check the submission receipt.' }));
+    var diffs = [];
+    inScope.forEach(function (p) {
+      if (p.vatReturn != null && p.vatSoa != null && Math.abs(p.vatSoa - p.vatReturn) > tol) diffs.push({ period: p.period, tax: 'VAT', amount: p.vatReturn, other: p.vatSoa, diff: r2(p.vatSoa - p.vatReturn) });
+      if (p.whtReturn != null && p.whtSoa != null && Math.abs(p.whtSoa - p.whtReturn) > tol) diffs.push({ period: p.period, tax: 'WHT', amount: p.whtReturn, other: p.whtSoa, diff: r2(p.whtSoa - p.whtReturn) });
+    });
+    var dTot = r2(diffs.reduce(function (a, d) { return a + d.diff; }, 0));
+    checks.push(mk(T[1][0], T[1][1], T[1][2], { status: noScope ? 'na' : diffs.length ? 'fail' : 'pass', missing: noScope, a: diffs.length, aLabel: 'Periods that differ', diff: diffs.length ? dTot : null,
+      exposure: dTot > 0 ? dTot : 0, exceptions: { list: diffs },
+      note: 'A higher amount on the statement usually means ZATCA assessed the period or posted an amendment you have not recorded. A lower one can mean a return was not accepted in full.' }));
+    var pens = L.filter(function (l) { return l.kind === 'penalty' && l.debit > 0; });
+    var refs = {};
+    (disputes || []).forEach(function (d) { [d.reference, d.soaRef].forEach(function (r) { if (r) refs[String(r).trim().toLowerCase()] = 1; }); });
+    var unrec = pens.filter(function (l) { return !(l.reference && refs[l.reference.toLowerCase()]); });
+    var pTot = r2(pens.reduce(function (a, l) { return a + l.debit; }, 0)), uTot = r2(unrec.reduce(function (a, l) { return a + l.debit; }, 0));
+    checks.push(mk(T[2][0], T[2][1], T[2][2], { status: !pens.length ? 'pass' : unrec.length ? 'fail' : 'warn', a: pTot, aLabel: 'Penalties on the statement', exposure: uTot,
+      exceptions: { list: unrec.map(function (l) { return { date: l.date, tax: l.taxType, period: l.period, reference: l.reference, description: l.description, amount: l.debit }; }) },
+      note: pens.length ? 'Every penalty needs a decision: pay it, object within 60 days, or ask for a waiver. Record it in Disputes and penalties with the statement reference.' : 'No penalties on the statement.' }));
+    var gl = doc.glBalance != null && doc.glBalance !== '' && isFinite(+doc.glBalance) ? r2(+doc.glBalance) : null;
+    checks.push(mk(T[3][0], T[3][1], T[3][2], gl == null ? { status: 'na', missing: 'GL balance of the ZATCA accounts', missingHint: 'Enter it on this page' } :
+      { a: bal, aLabel: 'Balance per ZATCA statement', b: gl, bLabel: 'Balance per general ledger', diff: r2(bal - gl), status: E.status(bal - gl, Math.abs(gl), S), exposure: bal - gl > tol ? r2(bal - gl) : 0,
+        note: 'A positive balance is tax owed to ZATCA. The general ledger figure is the net of every ZATCA payable and receivable account (VAT, WHT, penalties).' }));
+    var over = [];
+    periods.forEach(function (p) {
+      [['VAT', p.vatSoa, p.vatPaid, p.vatDue], ['WHT', p.whtSoa, p.whtPaid, p.whtDue]].forEach(function (z) {
+        var owed = r2((z[1] || 0) - (z[2] || 0));
+        if (z[1] != null && owed > tol && z[3] && today > z[3]) {
+          var days = daysBetween(z[3], today);
+          var fine = z[0] === 'WHT' ? r2(owed * S.penalties.whtLatePctPer30Days * Math.floor(days / 30)) : r2(owed * S.penalties.vatLatePaymentPctPerMonth * Math.ceil(days / 30));
+          over.push({ period: p.period, tax: z[0], due: z[3], amount: owed, overdue: days, penalty: fine });
+        }
+      });
+    });
+    var oTot = r2(over.reduce(function (a, o) { return a + o.amount; }, 0)), fTot = r2(over.reduce(function (a, o) { return a + o.penalty; }, 0));
+    checks.push(mk(T[4][0], T[4][1], T[4][2], { status: over.length ? 'fail' : 'pass', a: oTot, aLabel: 'Unpaid after the due date', exposure: r2(oTot + fTot), exceptions: { list: over },
+      note: over.length ? 'Late-payment fines keep accruing every month (VAT 5% a month, WHT 1% per 30 days) until paid. Estimated fines so far: SAR ' + fTot.toLocaleString('en-US') + '.' : 'Every liability on the statement was paid by its due date.',
+      noteAr: over.length ? 'غرامات التأخير تستمر شهرياً حتى السداد (القيمة المضافة 5% شهرياً، الاستقطاع 1% لكل 30 يوماً). الغرامات التقديرية حتى الآن: ' + fTot.toLocaleString('en-US') + ' ريال.' : 'سُدد كل التزام في الكشف في موعده.' }));
+    checks.forEach(function (c) { if (c.exposure != null) c.exposure = isFinite(c.exposure) && c.exposure > 0 ? r2(c.exposure) : 0; });
+    // SA4 (the whole balance) already holds what SA2, SA3 and SA5 find: count the larger view
+    var ex = function (i) { return checks[i].exposure || 0; };
+    var expo = Math.max(ex(1) + ex(2), ex(3), ex(4) + ex(2));
+    return { lines: L, balance: bal, byTax: byTax, periods: periods, checks: checks, exposure: r2(expo), first: first, last: last, asOf: asOf, penalties: pTot, overdue: oTot, fines: fTot };
+  };
+
+  function addD(d, n) { return d ? new Date(Date.parse(d + 'T00:00:00Z') + n * 86400000).toISOString().slice(0, 10) : ''; }
+  // working days in Saudi Arabia: Sunday to Thursday
+  function addWork(d, n) { if (!d) return ''; var x = new Date(d + 'T00:00:00Z'); while (n > 0) { x.setUTCDate(x.getUTCDate() + 1); var w = x.getUTCDay(); if (w !== 5 && w !== 6) n--; } return x.toISOString().slice(0, 10); }
+  E.addWorkDays = addWork;
+
+  // Refund applications: what happens next and by when.
+  E.REFUND_STEPS = [['draft', 'Preparing'], ['submitted', 'Submitted'], ['info_requested', 'Documents requested'], ['approved', 'Approved'], ['paid', 'Paid'], ['rejected', 'Rejected']];
+  E.refundStatus = function (r, S, today) {
+    S = E.mergeSettings(S); today = today || new Date().toISOString().slice(0, 10);
+    var amt = r2(+r.amount || 0), st = r.status || 'draft', next = null, issues = [];
+    if (amt > 0 && amt < (S.refundMin || 5000)) issues.push({ code: 'below_min', text: 'Below the minimum refund application of SAR ' + (S.refundMin || 5000).toLocaleString('en-US') + ': carry the credit forward instead.' });
+    if (st === 'draft') next = { label: 'Submit the application', due: '' };
+    if (st === 'submitted') next = { label: 'Waiting for ZATCA review', due: '', zatca: true };
+    if (st === 'info_requested') next = { label: 'Send the requested documents', due: E.date(r.infoDueOn) || addWork(E.date(r.infoRequestedOn), S.refunds.infoResponseDays) };
+    if (st === 'approved') next = { label: 'ZATCA pays the refund', due: addD(E.date(r.approvedOn), S.refunds.payDays), zatca: true };
+    var paid = st === 'paid' ? r2(r.paidAmount === '' || r.paidAmount == null ? amt : +r.paidAmount) : 0;
+    if (st === 'paid' && paid < amt - 1) issues.push({ code: 'short', text: 'Paid less than claimed: ask ZATCA for the reason and object to the reduction within 60 days.' });
+    if (st === 'rejected') issues.push({ code: 'rejected', text: 'A rejection is a decision you can object to within 60 days.' });
+    var days = next && next.due ? daysBetween(today, next.due) : null;
+    var state = st === 'paid' || st === 'rejected' ? 'closed' : days != null && days < 0 ? (next.zatca ? 'chase' : 'overdue') : days != null && days <= 7 && !next.zatca ? 'urgent' : 'open';
+    var outstanding = st === 'submitted' || st === 'info_requested' || st === 'approved' ? amt : 0;
+    var sub = E.date(r.submittedOn);
+    return { amount: amt, paid: paid, outstanding: outstanding, next: next, daysLeft: days, state: state, issues: issues, age: sub ? Math.max(0, daysBetween(sub, st === 'paid' && E.date(r.paidOn) ? E.date(r.paidOn) : today)) : null,
+      stepIdx: E.REFUND_STEPS.map(function (s) { return s[0]; }).indexOf(st) };
+  };
+
+  // Disputes and penalties: an assessment or penalty moves through an objection to
+  // ZATCA, the first-level committee (GSTC) and the appellate committee.
+  E.DISPUTE_STAGES = [['notice', 'Notice received'], ['objection', 'Objection filed with ZATCA'], ['zatca_rejected', 'ZATCA rejected the objection'], ['committee', 'Before the first-level committee'],
+    ['committee_decided', 'Committee decided'], ['appeal', 'Before the appellate committee'], ['closed', 'Closed']];
+  E.disputeStatus = function (d, S, today) {
+    S = E.mergeSettings(S); today = today || new Date().toISOString().slice(0, 10);
+    var D = S.disputes, st = d.stage || 'notice', next = null;
+    if (st === 'notice') next = { label: d.decision === 'accept' ? 'Pay the amount' : 'Object to ZATCA', due: addD(E.date(d.noticeOn), D.objectionDays) };
+    if (st === 'objection') next = { label: 'ZATCA decides the objection', due: addD(E.date(d.objectionOn), D.zatcaDecisionDays), zatca: true };
+    if (st === 'zatca_rejected') next = { label: 'Escalate to the GSTC committee', due: addD(E.date(d.zatcaDecisionOn), D.escalateDays) };
+    if (st === 'committee') next = { label: 'Committee hearing', due: E.date(d.hearingOn) || '', zatca: true };
+    if (st === 'committee_decided') next = { label: 'Appeal to the appellate committee', due: addD(E.date(d.committeeDecisionOn), D.appealDays) };
+    if (st === 'appeal') next = { label: 'Appellate committee hearing', due: E.date(d.hearingOn) || '', zatca: true };
+    var closed = st === 'closed', days = !closed && next && next.due ? daysBetween(today, next.due) : null;
+    var state = closed ? 'closed' : days != null && days < 0 ? (next.zatca ? 'waiting' : 'overdue') : days != null && days <= 7 && !next.zatca ? 'urgent' : 'open';
+    var stake = r2((+d.amount || 0) + (+d.penalty || 0)), paid = r2(+d.paidAmount || 0);
+    return { next: closed ? null : next, daysLeft: days, state: state, atStake: closed ? 0 : r2(Math.max(0, stake - paid)), stake: stake, paid: paid, relief: closed ? r2(+d.reliefAmount || 0) : 0,
+      stageIdx: E.DISPUTE_STAGES.map(function (s) { return s[0]; }).indexOf(st) };
+  };
+
+  // A past return with no exercise in the app is 'untracked', not overdue: nothing says
+  // it was missed. Zakat counts as done when the annual worksheet has a filing date.
+  // One list of dated obligations across taxes and entities, plus what ZATCA letters,
+  // disputes, refunds and corrections add. Items: { date, key, title, entityId, tax, kind, state }.
+  E.complianceCalendar = function (o) {
+    var S = E.mergeSettings(o.settings), today = o.today || new Date().toISOString().slice(0, 10), from = o.from, to = o.to, out = [];
+    var push = function (it) { if (it.date && it.date >= from && it.date <= to) out.push(it); };
+    var exs = o.exercises || [];
+    (o.entities || []).forEach(function (e) {
+      for (var y = +from.slice(0, 4) - 1; y <= +to.slice(0, 4); y++) {
+        E.periodsOfYear(y, e.vatFreq || 'monthly').forEach(function (p) {
+          var x = exs.filter(function (z) { return z.entityId === e.id && z.period === p; })[0], F = (x && x.filing) || {};
+          push({ date: E.deadlines(p).vat, key: e.id + '-vat-' + p, title: 'VAT return and payment', period: p, entityId: e.id, tax: 'VAT', kind: 'return', done: !!(F.vatFiledOn && F.vatPaidOn), exId: x && x.id, tracked: !!x });
+        });
+        if (e.whtRegistered !== false) for (var m = 1; m <= 12; m++) {
+          var mk = y + '-' + pad(m), xw = exs.filter(function (z) { return z.entityId === e.id && within(mk, z.period); })[0], Fw = (xw && xw.filing) || {};
+          push({ date: E.deadlines(mk).wht, key: e.id + '-wht-' + mk, title: 'WHT return and payment', period: mk, entityId: e.id, tax: 'WHT', kind: 'return', done: !!Fw.whtFiledOn, exId: xw && xw.id, tracked: !!xw });
+        }
+        var fyEnd = E.date(y + '-' + (e.fyEnd ? String(e.fyEnd).slice(5, 10) : '12-31'));
+        var an = (o.annual || []).filter(function (a) { return a.entityId === e.id && +a.year === y; })[0], zf = an && an.zakat && an.zakat.filedOn;
+        if (fyEnd) push({ date: addD(fyEnd, S.zakat.dueDays), key: e.id + '-zakat-' + y, title: 'Zakat / income tax return', period: fyEnd, entityId: e.id, tax: 'ZAKAT', kind: 'return', done: !!zf, tracked: !!an });
+      }
+    });
+    (o.requests || []).forEach(function (q) { var r = E.requestDue(q, S, today); if (r.due) push({ date: r.due, key: 'req-' + q.id, title: 'Reply to ZATCA', period: q.reference || '', entityId: q.entityId, tax: 'ZATCA', kind: 'request', done: r.state === 'closed', href: 'requests' }); });
+    (o.disputes || []).forEach(function (d) { var r = E.disputeStatus(d, S, today); if (r.next && r.next.due) push({ date: r.next.due, key: 'dsp-' + d.id, title: r.next.label, period: d.reference || '', entityId: d.entityId, tax: d.tax || 'VAT', kind: 'dispute', done: false, zatca: !!r.next.zatca, href: 'disputes' }); });
+    (o.refunds || []).forEach(function (f) { var r = E.refundStatus(f, S, today); if (r.next && r.next.due) push({ date: r.next.due, key: 'rf-' + f.id, title: r.next.label, period: f.period || '', entityId: f.entityId, tax: 'VAT', kind: 'refund', done: false, zatca: !!r.next.zatca, href: 'refunds' }); });
+    (o.corrections || []).forEach(function (c) { if (c.state !== 'done') push({ date: c.dueBy, key: 'cor-' + c.id, title: c.route === 'amend' ? 'Amend the VAT return' : 'Correct in the next VAT return', period: c.title || '', entityId: c.entityId, tax: 'VAT', kind: 'correction', done: false, href: 'reports/corrections' }); });
+    (o.events || []).forEach(function (ev) {
+      var d0 = E.date(ev.date); if (!d0) return;
+      var step = { monthly: 1, quarterly: 3, yearly: 12 }[ev.repeat] || 0, dt = new Date(d0 + 'T00:00:00Z'), day = dt.getUTCDate();
+      for (var n = 0, d = d0; d <= to && n < 400; n++) {
+        push({ date: d, key: 'ev-' + ev.id + '-' + d, title: ev.title || 'Event', period: '', entityId: ev.entityId, tax: ev.tax || 'OTHER', kind: 'custom', done: (ev.doneDates || []).indexOf(d) >= 0, evId: ev.id, note: ev.note || '' });
+        if (!step) break;
+        var t2 = new Date(Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth() + step * (n + 1), 1)), last = new Date(Date.UTC(t2.getUTCFullYear(), t2.getUTCMonth() + 1, 0)).getUTCDate();
+        d = iso(t2.getUTCFullYear(), t2.getUTCMonth() + 1, Math.min(day, last));
+      }
+    });
+    out.forEach(function (it) { var dd = daysBetween(today, it.date); it.daysLeft = dd; it.state = it.done ? 'done' : dd < 0 ? (it.zatca ? 'waiting' : it.tracked === false ? 'untracked' : 'overdue') : dd <= 7 ? 'soon' : 'upcoming'; });
+    return out.sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : a.key < b.key ? -1 : 1; });
+  };
+
+  // RFC 5545 calendar of all-day events with a reminder 3 days before. Text is escaped
+  // and lines are folded at 73 characters.
+  E.ics = function (items, name) {
+    var esc = function (s) { return String(s == null ? '' : s).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n'); };
+    var fold = function (l) { var o = [], i = 0; while (l.length - i > 73) { o.push((i ? ' ' : '') + l.slice(i, i + 73)); i += 73; } o.push((i ? ' ' : '') + l.slice(i)); return o.join('\r\n'); };
+    var day = function (d) { return d.replace(/-/g, ''); };
+    var L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Inspection Ready//Tax calendar//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'X-WR-CALNAME:' + esc(name || 'Tax calendar')];
+    (items || []).forEach(function (it) {
+      if (!E.date(it.date)) return;
+      L.push('BEGIN:VEVENT', 'UID:' + String(it.key).replace(/[^A-Za-z0-9_.-]/g, '-') + '@inspection-ready', 'DTSTAMP:20260101T000000Z', 'DTSTART;VALUE=DATE:' + day(it.date), 'DTEND;VALUE=DATE:' + day(addD(it.date, 1)),
+        'SUMMARY:' + esc(it.summary || it.title), 'DESCRIPTION:' + esc(it.description || ''), 'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + esc(it.summary || it.title), 'TRIGGER:-P3D', 'END:VALARM', 'END:VEVENT');
+    });
+    L.push('END:VCALENDAR');
+    return L.map(fold).join('\r\n') + '\r\n';
+  };
+
   root.ZEngine = E;
   if (typeof module !== 'undefined' && module.exports) module.exports = E;
 })(typeof window !== 'undefined' ? window : this);
@@ -3926,7 +4294,10 @@ Object.assign(window.ZI18N, {"Box 14 corrections":"تصحيحات البند 14"
             if (p.table === 'entities') d.entityId = d.id;
             if (p.table === 'exercises') d.parentId = d.entityId;
             var prev = m[d.id];
-            if (p.table === 'exercises' && d.status === 'closed' && (!prev || prev.status !== 'closed')) { d.signedOffBy = user.name; d.signedOffAt = new Date().toISOString(); }
+            if (p.table === 'exercises' && d.status === 'closed' && (!prev || prev.status !== 'closed')) {
+              if ((d.reviews || []).some(function (r) { return r && r.status !== 'cleared'; })) throw Object.assign(new Error('open_review_notes'), { code: 'open_review_notes' });
+              d.signedOffBy = user.name; d.signedOffAt = new Date().toISOString();
+            }
             d.updatedAt = new Date().toISOString(); d.updatedBy = user.name;
             m[d.id] = d;
           });
@@ -4002,6 +4373,14 @@ Object.assign(window.ZI18N, {"Box 14 corrections":"تصحيحات البند 14"
  *   - input VAT on a staff dinner, a hotel stay and the GM's car; exempt sales
  *     with no apportionment; SAR 30,000 of gifts against a SAR 4,167 monthly relief
  *   - one export without a customs export declaration (plus the export to SA)
+ *   - ZATCA statement of account (Jun-Sep 2026): the August WHT return posted at
+ *     SAR 10,340 against 9,840 filed and only 9,840 paid (SAR 500 overdue), a
+ *     SAR 2,325 late-payment penalty nobody recorded, so the statement is SAR 2,825
+ *     above the GL; the disputed assessment and e-invoicing penalty are booked
+ *   - disputes: an assessment under objection, a penalty still to object to (due
+ *     in 60 days of notice), one closed with SAR 3,000 relief
+ *   - refunds: one waiting on documents ZATCA asked for, one paid SAR 2,550
+ *     short, one draft below the SAR 5,000 minimum
  *   - management fees to the parent with no reverse-charge VAT; a reverse-charged
  *     training service with no WHT line
  *   - WHT filed and paid 2 days late (late, but under 30 days: no fine)
@@ -4234,6 +4613,37 @@ Object.assign(window.ZI18N, {"Box 14 corrections":"تصحيحات البند 14"
         { type: 'information', reference: 'ZATCA-IR-2026-55821', receivedOn: '2026-10-12', dueOn: '2026-10-22', items: 'Sales listing Q3 2026, bank statements Jul-Sep, 25 sample tax invoices', owner: 'Tax manager', status: 'open' },
         { type: 'assessment', reference: 'ZATCA-AS-2026-11402', period: '2025-Q4', receivedOn: '2026-08-25', amount: 46500, items: 'Assessment of input VAT on hospitality and vehicle expenses', owner: 'CFO', status: 'open' }
       ],
+      statement: { asOf: '2026-10-08', glBalance: 56500, lines: [
+        { date: '2026-07-10', taxType: 'Withholding tax', period: '2026-06', kind: 'Return', description: 'WHT return June 2026', reference: 'WHT-2606', debit: 7650, credit: 0 },
+        { date: '2026-07-10', taxType: 'Withholding tax', period: '2026-06', kind: 'Payment', description: 'SADAD payment', reference: 'SD-770121', debit: 0, credit: 7650 },
+        { date: '2026-07-30', taxType: 'VAT', period: '2026-06', kind: 'Payment', description: 'SADAD payment', reference: 'SD-771940', debit: 0, credit: 318400 },
+        { date: '2026-07-31', taxType: 'VAT', period: '2026-06', kind: 'Return', description: 'VAT return June 2026', reference: 'VAT-2606', debit: 318400, credit: 0 },
+        { date: '2026-08-10', taxType: 'Withholding tax', period: '2026-07', kind: 'Return', description: 'WHT return July 2026', reference: 'WHT-2607', debit: 8920, credit: 0 },
+        { date: '2026-08-10', taxType: 'Withholding tax', period: '2026-07', kind: 'Payment', description: 'SADAD payment', reference: 'SD-780433', debit: 0, credit: 8920 },
+        { date: '2026-08-25', taxType: 'VAT', period: '2025-Q4', kind: 'Assessment', description: 'Assessment - input VAT on hospitality and vehicles', reference: 'ZATCA-AS-2026-11402', debit: 46500, credit: 0 },
+        { date: '2026-08-31', taxType: 'VAT', period: '2026-07', kind: 'Return', description: 'VAT return July 2026', reference: 'VAT-2607', debit: 401220, credit: 0 },
+        { date: '2026-08-31', taxType: 'VAT', period: '2026-07', kind: 'Payment', description: 'SADAD payment', reference: 'SD-781002', debit: 0, credit: 401220 },
+        { date: '2026-09-10', taxType: 'Withholding tax', period: '2026-08', kind: 'Return', description: 'WHT return August 2026 (amended by ZATCA)', reference: 'WHT-2608', debit: 10340, credit: 0 },
+        { date: '2026-09-10', taxType: 'Withholding tax', period: '2026-08', kind: 'Payment', description: 'SADAD payment', reference: 'SD-790118', debit: 0, credit: 9840 },
+        { date: '2026-09-15', taxType: 'VAT', period: '2025-12', kind: 'Penalty', description: 'Late payment penalty VAT December 2025', reference: 'ZATCA-PN-2026-0912', debit: 2325, credit: 0 },
+        { date: '2026-09-20', taxType: 'VAT', period: '2026-08', kind: 'Penalty', description: 'E-invoicing violation - simplified invoices reported late', reference: 'ZATCA-PN-2026-0877', debit: 10000, credit: 0 },
+        { date: '2026-09-29', taxType: 'VAT', period: '2026-08', kind: 'Payment', description: 'SADAD payment', reference: 'SD-799310', debit: 0, credit: 412880 },
+        { date: '2026-09-30', taxType: 'VAT', period: '2026-08', kind: 'Return', description: 'VAT return August 2026', reference: 'VAT-2608', debit: 412880, credit: 0 }
+      ] },
+      disputes: [
+        { kind: 'assessment', tax: 'VAT', reference: 'ZATCA-AS-2026-11402', period: '2025-Q4', title: 'Input VAT on hospitality and vehicles disallowed', amount: 46500, penalty: 23250, noticeOn: '2026-08-25', stage: 'objection', objectionOn: '2026-10-05', decision: 'object', owner: 'CFO', grounds: 'Vehicles are pool cars used for deliveries (log books attached); hospitality was for customer events.' },
+        { kind: 'penalty', tax: 'VAT', reference: 'ZATCA-PN-2026-0877', period: '2026-08', title: 'E-invoicing: simplified invoices reported after 24 hours', amount: 0, penalty: 10000, noticeOn: '2026-09-20', stage: 'notice', decision: 'object', owner: 'Tax manager', grounds: 'First violation: a warning is due before a fine. Ask for cancellation.' },
+        { kind: 'penalty', tax: 'WHT', reference: 'ZATCA-PN-2025-4410', period: '2025-03', title: 'WHT late filing penalty', amount: 0, penalty: 6000, noticeOn: '2025-05-02', stage: 'closed', objectionOn: '2025-06-10', decision: 'object', paidAmount: 3000, reliefAmount: 3000, outcome: 'partial', owner: 'Tax manager' }
+      ],
+      refunds: [
+        { period: '2025-11', amount: 38400, status: 'info_requested', submittedOn: '2026-09-02', infoRequestedOn: '2026-10-08', owner: 'Tax manager', note: 'Customs declarations for the November machinery imports' },
+        { period: '2025-06', amount: 21750, status: 'paid', submittedOn: '2025-07-20', approvedOn: '2025-09-14', paidOn: '2025-10-30', paidAmount: 19200, owner: 'Tax manager', note: 'ZATCA disallowed input VAT on two invoices without the buyer TRN' },
+        { period: '2026-02', amount: 3900, status: 'draft', owner: 'Accountant' }
+      ],
+      events: [
+        { title: 'Quarterly tax risk review with the board', tax: 'OTHER', date: '2026-10-25', repeat: 'quarterly', note: 'Exposure, open findings, disputes and refunds' },
+        { title: 'RETT payment: warehouse sale (deed 4301928)', tax: 'RETT', date: '2026-10-14', repeat: '', doneDates: ['2026-10-14'] }
+      ],
       zakat2025: { capital: 10000000, reserves: 2000000, retainedEarnings: 6500000, provisions: 800000, longTermFinancing: 3000000, adjustedNetProfit: 4200000,
         netFixedAssets: 9500000, longTermInvestments: 2000000, yearType: 'gregorian', fyEnd: '2025-12-31', filedOn: '2026-04-28', declared: 380000 },
       history: (function () {
@@ -4281,13 +4691,17 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   var t = Z.t;
   Z.tt = function (o, base) { return S.lang === 'ar' && o[base + 'Ar'] ? o[base + 'Ar'] : o[base]; };
   var NF = {};
+  // accounting format: 1,234.50 / (1,234.50) / - for zero, Latin digits in both languages
   Z.fmt = function (n, dp) {
     if (n == null || n === '' || isNaN(n)) return '-';
     dp = dp == null ? 2 : dp;
     NF[dp] = NF[dp] || new Intl.NumberFormat('en-US', { minimumFractionDigits: dp, maximumFractionDigits: dp });
     var s = NF[dp].format(Math.abs(n));
+    if (dp && +s.replace(/,/g, '') === 0) return '-';
     return n < 0 ? '(' + s + ')' : s;
   };
+  // whole-number counts: rows, invoices, findings
+  Z.count = function (n) { return n == null || n === '' || isNaN(n) ? '-' : Z.fmt(Math.round(+n), 0); };
   // dates, periods and codes stay left-to-right inside Arabic text
   Z.ltr = function (s) { return '<bdi dir="ltr">' + esc(s) + '</bdi>'; };
   Z.pct = function (x) { return x == null ? '-' : Math.round(x * 100) + '%'; };
@@ -4332,7 +4746,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   var ERR = {
     bad_credentials: 'Email or password is not correct.', email_taken: 'An account with this email already exists.',
     weak_password: 'Use at least 10 characters for the password.', forbidden: 'Your role does not allow this.',
-    exercise_closed: 'This exercise is signed off. A manager must reopen it before changes.', auth_required: 'Your session ended. Sign in again.',
+    exercise_closed: 'This exercise is signed off. A manager must reopen it before changes.', open_review_notes: 'Clear every review note before signing off.', auth_required: 'Your session ended. Sign in again.',
     tenant_suspended: 'This organisation is suspended. Contact the platform administrator.', cloud_only: 'Available when connected to the Google Sheets backend.',
     missing_fields: 'Fill in every field.', too_many_attempts: 'Too many wrong passwords. Try again in 15 minutes.', bad_email: 'Enter a valid email address.', server_error: 'The server hit an error. Try again; if it repeats, check the Apps Script logs.'
   };
@@ -4553,9 +4967,14 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
         '<span class="cur-t"><small>' + t('Open exercise') + '</small><b>' + esc(Z.entName(ent)) + '</b><span>' + Z.ltr(ex.period) + (sc.score != null ? ', ' + sc.score + '%' : '') + '</span></span>' +
         (crit ? '<span class="nb" title="' + esc(t('Critical actions')) + '">' + crit + '</span>' : '') + '</a>';
     }
+    h += '<div class="group">' + t('ZATCA account') + '</div>';
+    h += nav('#/' + tx + '/calendar', t('Tax calendar'), 'calendar-dots', view === 'calendar');
+    h += nav('#/' + tx + '/account', t('Statement of account'), 'scales', view === 'account');
+    h += nav('#/' + tx + '/requests', t('ZATCA requests'), 'envelope-simple', view === 'requests');
+    h += nav('#/' + tx + '/disputes', t('Disputes and penalties'), 'gavel', view === 'disputes');
+    h += nav('#/' + tx + '/refunds', t('VAT refunds'), 'hand-coins', view === 'refunds');
     h += '<div class="group">' + t('Organisation') + '</div>';
     h += nav('#/' + tx + '/entities', t('Entities'), 'buildings', view === 'entities' || view === 'entity' || view === 'annual');
-    h += nav('#/' + tx + '/requests', t('ZATCA requests'), 'envelope-simple', view === 'requests');
     [['settings', t('Settings'), 'gear-six', 'manager'], ['users', t('Users'), 'users-three', 'owner'], ['audit', t('Audit trail'), 'list-checks', 'manager']].forEach(function (i) {
       if (Z.can(i[3])) h += nav('#/' + tx + '/' + i[0], i[1], i[2], view === i[0]);
     });
@@ -4585,7 +5004,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       '<button class="btn ghost small" data-act="theme" aria-label="' + t('Switch light/dark') + '">' + Z.icon('circle-half') + '</button><button class="btn ghost small lang-btn" data-act="lang">' + (S.lang === 'ar' ? 'English' : 'العربية') + '</button>' +
       Z.exitButton('btn small exit-btn');
   }
-  Z.CHG.entity = function (el) { S.entityId = el.value; localStorage.setItem('zr_entity', el.value); location.hash = '#/' + S.tax + '/' + ((S.route || [])[0] === 'insights' ? 'insights' : 'entity') + '/' + el.value; };
+  Z.CHG.entity = function (el) { S.entityId = el.value; localStorage.setItem('zr_entity', el.value); location.hash = '#/' + S.tax + '/' + ({ insights: 'insights', account: 'account' }[(S.route || [])[0]] || 'entity') + '/' + el.value; };
   Z.entity = function (id) { return S.entities.filter(function (e) { return e.id === id; })[0]; };
   Z.entName = function (e) { return e ? (S.lang === 'ar' && e.nameAr ? e.nameAr : e.name) : ''; };
 
@@ -4660,7 +5079,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       (S.api.mode === 'local' && !S.entities.some(function (e) { return e.demo; }) ? '<button class="btn" data-act="loaddemo">' + t('Load demo company') + '</button>' : '') + '</div>' +
       '<div class="stack"><div class="kpis">' + kpi('buildings', ents.length, t('Entities')) + kpi('hourglass-medium', open.length, t('Exercises not signed off')) +
       kpi('gauge', avg == null ? '-' : avg + '%', t('Average readiness, last 12 months')) + kpi('x-circle', fails, t('Failed checks in latest exercises'), fails) +
-      kpi('coins', Z.fmt(exposure, 0), wht ? t('WHT exposure (SAR)') : t('VAT exposure (SAR)'), exposure) + '</div>' +
+      kpi('coins', Z.fmt(exposure), wht ? t('WHT exposure (SAR)') : t('VAT exposure (SAR)'), exposure) + '</div>' +
       Z.getStarted() + dataStrip() + '<div id="reqalert"></div>' +
       (ents.length ? '' : '<section class="paper empty"><i class="ph ph-info big" aria-hidden="true"></i><p>' + t('No entity is registered for withholding tax. Turn it on in the entity settings.') + '</p></section>') +
       '<section class="paper"><header><div><h2>' + t('Readiness by month') + '</h2><p>' + t('Green is ready, amber at risk, red not ready. A dark underline means signed off.') + '</p></div></header><div class="tbl-wrap">' + heat + '</div></section>' +
@@ -5285,11 +5704,11 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     var wrap = document.createElement('div'); wrap.className = 'drawer-scrim'; wrap.id = 'drawer';
     wrap.innerHTML = '<aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="dr-t">' +
       '<header><div><h2 id="dr-t">' + esc(spec.title) + '</h2>' + (spec.sub ? '<p>' + esc(spec.sub) + '</p>' : '') + '</div><button type="button" class="btn ghost icon" data-act="closedrawer" aria-label="' + esc(t('Close')) + '"><i class="ph ph-x" aria-hidden="true"></i></button></header>' +
-      (spec.total != null ? '<div class="dr-total"><b data-count="' + (+spec.total || 0) + '">' + (typeof spec.total === 'number' ? fmt(spec.total, money ? 0 : 0) : esc(spec.total)) + '</b><span>' + esc(spec.totalLabel || '') + '</span></div>' : '') +
+      (spec.total != null ? '<div class="dr-total"><b data-count="' + (+spec.total || 0) + '">' + (typeof spec.total === 'number' ? (money ? fmt(spec.total) : Z.count(spec.total)) : esc(spec.total)) + '</b><span>' + esc(spec.totalLabel || '') + '</span></div>' : '') +
       (rows.length ? '<ol class="dr-rows">' + rows.map(function (r, i) {
         var w = Math.max(1.5, Math.abs(+r.value || 0) / max * 100).toFixed(1);
         var inner = '<span class="dr-l"><b>' + esc(r.label) + '</b>' + (r.sub ? '<small>' + esc(r.sub) + '</small>' : '') + '</span>' +
-          '<span class="dr-v num">' + (r.display != null ? esc(r.display) : fmt(r.value, 0)) + '</span>' +
+          '<span class="dr-v num">' + (r.display != null ? esc(r.display) : money ? fmt(r.value) : Z.count(r.value)) + '</span>' +
           (r.value != null && !isNaN(+r.value) ? '<span class="dr-bar"><i class="' + (r.tone || '') + '" style="--w:' + w + '%"></i></span>' : '');
         var attrs = r.href ? 'href="' + esc(r.href) + '"' : r.act ? 'href="#" data-act="' + esc(r.act) + '"' + Object.keys(r.data || {}).map(function (k) { return ' data-' + k + '="' + esc(r.data[k]) + '"'; }).join('') : '';
         return '<li style="--i:' + i + '">' + (attrs ? '<a class="dr-row" ' + attrs + '>' + inner + '<i class="ph ph-caret-' + (isRtl() ? 'left' : 'right') + ' go" aria-hidden="true"></i></a>' : '<div class="dr-row">' + inner + '</div>') + '</li>';
@@ -5502,7 +5921,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       '<tr class="total"><td>' + t('Net VAT due') + '</td><td class="num">' + fmt(ret && ret[16].vat) + '</td><td class="num">' + fmt(sys && sys[13].vat) + '</td><td class="num">' + fmt(xls && xls[13].vat) + '</td><td></td><td class="num">' + fmt(-((R.bank.summary || {}).zatca_vat || 0) || null) + '</td>' + (fz ? '<td></td>' : '') + '</tr></tbody></table>';
     return '<div class="grid g2" style="align-items:start"><section class="paper"><header><div><h2>' + t('Readiness') + '</h2><p>' + t('Weighted from every check, sample, document and open finding in this exercise.') + '</p></div></header>' +
       '<div class="row ready-row">' + Z.seal(sc.score, sc.grade) + '<div class="parts" style="flex:1">' + parts + '</div></div>' +
-      '<div class="kpis" style="margin-top:18px"><div class="' + (R.vatExposure ? 'bad' : '') + '"><b>' + fmt(R.vatExposure || 0, 0) + '</b><span>' + t('VAT exposure (SAR)') + '</span></div><div><b>' + checks.filter(function (c) { return c.status === 'fail'; }).length + ' / ' + checks.length + '</b><span>' + t('Checks failed') + '</span></div><div><b>' + S.samples.filter(function (x) { return x.flow !== 'W'; }).length + '</b><span>' + t('Samples') + '</span></div></div></section>' +
+      '<div class="kpis" style="margin-top:18px"><div class="' + (R.vatExposure ? 'bad' : '') + '"><b>' + fmt(R.vatExposure || 0) + '</b><span>' + t('VAT exposure (SAR)') + '</span></div><div><b>' + checks.filter(function (c) { return c.status === 'fail'; }).length + ' / ' + checks.length + '</b><span>' + t('Checks failed') + '</span></div><div><b>' + S.samples.filter(function (x) { return x.flow !== 'W'; }).length + '</b><span>' + t('Samples') + '</span></div></div></section>' +
       '<section class="paper"><header><div><h2>' + t('What needs attention') + '</h2><p>' + t('Failures first, largest differences first.') + '</p></div></header>' +
       (missing.length ? '<p><b>' + t('Missing data:') + '</b> ' + missing.map(function (k) { return '<a href="#/ex/' + S.ex.id + '/data">' + esc(k === 'return' ? t('VAT return as filed') : t(E.KINDS[k].en)) + '</a>'; }).join(', ') + '</p>' : '') +
       (attention.slice(0, 9).map(function (c) {
@@ -5529,7 +5948,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       '<tr class="total"><td>' + t('WHT due') + '</td><td class="num">' + fmt(sum(ret, 't')) + '</td><td class="num">' + fmt(sum(reg, 't')) + '</td><td class="num">' + fmt(sum(xls, 't')) + '</td><td class="num" title="' + esc(t('Paid to ZATCA for withholding tax')) + '">' + fmt(paid || null) + '</td></tr></tbody></table>';
     return '<div class="grid g2" style="align-items:start"><section class="paper"><header><div><h2>' + t('WHT readiness') + '</h2><p>' + t('Weighted from the WHT checks, WHT samples, WHT documents and open WHT findings only.') + '</p></div></header>' +
       '<div class="row ready-row">' + Z.seal(sc.score, sc.grade) + '<div class="parts" style="flex:1">' + parts + '</div></div>' +
-      '<div class="kpis" style="margin-top:18px"><div class="' + (R.whtExposure ? 'bad' : '') + '"><b>' + fmt(R.whtExposure || 0, 0) + '</b><span>' + t('WHT exposure (SAR)') + '</span></div><div><b>' + checks.filter(function (c) { return c.status === 'fail'; }).length + ' / ' + checks.length + '</b><span>' + t('Checks failed') + '</span></div><div><b>' + S.samples.filter(function (x) { return x.flow === 'W'; }).length + '</b><span>' + t('Samples') + '</span></div></div></section>' +
+      '<div class="kpis" style="margin-top:18px"><div class="' + (R.whtExposure ? 'bad' : '') + '"><b>' + fmt(R.whtExposure || 0) + '</b><span>' + t('WHT exposure (SAR)') + '</span></div><div><b>' + checks.filter(function (c) { return c.status === 'fail'; }).length + ' / ' + checks.length + '</b><span>' + t('Checks failed') + '</span></div><div><b>' + S.samples.filter(function (x) { return x.flow === 'W'; }).length + '</b><span>' + t('Samples') + '</span></div></div></section>' +
       '<section class="paper"><header><div><h2>' + t('What needs attention') + '</h2><p>' + t('Failures first, largest differences first.') + '</p></div></header>' +
       (missing.length ? '<p><b>' + t('Missing data:') + '</b> ' + missing.map(function (k) { return '<a href="#/ex/' + S.ex.id + '/data">' + esc(t(E.KINDS[k].en)) + '</a>'; }).join(', ') + '</p>' : '') +
       (attention.slice(0, 9).map(function (c) {
@@ -5546,7 +5965,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       return Object.keys(E.KINDS).filter(function (k) { return E.KINDS[k].group === g && !(g === 'wht' && ent.whtRegistered === false); }).map(function (k) {
         var K = E.KINDS[k], files = S.datasets.filter(function (d) { return d.kind === k; });
         return '<div class="paper"><div class="spread" style="align-items:flex-start"><h3>' + esc(S.lang === 'ar' ? K.ar : K.en) + '</h3>' + (K.required ? '<span class="req">' + (files.length ? Z.tick('pass') : t('Required')) + '</span>' : '') + '</div>' +
-          '<div class="files">' + (files.map(function (d) { return '<div><span>' + esc(d.fileName) + '</span><span class="nowrap">' + fmt(d.rowCount, 0) + ' ' + t('rows') + (lk ? '' : ' <a href="#" data-act="deldata" data-id="' + d.id + '" aria-label="' + t('Remove') + ' ' + esc(d.fileName) + '">✕</a>') + '</span></div>'; }).join('') || '<span class="faint">' + t('Nothing loaded') + '</span>') + '</div>' +
+          '<div class="files">' + (files.map(function (d) { return '<div><span>' + esc(d.fileName) + '</span><span class="nowrap">' + Z.count(d.rowCount) + ' ' + t('rows') + (lk ? '' : ' <a href="#" data-act="deldata" data-id="' + d.id + '" aria-label="' + t('Remove') + ' ' + esc(d.fileName) + '">✕</a>') + '</span></div>'; }).join('') || '<span class="faint">' + t('Nothing loaded') + '</span>') + '</div>' +
           '<div class="row" style="margin-top:auto">' + (lk ? '' : '<button class="btn small primary" data-act="upload" data-k="' + k + '">' + t('Upload Excel / CSV') + '</button>') + '<button class="btn small ghost" data-act="template" data-k="' + k + '">' + t('Template') + '</button>' + (files.length ? '<button class="btn small ghost" data-act="viewdata" data-k="' + k + '">' + t('View') + '</button>' : '') + '</div></div>';
       }).join('');
     };
@@ -5628,12 +6047,12 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       '<h3 style="margin:16px 0 8px">' + t('Match the columns') + '</h3><div class="grid g3">' + K.fields.map(function (f) {
         return '<label class="f"><span>' + esc(fieldLabel(f.k)) + (f.req ? ' *' : '') + '</span><select data-chg="upmap" data-f="' + f.k + '">' + colOpts(UP.map[f.k]) + '</select></label>';
       }).join('') + '</div>' +
-      '<h3 style="margin:18px 0 8px">' + t('Preview') + ' - ' + fmt(res.rows.length, 0) + ' ' + t('rows') + (res.errors.length ? ' · <span class="diff-bad">' + res.errors.length + ' ' + t('with missing required values') + '</span>' : '') + '</h3>' +
+      '<h3 style="margin:18px 0 8px">' + t('Preview') + ' - ' + Z.count(res.rows.length) + ' ' + t('rows') + (res.errors.length ? ' · <span class="diff-bad">' + res.errors.length + ' ' + t('with missing required values') + '</span>' : '') + '</h3>' +
       '<div class="tbl-wrap"><table class="t"><thead><tr>' + K.fields.map(function (f) { return '<th>' + esc(fieldLabel(f.k)) + '</th>'; }).join('') + '</tr></thead><tbody>' +
       prev.map(function (r) { return '<tr>' + K.fields.map(function (f) { return '<td' + (f.t === 'n' ? ' class="num"' : '') + '>' + esc(f.t === 'n' ? fmt(r[f.k]) : r[f.k]) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table></div>' +
       (res.errors.length ? '<p class="diff-bad" style="margin-top:8px">' + t('Rows') + ' ' + res.errors.slice(0, 12).map(function (e) { return e.row; }).join(', ') + (res.errors.length > 12 ? '…' : '') + ' ' + t('are missing required values. They are kept and will show in the checks.') + '</p>' : '');
     Z.modal(t('Load') + ' - ' + (S.lang === 'ar' ? K.ar : K.en), body,
-      '<button class="btn" data-act="closemodal">' + t('Cancel') + '</button><button class="btn primary" data-act="upsave"' + (missingReq.length || !res.rows.length ? ' disabled title="' + esc(t('Map every required column')) + '"' : '') + '>' + (UP.toReturn ? t('Use as VAT return') : t('Save') + ' ' + fmt(res.rows.length, 0) + ' ' + t('rows')) + '</button>', true);
+      '<button class="btn" data-act="closemodal">' + t('Cancel') + '</button><button class="btn primary" data-act="upsave"' + (missingReq.length || !res.rows.length ? ' disabled title="' + esc(t('Map every required column')) + '"' : '') + '>' + (UP.toReturn ? t('Use as VAT return') : t('Save') + ' ' + Z.count(res.rows.length) + ' ' + t('rows')) + '</button>', true);
   }
   Z.CHG.upsheet = function (el) { UP.sheet = el.value; prepSheet(); mapModal(); };
   Z.CHG.uphdr = function (el) { UP.headerRow = Math.max(0, +el.value - 1); UP.map = E.autoMap(UP.aoa[UP.headerRow] || [], UP.kind); mapModal(); };
@@ -5647,7 +6066,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     var ds = { parentId: S.ex.id, kind: UP.kind, fileName: UP.fileName, sheet: UP.sheet, headerRow: UP.headerRow, mapping: UP.map, rowCount: rows.length, errors: UP.result.errors.length, uploadedAt: new Date().toISOString(), label: UP.fileName };
     Z.save('datasets', ds).then(function (d) {
       return Z.save('rows', Object.assign({ id: d.id, parentId: S.ex.id }, pack(rows))).then(function () {
-        Z.closeModal(); Z.toast(fmt(rows.length, 0) + ' ' + t('rows saved')); S.loaded = false; Z.route();
+        Z.closeModal(); Z.toast(Z.count(rows.length) + ' ' + t('rows saved')); S.loaded = false; Z.route();
       });
     });
   };
@@ -5665,7 +6084,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   };
   Z.ACT.viewdata = function (el) {
     var k = el.dataset.k, rows = S.data[k] || [], K = E.KINDS[k];
-    Z.modal(S.lang === 'ar' ? K.ar : K.en, '<p class="muted">' + fmt(rows.length, 0) + ' ' + t('rows') + (rows.length > 300 ? ' - ' + t('first 300 shown') : '') + '</p>' + Z.rowsTable(rows.slice(0, 300), K.fields.map(function (f) { return f.k; })), '', true);
+    Z.modal(S.lang === 'ar' ? K.ar : K.en, '<p class="muted">' + Z.count(rows.length) + ' ' + t('rows') + (rows.length > 300 ? ' - ' + t('first 300 shown') : '') + '</p>' + Z.rowsTable(rows.slice(0, 300), K.fields.map(function (f) { return f.k; })), '', true);
   };
 
   var FIELD_LABELS = { account: 'Account', name: 'Account name', opening: 'Opening', debit: 'Debit', credit: 'Credit', closing: 'Closing', date: 'Date', doc: 'Document', description: 'Description', party: 'Counterparty', country: 'Country', flow: 'Sales / purchase', invoice: 'Invoice no.', vatNo: 'VAT no.', category: 'Tax category', docType: 'Document type', net: 'Net', vat: 'VAT', total: 'Total', box: 'Box', amount: 'Amount', adj: 'Adjustment', uuid: 'UUID', status: 'Status', declaration: 'Declaration no.', value: 'Customs value', reference: 'Reference', balance: 'Balance', paymentType: 'Payment type', gross: 'Gross', rate: 'Rate', wht: 'WHT', dtt: 'Treaty relief', certificate: 'Certificate', paidDate: 'Paid to ZATCA', tax: 'Tax', cls: 'Class', reason: 'Why', expected: 'Expected', statutory: 'Statutory rate', applied: 'Applied rate', shortfall: 'Shortfall', due: 'Due', daysLate: 'Days late', penalty: 'Fine', missing: 'Missing',
@@ -5691,14 +6110,15 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
         (c.diff != null && c.bLabel ? '<span class="d ' + c.status + '">' + t('Difference') + ': <b>' + fmt(c.diff) + '</b></span>' : '') + (c.exposure ? '<span class="d fail">' + t('Exposure') + ': <b>' + fmt(c.exposure) + '</b></span>' : '') + (c.source ? '<span class="faint">' + esc(c.source) + '</span>' : '');
     return '<div class="check" id="c-' + c.id + '">' + Z.tick(c.status) + '<div><h3>' + esc(c.id) + ' · ' + esc(Z.tt(c, 'title')) + '</h3><div class="figs">' + figs + '</div>' +
       (c.note ? '<p class="faint" style="font-size:12.5px;margin:4px 0 0">' + esc(S.lang === 'ar' && c.noteAr ? c.noteAr : t(c.note)) + '</p>' : '') + (extra || '') +
-      (c.status !== 'pass' && c.status !== 'na' || note ? '<textarea data-chg="cnote" data-id="' + c.id + '" placeholder="' + esc(t('Explanation for the inspector (what causes the difference, evidence reference)')) + '"' + (lk ? ' disabled' : '') + '>' + esc(note) + '</textarea>' : '') + '</div>' +
-      '<div class="acts">' + (c.status === 'fail' || c.status === 'warn' ? (lk ? '' : '<button class="btn small" data-act="raise" data-id="' + c.id + '">' + t('Raise finding') + '</button>') : '') + '</div></div>';
+      (c.status !== 'pass' && c.status !== 'na' || note ? '<textarea data-chg="cnote" data-id="' + c.id + '" placeholder="' + esc(t('Explanation for the inspector (what causes the difference, evidence reference)')) + '"' + (lk ? ' disabled' : '') + '>' + esc(note) + '</textarea>' : '') +
+      (Z.reviewHtml ? Z.reviewHtml(c.id) : '') +
+      '</div><div class="acts">' + (c.status === 'fail' || c.status === 'warn' ? (lk ? '' : '<button class="btn small" data-act="raise" data-id="' + c.id + '">' + t('Raise finding') + '</button>') : '') + (Z.reviewButton ? Z.reviewButton(c.id) : '') + '</div></div>';
   };
   Z.CHG.cnote = function (el) { S.ex.checkNotes[el.dataset.id] = el.value; Z.saveEx(); };
   Z.exceptionsHtml = function (c) {
     if (!c.exceptions) return '';
     return Object.keys(c.exceptions).filter(function (k) { return c.exceptions[k].length; }).map(function (k) {
-      return '<details><summary>' + esc(t(EXC[k] || k)) + ' (' + fmt((c.counts || {})[k] || c.exceptions[k].length, 0) + ')</summary>' + Z.rowsTable(c.exceptions[k].slice(0, 200), excCols(k, c.exceptions[k][0])) + '</details>';
+      return '<details><summary>' + esc(t(EXC[k] || k)) + ' (' + Z.count((c.counts || {})[k] || c.exceptions[k].length) + ')</summary>' + Z.rowsTable(c.exceptions[k].slice(0, 200), excCols(k, c.exceptions[k][0])) + '</details>';
     }).join('');
   };
   var EXC = { notReported: 'Sales invoices not reported to Fatoora', notInSystem: 'Fatoora invoices not in the system', rejected: 'Rejected by Fatoora', mismatch: 'VAT differs from Fatoora', unmatched: 'Unmatched lines', rate: 'Rate exceptions', late: 'Late remittances', noCert: 'Lines without a certificate', missing: 'Not in the WHT register', list: 'Exceptions' };
@@ -5807,7 +6227,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     var ok = rows.filter(function (r) { return r.c.status === 'pass'; }).length, known = rows.filter(function (r) { return r.c.status !== 'na'; }).length;
     return '<section class="paper" style="margin-top:18px"><header><div><h2>' + t('Fatoora against everything') + '</h2><p>' + t('What ZATCA holds on the e-invoicing portal compared with each of your sources. ZATCA runs these comparisons itself.') + '</p></div><span class="score-chip">' + ok + ' / ' + known + ' ' + t('agree') + '</span></header><div class="pairs">' +
       rows.map(function (r, i) {
-        var c = r.c, figure = c.status === 'na' ? t('No data') : c.status === 'pass' ? t('Agrees') : c.bLabel ? fmt(c.diff, 0) : c.a + ' ' + (c.a === 1 ? t('item') : t('items'));
+        var c = r.c, figure = c.status === 'na' ? t('No data') : c.status === 'pass' ? t('Agrees') : c.bLabel ? fmt(c.diff) : c.a + ' ' + (c.a === 1 ? t('item') : t('items'));
         return '<a class="pair st-' + c.status + '" style="--i:' + i + '" href="#" data-act="gocheck" data-id="' + c.id + '" data-tab="' + r.m[2] + '"><span class="node">' + t('Fatoora') + '</span><span class="link"><i></i>' + Z.tick(c.status) + '</span><span class="node">' + esc(t(r.m[1])) + '</span><span class="gap num">' + figure + '</span></a>';
       }).join('') + '</div></section>';
   }
@@ -5818,8 +6238,8 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   };
   Z.tabs.einv = function () {
     var EI = S.R.einv, sm = EI.summary;
-    var counts = sm ? '<div class="kpis"><div><b>' + fmt(sm.erp, 0) + '</b><span>' + t('Sales documents in the ERP') + '</span></div><div><b>' + fmt(sm.provider, 0) + '</b><span>' + t('Received by the e-invoicing provider') + '</span></div><div><b>' + fmt(sm.zatca, 0) + '</b><span>' + t('Held by ZATCA (Fatoora export)') + '</span></div>' +
-      Object.keys(sm.byStatus).map(function (k) { return '<div class="' + (/REJECT|PEND|NOT_/.test(k) ? 'bad' : '') + '"><b>' + fmt(sm.byStatus[k], 0) + '</b><span>' + esc(t(EST[k] || k)) + '</span></div>'; }).join('') + '</div>' : '';
+    var counts = sm ? '<div class="kpis"><div><b>' + Z.count(sm.erp) + '</b><span>' + t('Sales documents in the ERP') + '</span></div><div><b>' + Z.count(sm.provider) + '</b><span>' + t('Received by the e-invoicing provider') + '</span></div><div><b>' + Z.count(sm.zatca) + '</b><span>' + t('Held by ZATCA (Fatoora export)') + '</span></div>' +
+      Object.keys(sm.byStatus).map(function (k) { return '<div class="' + (/REJECT|PEND|NOT_/.test(k) ? 'bad' : '') + '"><b>' + Z.count(sm.byStatus[k]) + '</b><span>' + esc(t(EST[k] || k)) + '</span></div>'; }).join('') + '</div>' : '';
     return '<section class="paper area-vat"><header><div><h2>' + t('Three-way e-invoicing reconciliation') + '</h2><p>' + t('Your ERP issues the invoice, the e-invoicing provider signs it and sends it to Fatoora, ZATCA clears or records it. An inspector compares all three: an invoice missing anywhere along the chain is a finding.') + '</p></div>' +
       '<a class="btn small" href="#/ex/' + S.ex.id + '/data">' + t('Load provider or Fatoora export') + '</a></header>' + counts + '</section>' + fatooraMap() +
       '<section class="paper" style="margin-top:18px"><header><div><h2>' + t('E-invoicing checks') + '</h2></div></header>' + EI.checks.map(function (c) { return Z.checkHtml(c, Z.exceptionsHtml(c)); }).join('') + '</section>';
@@ -5881,10 +6301,10 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     var A = S.R.analytics, ra = A.ratios;
     var tiles = '<div class="kpis"><div class="' + (ra.effectiveRate != null && Math.abs(ra.effectiveRate - S.settings.vatRate * 100) >= 0.001 ? 'bad' : '') + '"><b>' + (ra.effectiveRate == null ? '-' : ra.effectiveRate + '%') + '</b><span>' + t('Effective VAT rate on standard sales') + '</span></div>' +
       '<div><b>' + (ra.inputToOutput == null ? '-' : ra.inputToOutput + '%') + '</b><span>' + t('Input VAT as % of output VAT') + '</span></div><div><b>' + (ra.zeroExemptShare == null ? '-' : ra.zeroExemptShare + '%') + '</b><span>' + t('Zero-rated, export and exempt share of sales') + '</span></div>' +
-      '<div><b>' + fmt((S.data.sys_vat || []).length, 0) + '</b><span>' + t('Invoices analysed') + '</span></div></div>';
+      '<div><b>' + Z.count((S.data.sys_vat || []).length) + '</b><span>' + t('Invoices analysed') + '</span></div></div>';
     var list = A.tests.map(function (x) {
-      var extra = x.dist ? benford(x.dist) : x.items.length ? '<details><summary>' + t('Show') + ' ' + fmt(x.count, 0) + '</summary>' + Z.rowsTable(x.items.slice(0, 200), ['invoice', 'date', 'party', 'vatNo', 'country', 'category', 'net', 'vat', 'reason'].filter(function (c) { return x.items[0][c] !== undefined; })) + '</details>' : '';
-      return '<div class="check">' + Z.tick(x.status) + '<div><h3>' + esc(x.id) + ' · ' + esc(Z.tt(x, 'title')) + ' ' + Z.pill(x.severity, t(Z.cap(x.severity))) + '</h3><div class="figs">' + (x.status === 'na' ? '' : '<span>' + t('Items') + ': <b>' + fmt(x.count, 0) + '</b></span>' + (x.amount ? '<span>' + t('Amount') + ': <b>' + fmt(x.amount) + '</b></span>' : '')) + '</div><p class="faint" style="font-size:12.5px;margin:4px 0 0">' + esc(t(x.desc || '')) + '</p>' + extra + '</div>' +
+      var extra = x.dist ? benford(x.dist) : x.items.length ? '<details><summary>' + t('Show') + ' ' + Z.count(x.count) + '</summary>' + Z.rowsTable(x.items.slice(0, 200), ['invoice', 'date', 'party', 'vatNo', 'country', 'category', 'net', 'vat', 'reason'].filter(function (c) { return x.items[0][c] !== undefined; })) + '</details>' : '';
+      return '<div class="check">' + Z.tick(x.status) + '<div><h3>' + esc(x.id) + ' · ' + esc(Z.tt(x, 'title')) + ' ' + Z.pill(x.severity, t(Z.cap(x.severity))) + '</h3><div class="figs">' + (x.status === 'na' ? '' : '<span>' + t('Items') + ': <b>' + Z.count(x.count) + '</b></span>' + (x.amount ? '<span>' + t('Amount') + ': <b>' + fmt(x.amount) + '</b></span>' : '')) + '</div><p class="faint" style="font-size:12.5px;margin:4px 0 0">' + esc(t(x.desc || '')) + '</p>' + extra + '</div>' +
         '<div class="acts">' + (x.count && !locked() ? '<button class="btn small" data-act="raisea" data-id="' + x.id + '">' + t('Raise finding') + '</button>' : '') + '</div></div>';
     }).join('');
     return tiles + '<section class="paper" style="margin-top:18px"><header><div><h2>' + t('Tests on every invoice') + '</h2><p>' + t('Run over the full system VAT report, not a sample. Flagged items are good candidates for risk-based samples.') + '</p></div></header>' + list + '</section>';
@@ -5952,7 +6372,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     f.size = Math.min(f.sizeOverride || size, pop.length) || size;
     var opt = function (v, cur, l) { return '<option value="' + v + '"' + (String(cur) === String(v) ? ' selected' : '') + '>' + l + '</option>'; };
     return '<section class="paper"><header><div><h2>' + t('Select a new sample') + '</h2><p>' + t('Sizes follow AICPA attribute and MUS tables (Poisson). The seed makes the selection reproducible: anyone re-running it gets the same items.') + '</p></div></header><div class="grid g2">' +
-      '<label class="f"><span>' + t('Population') + '</span><select data-chg="sf" data-f="flow">' + FLOWS().map(function (k) { return opt(k, f.flow, t(POP[k])); }).join('') + '</select><small>' + fmt(pop.length, 0) + ' ' + t('items') + ', ' + t('book value') + ' ' + fmt(bv) + ' (' + (field === 'vat' ? t('VAT / WHT') : t('net')) + ')</small></label>' +
+      '<label class="f"><span>' + t('Population') + '</span><select data-chg="sf" data-f="flow">' + FLOWS().map(function (k) { return opt(k, f.flow, t(POP[k])); }).join('') + '</select><small>' + Z.count(pop.length) + ' ' + t('items') + ', ' + t('book value') + ' ' + fmt(bv) + ' (' + (field === 'vat' ? t('VAT / WHT') : t('net')) + ')</small></label>' +
       '<label class="f"><span>' + t('Method') + '</span><select data-chg="sf" data-f="method">' + Object.keys(METHODS).map(function (k) { return opt(k, f.method, t(METHODS[k])); }).join('') + '</select></label>' +
       '<label class="f"><span>' + t('Confidence') + '</span><select data-chg="sf" data-f="confidence">' + [0.9, 0.95, 0.99].map(function (c) { return opt(c, f.confidence, c * 100 + '%'); }).join('') + '</select></label>' +
       (f.method === 'mus' ? Z.fld('tm', t('Tolerable misstatement (SAR)'), f.tm, 'number', 'data-chg="sf" data-f="tm"') + Z.fld('em', t('Expected misstatement (SAR)'), f.em || 0, 'number', 'data-chg="sf" data-f="em"')
@@ -6001,7 +6421,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     }).join('');
     var legend = A.map(function (a, i) { return '<li><b>' + (i + 1) + '</b> ' + esc(S.lang === 'ar' ? a[2] : a[1]) + ' <span class="faint">(' + (ev.byAttr[i].fails) + '/' + ev.byAttr[i].tested + ')</span></li>'; }).join('');
     return '<div class="spread" style="margin-bottom:14px"><button class="btn small" data-act="closesample">‹ ' + t('All samples') + '</button><div class="row">' + (lk ? '' : '<button class="btn small" data-act="passall">' + t('Mark untested as passed') + '</button><button class="btn small danger" data-act="delsample">' + t('Delete sample') + '</button>') + '<button class="btn small" data-act="xlsample">' + t('Export to Excel') + '</button></div></div>' +
-      '<div class="grid g2" style="align-items:start"><section class="paper"><header><div><h2>' + esc(t(POP[s.flow])) + ' - ' + esc(t(METHODS[s.method])) + '</h2><p>' + t('Seed') + ' ' + s.seed + ' · ' + t('population') + ' ' + fmt(s.populationCount, 0) + ' / ' + fmt(s.populationValue) + (s.interval ? ' · ' + t('interval') + ' ' + fmt(s.interval) + ' · ' + t('start') + ' ' + fmt(s.start) : '') + '</p></div></header>' +
+      '<div class="grid g2" style="align-items:start"><section class="paper"><header><div><h2>' + esc(t(POP[s.flow])) + ' - ' + esc(t(METHODS[s.method])) + '</h2><p>' + t('Seed') + ' ' + s.seed + ' · ' + t('population') + ' ' + Z.count(s.populationCount) + ' / ' + fmt(s.populationValue) + (s.interval ? ' · ' + t('interval') + ' ' + fmt(s.interval) + ' · ' + t('start') + ' ' + fmt(s.start) : '') + '</p></div></header>' +
       '<div class="kpis"><div><b>' + ev.tested + ' / ' + ev.total + '</b><span>' + t('Items tested') + '</span></div><div class="' + (ev.deviations ? 'bad' : '') + '"><b>' + ev.rate + '%</b><span>' + t('Deviation rate') + ' (' + t('upper limit') + ' ' + (ev.upperRate == null ? '-' : ev.upperRate + '%') + ')</span></div>' +
       '<div class="' + (ev.actualMisstatement ? 'bad' : '') + '"><b>' + fmt(ev.actualMisstatement) + '</b><span>' + t('Misstatement found') + '</span></div><div><b>' + fmt(ev.projected) + '</b><span>' + t('Projected to population') + (ev.upperLimit != null ? ' · ' + t('upper limit') + ' ' + fmt(ev.upperLimit) : '') + '</span></div></div>' +
       '<div class="grid g2" style="margin-top:14px"><label class="f"><span>' + t('Conclusion') + '</span><select data-chg="sconcl"' + (lk ? ' disabled' : '') + '><option value="">' + t('Still testing') + '</option><option value="accept"' + (s.conclusion === 'accept' ? ' selected' : '') + '>' + t('Population accepted') + '</option><option value="reject"' + (s.conclusion === 'reject' ? ' selected' : '') + '>' + t('Not accepted - extend testing or correct') + '</option></select></label>' +
@@ -6151,10 +6571,10 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     var sc = (wht ? R.whtScore : R.vatScore) || R.score, expo = wht ? R.whtExposure || 0 : R.vatExposure || 0;
     var ctl = '<div class="spread noprint" style="margin-bottom:16px"><div class="row">' +
       (ex.status === 'in_progress' && Z.can('preparer') ? '<button class="btn" data-act="exstatus" data-s="review">' + t('Send for review') + '</button>' : '') +
-      (ex.status !== 'closed' && Z.can('manager') ? '<button class="btn primary" data-act="exstatus" data-s="closed">' + t('Sign off exercise') + '</button>' : '') +
+      (ex.status !== 'closed' && Z.can('manager') ? (Z.openReviews && Z.openReviews().length ? '<button class="btn primary" disabled title="' + esc(t('Clear every review note before signing off.')) + '">' + t('Sign off exercise') + '</button>' : '<button class="btn primary" data-act="exstatus" data-s="closed">' + t('Sign off exercise') + '</button>') : '') +
       (ex.status === 'closed' && Z.can('manager') ? '<button class="btn" data-act="exstatus" data-s="in_progress">' + t('Reopen') + '</button>' : '') + '</div>' +
       '<div class="row"><button class="btn" data-act="exportxl">' + Z.icon('microsoft-excel-logo') + ' ' + (wht ? t('Export WHT workbook') : t('Export VAT workbook')) + '</button><button class="btn primary" data-act="print">' + Z.icon('file-pdf') + ' ' + t('Print / save as PDF') + '</button></div></div>' +
-      '<p class="faint noprint" style="margin:-6px 0 14px;font-size:12.5px">' + t('Sign-off covers the whole exercise, VAT and withholding tax together.') + '</p>';
+      '<p class="faint noprint" style="margin:-6px 0 14px;font-size:12.5px">' + t('Sign-off covers the whole exercise, VAT and withholding tax together.') + '</p>' + (Z.reviewSummary ? Z.reviewSummary() : '');
     var checkRows = function (list) {
       return list.map(function (c) { return '<tr><td>' + Z.tick(c.status) + '</td><td>' + esc(c.id) + '</td><td>' + esc(Z.tt(c, 'title')) + '</td><td class="num">' + (c.a != null ? fmt(c.a) : '') + '</td><td class="num">' + (c.b != null && c.bLabel ? fmt(c.b) : '') + '</td><td class="num">' + (c.diff != null ? fmt(c.diff) : '') + '</td><td style="font-size:12px">' + esc(S.ex.checkNotes[c.id] || (c.status === 'na' ? t('No data') + ': ' + t(c.missing || '') : '')) + '</td></tr>'; }).join('');
     };
@@ -6176,7 +6596,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       body = (boxRows ? '<h2>' + t('VAT return as filed') + '</h2><table class="t"><thead><tr><th>#</th><th>' + t('Box') + '</th><th class="num">' + t('Amount') + '</th><th class="num">' + t('VAT') + '</th></tr></thead><tbody>' + boxRows + '</tbody></table>' : '') +
         block(t('VAT reconciliation'), R.vat.checks) + block(t('Filing and payment'), filing) + block(t('E-invoicing: ERP, provider and ZATCA'), R.einv.checks) +
         block(t('Bank reconciliation'), R.bank.checks) + block(t('Marketplaces, real estate and excise'), R.other.checks) +
-        '<h2>' + t('Data analytics exceptions') + '</h2>' + (an.length ? '<table class="t"><tbody>' + an.map(function (x) { return '<tr><td>' + Z.tick(x.status) + '</td><td>' + esc(x.id) + '</td><td>' + esc(Z.tt(x, 'title')) + '</td><td class="num">' + fmt(x.count, 0) + '</td><td class="num">' + (x.amount ? fmt(x.amount) : '') + '</td></tr>'; }).join('') + '</tbody></table>' : '<p>' + t('No exceptions.') + '</p>');
+        '<h2>' + t('Data analytics exceptions') + '</h2>' + (an.length ? '<table class="t"><tbody>' + an.map(function (x) { return '<tr><td>' + Z.tick(x.status) + '</td><td>' + esc(x.id) + '</td><td>' + esc(Z.tt(x, 'title')) + '</td><td class="num">' + Z.count(x.count) + '</td><td class="num">' + (x.amount ? fmt(x.amount) : '') + '</td></tr>'; }).join('') + '</tbody></table>' : '<p>' + t('No exceptions.') + '</p>');
     }
     return ctl + '<article class="report"><div class="cover"><div><p style="margin:0;color:#555">' + (wht ? t('Withholding tax inspection readiness pack') : t('VAT inspection readiness pack')) + '</p><h1>' + esc(ent.name) + (ent.nameAr ? ' - ' + esc(ent.nameAr) : '') + '</h1><p style="margin:6px 0 0">' + t('TRN') + ' ' + esc(ent.trn || '-') + ' · ' + t('CR') + ' ' + esc(ent.cr || '-') + ' · ' + t('Period') + ' <b>' + Z.ltr(ex.period) + '</b> (' + Z.ltr(E.periodRange(ex.period).start + ' → ' + E.periodRange(ex.period).end) + ')</p>' +
       '<p style="margin:4px 0 0;color:#555">' + t('Prepared') + ' ' + Z.ltr(Z.today()) + ' · ' + t('Status') + ': ' + esc({ in_progress: t('In progress'), review: t('Under review'), closed: t('Signed off') }[ex.status] || '') + (ex.signedOffBy ? ' - ' + esc(ex.signedOffBy) + ' ' + esc(String(ex.signedOffAt).slice(0, 10)) : '') + '</p></div>' + Z.seal(sc.score, sc.grade) + '</div>' +
@@ -6249,9 +6669,13 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       jobs.push(Z.save('checklists', cl));
       d.requests.forEach(function (q) { jobs.push(Z.save('requests', Object.assign({ entityId: entId }, q))); });
       jobs.push(Z.save('annual', { id: entId + '_2025', entityId: entId, year: 2025, items: [], zakat: d.zakat2025 }));
+      jobs.push(Z.save('statements', Object.assign({ id: entId + '_soa', entityId: entId, label: 'ZATCA statement of account' }, d.statement)));
+      d.disputes.forEach(function (x) { jobs.push(Z.save('disputes', Object.assign({ entityId: entId, label: x.reference }, x))); });
+      d.refunds.forEach(function (x) { jobs.push(Z.save('refunds', Object.assign({ entityId: entId, label: x.period }, x))); });
+      d.events.forEach(function (x) { jobs.push(Z.save('events', Object.assign({ entityId: entId, label: x.title }, x))); });
       var ent2 = { name: 'Al Noor Logistics LLC', nameAr: 'النور للخدمات اللوجستية', trn: '311987654300003', cr: '1010223344', vatFreq: 'quarterly', whtRegistered: false, erp: 'Odoo', active: true, demo: true, mapping: { outputVat: '2210', inputVat: '1410', revenue: '4*' } };
       jobs.push(Z.save('entities', ent2).then(function (e2) {
-        return Z.call('saveMany', { table: 'exercises', docs: [['2026-Q1', 84], ['2026-Q2', 73]].map(function (h) { return { entityId: e2.id, period: h[0], status: 'closed', signedOffBy: 'Tax manager', label: e2.name + ' ' + h[0], summary: { score: h[1], grade: h[1] >= 85 ? 'ready' : h[1] >= 70 ? 'mostly' : 'risk', exposure: 0, fails: 1, netVat: 96000 }, reconItems: [], checkNotes: {}, bankOverrides: {} }; }) });
+        return Z.call('saveMany', { table: 'exercises', docs: [['2026-Q1', 84], ['2026-Q2', 73]].map(function (h) { return { entityId: e2.id, period: h[0], status: 'closed', signedOffBy: 'Tax manager', label: e2.name + ' ' + h[0], summary: { score: h[1], grade: h[1] >= 85 ? 'ready' : h[1] >= 70 ? 'mostly' : 'risk', exposure: 0, fails: 1, netVat: 96000 }, filing: { vatFiledOn: E.deadlines(h[0]).vat, vatPaidOn: E.deadlines(h[0]).vat }, reconItems: [], checkNotes: {}, bankOverrides: {} }; }) });
       }));
       return Promise.all(jobs).then(function () { return ex; });
     }).then(function (ex) {
@@ -6388,7 +6812,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   }
   function beneficiaries(rows) {
     var tot = rows.reduce(function (a, r) { return { g: a.g + r.gross, w: a.w + r.wht, m: a.m + r.missingCert }; }, { g: 0, w: 0, m: 0 });
-    return '<div class="kpis"><div><b>' + rows.length + '</b><span>' + t('Beneficiaries') + '</span></div><div><b>' + fmt(tot.g, 0) + '</b><span>' + t('Paid to non-residents') + '</span></div><div><b>' + fmt(tot.w, 0) + '</b><span>' + t('WHT withheld') + '</span></div><div class="' + (tot.m ? 'bad' : '') + '"><b>' + tot.m + '</b><span>' + t('Payments without a certificate') + '</span></div></div>' +
+    return '<div class="kpis"><div><b>' + rows.length + '</b><span>' + t('Beneficiaries') + '</span></div><div><b>' + fmt(tot.g) + '</b><span>' + t('Paid to non-residents') + '</span></div><div><b>' + fmt(tot.w) + '</b><span>' + t('WHT withheld') + '</span></div><div class="' + (tot.m ? 'bad' : '') + '"><b>' + tot.m + '</b><span>' + t('Payments without a certificate') + '</span></div></div>' +
       '<p class="muted" style="margin-top:12px">' + t('Use it to check certificates and the annual WHT figures; every beneficiary paid during the year appears once.') + '</p>' +
       '<section class="paper flush"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Beneficiary') + '</th><th>' + t('Entity') + '</th><th>' + t('Country') + '</th><th>' + t('Payment types') + '</th><th class="num">' + t('Payments') + '</th><th class="num">' + t('Gross paid') + '</th><th class="num">' + t('WHT') + '</th><th class="num">' + t('Effective rate') + '</th><th class="num">' + t('Treaty relief') + '</th><th class="num">' + t('No certificate') + '</th></tr></thead><tbody>' +
       (rows.map(function (r) { return '<tr><td><b>' + esc(r.party || '-') + '</b></td><td>' + esc(Z.entName(Z.entity(r.entityId))) + '</td><td>' + esc(r.country) + '</td><td style="font-size:12.5px">' + esc(Object.keys(r.types).map(function (k) { var w = E.WHT_TYPES.filter(function (x) { return x[0] === k; })[0]; return w ? (S.lang === 'ar' ? w[2] : w[1]) : k; }).join(', ')) + '</td><td class="num">' + r.n + '</td><td class="num">' + fmt(r.gross) + '</td><td class="num">' + fmt(r.wht) + '</td><td class="num">' + (r.gross ? Z.r(r.wht / r.gross * 100) + '%' : '-') + '</td><td class="num">' + (r.treaty || '') + '</td><td class="num ' + (r.missingCert ? 'diff-bad' : '') + '">' + (r.missingCert || '') + '</td></tr>'; }).join('') || '<tr><td colspan="10" class="empty">' + t('No WHT registers loaded for this range.') + '</td></tr>') + '</tbody></table></div></section>';
@@ -6584,7 +7008,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       Z.fld('z_fyEnd', t('Year end'), z.fyEnd, 'date', 'data-chg="zak" data-f="fyEnd"' + dis) + Z.fld('z_filedOn', t('Filed and paid on'), z.filedOn, 'date', 'data-chg="zak" data-f="filedOn"' + dis) +
       Z.fld('z_declared', t('Zakat declared in the return'), z.declared, 'number', 'step="0.01" data-chg="zak" data-f="declared"' + dis) + '</div></div></div>' +
       (can ? '<div class="row" style="margin-top:12px"><button class="btn" data-act="zakfill" data-e="' + e.id + '">' + t('Fill from trial balance') + '</button><span class="faint" style="font-size:12.5px">' + t('Uses the TB of the last exercise of the year. Adjusted net profit stays manual: it needs your tax adjustments.') + '</span></div>' : '') +
-      '<div class="kpis" style="margin-top:16px"><div><b>' + fmt(res.base, 0) + '</b><span>' + t('Computed Zakat base') + '</span></div><div><b>' + fmt(res.baseUsed, 0) + '</b><span>' + t('Base used (not below adjusted net profit)') + '</span></div>' +
+      '<div class="kpis" style="margin-top:16px"><div><b>' + fmt(res.base) + '</b><span>' + t('Computed Zakat base') + '</span></div><div><b>' + fmt(res.baseUsed) + '</b><span>' + t('Base used (not below adjusted net profit)') + '</span></div>' +
       '<div><b>' + Z.r(res.rate * 100) + '%</b><span>' + t('Rate applied') + '</span></div><div><b>' + fmt(res.zakat) + '</b><span>' + t('Zakat due (SAR)') + '</span></div>' + (res.dueDate ? '<div><b>' + Z.ltr(res.dueDate) + '</b><span>' + t('Return due') + '</span></div>' : '') + '</div>' +
       '<div style="margin-top:12px">' + res.checks.map(function (c) { return '<div class="row" style="flex-wrap:nowrap;padding:7px 0;border-top:1px solid var(--rule-2)">' + Z.tick(c.status) + '<span style="flex:1">' + esc(c.id) + ' · ' + esc(Z.tt(c, 'title')) + (c.note ? '<span class="faint" style="display:block;font-size:12.5px">' + esc(t(c.note)) + '</span>' : '') + '</span>' + (c.diff != null && c.bLabel ? '<b class="num ' + (c.status === 'fail' ? 'diff-bad' : '') + '">' + fmt(c.diff) + '</b>' : '') + '</div>'; }).join('') + '</div></section>';
   }
@@ -6709,7 +7133,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     var txt = d < 0 ? t('Overdue by') + ' ' + -d + ' ' + t('days') : d === 0 ? t('Due today') : d + ' ' + t('days left');
     return '<span class="cd ' + cls + '" title="' + esc(t('Deadline') + ' ' + a.deadline) + '">' + Z.icon(d < 0 ? 'alarm' : 'clock') + ' ' + txt + '</span>';
   }
-  var money = function (v, cls) { return '<b class="num' + (cls ? ' ' + cls : '') + '" data-count="' + (+v || 0) + '">' + fmt(v || 0, 0) + '</b>'; };
+  var money = function (v, cls) { return '<b class="num' + (cls ? ' ' + cls : '') + '" data-count="' + (+v || 0) + '">' + fmt(v || 0) + '</b>'; };
 
   // ---------------------------------------------------------------- charts (plain SVG, animated by CSS)
   // grouped bars with an optional line; values in SAR
@@ -6719,10 +7143,10 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     var max = Math.max.apply(null, all.concat([1])), step = Math.pow(10, Math.floor(Math.log10(max))), top = Math.ceil(max / step) * step;
     var y = function (v) { return pt + (H - pt - pb) * (1 - Math.max(0, +v || 0) / top); };
     var gw = (W - pl - pr) / n, bw = Math.min(22, gw / (series.length + 1));
-    var grid = [0, .25, .5, .75, 1].map(function (f) { var v = top * f, yy = y(v); return '<line x1="' + pl + '" x2="' + (W - pr) + '" y1="' + yy + '" y2="' + yy + '" class="gl"/><text x="' + (pl - 8) + '" y="' + (yy + 4) + '" class="ax" text-anchor="end">' + Z.fmt(v / 1000, 0) + 'k</text>'; }).join('');
+    var grid = [0, .25, .5, .75, 1].map(function (f) { var v = top * f, yy = y(v); return '<line x1="' + pl + '" x2="' + (W - pr) + '" y1="' + yy + '" y2="' + yy + '" class="gl"/><text x="' + (pl - 8) + '" y="' + (yy + 4) + '" class="ax" text-anchor="end">' + Z.count(v / 1000) + 'k</text>'; }).join('');
     var bars = labels.map(function (l, i) {
       var x0 = pl + gw * i + (gw - bw * series.length) / 2;
-      return series.map(function (s, k) { var v = +s.values[i] || 0, yy = y(v); return v ? '<rect class="cbar s' + k + '" style="--i:' + i + '" x="' + (x0 + k * bw) + '" y="' + yy + '" width="' + (bw - 3) + '" height="' + Math.max(1, H - pb - yy) + '" rx="3"><title>' + esc(s.name + ' ' + l + ': ' + fmt(v, 0)) + '</title></rect>' : ''; }).join('') +
+      return series.map(function (s, k) { var v = +s.values[i] || 0, yy = y(v); return v ? '<rect class="cbar s' + k + '" style="--i:' + i + '" x="' + (x0 + k * bw) + '" y="' + yy + '" width="' + (bw - 3) + '" height="' + Math.max(1, H - pb - yy) + '" rx="3"><title>' + esc(s.name + ' ' + l + ': ' + fmt(v)) + '</title></rect>' : ''; }).join('') +
         '<text x="' + (pl + gw * i + gw / 2) + '" y="' + (H - 8) + '" class="ax" text-anchor="middle">' + esc(l) + '</text>';
     }).join('');
     var path = '';
@@ -6748,7 +7172,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   function hbars(rows) {
     var max = Math.max.apply(null, rows.map(function (r) { return r.v; }).concat([1]));
     return '<div class="hbars">' + rows.map(function (r, i) {
-      return '<div class="hb" style="--i:' + i + '"><span>' + esc(r.label) + '</span><div class="track"><i style="--w:' + Math.max(2, r.v / max * 100).toFixed(1) + '%"></i></div><b class="num">' + fmt(r.v, 0) + '</b></div>';
+      return '<div class="hb" style="--i:' + i + '"><span>' + esc(r.label) + '</span><div class="track"><i style="--w:' + Math.max(2, r.v / max * 100).toFixed(1) + '%"></i></div><b class="num">' + fmt(r.v) + '</b></div>';
     }).join('') + '</div>';
   }
 
@@ -6758,15 +7182,15 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     var lv = LEVEL[a.level] || LEVEL.low, rt = ROUTE[a.route] || ROUTE.book, done = isDone(a), lk = Z.locked && Z.locked();
     var tab = { vat: 'vat', bank: 'bank', einv: 'einv', filing: 'filing', other: 'other', wht: 'wht', analytics: 'analytics' }[a.group] || 'overview';
     var maxCost = Math.max(a.costLater || 0, a.costNow || 0, 1);
-    var cost = a.recover ? '<div class="cost good">' + Z.icon('arrow-u-up-left') + ' ' + t('Tax to reclaim') + ' <b class="num">' + fmt(a.recover, 0) + '</b></div>' :
-      (a.costLater || a.costNow) ? '<div class="cost"><div class="cb"><span>' + t('If you act now') + '</span><div class="track"><i class="now" style="--w:' + (a.costNow / maxCost * 100).toFixed(1) + '%"></i></div><b class="num">' + fmt(a.costNow, 0) + '</b></div>' +
-        '<div class="cb"><span>' + t('If an inspector finds it') + '</span><div class="track"><i class="later" style="--w:' + (a.costLater / maxCost * 100).toFixed(1) + '%"></i></div><b class="num">' + fmt(a.costLater, 0) + '</b></div></div>' :
-      a.upTo ? '<div class="cost muted">' + t('E-invoicing violations: fines up to SAR') + ' ' + fmt(a.upTo, 0) + ' ' + t('each, usually after a warning') + '</div>' : '';
+    var cost = a.recover ? '<div class="cost good">' + Z.icon('arrow-u-up-left') + ' ' + t('Tax to reclaim') + ' <b class="num">' + fmt(a.recover) + '</b></div>' :
+      (a.costLater || a.costNow) ? '<div class="cost"><div class="cb"><span>' + t('If you act now') + '</span><div class="track"><i class="now" style="--w:' + (a.costNow / maxCost * 100).toFixed(1) + '%"></i></div><b class="num">' + fmt(a.costNow) + '</b></div>' +
+        '<div class="cb"><span>' + t('If an inspector finds it') + '</span><div class="track"><i class="later" style="--w:' + (a.costLater / maxCost * 100).toFixed(1) + '%"></i></div><b class="num">' + fmt(a.costLater) + '</b></div></div>' :
+      a.upTo ? '<div class="cost muted">' + t('E-invoicing violations: fines up to SAR') + ' ' + fmt(a.upTo) + ' ' + t('each, usually after a warning') + '</div>' : '';
     return '<article class="act lv-' + a.level + (done ? ' done' : '') + '" style="--i:' + (i || 0) + '">' +
       '<header><span class="pill ' + lv[1] + '">' + t(lv[0]) + '</span><span class="route">' + Z.icon(rt[1]) + ' ' + t(rt[0]) + '</span>' + countdown(a) +
       (a.counted === false ? '<span class="same" title="' + esc(t('Counted once with') + ' ' + a.sameAs) + '">' + Z.icon('link') + ' ' + t('Same difference as') + ' ' + esc(a.sameAs) + '</span>' : '') + '</header>' +
       '<h3><span class="cid">' + esc(a.checkId) + '</span> ' + esc(Z.tt(a, 'title')) + '</h3>' +
-      '<div class="facts">' + (a.impact ? '<span>' + t('Tax at stake') + ' <b class="num">' + fmt(a.impact, 0) + '</b></span>' : '') + (a.count ? '<span>' + t('Items') + ' <b class="num">' + a.count + '</b></span>' : '') +
+      '<div class="facts">' + (a.impact ? '<span>' + t('Tax at stake') + ' <b class="num">' + fmt(a.impact) + '</b></span>' : '') + (a.count ? '<span>' + t('Items') + ' <b class="num">' + a.count + '</b></span>' : '') +
       (a.match && a.match.length ? '<span class="match">' + Z.icon('arrows-left-right') + ' ' + a.match.map(function (m) { return esc(t(m)); }).join(' ↔ ') + '</span>' : '') + '</div>' + cost +
       '<details' + (opts.open ? ' open' : '') + '><summary>' + t('How to fix it') + ' (' + a.steps.length + ')</summary><ol>' + a.steps.map(function (s) { return '<li>' + esc(S.lang === 'ar' ? s.ar : s.en) + '</li>'; }).join('') + '</ol></details>' +
       '<footer>' + (S.ex ? '<a class="btn small ghost" href="#/ex/' + S.ex.id + '/' + tab + '">' + Z.icon('magnifying-glass') + ' ' + t('Open the check') + '</a>' : '') +
@@ -6797,7 +7221,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   };
   function planHero(p) {
     var nx = p.next;
-    var head = p.open.length ? (p.critical ? t('Fix the critical items first.') + ' ' : '') + t('Acting now instead of waiting for an inspection avoids about SAR') + ' <b class="num">' + fmt(p.avoided, 0) + '</b> ' + t('in penalties') + (nx ? ' - ' + t('next deadline') + ' ' + Z.ltr(nx.deadline) : '') + '.' : t('No open actions in this section.');
+    var head = p.open.length ? (p.critical ? t('Fix the critical items first.') + ' ' : '') + t('Acting now instead of waiting for an inspection avoids about SAR') + ' <b class="num">' + fmt(p.avoided) + '</b> ' + t('in penalties') + (nx ? ' - ' + t('next deadline') + ' ' + Z.ltr(nx.deadline) : '') + '.' : t('No open actions in this section.');
     return '<section class="paper hero-plan"><div class="headline">' + Z.icon(p.open.length ? 'lightbulb' : 'seal-check') + '<p>' + head + '</p></div><div class="kpis">' +
       '<div class="' + (p.critical ? 'bad' : '') + '">' + Z.icon('warning-octagon') + '<b data-count="' + p.critical + '">' + p.critical + '</b><span>' + t('Critical actions') + '</span></div>' +
       '<div>' + Z.icon('scales') + money(p.impact) + '<span>' + t('Tax at stake (SAR)') + '</span></div>' +
@@ -6825,7 +7249,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     var html = rows.map(function (r, i) {
       var tab = r.c ? ({ vat: 'vat', bank: 'bank', einv: 'einv', wht: 'wht' }[r.c.group] || 'overview') : 'data';
       return '<a class="pair st-' + r.st + '" style="--i:' + i + '" href="#/ex/' + S.ex.id + '/' + tab + '"><span class="node">' + esc(t(r.a)) + '</span><span class="link"><i></i>' + Z.tick(r.st) + '</span><span class="node">' + esc(t(r.b)) + '</span>' +
-        '<span class="gap num">' + (r.st === 'na' ? t('No data') : r.st === 'pass' ? t('Agrees') : fmt(r.c.diff, 0)) + '</span></a>';
+        '<span class="gap num">' + (r.st === 'na' ? t('No data') : r.st === 'pass' ? t('Agrees') : fmt(r.c.diff)) + '</span></a>';
     }).join('');
     return { html: html, agree: agree, known: known.length };
   }
@@ -6893,10 +7317,10 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     var els = (root || document.getElementById('main') || document).querySelectorAll('[data-count]');
     if (!els.length || reduced()) return;
     var t0 = performance.now(), dur = 900;
-    var targets = [].map.call(els, function (el) { return { el: el, v: +el.dataset.count || 0 }; });
+    var targets = [].map.call(els, function (el) { var txt = el.textContent; return { el: el, v: +el.dataset.count || 0, txt: txt, dp: /\.\d\d\)?$/.test(txt.trim()) ? 2 : 0 }; });
     var tick = function (now) {
       var k = Math.min(1, (now - t0) / dur), ease = 1 - Math.pow(1 - k, 3);
-      targets.forEach(function (x) { x.el.textContent = fmt(Math.round(x.v * ease), 0); });
+      targets.forEach(function (x) { x.el.textContent = k < 1 ? Z.fmt(x.v * ease, x.dp) : x.txt; });
       if (k < 1) requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);
@@ -6997,7 +7421,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   D.xexpo = function () { var l = secChecks().filter(function (c) { return c.exposure; }); return { title: isW() ? t('WHT exposure (SAR)') : t('VAT exposure (SAR)'), sub: t('By check'), total: l.reduce(function (s, c) { return s + c.exposure; }, 0), totalLabel: 'SAR', rows: l.map(function (c) { return checkRow(c, c.exposure); }).sort(desc) }; };
   D.xfails = function () {
     var l = secChecks().filter(function (c) { return c.status === 'fail'; });
-    return { title: t('Checks failed'), sub: sec(), total: l.length, totalLabel: t('of') + ' ' + secChecks().length, money: false, rows: l.map(function (c) { var r = checkRow(c, Math.abs(c.diff || c.exposure || 0)); r.display = c.diff != null && c.bLabel ? Z.fmt(c.diff, 0) : (c.a != null ? String(c.a) : ''); return r; }).sort(desc) };
+    return { title: t('Checks failed'), sub: sec(), total: l.length, totalLabel: t('of') + ' ' + secChecks().length, money: false, rows: l.map(function (c) { var r = checkRow(c, Math.abs(c.diff || c.exposure || 0)); r.display = c.diff != null && c.bLabel ? Z.fmt(c.diff) : (c.a != null ? String(c.a) : ''); return r; }).sort(desc) };
   };
   D.xsamples = function () {
     var flows = isW() ? ['W'] : ['S', 'P'], l = (S.samples || []).filter(function (s) { return flows.indexOf(s.flow) >= 0; });
@@ -7008,7 +7432,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     var name = t(Z.partName(k)), groups = { recon: isW() ? ['wht'] : ['vat'], bank: ['bank'], einv: ['einv'], filing: ['filing'], other: ['other'] }[k];
     if (groups) {
       var l = secChecks().filter(function (c) { return groups.indexOf(c.group) >= 0; }).sort(function (a, b) { var o = { fail: 0, warn: 1, na: 2, pass: 3 }; return o[a.status] - o[b.status]; });
-      return { title: name, sub: t('Every check in this part'), money: false, rows: l.map(function (c) { var r = checkRow(c, c.status === 'pass' ? 100 : c.status === 'warn' ? 50 : c.status === 'fail' ? 15 : 0); r.display = r.sub; r.sub = c.diff != null && c.bLabel ? t('Difference') + ' ' + Z.fmt(c.diff, 0) : ''; return r; }) };
+      return { title: name, sub: t('Every check in this part'), money: false, rows: l.map(function (c) { var r = checkRow(c, c.status === 'pass' ? 100 : c.status === 'warn' ? 50 : c.status === 'fail' ? 15 : 0); r.display = r.sub; r.sub = c.diff != null && c.bLabel ? t('Difference') + ' ' + Z.fmt(c.diff) : ''; return r; }) };
     }
     if (k === 'analytics') return { title: name, money: false, rows: R.analytics.tests.filter(function (x) { return x.status !== 'pass'; }).map(function (x) { return { label: x.id + '  ' + Z.tt(x, 'title'), sub: x.count + ' ' + t('items'), value: x.count, display: String(x.count), tone: x.status === 'fail' ? 'fail' : 'warn', href: exHref('analytics') }; }).sort(desc), empty: t('No exceptions.') };
     if (k === 'checklist') { var cl = (S.checklist && S.checklist.items || []).filter(function (x) { return (x.area === 'WHT') === isW() && x.status !== 'na'; }); return { title: name, total: cl.filter(function (x) { return x.status === 'available'; }).length, totalLabel: t('of') + ' ' + cl.length + ' ' + t('on file'), money: false, rows: cl.map(function (x) { return { label: S.lang === 'ar' ? x.ar : x.en, sub: x.owner || '', value: x.status === 'available' ? 100 : x.status === 'requested' ? 50 : 10, display: t({ available: 'On file', requested: 'Requested', missing: 'Missing' }[x.status] || x.status), tone: x.status === 'available' ? 'pass' : x.status === 'requested' ? 'warn' : 'fail', href: exHref('checklist') }; }) }; }
@@ -7092,6 +7516,438 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   };
   new MutationObserver(function () { Z.autoDrill(); }).observe(document.documentElement, { childList: true, subtree: true });
 
+})();
+
+</script>
+<script>
+/* The ZATCA side of the relationship: the statement of account ZATCA keeps for
+   the company, refund applications, disputes and penalties, one tax calendar
+   across every tax and company, and reviewer notes that hold sign-off.
+   All arithmetic is in the engine (E.statementRecon, E.refundStatus,
+   E.disputeStatus, E.complianceCalendar, E.ics); this file lays it out. */
+(function () {
+  'use strict';
+  var E = window.ZEngine, S = Z.S, t = Z.t, esc = Z.esc, fmt = Z.fmt, D = Z.DRILL;
+  var cfg = function () { return S.settingsDoc ? S.settingsDoc.values : {}; };
+  var ar = function () { return S.lang === 'ar'; };
+  var entName = function (id) { return Z.entName(Z.entity(id)) || '-'; };
+  var sel = function (name, cur, opts, attrs) { return '<select name="' + name + '"' + (attrs || '') + '>' + opts.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (String(cur == null ? '' : cur) === String(o[0]) ? ' selected' : '') + '>' + esc(t(o[1])) + '</option>'; }).join('') + '</select>'; };
+  var selF = function (name, label, cur, opts) { return '<label class="f"><span>' + esc(label) + '</span>' + sel(name, cur, opts) + '</label>'; };
+  var entOpts = function () { return S.entities.map(function (e) { return [e.id, Z.entName(e)]; }); };
+  var kpi = function (icon, val, label, drill, tone) { return '<div class="' + (tone || '') + '"' + (drill ? ' data-drill="' + drill + '"' : '') + '>' + Z.icon(icon) + '<b>' + val + '</b><span>' + esc(label) + '</span></div>'; };
+  var head = function (eyebrow, title, text, right) { return '<div class="pagehead"><div><p class="eyebrow">' + Z.icon('bank') + ' ' + esc(eyebrow) + '</p><h1>' + esc(title) + '</h1><p>' + esc(text) + '</p></div>' + (right ? '<div class="row">' + right + '</div>' : '') + '</div>'; };
+  var TAXN = { VAT: 'VAT', WHT: 'WHT', ZAKAT: 'Zakat', EXCISE: 'Excise', RETT: 'RETT', CIT: 'Income tax', ZATCA: 'ZATCA letter', OTHER: 'Other' };
+  var taxName = function (k) { return t(TAXN[k] || k); };
+  var KINDN = { return: 'Return', payment: 'Payment', penalty: 'Penalty', refund: 'Refund', assessment: 'Assessment', adjustment: 'Adjustment' };
+  // a deadline as a chip: overdue, within a week, later, waiting on ZATCA, done
+  function dueChip(state, days, due) {
+    if (state === 'done' || state === 'closed') return '<span class="zk-due ok">' + Z.icon('check') + t('Done') + '</span>';
+    if (!due) return '';
+    if (state === 'waiting' || state === 'chase') return '<span class="zk-due wait" title="' + esc(due) + '">' + Z.icon('hourglass-medium') + (days < 0 ? t('ZATCA is past its date by') + ' ' + -days + ' ' + t('days') : t('ZATCA, by') + ' ' + esc(due)) + '</span>';
+    if (days < 0) return '<span class="zk-due bad">' + Z.icon('warning') + t('Overdue by') + ' ' + -days + ' ' + t('days') + '</span>';
+    if (days === 0) return '<span class="zk-due bad">' + Z.icon('alarm') + t('Due today') + '</span>';
+    return '<span class="zk-due' + (days <= 7 ? ' soon' : '') + '">' + Z.icon('calendar-blank') + t('In') + ' ' + days + ' ' + t('days') + ', ' + Z.ltr(due) + '</span>';
+  }
+  function steps(list, idx, closed) {
+    return '<ol class="zk-steps" aria-label="' + esc(t('Progress')) + '">' + list.map(function (s, i) {
+      var st = closed || i < idx ? 'done' : i === idx ? 'cur' : '';
+      return '<li class="' + st + '"' + (i === idx && !closed ? ' aria-current="step"' : '') + '><i aria-hidden="true"></i><span>' + esc(t(s)) + '</span></li>';
+    }).join('') + '</ol>';
+  }
+  function download(name, text, type) {
+    var b = new Blob([text], { type: type }), a = document.createElement('a');
+    a.href = URL.createObjectURL(b); a.download = name; document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  }
+  function chk(c) {
+    var figs = c.status === 'na' ? '<span>' + t('Needs') + ': <b>' + esc(t(c.missing || '')) + '</b>' + (c.missingHint ? ' - ' + esc(t(c.missingHint)) : '') + '</span>' :
+      (c.aLabel ? '<span>' + esc(t(c.aLabel)) + ': <b>' + fmt(c.a, /Returns|Periods/.test(c.aLabel) ? 0 : 2) + '</b></span>' : '') + (c.bLabel ? '<span>' + esc(t(c.bLabel)) + ': <b>' + fmt(c.b) + '</b></span>' : '') +
+      (c.diff != null ? '<span class="d ' + c.status + '">' + t('Difference') + ': <b>' + fmt(c.diff) + '</b></span>' : '') + (c.exposure ? '<span class="d fail">' + t('Exposure') + ': <b>' + fmt(c.exposure) + '</b></span>' : '');
+    var list = (c.exceptions && c.exceptions.list) || [];
+    return '<div class="check" id="c-' + c.id + '">' + Z.tick(c.status) + '<div><h3>' + esc(c.id) + ' · ' + esc(ar() ? c.titleAr : c.title) + '</h3><div class="figs">' + figs + '</div>' +
+      (c.note ? '<p class="faint" style="font-size:12.5px;margin:4px 0 0">' + esc(ar() && c.noteAr ? c.noteAr : t(c.note)) + '</p>' : '') +
+      (list.length ? '<details><summary>' + t('Show the items') + ' (' + list.length + ')</summary>' + Z.rowsTable(list) + '</details>' : '') + '</div><div class="acts"></div></div>';
+  }
+
+  // ================================================================ statement of account
+  var SOA = { doc: null, rec: null, e: null };
+  Z.views.account = function (h) {
+    var e = Z.entity(h[1]) || Z.entity(S.entityId) || S.entities[0];
+    if (!e) return Z.setMain(head(t('ZATCA account'), t('Statement of account'), t('Add an entity first.')));
+    return Promise.all([Z.get('statements', e.id + '_soa'), Z.list('disputes')]).then(function (r) {
+      SOA.e = e; SOA.doc = r[0] || { id: e.id + '_soa', entityId: e.id, lines: [], label: 'ZATCA statement of account' }; SOA.doc.lines = SOA.doc.lines || []; SOA.disputes = r[1];
+      renderSoa();
+    });
+  };
+  function renderSoa() {
+    var e = SOA.e, doc = SOA.doc, can = Z.can('preparer');
+    var rec = SOA.rec = E.statementRecon(doc, S.exercises.filter(function (x) { return x.entityId === e.id; }), SOA.disputes.filter(function (d) { return d.entityId === e.id; }), cfg(), Z.today());
+    var sa = function (id) { return rec.checks.filter(function (c) { return c.id === id; })[0]; };
+    var gl = doc.glBalance == null || doc.glBalance === '' ? null : +doc.glBalance;
+    var right = (S.entities.length > 1 ? '<label class="f inline"><span class="sr-only">' + t('Entity') + '</span>' + sel('soaent', e.id, entOpts(), ' data-chg="soaent" aria-label="' + esc(t('Entity')) + '"') + '</label>' : '') +
+      (can ? '<button class="btn" data-act="soaimport">' + Z.icon('upload-simple') + ' ' + t('Import statement') + '</button><button class="btn primary" data-act="soaline">' + Z.icon('plus') + ' ' + t('Add line') + '</button>' : '');
+    var taxes = Object.keys(rec.byTax);
+    var hero = '<section class="paper zk-hero"><div class="zk-bal"><span class="zk-k">' + (rec.balance >= 0 ? t('Owed to ZATCA') : t('ZATCA owes you')) + '</span><b class="num" data-count="' + Math.abs(rec.balance) + '">' + fmt(Math.abs(rec.balance)) + '</b><span class="faint">SAR' + (rec.asOf ? ', ' + t('as of') + ' ' + Z.ltr(rec.asOf) : '') + '</span>' +
+      (taxes.length ? '<div class="zk-chips">' + taxes.map(function (k) { return '<span class="zk-chip"><i class="tx tx-' + k.toLowerCase() + '"></i>' + esc(taxName(k)) + ' <b class="num">' + fmt(rec.byTax[k].balance) + '</b></span>'; }).join('') + '</div>' : '') +
+      '<div class="zk-gl"><label class="f"><span>' + t('Balance per general ledger') + '</span><input type="number" step="0.01" data-chg="soagl" value="' + (gl == null ? '' : gl) + '"' + (can ? '' : ' disabled') + ' placeholder="' + esc(t('Net of all ZATCA accounts')) + '"></label>' +
+      '<label class="f"><span>' + t('Statement date') + '</span><input type="date" data-chg="soaasof" value="' + esc(doc.asOf || '') + '"' + (can ? '' : ' disabled') + '></label></div></div>' +
+      '<div class="zk-run">' + runChart(rec.lines) + '</div></section>';
+    var kp = '<div class="kpis">' + kpi('scales', fmt(rec.balance), t('Balance per ZATCA statement'), 'soa:tax') + kpi('book-open', gl == null ? '-' : fmt(gl), t('Balance per general ledger'), null) +
+      kpi('gavel', fmt(rec.penalties), t('Penalties on the statement'), 'soa:pen', sa('SA3').status === 'fail' ? 'bad' : '') + kpi('alarm', fmt(rec.overdue), t('Unpaid after the due date'), 'soa:over', rec.overdue ? 'bad' : '') +
+      kpi('shield-warning', fmt(rec.exposure), t('Exposure (SAR)'), 'soa:expo', rec.exposure ? 'bad' : '') + '</div>';
+    var checks = '<section class="paper"><header><div><h2>' + t('What the statement says about your filings') + '</h2><p>' + t('ZATCA keeps its own ledger for the company. Inspectors start from it: every return, assessment, penalty and payment should agree with your books.') + '</p></div>' +
+      '<span class="score-chip">' + rec.checks.filter(function (c) { return c.status === 'pass'; }).length + ' / ' + rec.checks.filter(function (c) { return c.status !== 'na'; }).length + ' ' + t('agree') + '</span></header>' + rec.checks.map(chk).join('') + '</section>';
+    var pr = rec.periods.slice().reverse().slice(0, 18);
+    var cell = function (ret, soa) { var d = ret != null && soa != null ? soa - ret : null; return '<td class="num">' + fmt(soa) + (d && Math.abs(d) > 1 ? ' <span class="diff-bad">(' + (d > 0 ? '+' : '') + fmt(d) + ')</span>' : '') + '</td>'; };
+    var periods = pr.length ? '<section class="paper flush"><div style="padding:14px 18px"><h2>' + t('Period by period') + '</h2><p class="muted" style="margin:2px 0 0">' + t('Your return, what ZATCA posted, and what was paid.') + '</p></div><div class="tbl-wrap"><table class="t zk-tbl"><thead><tr><th>' + t('Period') + '</th><th class="num">' + t('VAT return') + '</th><th class="num">' + t('VAT on the statement') + '</th><th class="num">' + t('VAT paid') + '</th><th class="num">' + t('WHT return') + '</th><th class="num">' + t('WHT on the statement') + '</th><th class="num">' + t('WHT paid') + '</th></tr></thead><tbody>' +
+      pr.map(function (p) { return '<tr class="clickable" data-act="openex" data-id="' + p.exId + '"><td>' + Z.ltr(p.period) + '</td><td class="num">' + fmt(p.vatReturn) + '</td>' + cell(p.vatReturn, p.vatSoa) + '<td class="num">' + fmt(p.vatPaid || null) + '</td><td class="num">' + fmt(p.whtReturn) + '</td>' + cell(p.whtReturn, p.whtSoa) + '<td class="num">' + fmt(p.whtPaid || null) + '</td></tr>'; }).join('') + '</tbody></table></div></section>' : '';
+    var run = 0, sorted = rec.lines.slice().sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : a.i - b.i; });
+    var lines = '<section class="paper flush"><div class="spread" style="padding:14px 18px"><div><h2>' + t('Statement lines') + '</h2><p class="muted" style="margin:2px 0 0">' + rec.lines.length + ' ' + t('lines') + (rec.first ? ', ' + Z.ltr(rec.first) + ' - ' + Z.ltr(rec.last) : '') + '</p></div>' +
+      (can && rec.lines.length ? '<button class="btn small ghost" data-act="soaclear">' + Z.icon('trash') + ' ' + t('Clear the statement') + '</button>' : '') + '</div>' +
+      (rec.lines.length ? '<div class="tbl-wrap" style="max-height:560px"><table class="t zk-tbl"><thead><tr><th>' + t('Date') + '</th><th>' + t('Tax') + '</th><th>' + t('Type') + '</th><th>' + t('Period') + '</th><th>' + t('Description') + '</th><th>' + t('Reference') + '</th><th class="num">' + t('Debit') + '</th><th class="num">' + t('Credit') + '</th><th class="num">' + t('Balance') + '</th>' + (can ? '<th><span class="sr-only">' + t('Remove') + '</span></th>' : '') + '</tr></thead><tbody>' +
+        sorted.map(function (l) { run += l.debit - l.credit; return '<tr class="k-' + l.kind + '"><td class="nowrap">' + Z.ltr(l.date) + '</td><td><span class="zk-tx"><i class="tx tx-' + l.taxType.toLowerCase() + '"></i>' + esc(taxName(l.taxType)) + '</span></td><td>' + (l.kind === 'penalty' ? Z.pill('fail', t('Penalty')) : esc(t(KINDN[l.kind]))) + '</td><td>' + Z.ltr(l.period) + '</td><td>' + esc(l.description) + '</td><td>' + Z.ltr(l.reference) + '</td><td class="num">' + (l.debit ? fmt(l.debit) : '') + '</td><td class="num">' + (l.credit ? fmt(l.credit) : '') + '</td><td class="num">' + fmt(run) + '</td>' +
+          (can ? '<td><button class="btn ghost small icon" data-act="soadel" data-i="' + l.i + '" aria-label="' + esc(t('Remove') + ' ' + l.date + ' ' + l.description) + '">' + Z.icon('x') + '</button></td>' : '') + '</tr>'; }).join('') + '</tbody></table></div>' :
+        '<div class="empty"><i class="ph ph-file-arrow-down big" aria-hidden="true"></i><h2>' + t('No statement loaded yet') + '</h2><p>' + t('Download the statement of account from the ZATCA portal (Excel), then import it here. Columns are recognised in English or Arabic.') + '</p>' + (can ? '<button class="btn primary" data-act="soaimport">' + t('Import statement') + '</button>' : '') + '</div>') + '</section>';
+    Z.setMain(head(t('ZATCA account'), t('Statement of account') + ': ' + Z.entName(e), t('Reconcile what ZATCA has posted for the company with your returns, payments and general ledger.'), right) +
+      '<div class="stack">' + hero + kp + checks + periods + lines + '</div>');
+  }
+  // balance at each month end: returns and their payments cross within days, so
+  // daily points swing; month ends show what is really building up
+  function runChart(lines) {
+    var L = lines.slice().filter(function (l) { return l.date; }).sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : a.i - b.i; });
+    var months = [], b = 0;
+    L.forEach(function (l) {
+      b += l.debit - l.credit; var mk = l.date.slice(0, 7), last = months[months.length - 1];
+      if (!last || last.m !== mk) months.push(last = { m: mk, v: 0, pen: 0, items: [] });
+      last.v = b; if (l.kind === 'penalty' && l.debit) { last.pen += l.debit; last.items.push(l); }
+    });
+    if (months.length < 2) return '<div class="zk-run-empty faint">' + t('The balance over time appears once the statement covers two months.') + '</div>';
+    var W = 560, H = 200, pl = 10, pr = 10, pt = 22, pb = 30, n = months.length;
+    var lo = Math.min(0, Math.min.apply(null, months.map(function (p) { return p.v; }))), hi = Math.max(1, Math.max.apply(null, months.map(function (p) { return p.v; })));
+    var x = function (i) { return pl + 18 + i * (W - pl - pr - 36) / (n - 1); }, y = function (v) { return pt + (hi - v) / (hi - lo || 1) * (H - pt - pb); };
+    var d = months.map(function (p, i) { return (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(p.v).toFixed(1); }).join(' ');
+    var area = d + ' L' + x(n - 1).toFixed(1) + ' ' + y(0).toFixed(1) + ' L' + x(0).toFixed(1) + ' ' + y(0).toFixed(1) + ' Z';
+    var lab = function (mk) { return new Date(Date.UTC(+mk.slice(0, 4), +mk.slice(5, 7) - 1, 1)).toLocaleDateString(ar() ? 'ar-SA-u-ca-gregory-nu-latn' : 'en-GB', { month: 'short', year: '2-digit', timeZone: 'UTC' }); };
+    var dots = months.map(function (p, i) {
+      return '<circle class="' + (p.pen ? 'pen' : 'dot') + '" style="--i:' + i + '" cx="' + x(i).toFixed(1) + '" cy="' + y(p.v).toFixed(1) + '" r="' + (p.pen ? 6 : 4) + '"><title>' + esc(p.m + ': ' + fmt(p.v) + (p.pen ? ', ' + t('Penalty posted') + ' ' + fmt(p.pen) : '')) + '</title></circle>' +
+        '<text class="ax" x="' + x(i).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="middle">' + esc(lab(p.m)) + '</text>' +
+        (i === n - 1 || p.pen ? '<text class="vl" x="' + x(i).toFixed(1) + '" y="' + (y(p.v) - 11).toFixed(1) + '" text-anchor="middle">' + fmt(p.v) + '</text>' : '');
+    }).join('');
+    return '<div class="chart"><svg direction="ltr" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(t('Balance with ZATCA over time')) + '">' +
+      '<line class="gl" x1="' + pl + '" x2="' + (W - pr) + '" y1="' + y(0).toFixed(1) + '" y2="' + y(0).toFixed(1) + '"/>' +
+      '<path class="area" d="' + area + '"/><path class="ln draw" d="' + d + '"/>' + dots + '</svg>' +
+      '<p class="zk-legend"><span><i class="k-ln"></i>' + t('Balance owed to ZATCA at month end') + '</span><span><i class="k-pen"></i>' + t('Penalty posted') + '</span></p></div>';
+  }
+  function saveSoa(msg) { return Z.save('statements', SOA.doc).then(function (d) { SOA.doc = d; d.lines = d.lines || []; renderSoa(); if (msg) Z.toast(msg); }); }
+  Z.CHG.soaent = function (el) { location.hash = '#/' + S.tax + '/account/' + el.value; };
+  Z.CHG.soagl = function (el) { SOA.doc.glBalance = el.value === '' ? null : +el.value; saveSoa(); };
+  Z.CHG.soaasof = function (el) { SOA.doc.asOf = el.value; saveSoa(); };
+  Z.ACT.soadel = function (el) {
+    // data-i is the line's place in the stored list (E.soaLines keeps it)
+    SOA.doc.lines.splice(+el.dataset.i, 1); saveSoa(t('Line removed'));
+  };
+  Z.ACT.soaclear = function () { if (!confirm(t('Remove every line of this statement?'))) return; SOA.doc.lines = []; saveSoa(t('Statement cleared')); };
+  Z.ACT.soaline = function () {
+    Z.modal(t('Add a statement line'), '<form id="sf" class="grid g2">' + Z.fld('date', t('Date'), Z.today(), 'date', 'required') +
+      selF('taxType', t('Tax'), 'VAT', [['VAT', 'VAT'], ['WHT', 'WHT'], ['ZAKAT', 'Zakat'], ['EXCISE', 'Excise'], ['RETT', 'RETT'], ['CIT', 'Income tax']]) +
+      selF('kind', t('Type'), 'return', Object.keys(KINDN).map(function (k) { return [k, KINDN[k]]; })) + Z.fld('period', t('Period'), '', 'text', 'placeholder="2026-09"') +
+      Z.fld('debit', t('Debit (owed to ZATCA)'), '', 'number', 'step="0.01" min="0"') + Z.fld('credit', t('Credit (paid or refunded)'), '', 'number', 'step="0.01" min="0"') +
+      Z.fld('reference', t('Reference'), '', 'text') + Z.fld('description', t('Description'), '', 'text') + '</form>',
+      '<button class="btn" data-act="closemodal">' + t('Cancel') + '</button><button class="btn primary" data-act="soalinesave">' + t('Add line') + '</button>');
+  };
+  Z.ACT.soalinesave = function () {
+    var f = document.getElementById('sf'); if (!f.reportValidity()) return;
+    var d = Object.fromEntries(new FormData(f)); d.debit = +d.debit || 0; d.credit = +d.credit || 0;
+    if (!d.debit && !d.credit) return Z.toast(t('Enter a debit or a credit.'), true);
+    SOA.doc.lines.push(d); Z.closeModal(); saveSoa(t('Line added'));
+  };
+  Z.ACT.soaimport = function () {
+    var inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.xlsx,.xls,.csv';
+    inp.onchange = function () {
+      var file = inp.files[0]; if (!file) return;
+      if (!window.XLSX) return Z.toast(t('The spreadsheet reader did not load. Check your internet connection.'), true);
+      file.arrayBuffer().then(function (buf) {
+        var wb = XLSX.read(buf, { type: 'array', cellDates: true }), aoa = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, raw: true, defval: '' });
+        var hd = E.detectHeader(aoa, 'soa');
+        if (hd.map.date == null || (hd.map.debit == null && hd.map.credit == null)) return Z.toast(t('No date and amount columns were found in this file.'), true);
+        var res = E.normalizeRows(aoa, hd.row, hd.map, 'soa');
+        if (!res.rows.length) return Z.toast(t('No lines were found in this file.'), true);
+        var replace = !SOA.doc.lines.length || confirm(t('Replace the lines already loaded? Cancel adds to them.'));
+        SOA.doc.lines = (replace ? [] : SOA.doc.lines).concat(res.rows.map(function (r) { var o = {}; Object.keys(r).forEach(function (k) { if (k[0] !== '_') o[k] = r[k]; }); return o; }));
+        SOA.doc.fileName = file.name;
+        saveSoa(res.rows.length + ' ' + t('lines imported') + (res.errors.length ? ', ' + res.errors.length + ' ' + t('skipped') : ''));
+      }).catch(function (e) { Z.toast(t('Could not read this file:') + ' ' + e.message, true); });
+    };
+    inp.click();
+  };
+  D.soa = function (k) {
+    var rec = SOA.rec; if (!rec) return null;
+    var lineRow = function (l, v) { return { label: (l.description || t(KINDN[l.kind])) , sub: l.date + ', ' + taxName(l.taxType) + (l.period ? ' ' + l.period : '') + (l.reference ? ', ' + l.reference : ''), value: v, tone: l.kind === 'penalty' ? 'fail' : '' }; };
+    if (k === 'tax') return { title: t('Balance per ZATCA statement'), sub: t('By tax'), total: rec.balance, totalLabel: 'SAR', rows: Object.keys(rec.byTax).map(function (x) { var b = rec.byTax[x]; return { label: taxName(x), sub: t('Debit') + ' ' + fmt(b.debit) + ', ' + t('Credit') + ' ' + fmt(b.credit), value: b.balance, tone: b.balance > 0 ? 'warn' : 'pass' }; }) };
+    if (k === 'pen') { var p = rec.lines.filter(function (l) { return l.kind === 'penalty' && l.debit; }); return { title: t('Penalties on the statement'), total: rec.penalties, totalLabel: 'SAR', rows: p.map(function (l) { return Object.assign(lineRow(l, l.debit), { href: '#/' + S.tax + '/disputes' }); }), empty: t('No penalties on the statement.'), note: t('Record each penalty in Disputes and penalties with its reference so the decision and deadline are tracked.') }; }
+    if (k === 'over') { var o = (rec.checks[4].exceptions || {}).list || []; return { title: t('Unpaid after the due date'), total: rec.overdue, totalLabel: 'SAR', rows: o.map(function (x) { return { label: taxName(x.tax) + ' ' + x.period, sub: t('Due') + ' ' + x.due + ', ' + x.overdue + ' ' + t('days') + ', ' + t('estimated fine') + ' ' + fmt(x.penalty), value: x.amount, tone: 'fail' }; }), empty: t('Nothing overdue.') }; }
+    if (k === 'expo') return { title: t('Exposure (SAR)'), sub: t('Each difference counted once'), total: rec.exposure, totalLabel: 'SAR', rows: rec.checks.filter(function (c) { return c.exposure; }).map(function (c) { return { label: c.id + ' ' + (ar() ? c.titleAr : c.title), value: c.exposure, tone: 'fail', href: '#c-' + c.id }; }), empty: t('Nothing exposed.') };
+    return null;
+  };
+
+  // ================================================================ refunds
+  var RSTEP = ['Preparing', 'Submitted', 'Documents requested', 'Approved', 'Paid'];
+  Z.views.refunds = function () {
+    return Z.list('refunds').then(function (rs) {
+      S.refunds = rs;
+      var rows = rs.map(function (r) { return { r: r, s: E.refundStatus(r, cfg(), Z.today()) }; }).sort(function (a, b) { return (a.s.state === 'closed') - (b.s.state === 'closed') || String(a.s.next && a.s.next.due || '9').localeCompare(String(b.s.next && b.s.next.due || '9')); });
+      var out = rows.reduce(function (a, x) { return a + x.s.outstanding; }, 0), you = rows.filter(function (x) { return x.r.status === 'info_requested' || x.r.status === 'draft'; });
+      var paid = rows.reduce(function (a, x) { return a + x.s.paid; }, 0), short = rows.reduce(function (a, x) { return a + (x.r.status === 'paid' ? Math.max(0, x.s.amount - x.s.paid) : 0); }, 0);
+      var cards = rows.map(function (x, i) {
+        var r = x.r, s = x.s, st = r.status === 'rejected';
+        return '<article class="zk-case' + (s.state === 'closed' ? ' closed' : '') + ' st-' + s.state + '" style="--i:' + i + '"><header><div><h3>' + t('VAT refund') + ' ' + Z.ltr(r.period || '') + '</h3><p class="faint">' + esc(entName(r.entityId)) + (r.owner ? ', ' + esc(r.owner) : '') + '</p></div><b class="num zk-amt">' + fmt(s.amount) + '</b></header>' +
+          (st ? '<p class="zk-rej">' + Z.icon('x-circle') + t('Rejected') + '</p>' : steps(RSTEP, Math.min(s.stepIdx, 4), r.status === 'paid')) +
+          '<div class="zk-next">' + (s.next ? '<span>' + esc(t(s.next.label)) + '</span>' + dueChip(s.state, s.daysLeft, s.next.due) : r.status === 'paid' ? '<span>' + t('Received') + ' <b class="num">' + fmt(s.paid) + '</b>' + (r.paidOn ? ' ' + t('on') + ' ' + Z.ltr(r.paidOn) : '') + '</span>' : '') + '</div>' +
+          (s.issues.length ? '<ul class="zk-issues">' + s.issues.map(function (q) { return '<li>' + Z.icon('warning-circle') + esc(t(q.text)) + '</li>'; }).join('') + '</ul>' : '') +
+          (r.note ? '<p class="faint zk-note">' + esc(r.note) + '</p>' : '') +
+          '<footer>' + (s.age != null ? '<span class="faint">' + s.age + ' ' + t('days since submission') + '</span>' : '<span></span>') + '<button class="btn small" data-act="editrefund" data-id="' + r.id + '">' + (Z.can('preparer') ? t('Update') : t('Open')) + '</button></footer></article>';
+      }).join('');
+      Z.setMain(head(t('ZATCA account'), t('VAT refunds'), t('Every refund application from submission to payment: what ZATCA asked for, what you owe it back, and when the money is due.'),
+        Z.can('preparer') ? '<button class="btn primary" data-act="editrefund">' + Z.icon('plus') + ' ' + t('Record a refund') + '</button>' : '') +
+        '<div class="stack"><div class="kpis">' + kpi('hand-coins', fmt(out), t('Refunds outstanding (SAR)'), 'rf:out', '') + kpi('user-focus', you.length, t('Waiting on you'), 'rf:you', you.length ? 'bad' : '') +
+        kpi('check-circle', fmt(paid), t('Refunds received (SAR)'), 'rf:paid', 'good') + kpi('arrow-fat-line-down', fmt(short), t('Paid short of the claim (SAR)'), 'rf:short', short ? 'bad' : '') + '</div>' +
+        '<p class="muted zk-src">' + Z.icon('info') + t('Minimum application SAR') + ' ' + fmt((E.mergeSettings(cfg()).refundMin || 5000), 0) + '. ' + t('ZATCA pays within 60 days of approval and expects requested documents within 20 working days (adviser summaries of VAT IR Art. 69-70; verify, editable in Settings).') + '</p>' +
+        (cards ? '<div class="zk-grid">' + cards + '</div>' : '<section class="paper empty"><i class="ph ph-hand-coins big" aria-hidden="true"></i><h2>' + t('No refund applications yet') + '</h2><p>' + t('When a return shows more input VAT than output VAT, record the refund application here to follow it to payment.') + '</p></section>') + '</div>');
+    });
+  };
+  Z.ACT.editrefund = function (el) {
+    var r = (S.refunds || []).filter(function (x) { return x.id === el.dataset.id; })[0] || { status: 'draft', entityId: S.entityId || (S.entities[0] || {}).id };
+    S.editRF = r; var can = Z.can('preparer');
+    Z.modal(r.id ? t('VAT refund') + ' ' + (r.period || '') : t('Record a refund'), '<form id="rff" class="grid g2">' + selF('entityId', t('Entity'), r.entityId, entOpts()) + Z.fld('period', t('Return period'), r.period, 'text', 'required placeholder="2026-09"') +
+      Z.fld('amount', t('Amount claimed (SAR)'), r.amount, 'number', 'step="0.01" min="0" required') + selF('status', t('Status'), r.status, E.REFUND_STEPS) +
+      Z.fld('submittedOn', t('Submitted on'), r.submittedOn, 'date') + Z.fld('infoRequestedOn', t('ZATCA asked for documents on'), r.infoRequestedOn, 'date') +
+      Z.fld('infoDueOn', t('Documents due by (if ZATCA gave a date)'), r.infoDueOn, 'date') + Z.fld('approvedOn', t('Approved on'), r.approvedOn, 'date') +
+      Z.fld('paidOn', t('Paid on'), r.paidOn, 'date') + Z.fld('paidAmount', t('Amount received (SAR)'), r.paidAmount, 'number', 'step="0.01" min="0"') + Z.fld('owner', t('Owner'), r.owner, 'text') +
+      '<label class="f" style="grid-column:1/-1"><span>' + t('Notes') + '</span><textarea name="note">' + esc(r.note || '') + '</textarea></label></form>',
+      (r.id && can ? '<button class="btn danger" data-act="delrow" data-tb="refunds" data-id="' + r.id + '">' + t('Delete') + '</button>' : '') + '<button class="btn" data-act="closemodal">' + t('Cancel') + '</button>' + (can ? '<button class="btn primary" data-act="saverefund">' + t('Save') + '</button>' : ''));
+  };
+  Z.ACT.saverefund = function () {
+    var f = document.getElementById('rff'); if (!f.reportValidity()) return;
+    var d = Object.assign({}, S.editRF, Object.fromEntries(new FormData(f))); d.amount = +d.amount || 0; d.paidAmount = d.paidAmount === '' ? null : +d.paidAmount; d.label = d.period;
+    Z.save('refunds', d).then(function () { Z.closeModal(); Z.toast(t('Saved')); Z.route(); });
+  };
+  Z.ACT.delrow = function (el) {
+    if (!confirm(t('Delete this record?'))) return;
+    Z.call('remove', { table: el.dataset.tb, id: el.dataset.id }).then(function () { Z.closeModal(); Z.toast(t('Deleted')); Z.route(); });
+  };
+  D.rf = function (k) {
+    var rows = (S.refunds || []).map(function (r) { return { r: r, s: E.refundStatus(r, cfg(), Z.today()) }; });
+    var row = function (x, v) { return { label: t('VAT refund') + ' ' + (x.r.period || ''), sub: entName(x.r.entityId) + ', ' + t((E.REFUND_STEPS.filter(function (q) { return q[0] === x.r.status; })[0] || [0, ''])[1]), value: v, act: 'editrefund', data: { id: x.r.id } }; };
+    if (k === 'out') return { title: t('Refunds outstanding (SAR)'), total: rows.reduce(function (a, x) { return a + x.s.outstanding; }, 0), totalLabel: 'SAR', rows: rows.filter(function (x) { return x.s.outstanding; }).map(function (x) { return row(x, x.s.outstanding); }), empty: t('Nothing outstanding.') };
+    if (k === 'you') { var y = rows.filter(function (x) { return x.r.status === 'info_requested' || x.r.status === 'draft'; }); return { title: t('Waiting on you'), total: y.length, totalLabel: t('applications'), money: false, rows: y.map(function (x) { return Object.assign(row(x, x.s.amount), { tone: x.s.state === 'overdue' ? 'fail' : 'warn' }); }), empty: t('Nothing is waiting on you.') }; }
+    if (k === 'paid') return { title: t('Refunds received (SAR)'), total: rows.reduce(function (a, x) { return a + x.s.paid; }, 0), totalLabel: 'SAR', rows: rows.filter(function (x) { return x.s.paid; }).map(function (x) { return Object.assign(row(x, x.s.paid), { tone: 'pass' }); }) };
+    if (k === 'short') return { title: t('Paid short of the claim (SAR)'), rows: rows.filter(function (x) { return x.r.status === 'paid' && x.s.paid < x.s.amount; }).map(function (x) { return Object.assign(row(x, x.s.amount - x.s.paid), { tone: 'fail' }); }), empty: t('Every refund was paid in full.') };
+    return null;
+  };
+
+  // ================================================================ disputes and penalties
+  var DSTEP = ['Notice', 'Objection', 'Committee', 'Appeal', 'Closed'];
+  var stepOf = function (stage) { return { notice: 0, objection: 1, zatca_rejected: 1, committee: 2, committee_decided: 2, appeal: 3, closed: 4 }[stage] || 0; };
+  Z.views.disputes = function () {
+    return Z.list('disputes').then(function (ds) {
+      S.disputes = ds;
+      var rows = ds.map(function (d) { return { d: d, s: E.disputeStatus(d, cfg(), Z.today()) }; }).sort(function (a, b) { return (a.s.state === 'closed') - (b.s.state === 'closed') || String(a.s.next && a.s.next.due || '9').localeCompare(String(b.s.next && b.s.next.due || '9')); });
+      var open = rows.filter(function (x) { return x.s.state !== 'closed'; }), stake = open.reduce(function (a, x) { return a + x.s.atStake; }, 0);
+      var mine = open.filter(function (x) { return x.s.next && x.s.next.due && !x.s.next.zatca; }), soon = mine.filter(function (x) { return x.s.daysLeft <= 30; });
+      var relief = rows.reduce(function (a, x) { return a + x.s.relief; }, 0);
+      var cards = rows.map(function (x, i) {
+        var d = x.d, s = x.s;
+        return '<article class="zk-case st-' + s.state + (s.state === 'closed' ? ' closed' : '') + '" style="--i:' + i + '"><header><div><p class="zk-kind">' + Z.pill(d.kind === 'penalty' ? 'warn' : 'na', t(d.kind === 'penalty' ? 'Penalty' : 'Assessment')) + ' <span class="zk-tx"><i class="tx tx-' + String(d.tax || 'VAT').toLowerCase() + '"></i>' + esc(taxName(d.tax || 'VAT')) + '</span> ' + Z.ltr(d.reference || '') + '</p>' +
+          '<h3>' + esc(d.title || d.reference || '') + '</h3><p class="faint">' + esc(entName(d.entityId)) + (d.period ? ', ' + t('period') + ' ' + Z.ltr(d.period) : '') + '</p></div><b class="num zk-amt">' + fmt(s.stake) + '</b></header>' +
+          steps(DSTEP, stepOf(d.stage), d.stage === 'closed') +
+          '<div class="zk-next">' + (s.next ? '<span>' + esc(t(s.next.label)) + '</span>' + dueChip(s.state, s.daysLeft, s.next.due) : '<span>' + (s.relief ? t('Relief obtained') + ' <b class="num">' + fmt(s.relief) + '</b>' : t('Closed')) + '</span>') + '</div>' +
+          (d.grounds ? '<p class="faint zk-note">' + esc(d.grounds) + '</p>' : '') +
+          '<footer><span class="faint">' + (s.paid ? t('Paid') + ' ' + fmt(s.paid) : t('Notice') + ' ' + Z.ltr(d.noticeOn || '-')) + '</span><button class="btn small" data-act="editdispute" data-id="' + d.id + '">' + (Z.can('preparer') ? t('Update') : t('Open')) + '</button></footer></article>';
+      }).join('');
+      var nd = mine[0];
+      Z.setMain(head(t('ZATCA account'), t('Disputes and penalties'), t('Assessments and penalties from notice to final decision: 60 days to object to ZATCA, then the GSTC committees. Missing a deadline makes the assessment final.'),
+        Z.can('preparer') ? '<button class="btn primary" data-act="editdispute">' + Z.icon('plus') + ' ' + t('Record a notice') + '</button>' : '') +
+        '<div class="stack"><div class="kpis">' + kpi('scales', fmt(stake), t('At stake in open cases (SAR)'), 'dsp:stake', stake ? 'bad' : '') + kpi('folder-open', open.length, t('Open cases'), 'dsp:open') +
+        kpi('alarm', nd ? (nd.s.daysLeft < 0 ? t('Overdue') : nd.s.daysLeft + ' ' + t('days')) : '-', t('To your next deadline'), 'dsp:soon', nd && nd.s.daysLeft <= 7 ? 'bad' : '') + kpi('seal-check', fmt(relief), t('Relief obtained (SAR)'), 'dsp:relief', 'good') + '</div>' +
+        (soon.length ? '<section class="paper alert-bar" role="alert"><i class="ph ph-alarm" aria-hidden="true"></i><div><h3>' + soon.length + ' ' + t('deadlines in the next 30 days') + '</h3><p class="muted" style="margin:2px 0 0">' + soon.map(function (x) { return esc(x.d.reference || x.d.title) + ': ' + esc(t(x.s.next.label)) + ' ' + Z.ltr(x.s.next.due); }).join(' · ') + '</p></div></section>' : '') +
+        '<p class="muted zk-src">' + Z.icon('info') + t('Deadlines from Settings: object within 60 days of the notice; ZATCA decides within 90 days; escalate to the GSTC within 30 days of a rejection; appeal within 30 days of a committee decision (verify the last three for your case).') + '</p>' +
+        (cards ? '<div class="zk-grid">' + cards + '</div>' : '<section class="paper empty"><i class="ph ph-gavel big" aria-hidden="true"></i><h2>' + t('No disputes or penalties recorded') + '</h2><p>' + t('Record every assessment and penalty notice the day it arrives: the 60-day clock starts on notification.') + '</p></section>') + '</div>');
+    });
+  };
+  Z.ACT.editdispute = function (el) {
+    var d = (S.disputes || []).filter(function (x) { return x.id === el.dataset.id; })[0] || { kind: 'penalty', tax: 'VAT', stage: 'notice', decision: 'object', entityId: S.entityId || (S.entities[0] || {}).id, noticeOn: Z.today() };
+    S.editDS = d; var can = Z.can('preparer');
+    Z.modal(d.id ? d.reference || t('Dispute') : t('Record a notice'), '<form id="dsf" class="grid g2">' +
+      selF('kind', t('Notice'), d.kind, [['assessment', 'Assessment'], ['penalty', 'Penalty']]) + selF('tax', t('Tax'), d.tax, [['VAT', 'VAT'], ['WHT', 'WHT'], ['ZAKAT', 'Zakat'], ['EXCISE', 'Excise'], ['RETT', 'RETT'], ['CIT', 'Income tax']]) +
+      selF('entityId', t('Entity'), d.entityId, entOpts()) + Z.fld('reference', t('ZATCA reference'), d.reference, 'text', 'required') +
+      '<label class="f" style="grid-column:1/-1"><span>' + t('What ZATCA says') + '</span><input type="text" name="title" value="' + esc(d.title || '') + '" required></label>' +
+      Z.fld('period', t('Period concerned'), d.period, 'text', 'placeholder="2026-Q3"') + Z.fld('noticeOn', t('Notified on'), d.noticeOn, 'date', 'required') +
+      Z.fld('amount', t('Tax assessed (SAR)'), d.amount, 'number', 'step="0.01" min="0"') + Z.fld('penalty', t('Penalty (SAR)'), d.penalty, 'number', 'step="0.01" min="0"') +
+      selF('decision', t('Our position'), d.decision, [['object', 'Object'], ['waiver', 'Ask for a waiver'], ['accept', 'Accept and pay']]) + selF('stage', t('Stage'), d.stage, E.DISPUTE_STAGES) +
+      Z.fld('objectionOn', t('Objection filed on'), d.objectionOn, 'date') + Z.fld('zatcaDecisionOn', t('ZATCA decision on'), d.zatcaDecisionOn, 'date') +
+      Z.fld('hearingOn', t('Committee hearing on'), d.hearingOn, 'date') + Z.fld('committeeDecisionOn', t('Committee decision on'), d.committeeDecisionOn, 'date') +
+      Z.fld('paidAmount', t('Paid so far (SAR)'), d.paidAmount, 'number', 'step="0.01" min="0"', t('Paying the undisputed part stops late-payment fines on it.')) + Z.fld('reliefAmount', t('Relief obtained (SAR)'), d.reliefAmount, 'number', 'step="0.01" min="0"') +
+      Z.fld('owner', t('Owner'), d.owner, 'text') + Z.fld('soaRef', t('Reference on the statement of account'), d.soaRef, 'text') +
+      '<label class="f" style="grid-column:1/-1"><span>' + t('Grounds and evidence') + '</span><textarea name="grounds">' + esc(d.grounds || '') + '</textarea></label></form>',
+      (d.id && can ? '<button class="btn danger" data-act="delrow" data-tb="disputes" data-id="' + d.id + '">' + t('Delete') + '</button>' : '') + '<button class="btn" data-act="closemodal">' + t('Cancel') + '</button>' + (can ? '<button class="btn primary" data-act="savedispute">' + t('Save') + '</button>' : ''), true);
+  };
+  Z.ACT.savedispute = function () {
+    var f = document.getElementById('dsf'); if (!f.reportValidity()) return;
+    var d = Object.assign({}, S.editDS, Object.fromEntries(new FormData(f)));
+    ['amount', 'penalty', 'paidAmount', 'reliefAmount'].forEach(function (k) { d[k] = d[k] === '' || d[k] == null ? null : +d[k]; }); d.label = d.reference;
+    Z.save('disputes', d).then(function () { Z.closeModal(); Z.toast(t('Saved')); Z.route(); });
+  };
+  D.dsp = function (k) {
+    var rows = (S.disputes || []).map(function (d) { return { d: d, s: E.disputeStatus(d, cfg(), Z.today()) }; });
+    var row = function (x, v, disp) { return { label: x.d.title || x.d.reference, sub: (x.d.reference || '') + ', ' + entName(x.d.entityId) + (x.s.next ? ', ' + t(x.s.next.label) + ' ' + (x.s.next.due || '') : ''), value: v, display: disp, act: 'editdispute', data: { id: x.d.id }, tone: x.s.state === 'overdue' || x.s.state === 'urgent' ? 'fail' : '' }; };
+    var open = rows.filter(function (x) { return x.s.state !== 'closed'; });
+    if (k === 'stake') return { title: t('At stake in open cases (SAR)'), sub: t('Tax plus penalty, less what is paid'), total: open.reduce(function (a, x) { return a + x.s.atStake; }, 0), totalLabel: 'SAR', rows: open.map(function (x) { return row(x, x.s.atStake); }), empty: t('No open cases.') };
+    if (k === 'open') return { title: t('Open cases'), total: open.length, totalLabel: t('cases'), money: false, rows: open.map(function (x) { return row(x, x.s.atStake); }), empty: t('No open cases.') };
+    if (k === 'soon') { var m = open.filter(function (x) { return x.s.next && x.s.next.due && !x.s.next.zatca; }).sort(function (a, b) { return a.s.daysLeft - b.s.daysLeft; }); return { title: t('Your deadlines'), rows: m.map(function (x) { return row(x, Math.max(0, 120 - x.s.daysLeft), x.s.daysLeft < 0 ? t('Overdue') : x.s.daysLeft + ' ' + t('days')); }), money: false, empty: t('No deadline is waiting on you.') }; }
+    if (k === 'relief') return { title: t('Relief obtained (SAR)'), total: rows.reduce(function (a, x) { return a + x.s.relief; }, 0), totalLabel: 'SAR', rows: rows.filter(function (x) { return x.s.relief; }).map(function (x) { return Object.assign(row(x, x.s.relief), { tone: 'pass' }); }), empty: t('No relief recorded yet.') };
+    return null;
+  };
+
+  // ================================================================ tax calendar
+  var CAL = { items: [], tax: 'all', month: null };
+  var TF = [['all', 'All'], ['VAT', 'VAT'], ['WHT', 'WHT'], ['ZAKAT', 'Zakat'], ['ZATCA', 'ZATCA and disputes'], ['OTHER', 'Other taxes']];
+  var inTF = function (it) { if (CAL.tax === 'all') return true; if (CAL.tax === 'ZATCA') return it.kind === 'request' || it.kind === 'dispute' || it.kind === 'refund'; if (CAL.tax === 'OTHER') return ['EXCISE', 'RETT', 'CIT', 'OTHER'].indexOf(it.tax) >= 0 && it.kind === 'custom'; return it.tax === CAL.tax && (it.kind === 'return' || it.kind === 'correction' || it.kind === 'custom'); };
+  Z.views.calendar = function () {
+    var today = Z.today(); CAL.month = CAL.month || today.slice(0, 7);
+    var back = new Date(Date.UTC(+today.slice(0, 4), +today.slice(5, 7) - 4, 1)).toISOString().slice(0, 10), from = back, to = (+today.slice(0, 4) + 1) + '-12-31';
+    return Promise.all(['requests', 'disputes', 'refunds', 'events', 'findings', 'annual'].map(function (tb) { return Z.list(tb).catch(function () { return []; }); })).then(function (r) {
+      S.events = r[3];
+      var exById = {}; S.exercises.forEach(function (x) { exById[x.id] = x; });
+      var cor = E.corrections(r[4], cfg(), today).map(function (c) { return Object.assign(c, { entityId: (exById[c.parentId] || {}).entityId }); });
+      var ids = S.entities.filter(function (e) { return e.active !== false; });
+      CAL.items = E.complianceCalendar({ entities: ids, exercises: S.exercises, requests: r[0], disputes: r[1], refunds: r[2], events: r[3], corrections: cor, annual: r[5], settings: cfg(), today: today, from: from, to: to });
+      renderCal();
+    });
+  };
+  function stateText(it) { return { done: t('Done'), overdue: t('Overdue'), soon: t('This week'), upcoming: t('Upcoming'), waiting: t('Waiting for ZATCA'), untracked: t('No exercise') }[it.state]; }
+  function itemHref(it) { return it.exId ? '#/' + S.tax + '/ex/' + it.exId + '/filing' : it.href ? '#/' + S.tax + '/' + it.href : ''; }
+  function renderCal() {
+    var today = Z.today(), all = CAL.items.filter(inTF), m = CAL.month;
+    var mine = all.filter(function (i) { return i.state !== 'done'; });
+    var over = mine.filter(function (i) { return i.state === 'overdue'; }), week = mine.filter(function (i) { return i.state === 'soon'; }), d30 = mine.filter(function (i) { return i.daysLeft >= 0 && i.daysLeft <= 30; });
+    var doneM = all.filter(function (i) { return i.state === 'done' && i.date.slice(0, 7) === today.slice(0, 7); });
+    // month grid, weeks start on Sunday
+    var y = +m.slice(0, 4), mo = +m.slice(5, 7), first = new Date(Date.UTC(y, mo - 1, 1)), days = new Date(Date.UTC(y, mo, 0)).getUTCDate(), lead = first.getUTCDay();
+    var byDay = {}; all.forEach(function (i) { if (i.date.slice(0, 7) === m) (byDay[i.date] = byDay[i.date] || []).push(i); });
+    var wd = [t('Sun'), t('Mon'), t('Tue'), t('Wed'), t('Thu'), t('Fri'), t('Sat')];
+    var cells = ''; for (var k = 0; k < lead; k++) cells += '<span class="zk-d pad"></span>';
+    for (var dd = 1; dd <= days; dd++) {
+      var iso = m + '-' + (dd < 10 ? '0' : '') + dd, its = byDay[iso] || [], worst = its.some(function (i) { return i.state === 'overdue'; }) ? 'overdue' : its.some(function (i) { return i.state === 'soon'; }) ? 'soon' : its.length && its.every(function (i) { return i.state === 'done'; }) ? 'done' : its.length ? 'upcoming' : '';
+      cells += '<' + (its.length ? 'a href="#cal-' + iso + '" data-act="caljump" data-d="' + iso + '"' : 'span') + ' class="zk-d' + (iso === today ? ' today' : '') + (worst ? ' has ' + worst : '') + '"' + (its.length ? ' aria-label="' + esc(iso + ': ' + its.length + ' ' + t('deadlines')) + '"' : '') + '><b>' + dd + '</b>' +
+        (its.length ? '<span class="dots">' + its.slice(0, 4).map(function (i) { return '<i class="tx-' + i.tax.toLowerCase() + '"></i>'; }).join('') + '</span>' : '') + '</' + (its.length ? 'a' : 'span') + '>';
+    }
+    var monthName = function (mk) { return new Date(Date.UTC(+mk.slice(0, 4), +mk.slice(5, 7) - 1, 1)).toLocaleDateString(ar() ? 'ar-SA-u-ca-gregory-nu-latn' : 'en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' }); };
+    var shift = function (n) { var d = new Date(Date.UTC(y, mo - 1 + n, 1)); return d.toISOString().slice(0, 7); };
+    var grid = '<section class="paper zk-month"><header class="cal-nav-row"><button class="btn ghost icon" data-act="calmonth" data-m="' + shift(-1) + '" aria-label="' + esc(t('Previous month')) + '">' + Z.icon(ar() ? 'caret-right' : 'caret-left') + '</button><h2>' + esc(monthName(m)) + '</h2><button class="btn ghost icon" data-act="calmonth" data-m="' + shift(1) + '" aria-label="' + esc(t('Next month')) + '">' + Z.icon(ar() ? 'caret-left' : 'caret-right') + '</button></header>' +
+      '<div class="zk-wd">' + wd.map(function (w) { return '<span>' + esc(w) + '</span>'; }).join('') + '</div><div class="zk-days">' + cells + '</div>' +
+      '<p class="zk-legend">' + [['vat', 'VAT'], ['wht', 'WHT'], ['zakat', 'Zakat'], ['zatca', 'ZATCA'], ['other', 'Other']].map(function (l) { return '<span><i class="tx tx-' + l[0] + '"></i>' + esc(t(l[1])) + '</span>'; }).join('') + '</p></section>';
+    // agenda: from the start of the shown month, the next 120 days of items, grouped by date
+    var start = m + '-01', end = new Date(Date.parse(start + 'T00:00:00Z') + 120 * 86400000).toISOString().slice(0, 10);
+    var list = all.filter(function (i) { return (i.date >= start && i.date <= end) || (i.state === 'overdue' && m === today.slice(0, 7)); });
+    var groups = {}, order = []; list.forEach(function (i) { if (!groups[i.date]) { groups[i.date] = []; order.push(i.date); } groups[i.date].push(i); });
+    var agenda = '<section class="paper zk-agenda"><header><div><h2>' + t('Agenda') + '</h2><p>' + t('From the month shown, the next 120 days, plus anything overdue.') + '</p></div></header>' + (order.length ? '<ol>' + order.map(function (d, gi) {
+      var dt = new Date(d + 'T00:00:00Z');
+      return '<li id="cal-' + d + '" style="--i:' + gi + '"><div class="zk-date' + (d < today ? ' past' : d === today ? ' today' : '') + '"><b>' + dt.getUTCDate() + '</b><span>' + esc(dt.toLocaleDateString(ar() ? 'ar-SA-u-ca-gregory-nu-latn' : 'en-GB', { month: 'short', timeZone: 'UTC' })) + '</span></div><ul>' + groups[d].map(function (i) {
+        var href = itemHref(i), tag = href ? 'a href="' + href + '"' : i.evId ? 'a href="#" data-act="editevent" data-id="' + i.evId + '" data-d="' + i.date + '"' : 'div';
+        return '<li><' + tag + ' class="zk-it st-' + i.state + '"><i class="tx tx-' + i.tax.toLowerCase() + '" aria-hidden="true"></i><span class="zk-it-t"><b>' + esc(t(i.title)) + (i.period ? ' ' + Z.ltr(i.period) : '') + '</b><small>' + esc(entName(i.entityId)) + ', ' + esc(taxName(i.tax)) + '</small></span><span class="zk-st">' + esc(stateText(i)) + '</span></' + tag.split(' ')[0] + '></li>';
+      }).join('') + '</ul></li>';
+    }).join('') + '</ol>' : '<div class="empty"><p>' + t('Nothing due in this window.') + '</p></div>') + '</section>';
+    var chips = '<div class="zk-filter" role="group" aria-label="' + esc(t('Show')) + '">' + TF.map(function (f) { return '<button type="button" class="zk-fchip' + (CAL.tax === f[0] ? ' on' : '') + '" aria-pressed="' + (CAL.tax === f[0]) + '" data-act="caltax" data-k="' + f[0] + '">' + (f[0] === 'all' ? '' : '<i class="tx tx-' + f[0].toLowerCase() + '"></i>') + esc(t(f[1])) + '</button>'; }).join('') + '</div>';
+    Z.setMain(head(t('ZATCA account'), t('Tax calendar'), t('Every filing and payment deadline across taxes and companies, with ZATCA letters, dispute and refund dates. Export it to Outlook or Google Calendar.'),
+      '<button class="btn" data-act="calics">' + Z.icon('calendar-plus') + ' ' + t('Export to calendar (.ics)') + '</button>' + (Z.can('preparer') ? '<button class="btn primary" data-act="editevent">' + Z.icon('plus') + ' ' + t('Add a deadline') + '</button>' : '')) +
+      '<div class="stack"><div class="kpis">' + kpi('warning', over.length, t('Overdue'), 'cal:over', over.length ? 'bad' : '') + kpi('alarm', week.length, t('Due within 7 days'), 'cal:week', week.length ? 'bad' : '') +
+      kpi('calendar-dots', d30.length, t('Due in the next 30 days'), 'cal:d30') + kpi('check-circle', doneM.length, t('Done this month'), 'cal:done', 'good') + '</div>' + chips +
+      '<div class="zk-cal">' + grid + agenda + '</div></div>');
+  }
+  Z.ACT.calmonth = function (el) { CAL.month = el.dataset.m; renderCal(); };
+  Z.ACT.caltax = function (el) { CAL.tax = el.dataset.k; renderCal(); };
+  Z.ACT.caljump = function (el) { var x = document.getElementById('cal-' + el.dataset.d); if (x) { x.scrollIntoView({ behavior: 'smooth', block: 'center' }); x.classList.add('flash'); setTimeout(function () { x.classList.remove('flash'); }, 1600); } };
+  Z.ACT.calics = function () {
+    var items = CAL.items.filter(inTF).filter(function (i) { return i.state !== 'done' && i.date >= Z.today(); }).map(function (i) {
+      return { date: i.date, key: i.key, summary: t(i.title) + (i.period ? ' ' + i.period : '') + ' - ' + entName(i.entityId), description: taxName(i.tax) + '. ' + t('From Inspection Ready.') };
+    });
+    if (!items.length) return Z.toast(t('Nothing upcoming to export.'), true);
+    download('tax-calendar-' + Z.today() + '.ics', E.ics(items, Z.orgName ? Z.orgName() + ' tax calendar' : 'Tax calendar'), 'text/calendar;charset=utf-8');
+    Z.toast(items.length + ' ' + t('deadlines exported'));
+  };
+  Z.ACT.editevent = function (el) {
+    var ev = (S.events || []).filter(function (x) { return el && el.dataset && x.id === el.dataset.id; })[0] || { tax: 'OTHER', repeat: '', entityId: S.entityId || (S.entities[0] || {}).id, date: Z.today() };
+    S.editEV = ev; S.editEVDate = el && el.dataset ? el.dataset.d : ''; var can = Z.can('preparer'), done = ev.id && (ev.doneDates || []).indexOf(S.editEVDate) >= 0;
+    Z.modal(ev.id ? ev.title : t('Add a deadline'), '<form id="evf" class="grid g2"><label class="f" style="grid-column:1/-1"><span>' + t('What is due') + '</span><input type="text" name="title" value="' + esc(ev.title || '') + '" required placeholder="' + esc(t('e.g. Excise return, CIT advance payment, RETT on a sale')) + '"></label>' +
+      selF('entityId', t('Entity'), ev.entityId, entOpts()) + selF('tax', t('Tax'), ev.tax, [['VAT', 'VAT'], ['WHT', 'WHT'], ['ZAKAT', 'Zakat'], ['EXCISE', 'Excise'], ['RETT', 'RETT'], ['CIT', 'Income tax'], ['OTHER', 'Other']]) +
+      Z.fld('date', t('Date'), ev.date, 'date', 'required') + selF('repeat', t('Repeats'), ev.repeat || '', [['', 'Once'], ['monthly', 'Every month'], ['quarterly', 'Every quarter'], ['yearly', 'Every year']]) +
+      '<label class="f" style="grid-column:1/-1"><span>' + t('Notes') + '</span><textarea name="note">' + esc(ev.note || '') + '</textarea></label></form>',
+      (ev.id && can ? '<button class="btn danger" data-act="delrow" data-tb="events" data-id="' + ev.id + '">' + t('Delete') + '</button>' : '') +
+      (ev.id && can && S.editEVDate ? '<button class="btn" data-act="evdone">' + (done ? t('Mark as not done') : t('Mark done for') + ' ' + esc(S.editEVDate)) + '</button>' : '') +
+      '<button class="btn" data-act="closemodal">' + t('Cancel') + '</button>' + (can ? '<button class="btn primary" data-act="saveevent">' + t('Save') + '</button>' : ''));
+  };
+  Z.ACT.saveevent = function () {
+    var f = document.getElementById('evf'); if (!f.reportValidity()) return;
+    var d = Object.assign({}, S.editEV, Object.fromEntries(new FormData(f))); d.label = d.title;
+    Z.save('events', d).then(function () { Z.closeModal(); Z.toast(t('Saved')); Z.route(); });
+  };
+  Z.ACT.evdone = function () {
+    var ev = Object.assign({}, S.editEV), d = S.editEVDate, l = (ev.doneDates || []).slice(), i = l.indexOf(d);
+    if (i >= 0) l.splice(i, 1); else l.push(d); ev.doneDates = l;
+    Z.save('events', ev).then(function () { Z.closeModal(); Z.route(); });
+  };
+  D.cal = function (k) {
+    var all = CAL.items.filter(inTF), today = Z.today();
+    var pick = { over: function (i) { return i.state === 'overdue'; }, week: function (i) { return i.state === 'soon'; }, d30: function (i) { return i.state !== 'done' && i.daysLeft >= 0 && i.daysLeft <= 30; }, done: function (i) { return i.state === 'done' && i.date.slice(0, 7) === today.slice(0, 7); } }[k];
+    if (!pick) return null;
+    var l = all.filter(pick);
+    return { title: { over: t('Overdue'), week: t('Due within 7 days'), d30: t('Due in the next 30 days'), done: t('Done this month') }[k], total: l.length, totalLabel: t('deadlines'), money: false,
+      rows: l.map(function (i) { return { label: t(i.title) + (i.period ? ' ' + i.period : ''), sub: i.date + ', ' + entName(i.entityId) + ', ' + taxName(i.tax), value: Math.abs(i.daysLeft), display: i.state === 'done' ? t('Done') : i.daysLeft < 0 ? -i.daysLeft + ' ' + t('days late') : i.daysLeft + ' ' + t('days'), tone: i.state === 'overdue' ? 'fail' : i.state === 'soon' ? 'warn' : 'pass', href: itemHref(i) || undefined }; }),
+      empty: t('Nothing here.') };
+  };
+
+  // ================================================================ reviewer notes on checks
+  // A manager raises a note on a check; the preparer replies; the manager clears
+  // it. The server refuses sign-off while any note is open.
+  var reviews = function () { return (S.ex && S.ex.reviews) || []; };
+  Z.openReviews = function () { return reviews().filter(function (r) { return r.status !== 'cleared'; }); };
+  Z.reviewHtml = function (checkId) {
+    var list = reviews().filter(function (r) { return r.checkId === checkId; }); if (!list.length) return '';
+    var closed = S.ex.status === 'closed', mgr = Z.can('manager'), prep = Z.can('preparer');
+    return '<div class="zk-reviews">' + list.map(function (r) {
+      var open = r.status !== 'cleared';
+      return '<div class="zk-rv' + (open ? ' open' : '') + '"><p class="zk-rv-h">' + Z.icon(open ? 'chat-circle-dots' : 'check-circle') + '<b>' + esc(r.by || t('Reviewer')) + '</b><span class="faint">' + esc(String(r.at || '').slice(0, 10)) + '</span>' + (open ? Z.pill('warn', t('Open review note')) : Z.pill('pass', t('Cleared'))) + '</p><p class="zk-rv-t">' + esc(r.text) + '</p>' +
+        (r.reply && (!open || closed || !prep) ? '<p class="zk-rv-r">' + Z.icon('arrow-bend-down-right') + esc(r.reply) + (r.repliedBy ? ' <span class="faint">- ' + esc(r.repliedBy) + '</span>' : '') + '</p>' : '') +
+        (open && !closed && prep ? '<label class="f"><span class="sr-only">' + t('Reply') + '</span><textarea data-chg="rvreply" data-id="' + r.id + '" placeholder="' + esc(t('Reply to the reviewer: what you did or why no change is needed')) + '">' + esc(r.reply || '') + '</textarea></label>' : '') +
+        (!closed && mgr ? '<div class="row">' + (open ? '<button class="btn small" data-act="rvclear" data-id="' + r.id + '">' + Z.icon('check') + ' ' + t('Clear') + '</button>' : '<button class="btn small ghost" data-act="rvclear" data-id="' + r.id + '" data-reopen="1">' + t('Reopen') + '</button>') + '<button class="btn small ghost" data-act="rvdel" data-id="' + r.id + '">' + t('Delete') + '</button></div>' : '') + '</div>';
+    }).join('') + '</div>';
+  };
+  Z.reviewButton = function (checkId) { return S.ex && S.ex.status !== 'closed' && Z.can('manager') ? '<button class="btn small ghost" data-act="rvadd" data-id="' + checkId + '">' + Z.icon('chat-circle-text') + ' ' + t('Review note') + '</button>' : ''; };
+  function saveReviews(msg) { return Z.saveEx().then(function () { Z.route(); if (msg) Z.toast(msg); }); }
+  Z.ACT.rvadd = function (el) {
+    S.rvCheck = el.dataset.id;
+    Z.modal(t('Review note on') + ' ' + el.dataset.id, '<form id="rvf"><label class="f"><span>' + t('What should the preparer look at?') + '</span><textarea name="text" required></textarea></label><p class="faint" style="font-size:12.5px">' + t('The exercise cannot be signed off until every review note is cleared.') + '</p></form>',
+      '<button class="btn" data-act="closemodal">' + t('Cancel') + '</button><button class="btn primary" data-act="rvsave">' + t('Add note') + '</button>');
+  };
+  Z.ACT.rvsave = function () {
+    var f = document.getElementById('rvf'); if (!f.reportValidity()) return;
+    S.ex.reviews = reviews().concat([{ id: Z.uid('RV'), checkId: S.rvCheck, text: f.elements.text.value.trim(), by: Z.userName(), at: new Date().toISOString(), status: 'open' }]);
+    Z.closeModal(); saveReviews(t('Review note added'));
+  };
+  Z.ACT.rvclear = function (el) {
+    var reopen = !!el.dataset.reopen;
+    S.ex.reviews = reviews().map(function (r) { return r.id === el.dataset.id ? Object.assign({}, r, reopen ? { status: 'open', clearedBy: null, clearedAt: null } : { status: 'cleared', clearedBy: Z.userName(), clearedAt: new Date().toISOString() }) : r; });
+    saveReviews(reopen ? t('Review note reopened') : t('Review note cleared'));
+  };
+  Z.ACT.rvdel = function (el) { if (!confirm(t('Delete this review note?'))) return; S.ex.reviews = reviews().filter(function (r) { return r.id !== el.dataset.id; }); saveReviews(); };
+  Z.CHG.rvreply = function (el) { S.ex.reviews = reviews().map(function (r) { return r.id === el.dataset.id ? Object.assign({}, r, { reply: el.value }) : r; }); Z.saveEx(); };
+  // the sign-off block on the report tab
+  Z.reviewSummary = function () {
+    var open = Z.openReviews(), all = reviews(); if (!all.length) return '';
+    var tabOf = function (id) { if (!S.R) return 'overview'; var g = [['vat', S.R.vat.checks], ['bank', S.R.bank.checks], ['einv', S.R.einv.checks], ['filing', S.R.filing.checks], ['other', S.R.other.checks], ['wht', S.R.wht.checks]]; for (var i = 0; i < g.length; i++) if (g[i][1].some(function (c) { return c.id === id; })) return g[i][0]; return 'overview'; };
+    return '<section class="paper zk-rvsum noprint' + (open.length ? ' open' : '') + '"><header><div><h2>' + Z.icon(open.length ? 'chat-circle-dots' : 'check-circle') + ' ' + t('Review notes') + '</h2><p>' + (open.length ? open.length + ' ' + t('open: clear them before signing off.') : t('Every review note is cleared.')) + '</p></div><span class="score-chip">' + (all.length - open.length) + ' / ' + all.length + ' ' + t('cleared') + '</span></header>' +
+      (open.length ? '<ul>' + open.map(function (r) { return '<li><a href="#" data-act="gocheck" data-id="' + esc(r.checkId) + '" data-tab="' + tabOf(r.checkId) + '"><b>' + esc(r.checkId) + '</b> ' + esc(r.text) + '</a>' + (r.reply ? ' <span class="faint">(' + t('replied') + ')</span>' : '') + '</li>'; }).join('') + '</ul>' : '') + '</section>';
+  };
 })();
 
 </script>

@@ -13,13 +13,17 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   var t = Z.t;
   Z.tt = function (o, base) { return S.lang === 'ar' && o[base + 'Ar'] ? o[base + 'Ar'] : o[base]; };
   var NF = {};
+  // accounting format: 1,234.50 / (1,234.50) / - for zero, Latin digits in both languages
   Z.fmt = function (n, dp) {
     if (n == null || n === '' || isNaN(n)) return '-';
     dp = dp == null ? 2 : dp;
     NF[dp] = NF[dp] || new Intl.NumberFormat('en-US', { minimumFractionDigits: dp, maximumFractionDigits: dp });
     var s = NF[dp].format(Math.abs(n));
+    if (dp && +s.replace(/,/g, '') === 0) return '-';
     return n < 0 ? '(' + s + ')' : s;
   };
+  // whole-number counts: rows, invoices, findings
+  Z.count = function (n) { return n == null || n === '' || isNaN(n) ? '-' : Z.fmt(Math.round(+n), 0); };
   // dates, periods and codes stay left-to-right inside Arabic text
   Z.ltr = function (s) { return '<bdi dir="ltr">' + esc(s) + '</bdi>'; };
   Z.pct = function (x) { return x == null ? '-' : Math.round(x * 100) + '%'; };
@@ -64,7 +68,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   var ERR = {
     bad_credentials: 'Email or password is not correct.', email_taken: 'An account with this email already exists.',
     weak_password: 'Use at least 10 characters for the password.', forbidden: 'Your role does not allow this.',
-    exercise_closed: 'This exercise is signed off. A manager must reopen it before changes.', auth_required: 'Your session ended. Sign in again.',
+    exercise_closed: 'This exercise is signed off. A manager must reopen it before changes.', open_review_notes: 'Clear every review note before signing off.', auth_required: 'Your session ended. Sign in again.',
     tenant_suspended: 'This organisation is suspended. Contact the platform administrator.', cloud_only: 'Available when connected to the Google Sheets backend.',
     missing_fields: 'Fill in every field.', too_many_attempts: 'Too many wrong passwords. Try again in 15 minutes.', bad_email: 'Enter a valid email address.', server_error: 'The server hit an error. Try again; if it repeats, check the Apps Script logs.'
   };
@@ -285,9 +289,14 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
         '<span class="cur-t"><small>' + t('Open exercise') + '</small><b>' + esc(Z.entName(ent)) + '</b><span>' + Z.ltr(ex.period) + (sc.score != null ? ', ' + sc.score + '%' : '') + '</span></span>' +
         (crit ? '<span class="nb" title="' + esc(t('Critical actions')) + '">' + crit + '</span>' : '') + '</a>';
     }
+    h += '<div class="group">' + t('ZATCA account') + '</div>';
+    h += nav('#/' + tx + '/calendar', t('Tax calendar'), 'calendar-dots', view === 'calendar');
+    h += nav('#/' + tx + '/account', t('Statement of account'), 'scales', view === 'account');
+    h += nav('#/' + tx + '/requests', t('ZATCA requests'), 'envelope-simple', view === 'requests');
+    h += nav('#/' + tx + '/disputes', t('Disputes and penalties'), 'gavel', view === 'disputes');
+    h += nav('#/' + tx + '/refunds', t('VAT refunds'), 'hand-coins', view === 'refunds');
     h += '<div class="group">' + t('Organisation') + '</div>';
     h += nav('#/' + tx + '/entities', t('Entities'), 'buildings', view === 'entities' || view === 'entity' || view === 'annual');
-    h += nav('#/' + tx + '/requests', t('ZATCA requests'), 'envelope-simple', view === 'requests');
     [['settings', t('Settings'), 'gear-six', 'manager'], ['users', t('Users'), 'users-three', 'owner'], ['audit', t('Audit trail'), 'list-checks', 'manager']].forEach(function (i) {
       if (Z.can(i[3])) h += nav('#/' + tx + '/' + i[0], i[1], i[2], view === i[0]);
     });
@@ -317,7 +326,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       '<button class="btn ghost small" data-act="theme" aria-label="' + t('Switch light/dark') + '">' + Z.icon('circle-half') + '</button><button class="btn ghost small lang-btn" data-act="lang">' + (S.lang === 'ar' ? 'English' : 'العربية') + '</button>' +
       Z.exitButton('btn small exit-btn');
   }
-  Z.CHG.entity = function (el) { S.entityId = el.value; localStorage.setItem('zr_entity', el.value); location.hash = '#/' + S.tax + '/' + ((S.route || [])[0] === 'insights' ? 'insights' : 'entity') + '/' + el.value; };
+  Z.CHG.entity = function (el) { S.entityId = el.value; localStorage.setItem('zr_entity', el.value); location.hash = '#/' + S.tax + '/' + ({ insights: 'insights', account: 'account' }[(S.route || [])[0]] || 'entity') + '/' + el.value; };
   Z.entity = function (id) { return S.entities.filter(function (e) { return e.id === id; })[0]; };
   Z.entName = function (e) { return e ? (S.lang === 'ar' && e.nameAr ? e.nameAr : e.name) : ''; };
 
@@ -392,7 +401,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       (S.api.mode === 'local' && !S.entities.some(function (e) { return e.demo; }) ? '<button class="btn" data-act="loaddemo">' + t('Load demo company') + '</button>' : '') + '</div>' +
       '<div class="stack"><div class="kpis">' + kpi('buildings', ents.length, t('Entities')) + kpi('hourglass-medium', open.length, t('Exercises not signed off')) +
       kpi('gauge', avg == null ? '-' : avg + '%', t('Average readiness, last 12 months')) + kpi('x-circle', fails, t('Failed checks in latest exercises'), fails) +
-      kpi('coins', Z.fmt(exposure, 0), wht ? t('WHT exposure (SAR)') : t('VAT exposure (SAR)'), exposure) + '</div>' +
+      kpi('coins', Z.fmt(exposure), wht ? t('WHT exposure (SAR)') : t('VAT exposure (SAR)'), exposure) + '</div>' +
       Z.getStarted() + dataStrip() + '<div id="reqalert"></div>' +
       (ents.length ? '' : '<section class="paper empty"><i class="ph ph-info big" aria-hidden="true"></i><p>' + t('No entity is registered for withholding tax. Turn it on in the entity settings.') + '</p></section>') +
       '<section class="paper"><header><div><h2>' + t('Readiness by month') + '</h2><p>' + t('Green is ready, amber at risk, red not ready. A dark underline means signed off.') + '</p></div></header><div class="tbl-wrap">' + heat + '</div></section>' +

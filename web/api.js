@@ -104,7 +104,10 @@
             if (p.table === 'entities') d.entityId = d.id;
             if (p.table === 'exercises') d.parentId = d.entityId;
             var prev = m[d.id];
-            if (p.table === 'exercises' && d.status === 'closed' && (!prev || prev.status !== 'closed')) { d.signedOffBy = user.name; d.signedOffAt = new Date().toISOString(); }
+            if (p.table === 'exercises' && d.status === 'closed' && (!prev || prev.status !== 'closed')) {
+              if ((d.reviews || []).some(function (r) { return r && r.status !== 'cleared'; })) throw Object.assign(new Error('open_review_notes'), { code: 'open_review_notes' });
+              d.signedOffBy = user.name; d.signedOffAt = new Date().toISOString();
+            }
             d.updatedAt = new Date().toISOString(); d.updatedBy = user.name;
             m[d.id] = d;
           });

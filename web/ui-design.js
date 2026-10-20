@@ -235,11 +235,11 @@
     var wrap = document.createElement('div'); wrap.className = 'drawer-scrim'; wrap.id = 'drawer';
     wrap.innerHTML = '<aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="dr-t">' +
       '<header><div><h2 id="dr-t">' + esc(spec.title) + '</h2>' + (spec.sub ? '<p>' + esc(spec.sub) + '</p>' : '') + '</div><button type="button" class="btn ghost icon" data-act="closedrawer" aria-label="' + esc(t('Close')) + '"><i class="ph ph-x" aria-hidden="true"></i></button></header>' +
-      (spec.total != null ? '<div class="dr-total"><b data-count="' + (+spec.total || 0) + '">' + (typeof spec.total === 'number' ? fmt(spec.total, money ? 0 : 0) : esc(spec.total)) + '</b><span>' + esc(spec.totalLabel || '') + '</span></div>' : '') +
+      (spec.total != null ? '<div class="dr-total"><b data-count="' + (+spec.total || 0) + '">' + (typeof spec.total === 'number' ? (money ? fmt(spec.total) : Z.count(spec.total)) : esc(spec.total)) + '</b><span>' + esc(spec.totalLabel || '') + '</span></div>' : '') +
       (rows.length ? '<ol class="dr-rows">' + rows.map(function (r, i) {
         var w = Math.max(1.5, Math.abs(+r.value || 0) / max * 100).toFixed(1);
         var inner = '<span class="dr-l"><b>' + esc(r.label) + '</b>' + (r.sub ? '<small>' + esc(r.sub) + '</small>' : '') + '</span>' +
-          '<span class="dr-v num">' + (r.display != null ? esc(r.display) : fmt(r.value, 0)) + '</span>' +
+          '<span class="dr-v num">' + (r.display != null ? esc(r.display) : money ? fmt(r.value) : Z.count(r.value)) + '</span>' +
           (r.value != null && !isNaN(+r.value) ? '<span class="dr-bar"><i class="' + (r.tone || '') + '" style="--w:' + w + '%"></i></span>' : '');
         var attrs = r.href ? 'href="' + esc(r.href) + '"' : r.act ? 'href="#" data-act="' + esc(r.act) + '"' + Object.keys(r.data || {}).map(function (k) { return ' data-' + k + '="' + esc(r.data[k]) + '"'; }).join('') : '';
         return '<li style="--i:' + i + '">' + (attrs ? '<a class="dr-row" ' + attrs + '>' + inner + '<i class="ph ph-caret-' + (isRtl() ? 'left' : 'right') + ' go" aria-hidden="true"></i></a>' : '<div class="dr-row">' + inner + '</div>') + '</li>';

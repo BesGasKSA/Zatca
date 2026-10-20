@@ -213,7 +213,7 @@ async function audit(label) {
       await go('#/' + s + '/insights/' + demo.e, 3000); await audit(tag + ' ' + s + ' company 360');
       for (const tab of (s === 'vat' ? VAT : WHT)) { await go('#/' + s + '/ex/' + demo.x + '/' + tab, 1100); await audit(tag + ' ' + s + ' ex ' + tab); }
       for (const r of (s === 'vat' ? RV : RW)) { await go('#/' + s + '/reports/' + r, r === 'beneficiaries' || r === 'aging' ? 2200 : 1000); await audit(tag + ' ' + s + ' report ' + r); }
-      for (const v of ['entities', 'entity/' + demo.e, 'annual/' + demo.e + '/2025', 'requests', 'settings', 'users', 'audit']) { await go('#/' + s + '/' + v, 1200); await audit(tag + ' ' + s + ' ' + v); }
+      for (const v of ['entities', 'entity/' + demo.e, 'annual/' + demo.e + '/2025', 'requests', 'account/' + demo.e, 'refunds', 'disputes', 'calendar', 'settings', 'users', 'audit']) { await go('#/' + s + '/' + v, 1500); await audit(tag + ' ' + s + ' ' + v); }
     }
   }
   await sweep('EN');
@@ -235,6 +235,42 @@ async function audit(label) {
   await go('#/vat/reports/summary', 1200); await click('[data-act="rexport"]', 2000);
   await go('#/wht/reports/beneficiaries', 2500); await click('[data-act="rexport"]', 2000);
   ok(fs.readdirSync(dl).some((f) => /^vat-report-summary/.test(f)) && fs.readdirSync(dl).some((f) => /^wht-report-beneficiaries/.test(f)), 'report exports downloaded');
+  step = 'ZATCA account';
+  await go('#/vat/account/' + demo.e, 2000);
+  ok(await ev("var t = document.querySelector('#main').innerText; return t.indexOf('59,325.00') >= 0 && t.indexOf('56,500.00') >= 0 && t.indexOf('2,830.00') >= 0"), 'statement balance, GL and exposure in accounting format');
+  ok(await ev("return document.querySelectorAll('#main .check').length === 5 && /1 \\/ 5/.test(document.querySelector('.score-chip').textContent)"), 'five statement checks, one agrees');
+  ok(await ev("return document.querySelectorAll('.zk-run svg .pen').length >= 1"), 'penalties marked on the balance chart');
+  await click('[data-drill="soa:pen"]', 900);
+  ok(await ev("var d = document.querySelector('.drawer'); return !!d && d.querySelectorAll('.dr-row').length === 2 && /12,325\\.00/.test(d.innerText)"), 'penalties drill lists both penalties');
+  await ev('Z.closeDrawer(true); return 1');
+  await click('[data-act="soaline"]', 800);
+  await setVal('#sf [name=description]', 'Test adjustment'); await setVal('#sf [name=debit]', '100'); await setVal('#sf [name=period]', '2026-09');
+  await click('[data-act="soalinesave"]', 1500);
+  ok(await ev("return /59,425\\.00/.test(document.querySelector('.zk-bal').innerText)"), 'a manual line moves the balance');
+  await ev("var b = [].slice.call(document.querySelectorAll('[data-act=soadel]')).filter(function (x) { return /Test adjustment/.test(x.getAttribute('aria-label')); })[0]; b.click(); return 1"); await sleep(1500);
+  ok(await ev("return /59,325\\.00/.test(document.querySelector('.zk-bal').innerText)"), 'and removing it moves it back');
+  await go('#/vat/refunds', 1500);
+  ok(await ev("return document.querySelectorAll('.zk-case').length === 3 && /38,400\\.00/.test(document.querySelector('.kpis').innerText)"), 'three refunds, 38,400.00 outstanding');
+  await go('#/vat/disputes', 1500);
+  ok(await ev("return document.querySelectorAll('.zk-case').length === 3 && /79,750\\.00/.test(document.querySelector('.kpis').innerText)"), 'three disputes, 79,750.00 at stake');
+  await go('#/vat/calendar', 2500);
+  ok(await ev("return document.querySelectorAll('.zk-d.has').length > 0 && document.querySelectorAll('.zk-agenda .zk-it').length > 3"), 'calendar month and agenda filled');
+  await click('[data-act="calics"]', 2000);
+  ok(fs.readdirSync(dl).some((f) => /^tax-calendar-.*\.ics$/.test(f)), 'calendar exported as .ics');
+  await click('[data-act="caltax"][data-k="WHT"]', 600);
+  ok(await ev("return [].every.call(document.querySelectorAll('.zk-agenda .zk-it .tx'), function (i) { return i.classList.contains('tx-wht'); })"), 'tax filter shows WHT only');
+  step = 'review notes';
+  await go('#/vat/ex/' + demo.x + '/vat', 1500);
+  await click('[data-act="rvadd"][data-id="V1"]', 800);
+  await setVal('#rvf [name=text]', 'Explain the box 1 gap');
+  await click('[data-act="rvsave"]', 1500);
+  ok(await ev("return Z.openReviews().length === 1 && !!document.querySelector('#c-V1 .zk-rv.open')"), 'review note shown on the check');
+  await go('#/vat/ex/' + demo.x + '/report', 1500);
+  ok(await ev("return !document.querySelector('[data-act=exstatus][data-s=closed]') && !!document.querySelector('.zk-rvsum.open')"), 'sign-off held while a note is open');
+  await go('#/vat/ex/' + demo.x + '/vat', 1500);
+  await click('#c-V1 [data-act="rvclear"]', 1500);
+  await go('#/vat/ex/' + demo.x + '/report', 1500);
+  ok(await ev("return !!document.querySelector('[data-act=exstatus][data-s=closed]')"), 'sign-off available once cleared');
   await click('[data-act="theme"]', 500);
   ok(await ev("return !!document.documentElement.dataset.theme"), 'theme toggles');
 
@@ -247,7 +283,7 @@ async function audit(label) {
   await ev("localStorage.setItem('zr_lang', 'en'); return 1");
   await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 2, mobile: true });
   await send('Page.reload'); await sleep(3000);
-  for (const h of ['#/vat/dashboard', '#/vat/ex/' + demo.x + '/overview', '#/vat/ex/' + demo.x + '/vat', '#/wht/ex/' + demo.x + '/wht', '#/vat/ex/' + demo.x + '/report', '#/wht/reports/beneficiaries', '#/vat/settings']) { await go(h, 1500); await audit('phone ' + h.split('/').slice(1, 4).join(' ')); }
+  for (const h of ['#/vat/dashboard', '#/vat/ex/' + demo.x + '/overview', '#/vat/ex/' + demo.x + '/vat', '#/wht/ex/' + demo.x + '/wht', '#/vat/ex/' + demo.x + '/report', '#/wht/reports/beneficiaries', '#/vat/settings', '#/vat/account', '#/vat/refunds', '#/vat/disputes', '#/vat/calendar']) { await go(h, 1800); await audit('phone ' + h.split('/').slice(1, 4).join(' ')); }
   await click('[data-act="menu"]', 600);
   ok(await ev("return getComputedStyle(document.querySelector('.rail')).visibility === 'visible'"), 'menu opens the sidebar on a phone');
 

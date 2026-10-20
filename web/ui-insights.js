@@ -44,7 +44,7 @@
     var txt = d < 0 ? t('Overdue by') + ' ' + -d + ' ' + t('days') : d === 0 ? t('Due today') : d + ' ' + t('days left');
     return '<span class="cd ' + cls + '" title="' + esc(t('Deadline') + ' ' + a.deadline) + '">' + Z.icon(d < 0 ? 'alarm' : 'clock') + ' ' + txt + '</span>';
   }
-  var money = function (v, cls) { return '<b class="num' + (cls ? ' ' + cls : '') + '" data-count="' + (+v || 0) + '">' + fmt(v || 0, 0) + '</b>'; };
+  var money = function (v, cls) { return '<b class="num' + (cls ? ' ' + cls : '') + '" data-count="' + (+v || 0) + '">' + fmt(v || 0) + '</b>'; };
 
   // ---------------------------------------------------------------- charts (plain SVG, animated by CSS)
   // grouped bars with an optional line; values in SAR
@@ -54,10 +54,10 @@
     var max = Math.max.apply(null, all.concat([1])), step = Math.pow(10, Math.floor(Math.log10(max))), top = Math.ceil(max / step) * step;
     var y = function (v) { return pt + (H - pt - pb) * (1 - Math.max(0, +v || 0) / top); };
     var gw = (W - pl - pr) / n, bw = Math.min(22, gw / (series.length + 1));
-    var grid = [0, .25, .5, .75, 1].map(function (f) { var v = top * f, yy = y(v); return '<line x1="' + pl + '" x2="' + (W - pr) + '" y1="' + yy + '" y2="' + yy + '" class="gl"/><text x="' + (pl - 8) + '" y="' + (yy + 4) + '" class="ax" text-anchor="end">' + Z.fmt(v / 1000, 0) + 'k</text>'; }).join('');
+    var grid = [0, .25, .5, .75, 1].map(function (f) { var v = top * f, yy = y(v); return '<line x1="' + pl + '" x2="' + (W - pr) + '" y1="' + yy + '" y2="' + yy + '" class="gl"/><text x="' + (pl - 8) + '" y="' + (yy + 4) + '" class="ax" text-anchor="end">' + Z.count(v / 1000) + 'k</text>'; }).join('');
     var bars = labels.map(function (l, i) {
       var x0 = pl + gw * i + (gw - bw * series.length) / 2;
-      return series.map(function (s, k) { var v = +s.values[i] || 0, yy = y(v); return v ? '<rect class="cbar s' + k + '" style="--i:' + i + '" x="' + (x0 + k * bw) + '" y="' + yy + '" width="' + (bw - 3) + '" height="' + Math.max(1, H - pb - yy) + '" rx="3"><title>' + esc(s.name + ' ' + l + ': ' + fmt(v, 0)) + '</title></rect>' : ''; }).join('') +
+      return series.map(function (s, k) { var v = +s.values[i] || 0, yy = y(v); return v ? '<rect class="cbar s' + k + '" style="--i:' + i + '" x="' + (x0 + k * bw) + '" y="' + yy + '" width="' + (bw - 3) + '" height="' + Math.max(1, H - pb - yy) + '" rx="3"><title>' + esc(s.name + ' ' + l + ': ' + fmt(v)) + '</title></rect>' : ''; }).join('') +
         '<text x="' + (pl + gw * i + gw / 2) + '" y="' + (H - 8) + '" class="ax" text-anchor="middle">' + esc(l) + '</text>';
     }).join('');
     var path = '';
@@ -83,7 +83,7 @@
   function hbars(rows) {
     var max = Math.max.apply(null, rows.map(function (r) { return r.v; }).concat([1]));
     return '<div class="hbars">' + rows.map(function (r, i) {
-      return '<div class="hb" style="--i:' + i + '"><span>' + esc(r.label) + '</span><div class="track"><i style="--w:' + Math.max(2, r.v / max * 100).toFixed(1) + '%"></i></div><b class="num">' + fmt(r.v, 0) + '</b></div>';
+      return '<div class="hb" style="--i:' + i + '"><span>' + esc(r.label) + '</span><div class="track"><i style="--w:' + Math.max(2, r.v / max * 100).toFixed(1) + '%"></i></div><b class="num">' + fmt(r.v) + '</b></div>';
     }).join('') + '</div>';
   }
 
@@ -93,15 +93,15 @@
     var lv = LEVEL[a.level] || LEVEL.low, rt = ROUTE[a.route] || ROUTE.book, done = isDone(a), lk = Z.locked && Z.locked();
     var tab = { vat: 'vat', bank: 'bank', einv: 'einv', filing: 'filing', other: 'other', wht: 'wht', analytics: 'analytics' }[a.group] || 'overview';
     var maxCost = Math.max(a.costLater || 0, a.costNow || 0, 1);
-    var cost = a.recover ? '<div class="cost good">' + Z.icon('arrow-u-up-left') + ' ' + t('Tax to reclaim') + ' <b class="num">' + fmt(a.recover, 0) + '</b></div>' :
-      (a.costLater || a.costNow) ? '<div class="cost"><div class="cb"><span>' + t('If you act now') + '</span><div class="track"><i class="now" style="--w:' + (a.costNow / maxCost * 100).toFixed(1) + '%"></i></div><b class="num">' + fmt(a.costNow, 0) + '</b></div>' +
-        '<div class="cb"><span>' + t('If an inspector finds it') + '</span><div class="track"><i class="later" style="--w:' + (a.costLater / maxCost * 100).toFixed(1) + '%"></i></div><b class="num">' + fmt(a.costLater, 0) + '</b></div></div>' :
-      a.upTo ? '<div class="cost muted">' + t('E-invoicing violations: fines up to SAR') + ' ' + fmt(a.upTo, 0) + ' ' + t('each, usually after a warning') + '</div>' : '';
+    var cost = a.recover ? '<div class="cost good">' + Z.icon('arrow-u-up-left') + ' ' + t('Tax to reclaim') + ' <b class="num">' + fmt(a.recover) + '</b></div>' :
+      (a.costLater || a.costNow) ? '<div class="cost"><div class="cb"><span>' + t('If you act now') + '</span><div class="track"><i class="now" style="--w:' + (a.costNow / maxCost * 100).toFixed(1) + '%"></i></div><b class="num">' + fmt(a.costNow) + '</b></div>' +
+        '<div class="cb"><span>' + t('If an inspector finds it') + '</span><div class="track"><i class="later" style="--w:' + (a.costLater / maxCost * 100).toFixed(1) + '%"></i></div><b class="num">' + fmt(a.costLater) + '</b></div></div>' :
+      a.upTo ? '<div class="cost muted">' + t('E-invoicing violations: fines up to SAR') + ' ' + fmt(a.upTo) + ' ' + t('each, usually after a warning') + '</div>' : '';
     return '<article class="act lv-' + a.level + (done ? ' done' : '') + '" style="--i:' + (i || 0) + '">' +
       '<header><span class="pill ' + lv[1] + '">' + t(lv[0]) + '</span><span class="route">' + Z.icon(rt[1]) + ' ' + t(rt[0]) + '</span>' + countdown(a) +
       (a.counted === false ? '<span class="same" title="' + esc(t('Counted once with') + ' ' + a.sameAs) + '">' + Z.icon('link') + ' ' + t('Same difference as') + ' ' + esc(a.sameAs) + '</span>' : '') + '</header>' +
       '<h3><span class="cid">' + esc(a.checkId) + '</span> ' + esc(Z.tt(a, 'title')) + '</h3>' +
-      '<div class="facts">' + (a.impact ? '<span>' + t('Tax at stake') + ' <b class="num">' + fmt(a.impact, 0) + '</b></span>' : '') + (a.count ? '<span>' + t('Items') + ' <b class="num">' + a.count + '</b></span>' : '') +
+      '<div class="facts">' + (a.impact ? '<span>' + t('Tax at stake') + ' <b class="num">' + fmt(a.impact) + '</b></span>' : '') + (a.count ? '<span>' + t('Items') + ' <b class="num">' + a.count + '</b></span>' : '') +
       (a.match && a.match.length ? '<span class="match">' + Z.icon('arrows-left-right') + ' ' + a.match.map(function (m) { return esc(t(m)); }).join(' ↔ ') + '</span>' : '') + '</div>' + cost +
       '<details' + (opts.open ? ' open' : '') + '><summary>' + t('How to fix it') + ' (' + a.steps.length + ')</summary><ol>' + a.steps.map(function (s) { return '<li>' + esc(S.lang === 'ar' ? s.ar : s.en) + '</li>'; }).join('') + '</ol></details>' +
       '<footer>' + (S.ex ? '<a class="btn small ghost" href="#/ex/' + S.ex.id + '/' + tab + '">' + Z.icon('magnifying-glass') + ' ' + t('Open the check') + '</a>' : '') +
@@ -132,7 +132,7 @@
   };
   function planHero(p) {
     var nx = p.next;
-    var head = p.open.length ? (p.critical ? t('Fix the critical items first.') + ' ' : '') + t('Acting now instead of waiting for an inspection avoids about SAR') + ' <b class="num">' + fmt(p.avoided, 0) + '</b> ' + t('in penalties') + (nx ? ' - ' + t('next deadline') + ' ' + Z.ltr(nx.deadline) : '') + '.' : t('No open actions in this section.');
+    var head = p.open.length ? (p.critical ? t('Fix the critical items first.') + ' ' : '') + t('Acting now instead of waiting for an inspection avoids about SAR') + ' <b class="num">' + fmt(p.avoided) + '</b> ' + t('in penalties') + (nx ? ' - ' + t('next deadline') + ' ' + Z.ltr(nx.deadline) : '') + '.' : t('No open actions in this section.');
     return '<section class="paper hero-plan"><div class="headline">' + Z.icon(p.open.length ? 'lightbulb' : 'seal-check') + '<p>' + head + '</p></div><div class="kpis">' +
       '<div class="' + (p.critical ? 'bad' : '') + '">' + Z.icon('warning-octagon') + '<b data-count="' + p.critical + '">' + p.critical + '</b><span>' + t('Critical actions') + '</span></div>' +
       '<div>' + Z.icon('scales') + money(p.impact) + '<span>' + t('Tax at stake (SAR)') + '</span></div>' +
@@ -160,7 +160,7 @@
     var html = rows.map(function (r, i) {
       var tab = r.c ? ({ vat: 'vat', bank: 'bank', einv: 'einv', wht: 'wht' }[r.c.group] || 'overview') : 'data';
       return '<a class="pair st-' + r.st + '" style="--i:' + i + '" href="#/ex/' + S.ex.id + '/' + tab + '"><span class="node">' + esc(t(r.a)) + '</span><span class="link"><i></i>' + Z.tick(r.st) + '</span><span class="node">' + esc(t(r.b)) + '</span>' +
-        '<span class="gap num">' + (r.st === 'na' ? t('No data') : r.st === 'pass' ? t('Agrees') : fmt(r.c.diff, 0)) + '</span></a>';
+        '<span class="gap num">' + (r.st === 'na' ? t('No data') : r.st === 'pass' ? t('Agrees') : fmt(r.c.diff)) + '</span></a>';
     }).join('');
     return { html: html, agree: agree, known: known.length };
   }
@@ -228,10 +228,10 @@
     var els = (root || document.getElementById('main') || document).querySelectorAll('[data-count]');
     if (!els.length || reduced()) return;
     var t0 = performance.now(), dur = 900;
-    var targets = [].map.call(els, function (el) { return { el: el, v: +el.dataset.count || 0 }; });
+    var targets = [].map.call(els, function (el) { var txt = el.textContent; return { el: el, v: +el.dataset.count || 0, txt: txt, dp: /\.\d\d\)?$/.test(txt.trim()) ? 2 : 0 }; });
     var tick = function (now) {
       var k = Math.min(1, (now - t0) / dur), ease = 1 - Math.pow(1 - k, 3);
-      targets.forEach(function (x) { x.el.textContent = fmt(Math.round(x.v * ease), 0); });
+      targets.forEach(function (x) { x.el.textContent = k < 1 ? Z.fmt(x.v * ease, x.dp) : x.txt; });
       if (k < 1) requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);

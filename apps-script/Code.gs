@@ -16,7 +16,9 @@
  */
 
 var REGISTRY_SHEETS = { TENANTS: 'tenants', USERS: 'users', AUDIT: 'audit' };
-var TENANT_TABLES = ['entities', 'exercises', 'datasets', 'rows', 'samples', 'findings', 'checklists', 'settings', 'annual', 'requests', 'audit'];
+var TENANT_TABLES = ['entities', 'exercises', 'datasets', 'rows', 'samples', 'findings', 'checklists', 'settings', 'annual', 'requests', 'statements', 'refunds', 'disputes', 'events', 'audit'];
+// tables that belong to one entity but to no exercise
+var ENTITY_TABLES = { annual: 1, requests: 1, statements: 1, refunds: 1, disputes: 1, events: 1 };
 // tables whose documents hang off an exercise (parentId = exerciseId)
 var CHILD_TABLES = { datasets: 1, rows: 1, samples: 1, findings: 1, checklists: 1 };
 var COLS = ['id', 'parentId', 'entityId', 'label', 'updatedAt', 'updatedBy', 'data'];
@@ -310,6 +312,8 @@ function save_(s, table, doc) {
       var reopening = prev && prev.status === 'closed' && doc.status !== 'closed';
       if (closing || reopening) need_(s, 'manager');
       if (prev && prev.status === 'closed' && doc.status === 'closed' && JSON.stringify(stripMeta_(prev)) !== JSON.stringify(stripMeta_(doc))) throw new Error('exercise_closed');
+      guardReviews_(s, prev, doc);
+      if (closing && (doc.reviews || []).some(function (r) { return r && r.status !== 'cleared'; })) throw new Error('open_review_notes');
       if (closing) { doc.signedOffBy = s.user.name; doc.signedOffAt = now_(); }
     } else if (CHILD_TABLES[table]) {
       var ex = readTable_(ss, 'exercises', doc.parentId)[0];
@@ -317,8 +321,8 @@ function save_(s, table, doc) {
       if (ex.status === 'closed') throw new Error('exercise_closed');
       if (prev && prev.parentId !== doc.parentId) throw new Error('forbidden');
       doc.entityId = ex.entityId;
-    } else if (table === 'annual' || table === 'requests') {
-      // one doc per entity and year: annual figures for the year-end reconciliation
+    } else if (ENTITY_TABLES[table]) {
+      // annual figures, ZATCA letters, statements of account, refunds, disputes, calendar events
       if (!doc.entityId || !canEntity_(s, doc.entityId) || !readTable_(ss, 'entities', doc.entityId)[0]) throw new Error('forbidden');
       if (prev && prev.entityId !== doc.entityId) throw new Error('forbidden');
     } else if (table === 'settings') {
@@ -352,6 +356,27 @@ function remove_(s, table, id) {
     if (table === 'datasets') deleteDoc_(ss, 'rows', id);
     deleteDoc_(ss, table, id);
     tenantAudit_(s, 'delete', table, id, d.label || d.name || d.period || '');
+  });
+}
+
+// Review notes on an exercise: a manager raises and clears them; anyone else may
+// only reply. Sign-off is refused while one is open.
+function guardReviews_(s, prev, doc) {
+  var before = (prev && prev.reviews) || [], after = doc.reviews || [];
+  if (!Array.isArray(after)) throw new Error('bad_doc');
+  if (after.length > 500) throw new Error('bad_doc');
+  after.forEach(function (r) {
+    if (!r || typeof r !== 'object') throw new Error('bad_doc');
+    checkId_(r.id);
+    ['text', 'reply', 'checkId', 'by', 'clearedBy'].forEach(function (k) { if (r[k] != null) r[k] = String(r[k]).slice(0, 2000); });
+  });
+  if (s.user.role === 'owner' || s.user.role === 'manager') return;
+  // the stored notes stand; only the replies sent for them are taken
+  var sent = {}; after.forEach(function (r) { sent[r.id] = r; });
+  doc.reviews = before.map(function (r) {
+    var o = JSON.parse(JSON.stringify(r)), n = sent[r.id];
+    if (n && n.reply !== o.reply) { o.reply = n.reply; o.repliedBy = s.user.name; o.repliedAt = now_(); }
+    return o;
   });
 }
 
