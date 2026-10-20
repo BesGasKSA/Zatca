@@ -211,7 +211,7 @@
       Z.fld('checkId', t('Linked check'), f.checkId, 'text', lk ? 'disabled' : '') +
       Z.fld('discoveredOn', t('Error discovered on'), f.discoveredOn || Z.today(), 'date', lk ? 'disabled' : '', t('Starts the 20-day clock for an amended return.')) +
       Z.fld('correctedOn', t('Amended return filed on'), f.correctedOn, 'date', lk ? 'disabled' : '') +
-      Z.fld('correctedPeriod', t('Or corrected in the return for period'), f.correctedPeriod, 'text', (lk ? 'disabled ' : '') + 'placeholder="2026-10"') + '</form>',
+      Z.fld('correctedPeriod', t('Or corrected in the return for period'), f.correctedPeriod, 'text', (lk ? 'disabled ' : '') + 'placeholder="2026-10"') + ((f.id && Z.attachHtml && 'findings:' + f.id) ? '<div style="grid-column:1/-1">' + Z.attachHtml((f.id && Z.attachHtml && 'findings:' + f.id), S.ex.entityId) + '</div>' : '') + '</form>',
       (f.id && !lk ? '<button class="btn danger" data-act="delfinding" data-id="' + f.id + '">' + t('Delete') + '</button>' : '') + '<button class="btn" data-act="closemodal">' + t('Cancel') + '</button>' + (lk ? '' : '<button class="btn primary" data-act="savefinding">' + t('Save finding') + '</button>'));
     Z.CHG.fcalc();
   }
@@ -347,6 +347,8 @@
       jobs.push(Z.save('statements', Object.assign({ id: entId + '_soa', entityId: entId, label: 'ZATCA statement of account' }, d.statement)));
       d.disputes.forEach(function (x) { jobs.push(Z.save('disputes', Object.assign({ entityId: entId, label: x.reference }, x))); });
       d.refunds.forEach(function (x) { jobs.push(Z.save('refunds', Object.assign({ entityId: entId, label: x.period }, x))); });
+      jobs.push(Z.save('corporate', Object.assign({ id: entId + '_corp_2026', entityId: entId, year: 2026, label: 'Income tax 2026' }, d.corporate)));
+      jobs.push(Z.save('devices', { id: entId + '_egs', entityId: entId, list: d.devices, label: 'E-invoicing devices' }));
       jobs.push(Z.save('registers', Object.assign({ id: entId + '_reg', entityId: entId, label: 'VAT adjustments' }, d.registers)));
       d.events.forEach(function (x) { jobs.push(Z.save('events', Object.assign({ entityId: entId, label: x.title }, x))); });
       var ent2 = { name: 'Al Noor Logistics LLC', nameAr: 'النور للخدمات اللوجستية', trn: '311987654300003', cr: '1010223344', vatFreq: 'quarterly', whtRegistered: false, erp: 'Odoo', active: true, demo: true, mapping: { outputVat: '2210', inputVat: '1410', revenue: '4*' } };

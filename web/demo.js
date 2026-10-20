@@ -43,6 +43,11 @@
  *     was declared a month late (VAT 30,000) with a late invoice; a EUR invoice at 4.05
  *     against a SAMA rate of 4.38 (VAT 1,980); housing let below market to an
  *     exempt related company (VAT 7,500 on the SAR 50,000 gap)
+ *   - income tax 2026 (40% non-Saudi owned): last year's SAR 2.4m tax less 200k WHT
+ *     makes three advance payments of 550,000; the September one is unpaid; transfer
+ *     pricing at SAR 6.7m needs both files and the master file is not ready
+ *   - e-invoicing devices: the POS unit POS-02 stamped invoices on a CSID that expired
+ *     on 30 Sep 2026; the ERP server's renews in March 2027
  *   - management fees to the parent with no reverse-charge VAT; a reverse-charged
  *     training service with no WHT line
  *   - WHT filed and paid 2 days late (late, but under 30 days: no fine)
@@ -305,6 +310,14 @@
       events: [
         { title: 'Quarterly tax risk review with the board', tax: 'OTHER', date: '2026-10-25', repeat: 'quarterly', note: 'Exposure, open findings, disputes and refunds' },
         { title: 'RETT payment: warehouse sale (deed 4301928)', tax: 'RETT', date: '2026-10-14', repeat: '', doneDates: ['2026-10-14'] }
+      ],
+      corporate: { fyEnd: '2026-12-31', foreignSharePct: 40, taxableProfit: 10500000, priorYearTax: 2400000, priorYearWht: 200000, filedOn: '',
+        instalments: [{ paidOn: '2026-06-28', amount: 550000 }, { paidOn: '', amount: null }],
+        transactions: [{ party: 'Noor Holding BV', country: 'Netherlands', type: 'management', amount: 4200000 }, { party: 'Noor Holding BV', country: 'Netherlands', type: 'loans', amount: 2500000 }],
+        groupRevenue: 1800000000, disclosureFiledOn: '', localFileReady: 'yes', masterFileReady: 'no' },
+      devices: [
+        { name: 'NetSuite e-invoicing server', code: 'ERP-01', type: 'server', location: 'Riyadh head office', csidIssuedOn: '2025-03-01', csidExpiresOn: '2027-03-01', status: 'active' },
+        { name: 'Showroom POS', code: 'POS-02', type: 'pos', location: 'Jeddah showroom', csidIssuedOn: '2025-09-30', csidExpiresOn: '2026-09-30', status: 'active' }
       ],
       registers: {
         capital: [

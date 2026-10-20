@@ -201,7 +201,7 @@
       Z.fld('submittedOn', t('Submitted on'), r.submittedOn, 'date') + Z.fld('infoRequestedOn', t('ZATCA asked for documents on'), r.infoRequestedOn, 'date') +
       Z.fld('infoDueOn', t('Documents due by (if ZATCA gave a date)'), r.infoDueOn, 'date') + Z.fld('approvedOn', t('Approved on'), r.approvedOn, 'date') +
       Z.fld('paidOn', t('Paid on'), r.paidOn, 'date') + Z.fld('paidAmount', t('Amount received (SAR)'), r.paidAmount, 'number', 'step="0.01" min="0"') + Z.fld('owner', t('Owner'), r.owner, 'text') +
-      '<label class="f" style="grid-column:1/-1"><span>' + t('Notes') + '</span><textarea name="note">' + esc(r.note || '') + '</textarea></label></form>',
+      '<label class="f" style="grid-column:1/-1"><span>' + t('Notes') + '</span><textarea name="note">' + esc(r.note || '') + '</textarea></label>' + ((r.id && 'refunds:' + r.id) ? '<div style="grid-column:1/-1">' + Z.attachHtml((r.id && 'refunds:' + r.id), r.entityId) + '</div>' : '') + '</form>',
       (r.id && can ? '<button class="btn danger" data-act="delrow" data-tb="refunds" data-id="' + r.id + '">' + t('Delete') + '</button>' : '') + '<button class="btn" data-act="closemodal">' + t('Cancel') + '</button>' + (can ? '<button class="btn primary" data-act="saverefund">' + t('Save') + '</button>' : ''));
   };
   Z.ACT.saverefund = function () {
@@ -266,7 +266,7 @@
       Z.fld('hearingOn', t('Committee hearing on'), d.hearingOn, 'date') + Z.fld('committeeDecisionOn', t('Committee decision on'), d.committeeDecisionOn, 'date') +
       Z.fld('paidAmount', t('Paid so far (SAR)'), d.paidAmount, 'number', 'step="0.01" min="0"', t('Paying the undisputed part stops late-payment fines on it.')) + Z.fld('reliefAmount', t('Relief obtained (SAR)'), d.reliefAmount, 'number', 'step="0.01" min="0"') +
       Z.fld('owner', t('Owner'), d.owner, 'text') + Z.fld('soaRef', t('Reference on the statement of account'), d.soaRef, 'text') +
-      '<label class="f" style="grid-column:1/-1"><span>' + t('Grounds and evidence') + '</span><textarea name="grounds">' + esc(d.grounds || '') + '</textarea></label></form>',
+      '<label class="f" style="grid-column:1/-1"><span>' + t('Grounds and evidence') + '</span><textarea name="grounds">' + esc(d.grounds || '') + '</textarea></label>' + ((d.id && 'disputes:' + d.id) ? '<div style="grid-column:1/-1">' + Z.attachHtml((d.id && 'disputes:' + d.id), d.entityId) + '</div>' : '') + '</form>',
       (d.id && can ? '<button class="btn danger" data-act="delrow" data-tb="disputes" data-id="' + d.id + '">' + t('Delete') + '</button>' : '') + '<button class="btn" data-act="closemodal">' + t('Cancel') + '</button>' + (can ? '<button class="btn primary" data-act="savedispute">' + t('Save') + '</button>' : ''), true);
   };
   Z.ACT.savedispute = function () {

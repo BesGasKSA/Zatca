@@ -258,13 +258,14 @@
     file.arrayBuffer().then(function (buf) {
       UP.wb = XLSX.read(buf, { type: 'array', cellDates: true });
       UP.sheet = UP.wb.SheetNames[0];
-      prepSheet(); mapModal();
+      // a column layout saved for this company and file type is applied when it fits
+      return Z.get('profiles', S.ex.entityId + '_' + UP.kind).catch(function () { return null; }).then(function (pf) { UP.profile = pf; prepSheet(); mapModal(); });
     }).catch(function (e) { Z.toast(t('Could not read this file:') + ' ' + e.message, true); });
   }
   function prepSheet() {
     UP.aoa = XLSX.utils.sheet_to_json(UP.wb.Sheets[UP.sheet], { header: 1, raw: true, defval: '' });
-    var d = E.detectHeader(UP.aoa, UP.kind);
-    UP.headerRow = d.row; UP.map = d.map;
+    var d = E.detectHeader(UP.aoa, UP.kind), pf = UP.profile && E.applyProfile(UP.aoa, UP.profile.headers);
+    UP.headerRow = pf ? pf.row : d.row; UP.map = pf ? Object.assign({}, d.map, pf.map) : d.map; UP.usedProfile = !!pf;
   }
   function mapModal() {
     var K = E.KINDS[UP.kind], hdr = UP.aoa[UP.headerRow] || [];
@@ -275,6 +276,7 @@
     var prev = res.rows.slice(0, 8);
     var body = '<div class="grid g3"><label class="f"><span>' + t('Sheet') + '</span><select data-chg="upsheet">' + UP.wb.SheetNames.map(function (n) { return '<option' + (n === UP.sheet ? ' selected' : '') + '>' + esc(n) + '</option>'; }).join('') + '</select></label>' +
       '<label class="f"><span>' + t('Header row') + '</span><input type="number" min="1" value="' + (UP.headerRow + 1) + '" data-chg="uphdr"></label><div class="f"><span class="muted" style="font-size:13px">' + t('File') + '</span><p style="margin:6px 0 0">' + esc(UP.fileName) + '</p></div></div>' +
+      (UP.usedProfile ? '<p class="zk-profile">' + Z.icon('bookmark-simple') + t('Columns matched with the layout saved for this company.') + (UP.profile.erp ? ' (' + esc(UP.profile.erp) + ')' : '') + '</p>' : '') +
       '<h3 style="margin:16px 0 8px">' + t('Match the columns') + '</h3><div class="grid g3">' + K.fields.map(function (f) {
         return '<label class="f"><span>' + esc(fieldLabel(f.k)) + (f.req ? ' *' : '') + '</span><select data-chg="upmap" data-f="' + f.k + '">' + colOpts(UP.map[f.k]) + '</select></label>';
       }).join('') + '</div>' +
@@ -295,6 +297,8 @@
       return Z.saveEx().then(function () { Z.toast(t('VAT return figures loaded')); Z.changed(); });
     }
     var ds = { parentId: S.ex.id, kind: UP.kind, fileName: UP.fileName, sheet: UP.sheet, headerRow: UP.headerRow, mapping: UP.map, rowCount: rows.length, errors: UP.result.errors.length, uploadedAt: new Date().toISOString(), label: UP.fileName };
+    var ent = Z.entity(S.ex.entityId) || {};
+    if (Z.can('preparer')) Z.save('profiles', { id: S.ex.entityId + '_' + UP.kind, entityId: S.ex.entityId, kind: UP.kind, erp: ent.erp || '', headers: E.profileFrom(UP.aoa[UP.headerRow], UP.map), label: (ent.erp || '') + ' ' + UP.kind }).catch(function () {});
     Z.save('datasets', ds).then(function (d) {
       return Z.save('rows', Object.assign({ id: d.id, parentId: S.ex.id }, pack(rows))).then(function () {
         Z.closeModal(); Z.toast(Z.count(rows.length) + ' ' + t('rows saved')); S.loaded = false; Z.route();

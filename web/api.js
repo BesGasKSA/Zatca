@@ -89,6 +89,7 @@
         if (p.orgName) localStorage.setItem('zr_local_org', p.orgName);
         return Promise.resolve({ ok: true, user: user, tenant: tenant });
       case 'list':
+        if (p.table === 'files') return Promise.reject(Object.assign(new Error('forbidden'), { code: 'forbidden' }));
         return self.all(p.table).then(function (m) {
           var docs = Object.keys(m).map(function (k) { return m[k]; }).filter(function (d) { return !p.parentId || d.parentId === p.parentId; });
           if (p.table === 'audit') docs.sort(function (a, b) { return a.at < b.at ? 1 : -1; });
@@ -124,6 +125,7 @@
             jobs.push(self.all(t).then(function (mm) { Object.keys(mm).forEach(function (k) { if (mm[k].parentId === p.id) delete mm[k]; }); return self.put(t, mm); }));
           });
           if (p.table === 'datasets') jobs.push(self.all('rows').then(function (mm) { delete mm[p.id]; return self.put('rows', mm); }));
+          if (p.table === 'attachments') jobs.push(self.all('files').then(function (mm) { delete mm[p.id]; return self.put('files', mm); }));
           return Promise.all(jobs).then(function () { self.audit('delete', p.table, p.id, d ? (d.name || d.period || d.title || '') : ''); return { ok: true }; });
         });
       case 'usersList':

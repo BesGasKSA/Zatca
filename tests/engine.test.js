@@ -421,4 +421,47 @@ t('adjustments total: 54,480 to pay and 15,000 to reclaim, settings editable', f
   var empty = E.adjustments({}, {}, '2026-10-20'); assert.ok(empty.checks.every(function (c) { return c.status === 'na'; })); assert.strictEqual(empty.exposure, 0);
 });
 
+console.log('income tax, transfer pricing, devices, VAT group, import profiles');
+t('CT1: SAR 2.4m tax last year less 200k WHT makes three advance payments of 550,000; the September one is overdue', function () {
+  var c = E.citStatus(demo.corporate, {}, '2026-10-20');
+  assert.strictEqual(c.instalment, 550000); assert.deepStrictEqual(c.rows.map(function (r) { return r.due; }), ['2026-06-30', '2026-09-30', '2026-12-31']);
+  assert.deepStrictEqual(c.rows.map(function (r) { return r.state; }), ['paid', 'overdue', 'due']); assert.strictEqual(c.rows[1].fine, 0, 'under 30 days: no fine yet');
+  assert.strictEqual(byId(c.checks, 'CT1').status, 'fail'); assert.strictEqual(c.tax, 840000, '20% of the 40% non-Saudi share of 10.5m');
+  assert.strictEqual(E.citStatus(demo.corporate, {}, '2026-11-15').rows[1].fine, 5500, 'after 46 days: 1% for one full 30 days');
+});
+t('CT1: no advance payments under SAR 2m of tax, or when an instalment would be under SAR 500,000; a June year end shifts the months', function () {
+  assert.strictEqual(E.citStatus({ priorYearTax: 1900000 }, {}, '2026-10-20').required, false);
+  assert.strictEqual(E.citStatus({ priorYearTax: 2000000, priorYearWht: 100000 }, {}, '2026-10-20').required, false, '25% of 1.9m is under 500k');
+  assert.deepStrictEqual(E.citStatus({ fyEnd: '2026-06-30', priorYearTax: 4000000 }, {}, '2026-01-01').rows.map(function (r) { return r.due; }), ['2025-12-31', '2026-03-31', '2026-06-30']);
+});
+t('TP: SAR 6.7m of controlled transactions needs both files; the master file is missing; the group is under the CbCR threshold', function () {
+  var p = E.tpStatus(demo.corporate, {}, '2026-10-20');
+  assert.strictEqual(p.total, 6700000); assert.ok(p.filesRequired);
+  assert.deepStrictEqual(p.checks.map(function (c) { return c.status; }), ['warn', 'fail', 'pass']);
+  assert.strictEqual(E.tpStatus({ fyEnd: '2025-12-31', transactions: [{ amount: 100 }] }, {}, '2026-10-20').checks[0].status, 'fail', 'disclosure form overdue after 120 days');
+});
+t('EG: the POS unit stamps on an expired CSID; renewals inside 30 days warn; unknown units are caught', function () {
+  var g = E.egsStatus(demo.devices, ['ERP-01', 'POS-02'], {}, '2026-10-20');
+  assert.deepStrictEqual(g.list.map(function (x) { return x.state; }), ['ok', 'expired']); assert.strictEqual(byId(g.checks, 'EG1').status, 'fail'); assert.strictEqual(byId(g.checks, 'EG2').status, 'pass');
+  assert.strictEqual(E.egsStatus([{ code: 'A', csidExpiresOn: '2026-11-10' }], ['A', 'b-9', 'B-9'], {}, '2026-10-20').checks[0].status, 'warn');
+  assert.deepStrictEqual(E.egsStatus([{ code: 'A', csidExpiresOn: '2027-11-10' }], ['A', 'B-9', 'B-9'], {}, '2026-10-20').unregistered, ['B-9']);
+});
+t('VG: the group return must equal the members added up; a member without an exercise is flagged', function () {
+  var m = [{ name: 'A', trn: '310123456700003', exercises: [{ period: '2026-09', summary: { sales: 1000, outputVat: 150, inputVat: 60 } }] }, { name: 'B', trn: '311987654300003', exercises: [{ period: '2026-09', summary: { sales: 500, outputVat: 75, inputVat: 30 } }] }];
+  var ok = E.vatGroupStatus({ returns: { '2026-09': { sales: 1500, outputVat: 225, inputVat: 90 } } }, m, {});
+  assert.strictEqual(ok.checks[0].status, 'pass'); assert.strictEqual(ok.checks[1].status, 'pass');
+  var low = E.vatGroupStatus({ returns: { '2026-09': { sales: 1500, outputVat: 200, inputVat: 90 } } }, m, {});
+  assert.strictEqual(low.checks[0].status, 'fail'); assert.strictEqual(low.exposure, 25, 'output VAT under-declared by the group');
+  assert.strictEqual(E.vatGroupStatus({ returns: { '2026-08': {} } }, m, {}).lines[0].status, 'warn');
+  assert.strictEqual(E.vatGroupStatus({}, [{ name: 'X', trn: '123' }], {}).checks[1].status, 'fail', 'an invalid TRN cannot be in a group');
+});
+t('import profiles: a saved column layout maps the next file even when the columns move', function () {
+  var first = [['Report'], ['Doc No', 'Posting', 'Kind', 'VAT cat', 'Net', 'Tax']];
+  var prof = E.profileFrom(first[1], { invoice: 0, date: 1, vat: 5 });
+  assert.deepStrictEqual(prof, { invoice: 'doc no', date: 'posting', vat: 'tax' });
+  var next = [['x'], ['y'], ['Tax', 'Doc no', 'Something', 'POSTING']];
+  assert.deepStrictEqual(E.applyProfile(next, prof), { row: 2, map: { invoice: 1, date: 3, vat: 0 } });
+  assert.strictEqual(E.applyProfile([['other', 'columns']], prof), null);
+});
+
 console.log('\n' + passed + ' passed' + (process.exitCode ? ', some FAILED' : ''));

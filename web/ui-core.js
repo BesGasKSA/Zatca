@@ -283,6 +283,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     h += nav('#/' + tx + '/dashboard', t('Dashboard'), 'squares-four', view === 'dashboard');
     h += nav('#/' + tx + '/insights', t('Company 360'), 'chart-line-up', view === 'insights');
     h += nav('#/' + tx + '/reports', t('Reports'), 'chart-bar', view === 'reports');
+    h += nav('#/' + tx + '/board', t('Board report'), 'presentation-chart', view === 'board');
     if (!wht) h += nav('#/' + tx + '/adjust', t('VAT adjustments'), 'sliders-horizontal', view === 'adjust');
     if (ex) {
       var ent = Z.entity(ex.entityId) || {}, sc = Z.taxScore(ex.summary), crit = Z.planFor && S.R ? Z.planFor().critical : 0;
@@ -296,6 +297,9 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     h += nav('#/' + tx + '/requests', t('ZATCA requests'), 'envelope-simple', view === 'requests');
     h += nav('#/' + tx + '/disputes', t('Disputes and penalties'), 'gavel', view === 'disputes');
     h += nav('#/' + tx + '/refunds', t('VAT refunds'), 'hand-coins', view === 'refunds');
+    h += nav('#/' + tx + '/corporate', t('Income tax and TP'), 'bank', view === 'corporate');
+    if (!wht) h += nav('#/' + tx + '/devices', t('E-invoicing devices'), 'cpu', view === 'devices');
+    if (!wht) h += nav('#/' + tx + '/group', t('VAT group'), 'tree-structure', view === 'group');
     h += '<div class="group">' + t('Organisation') + '</div>';
     h += nav('#/' + tx + '/entities', t('Entities'), 'buildings', view === 'entities' || view === 'entity' || view === 'annual');
     [['settings', t('Settings'), 'gear-six', 'manager'], ['users', t('Users'), 'users-three', 'owner'], ['audit', t('Audit trail'), 'list-checks', 'manager']].forEach(function (i) {
@@ -327,7 +331,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       '<button class="btn ghost small" data-act="theme" aria-label="' + t('Switch light/dark') + '">' + Z.icon('circle-half') + '</button><button class="btn ghost small lang-btn" data-act="lang">' + (S.lang === 'ar' ? 'English' : 'العربية') + '</button>' +
       Z.exitButton('btn small exit-btn');
   }
-  Z.CHG.entity = function (el) { S.entityId = el.value; localStorage.setItem('zr_entity', el.value); location.hash = '#/' + S.tax + '/' + ({ insights: 'insights', account: 'account', adjust: 'adjust' }[(S.route || [])[0]] || 'entity') + '/' + el.value; };
+  Z.CHG.entity = function (el) { S.entityId = el.value; localStorage.setItem('zr_entity', el.value); location.hash = '#/' + S.tax + '/' + ({ insights: 'insights', account: 'account', adjust: 'adjust', corporate: 'corporate', devices: 'devices' }[(S.route || [])[0]] || 'entity') + '/' + el.value; };
   Z.entity = function (id) { return S.entities.filter(function (e) { return e.id === id; })[0]; };
   Z.entName = function (e) { return e ? (S.lang === 'ar' && e.nameAr ? e.nameAr : e.name) : ''; };
 
@@ -598,6 +602,9 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       fld('bd_minMonths', t('Bad-debt relief: months overdue'), V.badDebt.minMonths, 'number', 'step="1"', t('Adviser summaries; verify.')) +
       fld('adv_invoiceDays', t('Advance payments: invoice within (days after month end)'), V.advances.invoiceDays, 'number', 'step="1"', t('Adviser summaries; verify.')) +
       fld('fx_usdPeg', t('SAR per US dollar (peg)'), V.fx.usdPeg, 'number', 'step="0.0001"') +
+      fld('cit_rate', t('Income tax rate on the non-Saudi share'), V.cit.rate, 'number', 'step="0.01"') + fld('cit_advanceThreshold', t('Advance payments when last year\'s tax reached (SAR)'), V.cit.advanceThreshold, 'number', 'step="1"', t('Adviser summaries; verify.')) +
+      fld('cit_minInstalment', t('No advance payment under (SAR)'), V.cit.minInstalment, 'number', 'step="1"', t('Adviser summaries; verify.')) + fld('tp_fileThreshold', t('Transfer pricing files from (SAR)'), V.tp.fileThreshold, 'number', 'step="1"', t('Adviser summaries; verify.')) +
+      fld('tp_cbcrThreshold', t('Country-by-country report above group revenue (SAR)'), V.tp.cbcrThreshold, 'number', 'step="1"', t('Adviser summaries; verify.')) + fld('egs_renewDays', t('Renew device certificates this many days ahead'), V.egs.renewDays, 'number', 'step="1"') +
       fld('zakatp_latePctPer30Days', t('Zakat late fine % per 30 days (estimate)'), Z.r(V.zakat.latePctPer30Days * 100), 'number', 'step="0.01"') +
       fld('sugar_mid', t('Sweetened drinks 5-7.99 g sugar: SAR per litre'), V.sugarTiers.tiers[1][2], 'number', 'step="0.01"') +
       fld('sugar_high', t('Sweetened drinks 8 g sugar or more: SAR per litre'), V.sugarTiers.tiers[2][2], 'number', 'step="0.01"', t('Per-litre tiers since 1 Jan 2026; under 5 g and sugar-free pay nothing.')) +
@@ -631,7 +638,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
         else if (k.indexOf('rett_') === 0) { v.rett = v.rett || {}; v.rett[k.slice(5)] = +val / 100; }
         else if (k.indexOf('rettd_') === 0) { v.rett = v.rett || {}; v.rett[k.slice(6)] = +val; }
         else if (k.indexOf('disp_') === 0) { v.disputes = v.disputes || {}; v.disputes[k.slice(5)] = +val; }
-        else if (/^(rfd|cap|bd|adv|fx)_/.test(k)) { var grp = { rfd: 'refunds', cap: 'capitalAssets', bd: 'badDebt', adv: 'advances', fx: 'fx' }[k.split('_')[0]]; v[grp] = v[grp] || {}; v[grp][k.slice(k.indexOf('_') + 1)] = +val; }
+        else if (/^(rfd|cap|bd|adv|fx|cit|tp|egs)_/.test(k)) { var grp = { rfd: 'refunds', cap: 'capitalAssets', bd: 'badDebt', adv: 'advances', fx: 'fx', cit: 'cit', tp: 'tp', egs: 'egs' }[k.split('_')[0]]; v[grp] = v[grp] || {}; v[grp][k.slice(k.indexOf('_') + 1)] = +val; }
         else if (k.indexOf('zakatp_') === 0) { v.zakat = v.zakat || {}; v.zakat[k.slice(7)] = +val / 100; }
         else if (k.indexOf('sugar_') === 0) { v.sugarTiers = v.sugarTiers || { tiers: [[0, 5, 0], [5, 8, 0.79], [8, 1000, 1.09]] }; v.sugarTiers.tiers[k === 'sugar_mid' ? 1 : 2][2] = +val; }
         else if (k.indexOf('zakat_') === 0) { v.zakat = v.zakat || {}; v.zakat[k.slice(6)] = +val; }

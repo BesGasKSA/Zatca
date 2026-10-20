@@ -60,6 +60,12 @@
     badDebt: { minMonths: 12, notifyCustomer: true },
     advances: { invoiceDays: 15 },
     fx: { usdPeg: 3.75 },
+    // Wave 3. Income tax on the non-Saudi share 20%; advance payments when last year's tax was
+    // SAR 2m+ (25% each, none under SAR 500k); TP files at SAR 6m of controlled transactions,
+    // CbCR above SAR 3.2bn: adviser summaries, editable, labelled "verify".
+    cit: { rate: 0.20, advanceThreshold: 2000000, minInstalment: 500000, instalmentPct: 0.25, dueDays: 120, latePctPer30Days: 0.01 },
+    tp: { fileThreshold: 6000000, cbcrThreshold: 3200000000, dueDays: 120 },
+    egs: { renewDays: 30 },
     materiality: 50000,
     benfordMin: 300,
     glBasis: 'movement',  // movement | gross - how TB VAT accounts are read when no GL is given
@@ -552,6 +558,22 @@
       if (best >= 0) { map[f.k] = best; used[best] = 1; }
     });
     return map;
+  };
+
+  // Import profiles: once a company's file has been mapped, remember each field's header
+  // text; the next file whose header row holds the same texts is mapped the same way.
+  E.profileFrom = function (headerRow, map) {
+    var h = {}; Object.keys(map || {}).forEach(function (f) { var v = normHeader((headerRow || [])[map[f]]); if (v) h[f] = v; });
+    return h;
+  };
+  E.applyProfile = function (aoa, headers) {
+    var want = Object.keys(headers || {}); if (!want.length) return null;
+    for (var r = 0; r < Math.min(15, (aoa || []).length); r++) {
+      var row = (aoa[r] || []).map(normHeader), map = {}, ok = true;
+      want.forEach(function (f) { var i = row.indexOf(headers[f]); if (i < 0) ok = false; else map[f] = i; });
+      if (ok) return { row: r, map: map };
+    }
+    return null;
   };
 
   // The header row is the first of the top 15 rows that names the most fields.
@@ -2826,6 +2848,112 @@
     var due = r2(cDue + bDue + aDue + fDue + rDue), recover = r2(cRec + bRec + fRec);
     return { checks: checks, capital: cap, baddebts: bd, advances: adv, fx: fx, related: rp, exposure: due, recover: recover,
       issues: checks.filter(function (c) { return c.status === 'fail' || c.status === 'warn'; }).length };
+  };
+
+  // ================================================================== wave 3: income tax, transfer pricing, devices, VAT groups
+  function monthEnd(y, m) { return new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10); }
+  function lateFine(amount, days, pctPer30) { return days >= 30 ? r2(amount * pctPer30 * Math.floor(days / 30)) : 0; }
+
+  // CT. Income tax on the non-Saudi share and advance payments (Income Tax Law Art. 70,
+  // IR Art. 64 as summarised by advisers): when last year's liability was SAR 2m or more,
+  // three instalments of 25% of (last year's tax - WHT suffered), due at the end of months
+  // 6, 9 and 12 of the tax year; none when an instalment would be under SAR 500,000 (verify).
+  E.citStatus = function (c, S, today) {
+    S = E.mergeSettings(S); today = today || new Date().toISOString().slice(0, 10); c = c || {};
+    var C = S.cit, fyEnd = E.date(c.fyEnd) || (today.slice(0, 4) + '-12-31'), y = +fyEnd.slice(0, 4), m = +fyEnd.slice(5, 7);
+    var share = pct(c.foreignSharePct, 0) / 100, profit = E.num(c.taxableProfit), tax = isFinite(profit) && profit > 0 ? r2(profit * share * C.rate) : 0;
+    var prior = pos(c.priorYearTax), wht = pos(c.priorYearWht), inst = r2(Math.max(0, prior - wht) * C.instalmentPct);
+    var required = prior >= C.advanceThreshold && inst >= C.minInstalment;
+    // months 6, 9, 12 of the tax year that ends at fyEnd
+    var due = [6, 9, 12].map(function (k) { var mm = m - 12 + k; var yy = y + Math.floor((mm - 1) / 12); mm = ((mm - 1) % 12 + 12) % 12 + 1; return monthEnd(yy, mm); });
+    var paid = Array.isArray(c.instalments) ? c.instalments : [];
+    var rows = required ? due.map(function (d, i) {
+      var p = paid[i] && typeof paid[i] === 'object' ? paid[i] : {}, on = E.date(p.paidOn), amt = pos(p.amount), short = r2(Math.max(0, inst - amt));
+      var late = on ? Math.max(0, daysBetween(d, on)) : (today > d ? daysBetween(d, today) : 0);
+      var st = on && short <= S.tolAbs ? (late ? 'late' : 'paid') : today > d ? 'overdue' : 'due';
+      return { n: i + 1, due: d, amount: inst, paid: amt, paidOn: on, short: short, daysLate: late, state: st, fine: st === 'paid' ? 0 : lateFine(st === 'late' ? inst : short, late, C.latePctPer30Days) };
+    }) : [];
+    var returnDue = addD(fyEnd, C.dueDays), filed = E.date(c.filedOn);
+    var owed = rows.filter(function (r) { return r.state === 'overdue'; }).reduce(function (s, r) { return s + r.short; }, 0);
+    var fines = rows.reduce(function (s, r) { return s + r.fine; }, 0);
+    var checks = [
+      { id: 'CT1', title: 'Advance payments of income tax made on time', titleAr: 'سداد الدفعات المعجلة لضريبة الدخل في موعدها', area: 'cit',
+        status: !prior ? 'na' : !required ? 'pass' : rows.some(function (r) { return r.state === 'overdue'; }) ? 'fail' : rows.some(function (r) { return r.state === 'late'; }) ? 'warn' : 'pass',
+        missing: prior ? '' : 'Last year\'s income tax liability', a: required ? inst : 0, aLabel: 'Each instalment', exposure: r2(owed + fines),
+        note: required ? 'Last year\'s tax was SAR ' + prior.toLocaleString('en-US') + ': three instalments of SAR ' + inst.toLocaleString('en-US') + ' are due.' : prior ? 'No advance payments are due: last year\'s tax was under SAR ' + C.advanceThreshold.toLocaleString('en-US') + ' or the instalment under SAR ' + C.minInstalment.toLocaleString('en-US') + '.' : '',
+        noteAr: required ? 'كانت ضريبة العام الماضي ' + prior.toLocaleString('en-US') + ' ريال: تستحق ثلاث دفعات معجلة قيمة كل منها ' + inst.toLocaleString('en-US') + ' ريال.' : prior ? 'لا تستحق دفعات معجلة: ضريبة العام الماضي أقل من ' + C.advanceThreshold.toLocaleString('en-US') + ' ريال أو الدفعة أقل من ' + C.minInstalment.toLocaleString('en-US') + ' ريال.' : '' },
+      { id: 'CT2', title: 'Income tax return filed within 120 days of the year end', titleAr: 'تقديم إقرار ضريبة الدخل خلال 120 يوماً من نهاية السنة', area: 'cit',
+        status: !share ? 'na' : filed ? (filed <= returnDue ? 'pass' : 'warn') : today > returnDue ? 'fail' : 'pass', missing: share ? '' : 'Non-Saudi ownership share',
+        a: tax, aLabel: 'Income tax on the non-Saudi share', exposure: !filed && today > returnDue ? r2(tax + lateFine(tax, daysBetween(returnDue, today), C.latePctPer30Days)) : 0,
+        note: 'Income tax is ' + Math.round(C.rate * 100) + '% of the taxable profit attributable to non-Saudi owners; the Saudi and GCC share pays Zakat. Return and balance due by ' + returnDue + '.', noteAr: 'ضريبة الدخل ' + Math.round(C.rate * 100) + '% من الربح الخاضع العائد للملاك غير السعوديين، وحصة السعوديين والخليجيين تخضع للزكاة. الإقرار والرصيد مستحقان بحلول ' + returnDue + '.' }
+    ];
+    return { fyEnd: fyEnd, tax: tax, share: share, prior: prior, instalment: inst, required: required, rows: rows, returnDue: returnDue, fines: r2(fines), owed: r2(owed), checks: checks,
+      exposure: r2(checks.reduce(function (s, x) { return s + (x.exposure || 0); }, 0)) };
+  };
+
+  // TP. Transfer pricing (TP Bylaws as summarised by advisers): a disclosure form with the
+  // return (120 days); master and local files when controlled transactions reach SAR 6m;
+  // CbCR notification when the group's revenue exceeds SAR 3.2bn (verify).
+  E.tpStatus = function (p, S, today) {
+    S = E.mergeSettings(S); today = today || new Date().toISOString().slice(0, 10); p = p || {};
+    var T = S.tp, tx = objs(p.transactions), total = r2(tx.reduce(function (s, x) { return s + pos(x.amount); }, 0));
+    var fyEnd = E.date(p.fyEnd) || ((+today.slice(0, 4) - 1) + '-12-31'), due = addD(fyEnd, T.dueDays), group = pos(p.groupRevenue);
+    var byType = {}; tx.forEach(function (x) { var k = String(x.type || 'other'); byType[k] = r2((byType[k] || 0) + pos(x.amount)); });
+    var files = total >= T.fileThreshold, cbcr = group > T.cbcrThreshold, past = today > due;
+    var yes = function (v) { return v === true || v === 'yes'; };
+    var checks = [
+      { id: 'TP1', title: 'Controlled transactions disclosure form filed with the return', titleAr: 'تقديم نموذج الإفصاح عن المعاملات الخاضعة للرقابة مع الإقرار', area: 'tp',
+        status: !tx.length ? 'na' : E.date(p.disclosureFiledOn) ? 'pass' : past ? 'fail' : 'warn', missing: tx.length ? '' : 'Related-party transactions for the year', a: total, aLabel: 'Controlled transactions',
+        note: 'Due with the Zakat or income tax return, ' + due + ', with a licensed accountant\'s affidavit where required.', noteAr: 'يُقدم مع إقرار الزكاة أو ضريبة الدخل بحلول ' + due + '، مع إقرار محاسب قانوني مرخص عند الحاجة.' },
+      { id: 'TP2', title: 'Master file and local file ready', titleAr: 'جاهزية الملف الرئيسي والملف المحلي', area: 'tp',
+        status: !tx.length ? 'na' : !files ? 'pass' : yes(p.localFileReady) && yes(p.masterFileReady) ? 'pass' : 'fail', a: total, aLabel: 'Controlled transactions', b: T.fileThreshold, bLabel: 'Threshold',
+        note: files ? 'Above SAR ' + T.fileThreshold.toLocaleString('en-US') + ': keep both files ready to hand over within 30 days of a ZATCA request.' : 'Below the SAR ' + T.fileThreshold.toLocaleString('en-US') + ' threshold: the files are not required, the disclosure form still is.', noteAr: files ? 'أعلى من ' + T.fileThreshold.toLocaleString('en-US') + ' ريال: جهّز الملفين لتسليمهما خلال 30 يوماً من طلب الهيئة.' : 'أقل من حد ' + T.fileThreshold.toLocaleString('en-US') + ' ريال: الملفان غير مطلوبين، ونموذج الإفصاح ما زال مطلوباً.' },
+      { id: 'TP3', title: 'Country-by-country notification', titleAr: 'إشعار التقرير على مستوى كل دولة', area: 'tp',
+        status: !group ? 'na' : !cbcr ? 'pass' : E.date(p.cbcrNotifiedOn) ? 'pass' : past ? 'fail' : 'warn', missing: group ? '' : 'Group consolidated revenue', a: group, aLabel: 'Group revenue', b: T.cbcrThreshold, bLabel: 'Threshold',
+        note: cbcr ? 'The group is above SAR ' + T.cbcrThreshold.toLocaleString('en-US') + ': each Saudi entity notifies ZATCA which entity files the report.' : 'The group is below the country-by-country threshold.', noteAr: cbcr ? 'المجموعة أعلى من ' + T.cbcrThreshold.toLocaleString('en-US') + ' ريال: تُبلغ كل منشأة سعودية الهيئة بالمنشأة التي تقدم التقرير.' : 'المجموعة أقل من حد التقرير على مستوى كل دولة.' }
+    ];
+    return { total: total, byType: byType, filesRequired: files, cbcr: cbcr, due: due, checks: checks };
+  };
+
+  // EG. E-invoicing devices (EGS units): each needs a production CSID; an expired one makes
+  // every invoice it stamps non-compliant. Units seen in the provider export but missing
+  // from the register are devices nobody looks after.
+  E.egsStatus = function (devices, seen, S, today) {
+    S = E.mergeSettings(S); today = today || new Date().toISOString().slice(0, 10);
+    var list = objs(devices).map(function (d) {
+      var exp = E.date(d.csidExpiresOn), left = exp ? daysBetween(today, exp) : null, off = d.status === 'retired';
+      return { d: d, left: left, state: off ? 'retired' : !exp ? 'unknown' : left < 0 ? 'expired' : left <= S.egs.renewDays ? 'renew' : 'ok' };
+    });
+    var known = {}; list.forEach(function (x) { known[String(x.d.code || x.d.name || '').trim().toLowerCase()] = 1; });
+    var unreg = (Array.isArray(seen) ? seen : []).map(function (u) { return String(u || '').trim(); }).filter(function (u, i, a) { return u && a.indexOf(u) === i && !known[u.toLowerCase()]; });
+    var bad = list.filter(function (x) { return x.state === 'expired'; }), soon = list.filter(function (x) { return x.state === 'renew' || x.state === 'unknown'; });
+    return { list: list, unregistered: unreg, checks: [
+      { id: 'EG1', title: 'Every device has a valid CSID', titleAr: 'لكل جهاز شهادة تشفير سارية', area: 'egs', status: !list.length ? 'na' : bad.length ? 'fail' : soon.length ? 'warn' : 'pass', missing: list.length ? '' : 'E-invoicing devices register',
+        a: bad.length, aLabel: 'Expired', note: 'Renew at least ' + S.egs.renewDays + ' days before expiry: renewal needs a new OTP from the Fatoora portal for each unit.', noteAr: 'جدّد قبل الانتهاء بـ ' + S.egs.renewDays + ' يوماً على الأقل: يتطلب التجديد رمزاً جديداً من بوابة فاتورة لكل وحدة.' },
+      { id: 'EG2', title: 'Every device that sends invoices is in the register', titleAr: 'كل جهاز يرسل فواتير مسجل في السجل', area: 'egs', status: !seen || !seen.length ? 'na' : unreg.length ? 'fail' : 'pass', missing: seen && seen.length ? '' : 'E-invoicing provider export',
+        a: unreg.length, aLabel: 'Devices not in the register', exceptions: { list: unreg.map(function (u) { return { egs: u }; }) } }
+    ] };
+  };
+
+  // VG. VAT group: one return for all members. The group return must equal the members'
+  // figures added up; every member must be a VAT-registered Saudi resident under 50% common control.
+  E.vatGroupStatus = function (g, members, S) {
+    S = E.mergeSettings(S); g = g || {};
+    var periods = Object.keys(g.returns && typeof g.returns === 'object' ? g.returns : {}).sort().reverse();
+    var lines = periods.map(function (p) {
+      var ret = g.returns[p] || {}, sum = { sales: 0, outputVat: 0, inputVat: 0 }, missing = [];
+      objs(members).forEach(function (m) { var x = (m.exercises || []).filter(function (e) { return e.period === p; })[0], sm = x && x.summary; if (!sm) { missing.push(m.name); return; } ['sales', 'outputVat', 'inputVat'].forEach(function (k) { sum[k] += pos(sm[k]); }); });
+      var d = { sales: r2(E.num(ret.sales) - sum.sales), outputVat: r2(E.num(ret.outputVat) - sum.outputVat), inputVat: r2(E.num(ret.inputVat) - sum.inputVat) };
+      ['sales', 'outputVat', 'inputVat'].forEach(function (k) { if (!isFinite(d[k])) d[k] = 0; sum[k] = r2(sum[k]); });
+      var worst = Math.max(Math.abs(d.outputVat), Math.abs(d.inputVat));
+      return { period: p, ret: ret, sum: sum, diff: d, missing: missing, status: missing.length ? 'warn' : worst <= S.tolAbs ? 'pass' : 'fail', exposure: r2(Math.max(0, -d.outputVat) + Math.max(0, d.inputVat)) };
+    });
+    var bad = objs(members).filter(function (m) { return !E.validVatNo(m.trn || '') || m.control === false; });
+    return { lines: lines, exposure: r2(lines.reduce(function (s, l) { return s + l.exposure; }, 0)), checks: [
+      { id: 'VG1', title: 'Group return equals the members added up', titleAr: 'إقرار المجموعة يساوي مجموع الأعضاء', area: 'group', status: !lines.length ? 'na' : lines.some(function (l) { return l.status === 'fail'; }) ? 'fail' : lines.some(function (l) { return l.status === 'warn'; }) ? 'warn' : 'pass', missing: lines.length ? '' : 'Group return figures' },
+      { id: 'VG2', title: 'Every member qualifies for the group', titleAr: 'كل عضو مستوفٍ لشروط المجموعة', area: 'group', status: !objs(members).length ? 'na' : bad.length ? 'fail' : 'pass', a: bad.length, aLabel: 'Members to check',
+        note: 'Saudi resident, VAT registered, under 50% common control (ownership, votes or value), not in another group.' }
+    ] };
   };
 
   root.ZEngine = E;

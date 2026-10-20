@@ -197,7 +197,7 @@ t('an open review note blocks sign-off; a preparer can only reply', function () 
   err(call({ action: 'save', token: A.token, table: 'exercises', doc: bad }), 'bad_id');
 });
 t('statements, refunds, disputes and calendar events are scoped to an accessible entity', function () {
-  ['statements', 'refunds', 'disputes', 'events', 'registers'].forEach(function (tb) {
+  ['statements', 'refunds', 'disputes', 'events', 'registers', 'corporate', 'devices', 'groups', 'profiles'].forEach(function (tb) {
     var d = ok(call({ action: 'save', token: A.token, table: tb, doc: { entityId: ent.id, label: tb } })).doc;
     assert.strictEqual(d.entityId, ent.id);
     err(call({ action: 'save', token: B.token, table: tb, doc: { entityId: ent.id } }), 'forbidden');
@@ -206,6 +206,20 @@ t('statements, refunds, disputes and calendar events are scoped to an accessible
     assert.strictEqual(ok(call({ action: 'list', token: P.token, table: tb })).docs.length, 1, 'preparer with access sees it');
     ok(call({ action: 'remove', token: A.token, table: tb, id: d.id }));
   });
+});
+t('attachments: allowed types and size only, contents never listed, deleted together', function () {
+  var data = Buffer.from('%PDF-1.4 test').toString('base64');
+  var m = ok(call({ action: 'save', token: A.token, table: 'attachments', doc: { id: 'AT-1', entityId: ent.id, owner: 'disputes:DS-1', name: '../../evil<script>.pdf', type: 'application/pdf', size: 13 } })).doc;
+  assert.ok(m.name.indexOf('/') < 0 && m.name.indexOf('<') < 0, 'file name cleaned');
+  ok(call({ action: 'save', token: A.token, table: 'files', doc: { id: 'AT-1', entityId: ent.id, data: data } }));
+  err(call({ action: 'save', token: A.token, table: 'attachments', doc: { entityId: ent.id, owner: 'disputes:DS-1', name: 'x.html', type: 'text/html', size: 10 } }), 'bad_file');
+  err(call({ action: 'save', token: A.token, table: 'attachments', doc: { entityId: ent.id, owner: 'disputes:DS-1', name: 'x.pdf', type: 'application/pdf', size: 3 * 1024 * 1024 } }), 'file_too_large');
+  err(call({ action: 'save', token: A.token, table: 'files', doc: { entityId: ent.id, data: '<script>alert(1)</script>' } }), 'file_too_large');
+  err(call({ action: 'list', token: A.token, table: 'files' }), 'forbidden');
+  assert.strictEqual(ok(call({ action: 'get', token: A.token, table: 'files', id: 'AT-1' })).doc.data, data);
+  assert.strictEqual(ok(call({ action: 'get', token: B.token, table: 'files', id: 'AT-1' })).doc, null, 'another tenant sees nothing');
+  ok(call({ action: 'remove', token: A.token, table: 'attachments', id: 'AT-1' }));
+  assert.strictEqual(ok(call({ action: 'get', token: A.token, table: 'files', id: 'AT-1' })).doc, null, 'content removed with its attachment');
 });
 t('disabling a user ends their session', function () {
   var users = ok(call({ action: 'usersList', token: A.token })).users, pat = users.filter(function (u) { return u.email === 'pat@alpha.sa'; })[0];

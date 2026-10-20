@@ -1033,3 +1033,42 @@ a.zk-it:hover { background: var(--surface-2); }
 .zk-yr.miss { background: var(--warn-soft); border: 1px dashed var(--warn); }
 .zk-cbx { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; }
 @media (max-width: 700px) { .zk-div-row { grid-template-columns: 1fr 2px 1fr; } .zk-div-l { grid-column: 1 / -1; padding: 0 0 2px; } }
+
+/* ---------------------------------------------------------------- wave 3: income tax, devices, group, board, attachments */
+.zk-inst { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin: 6px 0 12px; }
+.zk-inst-c { position: relative; border: 1px solid var(--line); border-radius: var(--r-m); padding: 14px 14px 6px; display: grid; gap: 3px; background: var(--surface); overflow: hidden; animation: rise .45s var(--ease) both; animation-delay: calc(var(--i, 0) * 70ms); }
+.zk-inst-c::before { content: ''; position: absolute; inset-block-start: 0; inset-inline: 0; height: 4px; background: var(--line-2); }
+.zk-inst-c.st-paid::before { background: var(--pass); } .zk-inst-c.st-late::before { background: var(--warn); } .zk-inst-c.st-overdue::before { background: var(--fail); }
+.zk-inst-c > b { font-size: 20px; font-weight: 800; }
+.zk-inst-c .zk-k { font-size: 12px; font-weight: 700; color: var(--ink-3); }
+.zk-inst-s { font-size: 12.5px; font-weight: 700; color: var(--ink-2); }
+.zk-inst-c.st-overdue .zk-inst-s { color: var(--fail); }
+.zk-gauge { display: grid; gap: 4px; min-width: 220px; font-size: 12px; color: var(--ink-2); text-align: end; }
+.zk-gauge-t { height: 10px; border-radius: 6px; background: var(--surface-2); overflow: hidden; }
+.zk-gauge-t i { display: block; height: 100%; width: var(--w); background: var(--accent); border-radius: 6px; transform-origin: left; animation: grow-x .8s var(--ease) both; }
+.zk-gauge-t i.over { background: var(--warn); }
+[dir="rtl"] .zk-gauge-t i { transform-origin: right; }
+.zk-dev { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-m); box-shadow: var(--shadow-1); padding: 14px 16px; display: grid; gap: 10px; animation: rise .45s var(--ease) both; animation-delay: calc(var(--i, 0) * 60ms); }
+.zk-dev header { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; }
+.zk-dev h3 { margin: 0; font-size: 15px; } .zk-dev header p { margin: 2px 0 0; font-size: 12.5px; }
+.zk-dev-ico { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); font-size: 20px; }
+.zk-dev-st { font-size: 12px; font-weight: 750; padding: 3px 10px; border-radius: 999px; background: var(--pass-soft); color: var(--pass); white-space: nowrap; }
+.zk-dev.st-renew .zk-dev-st, .zk-dev.st-unknown .zk-dev-st { background: var(--warn-soft); color: var(--ink); }
+.zk-dev.st-expired .zk-dev-st { background: var(--fail-soft); color: var(--fail); } .zk-dev.st-retired .zk-dev-st { background: var(--surface-2); color: var(--ink-3); }
+.zk-life { height: 8px; border-radius: 5px; background: var(--surface-2); overflow: hidden; }
+.zk-life i { display: block; height: 100%; width: var(--w); background: var(--pass); transform-origin: left; animation: grow-x .8s var(--ease) both; }
+[dir="rtl"] .zk-life i { transform-origin: right; }
+.zk-dev.st-renew .zk-life i { background: var(--warn); } .zk-dev.st-expired .zk-life i { background: var(--fail); }
+.zk-life-t { margin: 0; font-size: 12.5px; color: var(--ink-2); }
+.zk-dev footer { display: flex; justify-content: flex-end; }
+.zk-members { border: 1px solid var(--line); border-radius: var(--r-s); padding: 10px 12px; display: grid; gap: 8px; margin-top: 12px; }
+.zk-board .kpis { margin: 14px 0; }
+.zk-att { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 12px; border: 1px dashed var(--line-2); border-radius: var(--r-s); margin-top: 6px; }
+.zk-att-h { display: inline-flex; gap: 6px; align-items: center; font-size: 13px; font-weight: 700; color: var(--ink-2); }
+.zk-file { display: inline-flex; align-items: center; gap: 6px; padding: 3px 4px 3px 10px; border-radius: 999px; background: var(--surface-2); font-size: 12.5px; }
+.zk-file a { display: inline-flex; gap: 5px; align-items: center; color: var(--ink); text-decoration: none; font-weight: 600; max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.zk-file small { color: var(--ink-3); }
+.zk-profile { display: flex; gap: 8px; align-items: center; margin: 10px 0 0; padding: 8px 12px; border-radius: var(--r-s); background: var(--accent-soft); font-size: 13px; font-weight: 600; }
+/* the report is always a white page: its accent and links use the light palette */
+.report { --accent: #0f766e; --accent-soft: #e6f4f1; --accent-line: #a7d8cf; } :root[data-tax="wht"] .report { --accent: #1d4ed8; --accent-soft: #e6edfb; --accent-line: #b4c6f2; }
+.report a { color: var(--accent); }

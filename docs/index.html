@@ -1047,6 +1047,45 @@ a.zk-it:hover { background: var(--surface-2); }
 .zk-cbx { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; }
 @media (max-width: 700px) { .zk-div-row { grid-template-columns: 1fr 2px 1fr; } .zk-div-l { grid-column: 1 / -1; padding: 0 0 2px; } }
 
+/* ---------------------------------------------------------------- wave 3: income tax, devices, group, board, attachments */
+.zk-inst { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin: 6px 0 12px; }
+.zk-inst-c { position: relative; border: 1px solid var(--line); border-radius: var(--r-m); padding: 14px 14px 6px; display: grid; gap: 3px; background: var(--surface); overflow: hidden; animation: rise .45s var(--ease) both; animation-delay: calc(var(--i, 0) * 70ms); }
+.zk-inst-c::before { content: ''; position: absolute; inset-block-start: 0; inset-inline: 0; height: 4px; background: var(--line-2); }
+.zk-inst-c.st-paid::before { background: var(--pass); } .zk-inst-c.st-late::before { background: var(--warn); } .zk-inst-c.st-overdue::before { background: var(--fail); }
+.zk-inst-c > b { font-size: 20px; font-weight: 800; }
+.zk-inst-c .zk-k { font-size: 12px; font-weight: 700; color: var(--ink-3); }
+.zk-inst-s { font-size: 12.5px; font-weight: 700; color: var(--ink-2); }
+.zk-inst-c.st-overdue .zk-inst-s { color: var(--fail); }
+.zk-gauge { display: grid; gap: 4px; min-width: 220px; font-size: 12px; color: var(--ink-2); text-align: end; }
+.zk-gauge-t { height: 10px; border-radius: 6px; background: var(--surface-2); overflow: hidden; }
+.zk-gauge-t i { display: block; height: 100%; width: var(--w); background: var(--accent); border-radius: 6px; transform-origin: left; animation: grow-x .8s var(--ease) both; }
+.zk-gauge-t i.over { background: var(--warn); }
+[dir="rtl"] .zk-gauge-t i { transform-origin: right; }
+.zk-dev { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-m); box-shadow: var(--shadow-1); padding: 14px 16px; display: grid; gap: 10px; animation: rise .45s var(--ease) both; animation-delay: calc(var(--i, 0) * 60ms); }
+.zk-dev header { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; }
+.zk-dev h3 { margin: 0; font-size: 15px; } .zk-dev header p { margin: 2px 0 0; font-size: 12.5px; }
+.zk-dev-ico { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); font-size: 20px; }
+.zk-dev-st { font-size: 12px; font-weight: 750; padding: 3px 10px; border-radius: 999px; background: var(--pass-soft); color: var(--pass); white-space: nowrap; }
+.zk-dev.st-renew .zk-dev-st, .zk-dev.st-unknown .zk-dev-st { background: var(--warn-soft); color: var(--ink); }
+.zk-dev.st-expired .zk-dev-st { background: var(--fail-soft); color: var(--fail); } .zk-dev.st-retired .zk-dev-st { background: var(--surface-2); color: var(--ink-3); }
+.zk-life { height: 8px; border-radius: 5px; background: var(--surface-2); overflow: hidden; }
+.zk-life i { display: block; height: 100%; width: var(--w); background: var(--pass); transform-origin: left; animation: grow-x .8s var(--ease) both; }
+[dir="rtl"] .zk-life i { transform-origin: right; }
+.zk-dev.st-renew .zk-life i { background: var(--warn); } .zk-dev.st-expired .zk-life i { background: var(--fail); }
+.zk-life-t { margin: 0; font-size: 12.5px; color: var(--ink-2); }
+.zk-dev footer { display: flex; justify-content: flex-end; }
+.zk-members { border: 1px solid var(--line); border-radius: var(--r-s); padding: 10px 12px; display: grid; gap: 8px; margin-top: 12px; }
+.zk-board .kpis { margin: 14px 0; }
+.zk-att { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 12px; border: 1px dashed var(--line-2); border-radius: var(--r-s); margin-top: 6px; }
+.zk-att-h { display: inline-flex; gap: 6px; align-items: center; font-size: 13px; font-weight: 700; color: var(--ink-2); }
+.zk-file { display: inline-flex; align-items: center; gap: 6px; padding: 3px 4px 3px 10px; border-radius: 999px; background: var(--surface-2); font-size: 12.5px; }
+.zk-file a { display: inline-flex; gap: 5px; align-items: center; color: var(--ink); text-decoration: none; font-weight: 600; max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.zk-file small { color: var(--ink-3); }
+.zk-profile { display: flex; gap: 8px; align-items: center; margin: 10px 0 0; padding: 8px 12px; border-radius: var(--r-s); background: var(--accent-soft); font-size: 13px; font-weight: 600; }
+/* the report is always a white page: its accent and links use the light palette */
+.report { --accent: #0f766e; --accent-soft: #e6f4f1; --accent-line: #a7d8cf; } :root[data-tax="wht"] .report { --accent: #1d4ed8; --accent-soft: #e6edfb; --accent-line: #b4c6f2; }
+.report a { color: var(--accent); }
+
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
@@ -1510,6 +1549,8 @@ Object.assign(window.ZI18N, {"ZATCA account":"حساب الهيئة","Tax calend
 Object.assign(window.ZI18N, {"The balance over time appears once the statement covers two months.":"يظهر الرصيد عبر الزمن عندما يغطي الكشف شهرين.","Balance owed to ZATCA at month end":"الرصيد المستحق للهيئة في نهاية الشهر"});
 Object.assign(window.ZI18N, {"No exercise":"لا يوجد تمرين"});
 Object.assign(window.ZI18N, {"VAT adjustments":"تعديلات ضريبة القيمة المضافة","Days to escalate a rejected objection to the GSTC":"أيام التصعيد للأمانة العامة للجان الضريبية بعد رفض الاعتراض","Adviser summaries; verify.":"من ملخصات المستشارين؛ للتحقق.","Days ZATCA has to decide an objection":"أيام بت الهيئة في الاعتراض","Days ZATCA has to pay an approved refund":"أيام صرف الهيئة للاسترداد المعتمد","Working days to answer a refund document request":"أيام العمل للرد على طلب مستندات الاسترداد","Capital asset adjustment period, buildings (years)":"فترة تعديل الأصول الرأسمالية، العقارات (سنوات)","Capital asset adjustment period, other assets (years)":"فترة تعديل الأصول الرأسمالية، الأصول الأخرى (سنوات)","Bad-debt relief: months overdue":"تخفيض الديون المعدومة: أشهر التأخير","Advance payments: invoice within (days after month end)":"الدفعات المقدمة: الفاتورة خلال (أيام بعد نهاية الشهر)","SAR per US dollar (peg)":"ريال لكل دولار أمريكي (سعر الربط)","What the registers change in your VAT":"ما تغيره السجلات في ضريبتك","Tax to pay grows to the right, tax to reclaim to the left. Each bar opens its register.":"الضريبة المستحقة تمتد يميناً والمستردة يساراً. كل شريط يفتح سجله.","To reclaim":"للاسترداد","To pay":"للسداد","The adjustments an inspector looks for outside the monthly ledger: capital assets, bad debts, advance payments, foreign currency and related parties.":"التعديلات التي يبحث عنها الفاحص خارج الدفاتر الشهرية: الأصول الرأسمالية، الديون المعدومة، الدفعات المقدمة، العملات الأجنبية، والأطراف ذات العلاقة.","VAT to pay (SAR)":"ضريبة للسداد (ريال)","VAT to reclaim (SAR)":"ضريبة للاسترداد (ريال)","Registers with issues":"سجلات بها ملاحظات","Items in the registers":"بنود في السجلات","Items in the register":"بنود في السجل","Capital assets follow VAT IR Art. 52 (10 years for buildings, 6 for other assets). The bad-debt conditions, the 15-day invoice rule for advances and the related-party rule come from adviser summaries: verify for your case; they are editable in Settings.":"تتبع الأصول الرأسمالية المادة 52 من اللائحة (10 سنوات للعقارات و6 لغيرها). شروط الديون المعدومة وقاعدة فاتورة الدفعات المقدمة خلال 15 يوماً وقاعدة الأطراف ذات العلاقة من ملخصات المستشارين: تحقق منها لحالتك، وهي قابلة للتعديل في الإعدادات.","No items yet":"لا توجد بنود بعد","first year":"السنة الأولى","use not recorded":"الاستخدام غير مسجل","not yet":"لم يحن بعد","years":"سنوات","to":"حتى","Qualifies":"مستوفٍ للشروط","Does not qualify yet":"غير مستوفٍ بعد","Claimed in":"مطالب به في","Taxable use":"الاستخدام الخاضع","Adjusted in a return":"عُدّل في إقرار","Taxable use by year (%)":"الاستخدام الخاضع حسب السنة (%)","Edit":"تعديل","Nothing to pay.":"لا شيء للسداد.","Nothing to reclaim.":"لا شيء للاسترداد.","registers":"سجلات","Review":"مراجعة","No issues.":"لا توجد ملاحظات.","Capital assets":"الأصول الرأسمالية","Bad debts":"الديون المعدومة","Advance payments":"الدفعات المقدمة","Foreign-currency invoices":"فواتير العملات الأجنبية","Related-party supplies":"التوريدات للأطراف ذات العلاقة","Capital assets register":"سجل الأصول الرأسمالية","Bad debts register":"سجل الديون المعدومة","Advance payments register":"سجل الدفعات المقدمة","Foreign-currency invoices register":"سجل فواتير العملات الأجنبية","Related-party supplies register":"سجل توريدات الأطراف ذات العلاقة","Asset":"الأصل","Type":"النوع","Building or land improvement (10 years)":"عقار أو تحسينات أرض (10 سنوات)","Other asset (6 years)":"أصل آخر (6 سنوات)","Acquired on":"تاريخ الاقتناء","Cost excl. VAT (SAR)":"التكلفة دون الضريبة (ريال)","Input VAT deducted (SAR)":"ضريبة المدخلات المخصومة (ريال)","Useful life (years)":"العمر الإنتاجي (سنوات)","Taxable use in the first year (%)":"الاستخدام الخاضع في السنة الأولى (%)","Customer":"العميل","Invoice":"الفاتورة","Invoice date":"تاريخ الفاتورة","Amount incl. VAT (SAR)":"المبلغ شامل الضريبة (ريال)","VAT on the invoice (SAR)":"الضريبة في الفاتورة (ريال)","Written off in the books on":"تاريخ الشطب في الدفاتر","Customer notified":"تم إبلاغ العميل","Relief claimed in return":"التخفيض مطالب به في إقرار","Recovered later (SAR)":"المحصل لاحقاً (ريال)","Reference":"المرجع","Received on":"تاريخ الاستلام","Amount received incl. VAT (SAR)":"المبلغ المستلم شامل الضريبة (ريال)","Refundable security deposit":"تأمين مسترد","No, it pays for the supply":"لا، دفعة مقابل التوريد","Yes, refundable deposit":"نعم، تأمين مسترد","Declared in return":"مُقر في الإقرار","Tax invoice issued on":"تاريخ إصدار الفاتورة الضريبية","Customer or supplier":"العميل أو المورد","Date the tax is due":"تاريخ استحقاق الضريبة","Currency":"العملة","Amount excl. VAT (currency)":"المبلغ دون الضريبة (بالعملة)","Rate used in the books":"السعر المستخدم في الدفاتر","SAMA rate that day":"سعر البنك المركزي في ذلك اليوم","Related party":"الطرف ذو العلاقة","Relationship":"العلاقة","What was supplied":"ما تم توريده","Price charged excl. VAT (SAR)":"السعر المحمل دون الضريبة (ريال)","Market value excl. VAT (SAR)":"القيمة السوقية دون الضريبة (ريال)","Buyer recovers all its input VAT":"المشتري يسترد كامل ضريبة مدخلاته","Period":"الفترة","Input VAT":"ضريبة المدخلات","Year by year":"سنة بسنة","Months overdue":"أشهر التأخير","Received":"تم الاستلام","Amount":"المبلغ","Declared in":"مُقر في","Tax invoice":"الفاتورة الضريبية","Rate used":"السعر المستخدم","SAMA rate":"سعر البنك المركزي","SAR difference":"الفرق بالريال","VAT difference":"فرق الضريبة","Price charged":"السعر المحمل","Market value":"القيمة السوقية","Buyer recovers all VAT":"المشتري يسترد كامل الضريبة","VAT due":"الضريبة المستحقة","not overdue long enough":"لم يتأخر بما يكفي","not written off":"غير مشطوب","customer not notified":"لم يُبلغ العميل","Not declared":"غير مُقر","Declared late":"أُقر متأخراً","Declared in the wrong period":"أُقر في فترة خاطئة","No tax invoice":"لا توجد فاتورة ضريبية","Invoice late":"فاتورة متأخرة","Building":"عقار","Other asset":"أصل آخر","Yes":"نعم","No":"لا","Capital assets: input VAT follows taxable use":"الأصول الرأسمالية: ضريبة المدخلات تتبع الاستخدام الخاضع"});
+Object.assign(window.ZI18N, {"Board report":"تقرير المجلس","Income tax and TP":"ضريبة الدخل وأسعار التحويل","E-invoicing devices":"أجهزة الفوترة الإلكترونية","VAT group":"مجموعة ضريبة القيمة المضافة","Income tax rate on the non-Saudi share":"نسبة ضريبة الدخل على الحصة غير السعودية","Advance payments when last year's tax reached (SAR)":"دفعات معجلة إذا بلغت ضريبة العام الماضي (ريال)","No advance payment under (SAR)":"لا دفعة معجلة أقل من (ريال)","Transfer pricing files from (SAR)":"ملفات أسعار التحويل ابتداءً من (ريال)","Country-by-country report above group revenue (SAR)":"التقرير على مستوى كل دولة لإيرادات المجموعة أعلى من (ريال)","Renew device certificates this many days ahead":"تجديد شهادات الأجهزة قبل هذا العدد من الأيام","Columns matched with the layout saved for this company.":"تمت مطابقة الأعمدة وفق التنسيق المحفوظ لهذه الشركة.","Instalment":"الدفعة","fine":"غرامة","No advance payments are due this year.":"لا توجد دفعات معجلة مستحقة هذا العام.","Enter last year's income tax to see whether advance payments are due.":"أدخل ضريبة دخل العام الماضي لمعرفة استحقاق الدفعات المعجلة.","Controlled transactions against the SAR 6 million threshold":"المعاملات الخاضعة للرقابة مقابل حد 6 ملايين ريال","Income tax and transfer pricing":"ضريبة الدخل وأسعار التحويل","Income tax on the share owned by non-Saudi shareholders, the advance payments it triggers, and the transfer pricing filings that go with the return.":"ضريبة الدخل على حصة الملاك غير السعوديين، والدفعات المعجلة المترتبة عليها، ومتطلبات أسعار التحويل المرافقة للإقرار.","Non-Saudi share":"الحصة غير السعودية","Income tax on that share (SAR)":"ضريبة الدخل على تلك الحصة (ريال)","Each advance payment (SAR)":"كل دفعة معجلة (ريال)","Overdue tax and fines (SAR)":"ضريبة متأخرة وغرامات (ريال)","Controlled transactions (SAR)":"المعاملات الخاضعة للرقابة (ريال)","Rates and thresholds from adviser summaries of the Income Tax Law (Art. 70) and the Transfer Pricing Bylaws: 20% on the non-Saudi share, advance payments when last year's tax was SAR 2 million or more, files at SAR 6 million, CbCR above SAR 3.2 billion. Verify; editable in Settings.":"النسب والحدود من ملخصات المستشارين لنظام ضريبة الدخل (المادة 70) ولائحة أسعار التحويل: 20% على الحصة غير السعودية، ودفعات معجلة إذا بلغت ضريبة العام الماضي مليوني ريال أو أكثر، والملفات عند 6 ملايين ريال، والتقرير على مستوى كل دولة فوق 3.2 مليار ريال. للتحقق؛ وقابلة للتعديل في الإعدادات.","The year":"السنة","Non-Saudi ownership (%)":"الملكية غير السعودية (%)","Taxable profit (SAR)":"الربح الخاضع (ريال)","Estimate during the year; final figure from the return.":"تقدير خلال السنة؛ والرقم النهائي من الإقرار.","Last year's income tax (SAR)":"ضريبة دخل العام الماضي (ريال)","WHT suffered last year (SAR)":"ضريبة الاستقطاع المحسومة العام الماضي (ريال)","Return filed on":"تاريخ تقديم الإقرار","Three instalments at the end of months 6, 9 and 12 of the tax year.":"ثلاث دفعات في نهاية الأشهر السادس والتاسع والثاني عشر من السنة الضريبية.","Transfer pricing":"أسعار التحويل","Transactions with related parties for the year, against the documentation thresholds.":"المعاملات مع الأطراف ذات العلاقة للسنة مقابل حدود التوثيق.","Group consolidated revenue (SAR)":"الإيرادات الموحدة للمجموعة (ريال)","Disclosure form filed on":"تاريخ تقديم نموذج الإفصاح","CbCR notification filed on":"تاريخ تقديم إشعار التقرير على مستوى كل دولة","Local file ready":"الملف المحلي جاهز","Master file ready":"الملف الرئيسي جاهز","Enter the related party and an amount.":"أدخل الطرف ذا العلاقة والمبلغ.","Enter the CSID expiry date":"أدخل تاريخ انتهاء شهادة التشفير","Expired":"منتهية","days ago":"يوماً مضت","invoices stamped since are not compliant":"الفواتير المختومة منذ ذلك غير ممتثلة","Every unit that stamps invoices (EGS) needs its own valid cryptographic stamp (CSID) from the Fatoora portal. An expired one makes every invoice it stamps non-compliant.":"كل وحدة تختم الفواتير تحتاج شهادة تشفير سارية خاصة بها من بوابة فاتورة. والشهادة المنتهية تجعل كل فاتورة تختمها غير ممتثلة.","Add a device":"إضافة جهاز","Valid":"سارية","To renew within 30 days":"للتجديد خلال 30 يوماً","Sending but not registered":"ترسل دون تسجيل","Open an exercise of this company with an e-invoicing provider export to compare its units with the register.":"افتح تمريناً لهذه الشركة يحتوي تقرير مزود الفوترة لمقارنة وحداته بالسجل.","No devices registered":"لا توجد أجهزة مسجلة","Add the ERP server and each POS that stamps invoices, with its CSID expiry date from the Fatoora portal.":"أضف خادم النظام وكل نقطة بيع تختم الفواتير مع تاريخ انتهاء شهادتها من بوابة فاتورة.","Unit code (as in the provider export)":"رمز الوحدة (كما في تقرير المزود)","Location":"الموقع","CSID issued on":"تاريخ إصدار الشهادة","CSID expires on":"تاريخ انتهاء الشهادة","Companies registered together for VAT file one return. The group return must equal what each member's books say, added up.":"الشركات المسجلة معاً في ضريبة القيمة المضافة تقدم إقراراً واحداً، ويجب أن يساوي مجموع ما في دفاتر كل عضو.","Set up the VAT group":"إعداد مجموعة ضريبة القيمة المضافة","No VAT group set up":"لا توجد مجموعة ضريبية","VAT grouping is available since 15 October 2025 for Saudi residents under 50% common control. Set it up here if your companies file one return.":"التجميع الضريبي متاح منذ 15 أكتوبر 2025 للمقيمين في المملكة تحت سيطرة مشتركة بنسبة 50%. أعدّه هنا إذا كانت شركاتك تقدم إقراراً واحداً.","One return for all members. Each period: the group return against the members' own figures added up.":"إقرار واحد لكل الأعضاء. في كل فترة: إقرار المجموعة مقابل مجموع أرقام الأعضاء.","Edit the group":"تعديل المجموعة","Enter a group return":"إدخال إقرار المجموعة","Members":"الأعضاء","Group returns entered":"إقرارات المجموعة المدخلة","Sales per group return":"المبيعات حسب إقرار المجموعة","Members added up":"مجموع الأعضاء","Output VAT per group return":"ضريبة المخرجات حسب إقرار المجموعة","Input VAT per group return":"ضريبة المدخلات حسب إقرار المجموعة","No exercise:":"لا يوجد تمرين:","Group name":"اسم المجموعة","Representative member":"العضو الممثل","Enter the period as 2026-09 or 2026-Q3.":"أدخل الفترة بصيغة 2026-09 أو 2026-Q3.","Report":"تقرير","Tax risk report for the board":"تقرير المخاطر الضريبية لمجلس الإدارة","Every company on one page: readiness, money at risk, disputes, refunds and devices. Print it or save it as PDF for the board pack.":"كل الشركات في صفحة واحدة: الجاهزية، والمبالغ المعرضة، والاعتراضات، والاستردادات، والأجهزة. اطبعه أو احفظه PDF لملف المجلس.","Tax at risk (SAR)":"الضريبة المعرضة للخطر (ريال)","Owed back to the companies (SAR)":"مستحق للشركات (ريال)","Expired e-invoicing devices":"أجهزة فوترة منتهية الشهادة","Where the risk is":"أين تكمن المخاطر","By company":"حسب الشركة","ZATCA statement":"كشف الهيئة","Open disputes":"الاعتراضات المفتوحة","Refunds outstanding":"استردادات قائمة","Return and ledger exposure":"مخاطر الإقرارات والدفاتر","Company":"الشركة","Latest period":"آخر فترة","Attach a file":"إرفاق ملف","No files":"لا توجد ملفات","Evidence":"المستندات","Attach PDF, image, Excel, Word or CSV files.":"أرفق ملفات PDF أو صور أو Excel أو Word أو CSV.","Files up to 2 MB can be attached.":"يمكن إرفاق ملفات حتى 2 ميجابايت.","File attached":"تم إرفاق الملف","This file is no longer available.":"هذا الملف لم يعد متاحاً.","Remove this file?":"إزالة هذا الملف؟","Paid on time":"مسدد في موعده","Paid late":"مسدد متأخراً","Not yet due":"لم يستحق بعد","Amount paid":"المبلغ المسدد","Paid on":"تاريخ السداد","Country":"الدولة","Amount (SAR)":"المبلغ (ريال)","Services":"خدمات","Goods":"سلع","Loans and interest":"قروض وفوائد","Royalties":"إتاوات","Management fees":"أتعاب إدارة","Renew now":"جدّد الآن","No expiry date":"لا يوجد تاريخ انتهاء","Retired":"متوقف","days left":"يوماً متبقية","ERP or central server":"النظام أو الخادم المركزي","Point of sale":"نقطة بيع","In use":"قيد الاستخدام","Name":"الاسم","Each instalment":"كل دفعة","Income tax on the non-Saudi share":"ضريبة الدخل على الحصة غير السعودية","Last year's income tax liability":"التزام ضريبة الدخل للعام الماضي","Non-Saudi ownership share":"حصة الملكية غير السعودية","Controlled transactions":"المعاملات الخاضعة للرقابة","Group revenue":"إيرادات المجموعة","Related-party transactions for the year":"معاملات الأطراف ذات العلاقة للسنة","Devices not in the register":"أجهزة غير مسجلة","E-invoicing devices register":"سجل أجهزة الفوترة الإلكترونية","E-invoicing provider export":"تقرير مزود الفوترة الإلكترونية","Group return figures":"أرقام إقرار المجموعة","Members to check":"أعضاء للمراجعة","Saudi resident, VAT registered, under 50% common control (ownership, votes or value), not in another group.":"مقيم في المملكة، ومسجل في ضريبة القيمة المضافة، وتحت سيطرة مشتركة بنسبة 50% (ملكية أو تصويت أو قيمة)، وليس عضواً في مجموعة أخرى."});
+Object.assign(window.ZI18N, {"Estimates from the checks and the penalty rates in Settings. Not legal advice.":"تقديرات من الفحوصات ونسب الغرامات في الإعدادات. ليست استشارة قانونية."});
 
 </script>
 <script>
@@ -1575,6 +1616,12 @@ Object.assign(window.ZI18N, {"VAT adjustments":"تعديلات ضريبة الق
     badDebt: { minMonths: 12, notifyCustomer: true },
     advances: { invoiceDays: 15 },
     fx: { usdPeg: 3.75 },
+    // Wave 3. Income tax on the non-Saudi share 20%; advance payments when last year's tax was
+    // SAR 2m+ (25% each, none under SAR 500k); TP files at SAR 6m of controlled transactions,
+    // CbCR above SAR 3.2bn: adviser summaries, editable, labelled "verify".
+    cit: { rate: 0.20, advanceThreshold: 2000000, minInstalment: 500000, instalmentPct: 0.25, dueDays: 120, latePctPer30Days: 0.01 },
+    tp: { fileThreshold: 6000000, cbcrThreshold: 3200000000, dueDays: 120 },
+    egs: { renewDays: 30 },
     materiality: 50000,
     benfordMin: 300,
     glBasis: 'movement',  // movement | gross - how TB VAT accounts are read when no GL is given
@@ -2067,6 +2114,22 @@ Object.assign(window.ZI18N, {"VAT adjustments":"تعديلات ضريبة الق
       if (best >= 0) { map[f.k] = best; used[best] = 1; }
     });
     return map;
+  };
+
+  // Import profiles: once a company's file has been mapped, remember each field's header
+  // text; the next file whose header row holds the same texts is mapped the same way.
+  E.profileFrom = function (headerRow, map) {
+    var h = {}; Object.keys(map || {}).forEach(function (f) { var v = normHeader((headerRow || [])[map[f]]); if (v) h[f] = v; });
+    return h;
+  };
+  E.applyProfile = function (aoa, headers) {
+    var want = Object.keys(headers || {}); if (!want.length) return null;
+    for (var r = 0; r < Math.min(15, (aoa || []).length); r++) {
+      var row = (aoa[r] || []).map(normHeader), map = {}, ok = true;
+      want.forEach(function (f) { var i = row.indexOf(headers[f]); if (i < 0) ok = false; else map[f] = i; });
+      if (ok) return { row: r, map: map };
+    }
+    return null;
   };
 
   // The header row is the first of the top 15 rows that names the most fields.
@@ -4343,6 +4406,112 @@ Object.assign(window.ZI18N, {"VAT adjustments":"تعديلات ضريبة الق
       issues: checks.filter(function (c) { return c.status === 'fail' || c.status === 'warn'; }).length };
   };
 
+  // ================================================================== wave 3: income tax, transfer pricing, devices, VAT groups
+  function monthEnd(y, m) { return new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10); }
+  function lateFine(amount, days, pctPer30) { return days >= 30 ? r2(amount * pctPer30 * Math.floor(days / 30)) : 0; }
+
+  // CT. Income tax on the non-Saudi share and advance payments (Income Tax Law Art. 70,
+  // IR Art. 64 as summarised by advisers): when last year's liability was SAR 2m or more,
+  // three instalments of 25% of (last year's tax - WHT suffered), due at the end of months
+  // 6, 9 and 12 of the tax year; none when an instalment would be under SAR 500,000 (verify).
+  E.citStatus = function (c, S, today) {
+    S = E.mergeSettings(S); today = today || new Date().toISOString().slice(0, 10); c = c || {};
+    var C = S.cit, fyEnd = E.date(c.fyEnd) || (today.slice(0, 4) + '-12-31'), y = +fyEnd.slice(0, 4), m = +fyEnd.slice(5, 7);
+    var share = pct(c.foreignSharePct, 0) / 100, profit = E.num(c.taxableProfit), tax = isFinite(profit) && profit > 0 ? r2(profit * share * C.rate) : 0;
+    var prior = pos(c.priorYearTax), wht = pos(c.priorYearWht), inst = r2(Math.max(0, prior - wht) * C.instalmentPct);
+    var required = prior >= C.advanceThreshold && inst >= C.minInstalment;
+    // months 6, 9, 12 of the tax year that ends at fyEnd
+    var due = [6, 9, 12].map(function (k) { var mm = m - 12 + k; var yy = y + Math.floor((mm - 1) / 12); mm = ((mm - 1) % 12 + 12) % 12 + 1; return monthEnd(yy, mm); });
+    var paid = Array.isArray(c.instalments) ? c.instalments : [];
+    var rows = required ? due.map(function (d, i) {
+      var p = paid[i] && typeof paid[i] === 'object' ? paid[i] : {}, on = E.date(p.paidOn), amt = pos(p.amount), short = r2(Math.max(0, inst - amt));
+      var late = on ? Math.max(0, daysBetween(d, on)) : (today > d ? daysBetween(d, today) : 0);
+      var st = on && short <= S.tolAbs ? (late ? 'late' : 'paid') : today > d ? 'overdue' : 'due';
+      return { n: i + 1, due: d, amount: inst, paid: amt, paidOn: on, short: short, daysLate: late, state: st, fine: st === 'paid' ? 0 : lateFine(st === 'late' ? inst : short, late, C.latePctPer30Days) };
+    }) : [];
+    var returnDue = addD(fyEnd, C.dueDays), filed = E.date(c.filedOn);
+    var owed = rows.filter(function (r) { return r.state === 'overdue'; }).reduce(function (s, r) { return s + r.short; }, 0);
+    var fines = rows.reduce(function (s, r) { return s + r.fine; }, 0);
+    var checks = [
+      { id: 'CT1', title: 'Advance payments of income tax made on time', titleAr: 'سداد الدفعات المعجلة لضريبة الدخل في موعدها', area: 'cit',
+        status: !prior ? 'na' : !required ? 'pass' : rows.some(function (r) { return r.state === 'overdue'; }) ? 'fail' : rows.some(function (r) { return r.state === 'late'; }) ? 'warn' : 'pass',
+        missing: prior ? '' : 'Last year\'s income tax liability', a: required ? inst : 0, aLabel: 'Each instalment', exposure: r2(owed + fines),
+        note: required ? 'Last year\'s tax was SAR ' + prior.toLocaleString('en-US') + ': three instalments of SAR ' + inst.toLocaleString('en-US') + ' are due.' : prior ? 'No advance payments are due: last year\'s tax was under SAR ' + C.advanceThreshold.toLocaleString('en-US') + ' or the instalment under SAR ' + C.minInstalment.toLocaleString('en-US') + '.' : '',
+        noteAr: required ? 'كانت ضريبة العام الماضي ' + prior.toLocaleString('en-US') + ' ريال: تستحق ثلاث دفعات معجلة قيمة كل منها ' + inst.toLocaleString('en-US') + ' ريال.' : prior ? 'لا تستحق دفعات معجلة: ضريبة العام الماضي أقل من ' + C.advanceThreshold.toLocaleString('en-US') + ' ريال أو الدفعة أقل من ' + C.minInstalment.toLocaleString('en-US') + ' ريال.' : '' },
+      { id: 'CT2', title: 'Income tax return filed within 120 days of the year end', titleAr: 'تقديم إقرار ضريبة الدخل خلال 120 يوماً من نهاية السنة', area: 'cit',
+        status: !share ? 'na' : filed ? (filed <= returnDue ? 'pass' : 'warn') : today > returnDue ? 'fail' : 'pass', missing: share ? '' : 'Non-Saudi ownership share',
+        a: tax, aLabel: 'Income tax on the non-Saudi share', exposure: !filed && today > returnDue ? r2(tax + lateFine(tax, daysBetween(returnDue, today), C.latePctPer30Days)) : 0,
+        note: 'Income tax is ' + Math.round(C.rate * 100) + '% of the taxable profit attributable to non-Saudi owners; the Saudi and GCC share pays Zakat. Return and balance due by ' + returnDue + '.', noteAr: 'ضريبة الدخل ' + Math.round(C.rate * 100) + '% من الربح الخاضع العائد للملاك غير السعوديين، وحصة السعوديين والخليجيين تخضع للزكاة. الإقرار والرصيد مستحقان بحلول ' + returnDue + '.' }
+    ];
+    return { fyEnd: fyEnd, tax: tax, share: share, prior: prior, instalment: inst, required: required, rows: rows, returnDue: returnDue, fines: r2(fines), owed: r2(owed), checks: checks,
+      exposure: r2(checks.reduce(function (s, x) { return s + (x.exposure || 0); }, 0)) };
+  };
+
+  // TP. Transfer pricing (TP Bylaws as summarised by advisers): a disclosure form with the
+  // return (120 days); master and local files when controlled transactions reach SAR 6m;
+  // CbCR notification when the group's revenue exceeds SAR 3.2bn (verify).
+  E.tpStatus = function (p, S, today) {
+    S = E.mergeSettings(S); today = today || new Date().toISOString().slice(0, 10); p = p || {};
+    var T = S.tp, tx = objs(p.transactions), total = r2(tx.reduce(function (s, x) { return s + pos(x.amount); }, 0));
+    var fyEnd = E.date(p.fyEnd) || ((+today.slice(0, 4) - 1) + '-12-31'), due = addD(fyEnd, T.dueDays), group = pos(p.groupRevenue);
+    var byType = {}; tx.forEach(function (x) { var k = String(x.type || 'other'); byType[k] = r2((byType[k] || 0) + pos(x.amount)); });
+    var files = total >= T.fileThreshold, cbcr = group > T.cbcrThreshold, past = today > due;
+    var yes = function (v) { return v === true || v === 'yes'; };
+    var checks = [
+      { id: 'TP1', title: 'Controlled transactions disclosure form filed with the return', titleAr: 'تقديم نموذج الإفصاح عن المعاملات الخاضعة للرقابة مع الإقرار', area: 'tp',
+        status: !tx.length ? 'na' : E.date(p.disclosureFiledOn) ? 'pass' : past ? 'fail' : 'warn', missing: tx.length ? '' : 'Related-party transactions for the year', a: total, aLabel: 'Controlled transactions',
+        note: 'Due with the Zakat or income tax return, ' + due + ', with a licensed accountant\'s affidavit where required.', noteAr: 'يُقدم مع إقرار الزكاة أو ضريبة الدخل بحلول ' + due + '، مع إقرار محاسب قانوني مرخص عند الحاجة.' },
+      { id: 'TP2', title: 'Master file and local file ready', titleAr: 'جاهزية الملف الرئيسي والملف المحلي', area: 'tp',
+        status: !tx.length ? 'na' : !files ? 'pass' : yes(p.localFileReady) && yes(p.masterFileReady) ? 'pass' : 'fail', a: total, aLabel: 'Controlled transactions', b: T.fileThreshold, bLabel: 'Threshold',
+        note: files ? 'Above SAR ' + T.fileThreshold.toLocaleString('en-US') + ': keep both files ready to hand over within 30 days of a ZATCA request.' : 'Below the SAR ' + T.fileThreshold.toLocaleString('en-US') + ' threshold: the files are not required, the disclosure form still is.', noteAr: files ? 'أعلى من ' + T.fileThreshold.toLocaleString('en-US') + ' ريال: جهّز الملفين لتسليمهما خلال 30 يوماً من طلب الهيئة.' : 'أقل من حد ' + T.fileThreshold.toLocaleString('en-US') + ' ريال: الملفان غير مطلوبين، ونموذج الإفصاح ما زال مطلوباً.' },
+      { id: 'TP3', title: 'Country-by-country notification', titleAr: 'إشعار التقرير على مستوى كل دولة', area: 'tp',
+        status: !group ? 'na' : !cbcr ? 'pass' : E.date(p.cbcrNotifiedOn) ? 'pass' : past ? 'fail' : 'warn', missing: group ? '' : 'Group consolidated revenue', a: group, aLabel: 'Group revenue', b: T.cbcrThreshold, bLabel: 'Threshold',
+        note: cbcr ? 'The group is above SAR ' + T.cbcrThreshold.toLocaleString('en-US') + ': each Saudi entity notifies ZATCA which entity files the report.' : 'The group is below the country-by-country threshold.', noteAr: cbcr ? 'المجموعة أعلى من ' + T.cbcrThreshold.toLocaleString('en-US') + ' ريال: تُبلغ كل منشأة سعودية الهيئة بالمنشأة التي تقدم التقرير.' : 'المجموعة أقل من حد التقرير على مستوى كل دولة.' }
+    ];
+    return { total: total, byType: byType, filesRequired: files, cbcr: cbcr, due: due, checks: checks };
+  };
+
+  // EG. E-invoicing devices (EGS units): each needs a production CSID; an expired one makes
+  // every invoice it stamps non-compliant. Units seen in the provider export but missing
+  // from the register are devices nobody looks after.
+  E.egsStatus = function (devices, seen, S, today) {
+    S = E.mergeSettings(S); today = today || new Date().toISOString().slice(0, 10);
+    var list = objs(devices).map(function (d) {
+      var exp = E.date(d.csidExpiresOn), left = exp ? daysBetween(today, exp) : null, off = d.status === 'retired';
+      return { d: d, left: left, state: off ? 'retired' : !exp ? 'unknown' : left < 0 ? 'expired' : left <= S.egs.renewDays ? 'renew' : 'ok' };
+    });
+    var known = {}; list.forEach(function (x) { known[String(x.d.code || x.d.name || '').trim().toLowerCase()] = 1; });
+    var unreg = (Array.isArray(seen) ? seen : []).map(function (u) { return String(u || '').trim(); }).filter(function (u, i, a) { return u && a.indexOf(u) === i && !known[u.toLowerCase()]; });
+    var bad = list.filter(function (x) { return x.state === 'expired'; }), soon = list.filter(function (x) { return x.state === 'renew' || x.state === 'unknown'; });
+    return { list: list, unregistered: unreg, checks: [
+      { id: 'EG1', title: 'Every device has a valid CSID', titleAr: 'لكل جهاز شهادة تشفير سارية', area: 'egs', status: !list.length ? 'na' : bad.length ? 'fail' : soon.length ? 'warn' : 'pass', missing: list.length ? '' : 'E-invoicing devices register',
+        a: bad.length, aLabel: 'Expired', note: 'Renew at least ' + S.egs.renewDays + ' days before expiry: renewal needs a new OTP from the Fatoora portal for each unit.', noteAr: 'جدّد قبل الانتهاء بـ ' + S.egs.renewDays + ' يوماً على الأقل: يتطلب التجديد رمزاً جديداً من بوابة فاتورة لكل وحدة.' },
+      { id: 'EG2', title: 'Every device that sends invoices is in the register', titleAr: 'كل جهاز يرسل فواتير مسجل في السجل', area: 'egs', status: !seen || !seen.length ? 'na' : unreg.length ? 'fail' : 'pass', missing: seen && seen.length ? '' : 'E-invoicing provider export',
+        a: unreg.length, aLabel: 'Devices not in the register', exceptions: { list: unreg.map(function (u) { return { egs: u }; }) } }
+    ] };
+  };
+
+  // VG. VAT group: one return for all members. The group return must equal the members'
+  // figures added up; every member must be a VAT-registered Saudi resident under 50% common control.
+  E.vatGroupStatus = function (g, members, S) {
+    S = E.mergeSettings(S); g = g || {};
+    var periods = Object.keys(g.returns && typeof g.returns === 'object' ? g.returns : {}).sort().reverse();
+    var lines = periods.map(function (p) {
+      var ret = g.returns[p] || {}, sum = { sales: 0, outputVat: 0, inputVat: 0 }, missing = [];
+      objs(members).forEach(function (m) { var x = (m.exercises || []).filter(function (e) { return e.period === p; })[0], sm = x && x.summary; if (!sm) { missing.push(m.name); return; } ['sales', 'outputVat', 'inputVat'].forEach(function (k) { sum[k] += pos(sm[k]); }); });
+      var d = { sales: r2(E.num(ret.sales) - sum.sales), outputVat: r2(E.num(ret.outputVat) - sum.outputVat), inputVat: r2(E.num(ret.inputVat) - sum.inputVat) };
+      ['sales', 'outputVat', 'inputVat'].forEach(function (k) { if (!isFinite(d[k])) d[k] = 0; sum[k] = r2(sum[k]); });
+      var worst = Math.max(Math.abs(d.outputVat), Math.abs(d.inputVat));
+      return { period: p, ret: ret, sum: sum, diff: d, missing: missing, status: missing.length ? 'warn' : worst <= S.tolAbs ? 'pass' : 'fail', exposure: r2(Math.max(0, -d.outputVat) + Math.max(0, d.inputVat)) };
+    });
+    var bad = objs(members).filter(function (m) { return !E.validVatNo(m.trn || '') || m.control === false; });
+    return { lines: lines, exposure: r2(lines.reduce(function (s, l) { return s + l.exposure; }, 0)), checks: [
+      { id: 'VG1', title: 'Group return equals the members added up', titleAr: 'إقرار المجموعة يساوي مجموع الأعضاء', area: 'group', status: !lines.length ? 'na' : lines.some(function (l) { return l.status === 'fail'; }) ? 'fail' : lines.some(function (l) { return l.status === 'warn'; }) ? 'warn' : 'pass', missing: lines.length ? '' : 'Group return figures' },
+      { id: 'VG2', title: 'Every member qualifies for the group', titleAr: 'كل عضو مستوفٍ لشروط المجموعة', area: 'group', status: !objs(members).length ? 'na' : bad.length ? 'fail' : 'pass', a: bad.length, aLabel: 'Members to check',
+        note: 'Saudi resident, VAT registered, under 50% common control (ownership, votes or value), not in another group.' }
+    ] };
+  };
+
   root.ZEngine = E;
   if (typeof module !== 'undefined' && module.exports) module.exports = E;
 })(typeof window !== 'undefined' ? window : this);
@@ -4440,6 +4609,7 @@ Object.assign(window.ZI18N, {"VAT adjustments":"تعديلات ضريبة الق
         if (p.orgName) localStorage.setItem('zr_local_org', p.orgName);
         return Promise.resolve({ ok: true, user: user, tenant: tenant });
       case 'list':
+        if (p.table === 'files') return Promise.reject(Object.assign(new Error('forbidden'), { code: 'forbidden' }));
         return self.all(p.table).then(function (m) {
           var docs = Object.keys(m).map(function (k) { return m[k]; }).filter(function (d) { return !p.parentId || d.parentId === p.parentId; });
           if (p.table === 'audit') docs.sort(function (a, b) { return a.at < b.at ? 1 : -1; });
@@ -4475,6 +4645,7 @@ Object.assign(window.ZI18N, {"VAT adjustments":"تعديلات ضريبة الق
             jobs.push(self.all(t).then(function (mm) { Object.keys(mm).forEach(function (k) { if (mm[k].parentId === p.id) delete mm[k]; }); return self.put(t, mm); }));
           });
           if (p.table === 'datasets') jobs.push(self.all('rows').then(function (mm) { delete mm[p.id]; return self.put('rows', mm); }));
+          if (p.table === 'attachments') jobs.push(self.all('files').then(function (mm) { delete mm[p.id]; return self.put('files', mm); }));
           return Promise.all(jobs).then(function () { self.audit('delete', p.table, p.id, d ? (d.name || d.period || d.title || '') : ''); return { ok: true }; });
         });
       case 'usersList':
@@ -4549,6 +4720,11 @@ Object.assign(window.ZI18N, {"VAT adjustments":"تعديلات ضريبة الق
  *     was declared a month late (VAT 30,000) with a late invoice; a EUR invoice at 4.05
  *     against a SAMA rate of 4.38 (VAT 1,980); housing let below market to an
  *     exempt related company (VAT 7,500 on the SAR 50,000 gap)
+ *   - income tax 2026 (40% non-Saudi owned): last year's SAR 2.4m tax less 200k WHT
+ *     makes three advance payments of 550,000; the September one is unpaid; transfer
+ *     pricing at SAR 6.7m needs both files and the master file is not ready
+ *   - e-invoicing devices: the POS unit POS-02 stamped invoices on a CSID that expired
+ *     on 30 Sep 2026; the ERP server's renews in March 2027
  *   - management fees to the parent with no reverse-charge VAT; a reverse-charged
  *     training service with no WHT line
  *   - WHT filed and paid 2 days late (late, but under 30 days: no fine)
@@ -4811,6 +4987,14 @@ Object.assign(window.ZI18N, {"VAT adjustments":"تعديلات ضريبة الق
       events: [
         { title: 'Quarterly tax risk review with the board', tax: 'OTHER', date: '2026-10-25', repeat: 'quarterly', note: 'Exposure, open findings, disputes and refunds' },
         { title: 'RETT payment: warehouse sale (deed 4301928)', tax: 'RETT', date: '2026-10-14', repeat: '', doneDates: ['2026-10-14'] }
+      ],
+      corporate: { fyEnd: '2026-12-31', foreignSharePct: 40, taxableProfit: 10500000, priorYearTax: 2400000, priorYearWht: 200000, filedOn: '',
+        instalments: [{ paidOn: '2026-06-28', amount: 550000 }, { paidOn: '', amount: null }],
+        transactions: [{ party: 'Noor Holding BV', country: 'Netherlands', type: 'management', amount: 4200000 }, { party: 'Noor Holding BV', country: 'Netherlands', type: 'loans', amount: 2500000 }],
+        groupRevenue: 1800000000, disclosureFiledOn: '', localFileReady: 'yes', masterFileReady: 'no' },
+      devices: [
+        { name: 'NetSuite e-invoicing server', code: 'ERP-01', type: 'server', location: 'Riyadh head office', csidIssuedOn: '2025-03-01', csidExpiresOn: '2027-03-01', status: 'active' },
+        { name: 'Showroom POS', code: 'POS-02', type: 'pos', location: 'Jeddah showroom', csidIssuedOn: '2025-09-30', csidExpiresOn: '2026-09-30', status: 'active' }
       ],
       registers: {
         capital: [
@@ -5151,6 +5335,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     h += nav('#/' + tx + '/dashboard', t('Dashboard'), 'squares-four', view === 'dashboard');
     h += nav('#/' + tx + '/insights', t('Company 360'), 'chart-line-up', view === 'insights');
     h += nav('#/' + tx + '/reports', t('Reports'), 'chart-bar', view === 'reports');
+    h += nav('#/' + tx + '/board', t('Board report'), 'presentation-chart', view === 'board');
     if (!wht) h += nav('#/' + tx + '/adjust', t('VAT adjustments'), 'sliders-horizontal', view === 'adjust');
     if (ex) {
       var ent = Z.entity(ex.entityId) || {}, sc = Z.taxScore(ex.summary), crit = Z.planFor && S.R ? Z.planFor().critical : 0;
@@ -5164,6 +5349,9 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     h += nav('#/' + tx + '/requests', t('ZATCA requests'), 'envelope-simple', view === 'requests');
     h += nav('#/' + tx + '/disputes', t('Disputes and penalties'), 'gavel', view === 'disputes');
     h += nav('#/' + tx + '/refunds', t('VAT refunds'), 'hand-coins', view === 'refunds');
+    h += nav('#/' + tx + '/corporate', t('Income tax and TP'), 'bank', view === 'corporate');
+    if (!wht) h += nav('#/' + tx + '/devices', t('E-invoicing devices'), 'cpu', view === 'devices');
+    if (!wht) h += nav('#/' + tx + '/group', t('VAT group'), 'tree-structure', view === 'group');
     h += '<div class="group">' + t('Organisation') + '</div>';
     h += nav('#/' + tx + '/entities', t('Entities'), 'buildings', view === 'entities' || view === 'entity' || view === 'annual');
     [['settings', t('Settings'), 'gear-six', 'manager'], ['users', t('Users'), 'users-three', 'owner'], ['audit', t('Audit trail'), 'list-checks', 'manager']].forEach(function (i) {
@@ -5195,7 +5383,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       '<button class="btn ghost small" data-act="theme" aria-label="' + t('Switch light/dark') + '">' + Z.icon('circle-half') + '</button><button class="btn ghost small lang-btn" data-act="lang">' + (S.lang === 'ar' ? 'English' : 'العربية') + '</button>' +
       Z.exitButton('btn small exit-btn');
   }
-  Z.CHG.entity = function (el) { S.entityId = el.value; localStorage.setItem('zr_entity', el.value); location.hash = '#/' + S.tax + '/' + ({ insights: 'insights', account: 'account', adjust: 'adjust' }[(S.route || [])[0]] || 'entity') + '/' + el.value; };
+  Z.CHG.entity = function (el) { S.entityId = el.value; localStorage.setItem('zr_entity', el.value); location.hash = '#/' + S.tax + '/' + ({ insights: 'insights', account: 'account', adjust: 'adjust', corporate: 'corporate', devices: 'devices' }[(S.route || [])[0]] || 'entity') + '/' + el.value; };
   Z.entity = function (id) { return S.entities.filter(function (e) { return e.id === id; })[0]; };
   Z.entName = function (e) { return e ? (S.lang === 'ar' && e.nameAr ? e.nameAr : e.name) : ''; };
 
@@ -5466,6 +5654,9 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       fld('bd_minMonths', t('Bad-debt relief: months overdue'), V.badDebt.minMonths, 'number', 'step="1"', t('Adviser summaries; verify.')) +
       fld('adv_invoiceDays', t('Advance payments: invoice within (days after month end)'), V.advances.invoiceDays, 'number', 'step="1"', t('Adviser summaries; verify.')) +
       fld('fx_usdPeg', t('SAR per US dollar (peg)'), V.fx.usdPeg, 'number', 'step="0.0001"') +
+      fld('cit_rate', t('Income tax rate on the non-Saudi share'), V.cit.rate, 'number', 'step="0.01"') + fld('cit_advanceThreshold', t('Advance payments when last year\'s tax reached (SAR)'), V.cit.advanceThreshold, 'number', 'step="1"', t('Adviser summaries; verify.')) +
+      fld('cit_minInstalment', t('No advance payment under (SAR)'), V.cit.minInstalment, 'number', 'step="1"', t('Adviser summaries; verify.')) + fld('tp_fileThreshold', t('Transfer pricing files from (SAR)'), V.tp.fileThreshold, 'number', 'step="1"', t('Adviser summaries; verify.')) +
+      fld('tp_cbcrThreshold', t('Country-by-country report above group revenue (SAR)'), V.tp.cbcrThreshold, 'number', 'step="1"', t('Adviser summaries; verify.')) + fld('egs_renewDays', t('Renew device certificates this many days ahead'), V.egs.renewDays, 'number', 'step="1"') +
       fld('zakatp_latePctPer30Days', t('Zakat late fine % per 30 days (estimate)'), Z.r(V.zakat.latePctPer30Days * 100), 'number', 'step="0.01"') +
       fld('sugar_mid', t('Sweetened drinks 5-7.99 g sugar: SAR per litre'), V.sugarTiers.tiers[1][2], 'number', 'step="0.01"') +
       fld('sugar_high', t('Sweetened drinks 8 g sugar or more: SAR per litre'), V.sugarTiers.tiers[2][2], 'number', 'step="0.01"', t('Per-litre tiers since 1 Jan 2026; under 5 g and sugar-free pay nothing.')) +
@@ -5499,7 +5690,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
         else if (k.indexOf('rett_') === 0) { v.rett = v.rett || {}; v.rett[k.slice(5)] = +val / 100; }
         else if (k.indexOf('rettd_') === 0) { v.rett = v.rett || {}; v.rett[k.slice(6)] = +val; }
         else if (k.indexOf('disp_') === 0) { v.disputes = v.disputes || {}; v.disputes[k.slice(5)] = +val; }
-        else if (/^(rfd|cap|bd|adv|fx)_/.test(k)) { var grp = { rfd: 'refunds', cap: 'capitalAssets', bd: 'badDebt', adv: 'advances', fx: 'fx' }[k.split('_')[0]]; v[grp] = v[grp] || {}; v[grp][k.slice(k.indexOf('_') + 1)] = +val; }
+        else if (/^(rfd|cap|bd|adv|fx|cit|tp|egs)_/.test(k)) { var grp = { rfd: 'refunds', cap: 'capitalAssets', bd: 'badDebt', adv: 'advances', fx: 'fx', cit: 'cit', tp: 'tp', egs: 'egs' }[k.split('_')[0]]; v[grp] = v[grp] || {}; v[grp][k.slice(k.indexOf('_') + 1)] = +val; }
         else if (k.indexOf('zakatp_') === 0) { v.zakat = v.zakat || {}; v.zakat[k.slice(7)] = +val / 100; }
         else if (k.indexOf('sugar_') === 0) { v.sugarTiers = v.sugarTiers || { tiers: [[0, 5, 0], [5, 8, 0.79], [8, 1000, 1.09]] }; v.sugarTiers.tiers[k === 'sugar_mid' ? 1 : 2][2] = +val; }
         else if (k.indexOf('zakat_') === 0) { v.zakat = v.zakat || {}; v.zakat[k.slice(6)] = +val; }
@@ -6228,13 +6419,14 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     file.arrayBuffer().then(function (buf) {
       UP.wb = XLSX.read(buf, { type: 'array', cellDates: true });
       UP.sheet = UP.wb.SheetNames[0];
-      prepSheet(); mapModal();
+      // a column layout saved for this company and file type is applied when it fits
+      return Z.get('profiles', S.ex.entityId + '_' + UP.kind).catch(function () { return null; }).then(function (pf) { UP.profile = pf; prepSheet(); mapModal(); });
     }).catch(function (e) { Z.toast(t('Could not read this file:') + ' ' + e.message, true); });
   }
   function prepSheet() {
     UP.aoa = XLSX.utils.sheet_to_json(UP.wb.Sheets[UP.sheet], { header: 1, raw: true, defval: '' });
-    var d = E.detectHeader(UP.aoa, UP.kind);
-    UP.headerRow = d.row; UP.map = d.map;
+    var d = E.detectHeader(UP.aoa, UP.kind), pf = UP.profile && E.applyProfile(UP.aoa, UP.profile.headers);
+    UP.headerRow = pf ? pf.row : d.row; UP.map = pf ? Object.assign({}, d.map, pf.map) : d.map; UP.usedProfile = !!pf;
   }
   function mapModal() {
     var K = E.KINDS[UP.kind], hdr = UP.aoa[UP.headerRow] || [];
@@ -6245,6 +6437,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     var prev = res.rows.slice(0, 8);
     var body = '<div class="grid g3"><label class="f"><span>' + t('Sheet') + '</span><select data-chg="upsheet">' + UP.wb.SheetNames.map(function (n) { return '<option' + (n === UP.sheet ? ' selected' : '') + '>' + esc(n) + '</option>'; }).join('') + '</select></label>' +
       '<label class="f"><span>' + t('Header row') + '</span><input type="number" min="1" value="' + (UP.headerRow + 1) + '" data-chg="uphdr"></label><div class="f"><span class="muted" style="font-size:13px">' + t('File') + '</span><p style="margin:6px 0 0">' + esc(UP.fileName) + '</p></div></div>' +
+      (UP.usedProfile ? '<p class="zk-profile">' + Z.icon('bookmark-simple') + t('Columns matched with the layout saved for this company.') + (UP.profile.erp ? ' (' + esc(UP.profile.erp) + ')' : '') + '</p>' : '') +
       '<h3 style="margin:16px 0 8px">' + t('Match the columns') + '</h3><div class="grid g3">' + K.fields.map(function (f) {
         return '<label class="f"><span>' + esc(fieldLabel(f.k)) + (f.req ? ' *' : '') + '</span><select data-chg="upmap" data-f="' + f.k + '">' + colOpts(UP.map[f.k]) + '</select></label>';
       }).join('') + '</div>' +
@@ -6265,6 +6458,8 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       return Z.saveEx().then(function () { Z.toast(t('VAT return figures loaded')); Z.changed(); });
     }
     var ds = { parentId: S.ex.id, kind: UP.kind, fileName: UP.fileName, sheet: UP.sheet, headerRow: UP.headerRow, mapping: UP.map, rowCount: rows.length, errors: UP.result.errors.length, uploadedAt: new Date().toISOString(), label: UP.fileName };
+    var ent = Z.entity(S.ex.entityId) || {};
+    if (Z.can('preparer')) Z.save('profiles', { id: S.ex.entityId + '_' + UP.kind, entityId: S.ex.entityId, kind: UP.kind, erp: ent.erp || '', headers: E.profileFrom(UP.aoa[UP.headerRow], UP.map), label: (ent.erp || '') + ' ' + UP.kind }).catch(function () {});
     Z.save('datasets', ds).then(function (d) {
       return Z.save('rows', Object.assign({ id: d.id, parentId: S.ex.id }, pack(rows))).then(function () {
         Z.closeModal(); Z.toast(Z.count(rows.length) + ' ' + t('rows saved')); S.loaded = false; Z.route();
@@ -6737,7 +6932,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       Z.fld('checkId', t('Linked check'), f.checkId, 'text', lk ? 'disabled' : '') +
       Z.fld('discoveredOn', t('Error discovered on'), f.discoveredOn || Z.today(), 'date', lk ? 'disabled' : '', t('Starts the 20-day clock for an amended return.')) +
       Z.fld('correctedOn', t('Amended return filed on'), f.correctedOn, 'date', lk ? 'disabled' : '') +
-      Z.fld('correctedPeriod', t('Or corrected in the return for period'), f.correctedPeriod, 'text', (lk ? 'disabled ' : '') + 'placeholder="2026-10"') + '</form>',
+      Z.fld('correctedPeriod', t('Or corrected in the return for period'), f.correctedPeriod, 'text', (lk ? 'disabled ' : '') + 'placeholder="2026-10"') + ((f.id && Z.attachHtml && 'findings:' + f.id) ? '<div style="grid-column:1/-1">' + Z.attachHtml((f.id && Z.attachHtml && 'findings:' + f.id), S.ex.entityId) + '</div>' : '') + '</form>',
       (f.id && !lk ? '<button class="btn danger" data-act="delfinding" data-id="' + f.id + '">' + t('Delete') + '</button>' : '') + '<button class="btn" data-act="closemodal">' + t('Cancel') + '</button>' + (lk ? '' : '<button class="btn primary" data-act="savefinding">' + t('Save finding') + '</button>'));
     Z.CHG.fcalc();
   }
@@ -6873,6 +7068,8 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       jobs.push(Z.save('statements', Object.assign({ id: entId + '_soa', entityId: entId, label: 'ZATCA statement of account' }, d.statement)));
       d.disputes.forEach(function (x) { jobs.push(Z.save('disputes', Object.assign({ entityId: entId, label: x.reference }, x))); });
       d.refunds.forEach(function (x) { jobs.push(Z.save('refunds', Object.assign({ entityId: entId, label: x.period }, x))); });
+      jobs.push(Z.save('corporate', Object.assign({ id: entId + '_corp_2026', entityId: entId, year: 2026, label: 'Income tax 2026' }, d.corporate)));
+      jobs.push(Z.save('devices', { id: entId + '_egs', entityId: entId, list: d.devices, label: 'E-invoicing devices' }));
       jobs.push(Z.save('registers', Object.assign({ id: entId + '_reg', entityId: entId, label: 'VAT adjustments' }, d.registers)));
       d.events.forEach(function (x) { jobs.push(Z.save('events', Object.assign({ entityId: entId, label: x.title }, x))); });
       var ent2 = { name: 'Al Noor Logistics LLC', nameAr: 'النور للخدمات اللوجستية', trn: '311987654300003', cr: '1010223344', vatFreq: 'quarterly', whtRegistered: false, erp: 'Odoo', active: true, demo: true, mapping: { outputVat: '2210', inputVat: '1410', revenue: '4*' } };
@@ -7082,7 +7279,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       Z.fld('receivedOn', t('Received on'), q.receivedOn, 'date', 'required') + Z.fld('dueOn', t('Deadline given by ZATCA'), q.dueOn, 'date', '', t('Leave empty for assessments and decisions: 60 / 30 days are applied.')) +
       Z.fld('amount', t('Amount assessed (SAR)'), q.amount, 'number', 'step="0.01"') + Z.fld('owner', t('Owner'), q.owner, 'text') +
       '<label class="f" style="grid-column:1/-1"><span>' + t('What is requested / assessed') + '</span><textarea name="items">' + esc(q.items || '') + '</textarea></label>' +
-      '<label class="f"><span>' + t('Status') + '</span>' + sel('status', q.status, [['open', 'Open'], ['responded', 'Responded'], ['closed', 'Closed']]) + '</label>' + Z.fld('respondedOn', t('Responded on'), q.respondedOn, 'date') + '</form>',
+      '<label class="f"><span>' + t('Status') + '</span>' + sel('status', q.status, [['open', 'Open'], ['responded', 'Responded'], ['closed', 'Closed']]) + '</label>' + Z.fld('respondedOn', t('Responded on'), q.respondedOn, 'date') + ((q.id && Z.attachHtml && 'requests:' + q.id) ? '<div style="grid-column:1/-1">' + Z.attachHtml((q.id && Z.attachHtml && 'requests:' + q.id), q.entityId) + '</div>' : '') + '</form>',
       (q.id && Z.can('preparer') ? '<button class="btn danger" data-act="delreq" data-id="' + q.id + '">' + t('Delete') + '</button>' : '') + '<button class="btn" data-act="closemodal">' + t('Cancel') + '</button>' + (Z.can('preparer') ? '<button class="btn primary" data-act="savereq">' + t('Save') + '</button>' : ''));
   };
   Z.ACT.savereq = function () {
@@ -7925,7 +8122,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       Z.fld('submittedOn', t('Submitted on'), r.submittedOn, 'date') + Z.fld('infoRequestedOn', t('ZATCA asked for documents on'), r.infoRequestedOn, 'date') +
       Z.fld('infoDueOn', t('Documents due by (if ZATCA gave a date)'), r.infoDueOn, 'date') + Z.fld('approvedOn', t('Approved on'), r.approvedOn, 'date') +
       Z.fld('paidOn', t('Paid on'), r.paidOn, 'date') + Z.fld('paidAmount', t('Amount received (SAR)'), r.paidAmount, 'number', 'step="0.01" min="0"') + Z.fld('owner', t('Owner'), r.owner, 'text') +
-      '<label class="f" style="grid-column:1/-1"><span>' + t('Notes') + '</span><textarea name="note">' + esc(r.note || '') + '</textarea></label></form>',
+      '<label class="f" style="grid-column:1/-1"><span>' + t('Notes') + '</span><textarea name="note">' + esc(r.note || '') + '</textarea></label>' + ((r.id && 'refunds:' + r.id) ? '<div style="grid-column:1/-1">' + Z.attachHtml((r.id && 'refunds:' + r.id), r.entityId) + '</div>' : '') + '</form>',
       (r.id && can ? '<button class="btn danger" data-act="delrow" data-tb="refunds" data-id="' + r.id + '">' + t('Delete') + '</button>' : '') + '<button class="btn" data-act="closemodal">' + t('Cancel') + '</button>' + (can ? '<button class="btn primary" data-act="saverefund">' + t('Save') + '</button>' : ''));
   };
   Z.ACT.saverefund = function () {
@@ -7990,7 +8187,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       Z.fld('hearingOn', t('Committee hearing on'), d.hearingOn, 'date') + Z.fld('committeeDecisionOn', t('Committee decision on'), d.committeeDecisionOn, 'date') +
       Z.fld('paidAmount', t('Paid so far (SAR)'), d.paidAmount, 'number', 'step="0.01" min="0"', t('Paying the undisputed part stops late-payment fines on it.')) + Z.fld('reliefAmount', t('Relief obtained (SAR)'), d.reliefAmount, 'number', 'step="0.01" min="0"') +
       Z.fld('owner', t('Owner'), d.owner, 'text') + Z.fld('soaRef', t('Reference on the statement of account'), d.soaRef, 'text') +
-      '<label class="f" style="grid-column:1/-1"><span>' + t('Grounds and evidence') + '</span><textarea name="grounds">' + esc(d.grounds || '') + '</textarea></label></form>',
+      '<label class="f" style="grid-column:1/-1"><span>' + t('Grounds and evidence') + '</span><textarea name="grounds">' + esc(d.grounds || '') + '</textarea></label>' + ((d.id && 'disputes:' + d.id) ? '<div style="grid-column:1/-1">' + Z.attachHtml((d.id && 'disputes:' + d.id), d.entityId) + '</div>' : '') + '</form>',
       (d.id && can ? '<button class="btn danger" data-act="delrow" data-tb="disputes" data-id="' + d.id + '">' + t('Delete') + '</button>' : '') + '<button class="btn" data-act="closemodal">' + t('Cancel') + '</button>' + (can ? '<button class="btn primary" data-act="savedispute">' + t('Save') + '</button>' : ''), true);
   };
   Z.ACT.savedispute = function () {
@@ -8294,6 +8491,254 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     if (k === 'issues') return { title: t('Registers with issues'), money: false, total: res.issues, totalLabel: t('registers'), rows: res.checks.filter(function (c) { return c.status === 'fail' || c.status === 'warn'; }).map(function (c, i) { return { label: c.id + ' ' + (ar() ? c.titleAr : c.title), value: c.exposure || 0, display: c.exposure ? fmt(c.exposure) : t('Review'), tone: c.status === 'fail' ? 'fail' : 'warn', href: '#reg-' + c.id }; }), empty: t('No issues.') };
     return null;
   };
+})();
+
+</script>
+<script>
+/* Wave 3: income tax on the non-Saudi share with advance payments and transfer
+   pricing (one `corporate` doc per entity and year), e-invoicing devices (`devices`,
+   one doc per entity), the VAT group (`groups`), the board's tax risk report, and
+   file attachments (`attachments` for what a file is, `files` for its content).
+   Arithmetic is in the engine: E.citStatus, E.tpStatus, E.egsStatus, E.vatGroupStatus. */
+(function () {
+  'use strict';
+  var E = window.ZEngine, S = Z.S, t = Z.t, esc = Z.esc, fmt = Z.fmt;
+  var cfg = function () { return S.settingsDoc ? S.settingsDoc.values : {}; };
+  var ar = function () { return S.lang === 'ar'; };
+  var kpi = function (icon, val, label, tone) { return '<div class="' + (tone || '') + '">' + Z.icon(icon) + '<b>' + val + '</b><span>' + esc(label) + '</span></div>'; };
+  var head = function (eyebrow, icon, title, text, right) { return '<div class="pagehead"><div><p class="eyebrow">' + Z.icon(icon) + ' ' + esc(eyebrow) + '</p><h1>' + esc(title) + '</h1><p>' + esc(text) + '</p></div>' + (right ? '<div class="row">' + right + '</div>' : '') + '</div>'; };
+  var entSel = function (chg, cur) { return S.entities.length > 1 ? '<select data-chg="' + chg + '" aria-label="' + esc(t('Entity')) + '">' + S.entities.map(function (x) { return '<option value="' + x.id + '"' + (x.id === cur ? ' selected' : '') + '>' + esc(Z.entName(x)) + '</option>'; }).join('') + '</select>' : ''; };
+  function chk(c) {
+    var figs = c.status === 'na' ? '<span>' + t('Needs') + ': <b>' + esc(t(c.missing || '')) + '</b></span>' :
+      (c.aLabel ? '<span>' + esc(t(c.aLabel)) + ': <b>' + (/Expired|Devices|Members/.test(c.aLabel) ? Z.count(c.a) : fmt(c.a)) + '</b></span>' : '') + (c.bLabel ? '<span>' + esc(t(c.bLabel)) + ': <b>' + fmt(c.b) + '</b></span>' : '') + (c.exposure ? '<span class="d fail">' + t('Exposure') + ': <b>' + fmt(c.exposure) + '</b></span>' : '');
+    var list = (c.exceptions && c.exceptions.list) || [];
+    return '<div class="check" id="c-' + c.id + '">' + Z.tick(c.status) + '<div><h3>' + esc(c.id) + ' · ' + esc(ar() ? c.titleAr : c.title) + '</h3><div class="figs">' + figs + '</div>' +
+      (c.note ? '<p class="faint" style="font-size:12.5px;margin:4px 0 0">' + esc(ar() && c.noteAr ? c.noteAr : t(c.note)) + '</p>' : '') + (list.length ? '<details><summary>' + t('Show the items') + ' (' + list.length + ')</summary>' + Z.rowsTable(list) + '</details>' : '') + '</div><div class="acts"></div></div>';
+  }
+  var yes = function (v) { return v === true || v === 'yes'; };
+  var TPT = { services: 'Services', goods: 'Goods', loans: 'Loans and interest', royalties: 'Royalties', management: 'Management fees', other: 'Other' };
+
+  // ================================================================ income tax and transfer pricing
+  var C = {};
+  Z.views.corporate = function (h) {
+    var e = Z.entity(h[1]) || Z.entity(S.entityId) || S.entities[0], year = +h[2] || +Z.today().slice(0, 4);
+    if (!e) return Z.setMain('<div class="empty"><h2>' + t('Add an entity first.') + '</h2></div>');
+    return Z.get('corporate', e.id + '_corp_' + year).then(function (doc) {
+      C.e = e; C.year = year; C.doc = doc || { id: e.id + '_corp_' + year, entityId: e.id, year: year, fyEnd: year + '-12-31', instalments: [], transactions: [], label: 'Income tax ' + year };
+      C.doc.instalments = Array.isArray(C.doc.instalments) ? C.doc.instalments : []; C.doc.transactions = Array.isArray(C.doc.transactions) ? C.doc.transactions : [];
+      renderCorp();
+    });
+  };
+  function renderCorp() {
+    var d = C.doc, e = C.e, can = Z.can('preparer'), cit = E.citStatus(d, cfg(), Z.today()), tp = E.tpStatus(d, cfg(), Z.today());
+    var dis = can ? '' : ' disabled';
+    var f = function (k, label, type, hint, attrs) { return Z.fld('c_' + k, label, d[k], type, 'data-chg="corp" data-f="' + k + '"' + (attrs || '') + dis, hint); };
+    var sel = function (k, label, opts) { return '<label class="f"><span>' + esc(label) + '</span><select data-chg="corp" data-f="' + k + '"' + dis + '>' + opts.map(function (o) { return '<option value="' + o[0] + '"' + (String(d[k] == null ? '' : d[k]) === o[0] ? ' selected' : '') + '>' + esc(t(o[1])) + '</option>'; }).join('') + '</select></label>'; };
+    var years = []; for (var y = +Z.today().slice(0, 4) + 1; y >= Z.FIRST_YEAR; y--) years.push(y);
+    var inst = cit.required ? '<div class="zk-inst">' + cit.rows.map(function (r, i) {
+      return '<div class="zk-inst-c st-' + r.state + '" style="--i:' + i + '"><span class="zk-k">' + t('Instalment') + ' ' + r.n + '</span><b class="num">' + fmt(r.amount) + '</b><span>' + t('Due') + ' ' + Z.ltr(r.due) + '</span>' +
+        '<span class="zk-inst-s">' + esc(t({ paid: 'Paid on time', late: 'Paid late', overdue: 'Overdue', due: 'Not yet due' }[r.state])) + (r.fine ? ', ' + t('fine') + ' ' + fmt(r.fine) : '') + '</span>' +
+        '<div class="grid g2">' + Z.fld('ip' + i, t('Paid on'), (d.instalments[i] || {}).paidOn, 'date', 'data-chg="corpinst" data-i="' + i + '" data-f="paidOn"' + dis) + Z.fld('ia' + i, t('Amount paid'), (d.instalments[i] || {}).amount, 'number', 'step="0.01" data-chg="corpinst" data-i="' + i + '" data-f="amount"' + dis) + '</div></div>';
+    }).join('') + '</div>' : '<p class="muted">' + (cit.prior ? t('No advance payments are due this year.') : t('Enter last year\'s income tax to see whether advance payments are due.')) + '</p>';
+    var types = Object.keys(tp.byType), maxT = Math.max.apply(null, types.map(function (k) { return tp.byType[k]; }).concat([1]));
+    var gauge = '<div class="zk-gauge" role="img" aria-label="' + esc(t('Controlled transactions against the SAR 6 million threshold')) + '"><div class="zk-gauge-t"><i style="--w:' + Math.min(100, tp.total / (E.mergeSettings(cfg()).tp.fileThreshold) * 100).toFixed(1) + '%" class="' + (tp.filesRequired ? 'over' : '') + '"></i></div><span>' + fmt(tp.total) + ' / ' + fmt(E.mergeSettings(cfg()).tp.fileThreshold) + '</span></div>';
+    Z.setMain(head(t('Income tax'), 'bank', t('Income tax and transfer pricing') + ': ' + Z.entName(e) + ' ' + C.year, t('Income tax on the share owned by non-Saudi shareholders, the advance payments it triggers, and the transfer pricing filings that go with the return.'),
+      entSel('corpent', e.id) + '<select data-chg="corpyear" aria-label="' + esc(t('Year')) + '">' + years.map(function (y) { return '<option' + (y === C.year ? ' selected' : '') + '>' + y + '</option>'; }).join('') + '</select>') +
+      '<div class="stack"><div class="kpis">' + kpi('percent', Math.round(cit.share * 100) + '%', t('Non-Saudi share')) + kpi('bank', fmt(cit.tax), t('Income tax on that share (SAR)')) +
+      kpi('calendar-check', cit.required ? fmt(cit.instalment) : '-', t('Each advance payment (SAR)')) + kpi('warning', fmt(cit.exposure + 0), t('Overdue tax and fines (SAR)'), cit.exposure ? 'bad' : '') + kpi('arrows-left-right', fmt(tp.total), t('Controlled transactions (SAR)')) + '</div>' +
+      '<p class="muted zk-src">' + Z.icon('info') + t('Rates and thresholds from adviser summaries of the Income Tax Law (Art. 70) and the Transfer Pricing Bylaws: 20% on the non-Saudi share, advance payments when last year\'s tax was SAR 2 million or more, files at SAR 6 million, CbCR above SAR 3.2 billion. Verify; editable in Settings.') + '</p>' +
+      '<section class="paper"><h2>' + t('The year') + '</h2><div class="grid g3" style="margin-top:10px">' + f('fyEnd', t('Year end'), 'date') + f('foreignSharePct', t('Non-Saudi ownership (%)'), 'number', '', ' step="0.01" min="0" max="100"') +
+      f('taxableProfit', t('Taxable profit (SAR)'), 'number', t('Estimate during the year; final figure from the return.'), ' step="0.01"') + f('priorYearTax', t('Last year\'s income tax (SAR)'), 'number', '', ' step="0.01" min="0"') +
+      f('priorYearWht', t('WHT suffered last year (SAR)'), 'number', '', ' step="0.01" min="0"') + f('filedOn', t('Return filed on'), 'date') + '</div></section>' +
+      '<section class="paper"><header><div><h2>' + t('Advance payments') + '</h2><p>' + t('Three instalments at the end of months 6, 9 and 12 of the tax year.') + '</p></div></header>' + inst + cit.checks.map(chk).join('') + '</section>' +
+      '<section class="paper"><header><div><h2>' + t('Transfer pricing') + '</h2><p>' + t('Transactions with related parties for the year, against the documentation thresholds.') + '</p></div>' + gauge + '</header>' +
+      (types.length ? '<div class="hbars" style="margin:6px 0 14px">' + types.map(function (k, i) { return '<div class="hb" style="--i:' + i + '"><span>' + esc(t(TPT[k] || k)) + '</span><div class="track"><i style="--w:' + (tp.byType[k] / maxT * 100).toFixed(1) + '%"></i></div><b class="num">' + fmt(tp.byType[k]) + '</b></div>'; }).join('') + '</div>' : '') +
+      '<div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Related party') + '</th><th>' + t('Country') + '</th><th>' + t('Type') + '</th><th class="num">' + t('Amount (SAR)') + '</th>' + (can ? '<th><span class="sr-only">' + t('Remove') + '</span></th>' : '') + '</tr></thead><tbody>' +
+      d.transactions.map(function (x, i) { return '<tr><td>' + esc(x.party || '') + '</td><td>' + esc(x.country || '') + '</td><td>' + esc(t(TPT[x.type] || x.type || 'Other')) + '</td><td class="num">' + fmt(x.amount) + '</td>' + (can ? '<td><button class="btn ghost small icon" data-act="tpdel" data-i="' + i + '" aria-label="' + esc(t('Remove') + ' ' + (x.party || '')) + '">' + Z.icon('x') + '</button></td>' : '') + '</tr>'; }).join('') +
+      (can ? '<tr><td><input type="text" id="tp-p" aria-label="' + esc(t('Related party')) + '"></td><td><input type="text" id="tp-c" aria-label="' + esc(t('Country')) + '"></td><td><select id="tp-t" aria-label="' + esc(t('Type')) + '">' + [['services', 'Services'], ['goods', 'Goods'], ['loans', 'Loans and interest'], ['royalties', 'Royalties'], ['management', 'Management fees'], ['other', 'Other']].map(function (o) { return '<option value="' + o[0] + '">' + esc(t(o[1])) + '</option>'; }).join('') + '</select></td><td><input type="number" step="0.01" min="0" id="tp-a" aria-label="' + esc(t('Amount (SAR)')) + '"></td><td><button class="btn small" data-act="tpadd">' + t('Add') + '</button></td></tr>' : '') + '</tbody></table></div>' +
+      '<div class="grid g3" style="margin-top:14px">' + f('groupRevenue', t('Group consolidated revenue (SAR)'), 'number', '', ' step="1" min="0"') + f('disclosureFiledOn', t('Disclosure form filed on'), 'date') + f('cbcrNotifiedOn', t('CbCR notification filed on'), 'date') +
+      sel('localFileReady', t('Local file ready'), [['no', 'No'], ['yes', 'Yes']]) + sel('masterFileReady', t('Master file ready'), [['no', 'No'], ['yes', 'Yes']]) + '</div>' + tp.checks.map(chk).join('') + '</section></div>');
+  }
+  function saveCorp(msg) { return Z.save('corporate', C.doc).then(function (d) { C.doc = d; d.instalments = d.instalments || []; d.transactions = d.transactions || []; renderCorp(); if (msg) Z.toast(msg); }); }
+  Z.CHG.corp = function (el) { var f = el.dataset.f; C.doc[f] = el.type === 'number' ? (el.value === '' ? null : +el.value) : el.value; saveCorp(); };
+  Z.CHG.corpinst = function (el) { var i = +el.dataset.i; while (C.doc.instalments.length <= i) C.doc.instalments.push({}); C.doc.instalments[i][el.dataset.f] = el.type === 'number' ? (el.value === '' ? null : +el.value) : el.value; saveCorp(); };
+  Z.CHG.corpent = function (el) { location.hash = '#/' + S.tax + '/corporate/' + el.value + '/' + C.year; };
+  Z.CHG.corpyear = function (el) { location.hash = '#/' + S.tax + '/corporate/' + C.e.id + '/' + el.value; };
+  Z.ACT.tpadd = function () {
+    var p = document.getElementById('tp-p').value.trim(), a = +document.getElementById('tp-a').value;
+    if (!p || !(a > 0)) return Z.toast(t('Enter the related party and an amount.'), true);
+    C.doc.transactions.push({ party: p, country: document.getElementById('tp-c').value.trim(), type: document.getElementById('tp-t').value, amount: a }); saveCorp(t('Saved'));
+  };
+  Z.ACT.tpdel = function (el) { C.doc.transactions.splice(+el.dataset.i, 1); saveCorp(t('Line removed')); };
+
+  // ================================================================ e-invoicing devices
+  var G = {};
+  Z.views.devices = function (h) {
+    var e = Z.entity(h[1]) || Z.entity(S.entityId) || S.entities[0];
+    if (!e) return Z.setMain('<div class="empty"><h2>' + t('Add an entity first.') + '</h2></div>');
+    return Z.get('devices', e.id + '_egs').then(function (doc) {
+      G.e = e; G.doc = doc || { id: e.id + '_egs', entityId: e.id, list: [], label: 'E-invoicing devices' }; G.doc.list = Array.isArray(G.doc.list) ? G.doc.list : [];
+      // units seen in the latest e-invoicing provider export of this company
+      var x = S.exercises.filter(function (z) { return z.entityId === e.id; }).sort(function (a, b) { return a.period < b.period ? 1 : -1; })[0];
+      G.seen = S.ex && S.ex.entityId === e.id && S.data && S.data.einv_provider ? S.data.einv_provider.map(function (r) { return r.egs; }) : null; G.exPeriod = S.ex && S.ex.entityId === e.id ? S.ex.period : x && x.period;
+      renderDev();
+    });
+  };
+  function renderDev() {
+    var r = E.egsStatus(G.doc.list, G.seen, cfg(), Z.today()), can = Z.can('preparer');
+    var by = { ok: 0, renew: 0, expired: 0, unknown: 0, retired: 0 }; r.list.forEach(function (x) { by[x.state]++; });
+    var cards = r.list.map(function (x, i) {
+      var d = x.d, span = d.csidIssuedOn && d.csidExpiresOn ? Math.max(1, E.daysBetween(E.date(d.csidIssuedOn) || Z.today(), E.date(d.csidExpiresOn) || Z.today())) : 0, used = span ? Math.min(100, Math.max(0, (span - Math.max(0, x.left)) / span * 100)) : 100;
+      return '<article class="zk-dev st-' + x.state + '" style="--i:' + i + '"><header><span class="zk-dev-ico">' + Z.icon(d.type === 'pos' ? 'cash-register' : 'hard-drives') + '</span><div><h3>' + esc(d.name || d.code) + '</h3><p class="faint">' + Z.ltr(d.code || '') + (d.location ? ', ' + esc(d.location) : '') + '</p></div>' +
+        '<span class="zk-dev-st">' + esc(t({ ok: 'Valid', renew: 'Renew now', expired: 'Expired', unknown: 'No expiry date', retired: 'Retired' }[x.state])) + '</span></header>' +
+        '<div class="zk-life"><i style="--w:' + used.toFixed(1) + '%"></i></div><p class="zk-life-t">' + (x.left == null ? t('Enter the CSID expiry date') : x.left < 0 ? t('Expired') + ' ' + -x.left + ' ' + t('days ago') + ': ' + t('invoices stamped since are not compliant') : x.left + ' ' + t('days left') + ', ' + Z.ltr(E.date(d.csidExpiresOn))) + '</p>' +
+        (can ? '<footer><button class="btn small" data-act="devedit" data-i="' + i + '">' + t('Update') + '</button></footer>' : '') + '</article>';
+    }).join('');
+    Z.setMain(head(t('E-invoicing'), 'cpu', t('E-invoicing devices') + ': ' + Z.entName(G.e), t('Every unit that stamps invoices (EGS) needs its own valid cryptographic stamp (CSID) from the Fatoora portal. An expired one makes every invoice it stamps non-compliant.'),
+      entSel('devent', G.e.id) + (can ? '<button class="btn primary" data-act="devedit">' + Z.icon('plus') + ' ' + t('Add a device') + '</button>' : '')) +
+      '<div class="stack"><div class="kpis">' + kpi('check-circle', by.ok, t('Valid'), 'good') + kpi('clock-countdown', by.renew + by.unknown, t('To renew within 30 days'), by.renew ? 'bad' : '') + kpi('x-circle', by.expired, t('Expired'), by.expired ? 'bad' : '') + kpi('question', r.unregistered.length, t('Sending but not registered'), r.unregistered.length ? 'bad' : '') + '</div>' +
+      '<section class="paper">' + r.checks.map(chk).join('') + (G.seen ? '' : '<p class="faint" style="font-size:12.5px">' + t('Open an exercise of this company with an e-invoicing provider export to compare its units with the register.') + '</p>') + '</section>' +
+      (cards ? '<div class="zk-grid">' + cards + '</div>' : '<section class="paper empty"><i class="ph ph-cpu big" aria-hidden="true"></i><h2>' + t('No devices registered') + '</h2><p>' + t('Add the ERP server and each POS that stamps invoices, with its CSID expiry date from the Fatoora portal.') + '</p></section>') + '</div>');
+  }
+  Z.CHG.devent = function (el) { location.hash = '#/' + S.tax + '/devices/' + el.value; };
+  Z.ACT.devedit = function (el) {
+    var i = el && el.dataset && el.dataset.i != null ? +el.dataset.i : -1, d = i >= 0 ? G.doc.list[i] : { type: 'pos', status: 'active' }; G.editI = i;
+    var sel = function (k, label, opts) { return '<label class="f"><span>' + esc(label) + '</span><select name="' + k + '">' + opts.map(function (o) { return '<option value="' + o[0] + '"' + (d[k] === o[0] ? ' selected' : '') + '>' + esc(t(o[1])) + '</option>'; }).join('') + '</select></label>'; };
+    Z.modal(i >= 0 ? d.name || d.code : t('Add a device'), '<form id="devf" class="grid g2">' + Z.fld('name', t('Name'), d.name, 'text', 'required') + Z.fld('code', t('Unit code (as in the provider export)'), d.code, 'text', 'required') +
+      sel('type', t('Type'), [['server', 'ERP or central server'], ['pos', 'Point of sale']]) + Z.fld('location', t('Location'), d.location, 'text') + Z.fld('csidIssuedOn', t('CSID issued on'), d.csidIssuedOn, 'date') + Z.fld('csidExpiresOn', t('CSID expires on'), d.csidExpiresOn, 'date') +
+      sel('status', t('Status'), [['active', 'In use'], ['retired', 'Retired']]) + '</form>',
+      (i >= 0 ? '<button class="btn danger" data-act="devdel">' + t('Delete') + '</button>' : '') + '<button class="btn" data-act="closemodal">' + t('Cancel') + '</button><button class="btn primary" data-act="devsave">' + t('Save') + '</button>');
+  };
+  Z.ACT.devsave = function () {
+    var f = document.getElementById('devf'); if (!f.reportValidity()) return;
+    var d = Object.fromEntries(new FormData(f)); Object.keys(d).forEach(function (k) { d[k] = String(d[k]).trim(); });
+    if (G.editI >= 0) G.doc.list[G.editI] = Object.assign({}, G.doc.list[G.editI], d); else G.doc.list.push(d);
+    Z.closeModal(); Z.save('devices', G.doc).then(function (x) { G.doc = x; x.list = x.list || []; renderDev(); Z.toast(t('Saved')); });
+  };
+  Z.ACT.devdel = function () { if (!confirm(t('Delete this record?'))) return; G.doc.list.splice(G.editI, 1); Z.closeModal(); Z.save('devices', G.doc).then(function (x) { G.doc = x; x.list = x.list || []; renderDev(); }); };
+
+  // ================================================================ VAT group
+  var VG = {};
+  Z.views.group = function () {
+    return Z.list('groups').then(function (gs) {
+      VG.all = gs; VG.doc = gs[0] || null; renderGroup();
+    });
+  };
+  function renderGroup() {
+    var g = VG.doc, can = Z.can('manager');
+    if (!g) return Z.setMain(head(t('VAT'), 'tree-structure', t('VAT group'), t('Companies registered together for VAT file one return. The group return must equal what each member\'s books say, added up.'), can ? '<button class="btn primary" data-act="groupnew">' + Z.icon('plus') + ' ' + t('Set up the VAT group') + '</button>' : '') +
+      '<section class="paper empty"><i class="ph ph-tree-structure big" aria-hidden="true"></i><h2>' + t('No VAT group set up') + '</h2><p>' + t('VAT grouping is available since 15 October 2025 for Saudi residents under 50% common control. Set it up here if your companies file one return.') + '</p></section>');
+    var members = (g.memberIds || []).map(function (id) { var e = Z.entity(id); return e ? { id: id, name: Z.entName(e), trn: e.trn, control: true, exercises: S.exercises.filter(function (x) { return x.entityId === id; }) } : null; }).filter(Boolean);
+    var r = E.vatGroupStatus(g, members, cfg());
+    var cell = function (v, d) { return '<td class="num">' + fmt(v) + (d && Math.abs(d) > 1 ? ' <span class="diff-bad">(' + fmt(d) + ')</span>' : '') + '</td>'; };
+    Z.setMain(head(t('VAT'), 'tree-structure', g.name || t('VAT group'), t('One return for all members. Each period: the group return against the members\' own figures added up.'), can ? '<button class="btn" data-act="groupnew">' + t('Edit the group') + '</button><button class="btn primary" data-act="groupret">' + Z.icon('plus') + ' ' + t('Enter a group return') + '</button>' : '') +
+      '<div class="stack"><div class="kpis">' + kpi('buildings', members.length, t('Members')) + kpi('calendar', r.lines.length, t('Group returns entered')) + kpi('warning', fmt(r.exposure), t('Exposure (SAR)'), r.exposure ? 'bad' : '') + '</div>' +
+      '<section class="paper"><h2>' + t('Members') + '</h2><div class="zk-chips" style="margin-top:8px">' + members.map(function (m) { return '<span class="zk-chip">' + (m.id === g.entityId ? Z.icon('star') : '') + esc(m.name) + ' ' + Z.ltr(m.trn || '') + '</span>'; }).join('') + '</div>' + r.checks.map(chk).join('') + '</section>' +
+      (r.lines.length ? '<section class="paper flush"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Period') + '</th><th class="num">' + t('Sales per group return') + '</th><th class="num">' + t('Members added up') + '</th><th class="num">' + t('Output VAT per group return') + '</th><th class="num">' + t('Members added up') + '</th><th class="num">' + t('Input VAT per group return') + '</th><th class="num">' + t('Members added up') + '</th><th>' + t('Status') + '</th></tr></thead><tbody>' +
+        r.lines.map(function (l) { return '<tr><td>' + Z.ltr(l.period) + '</td>' + cell(l.ret.sales) + cell(l.sum.sales, l.diff.sales) + cell(l.ret.outputVat) + cell(l.sum.outputVat, l.diff.outputVat) + cell(l.ret.inputVat) + cell(l.sum.inputVat, l.diff.inputVat) + '<td>' + Z.tick(l.status) + (l.missing.length ? ' <span class="faint" style="font-size:12px">' + t('No exercise:') + ' ' + esc(l.missing.join(', ')) + '</span>' : '') + '</td></tr>'; }).join('') + '</tbody></table></div></section>' : '') + '</div>');
+  }
+  Z.ACT.groupnew = function () {
+    var g = VG.doc || { name: '', memberIds: [] };
+    Z.modal(t('VAT group'), '<form id="vgf"><label class="f"><span>' + t('Group name') + '</span><input type="text" name="name" required value="' + esc(g.name || '') + '"></label><label class="f"><span>' + t('Representative member') + '</span><select name="rep">' + S.entities.map(function (e) { return '<option value="' + e.id + '"' + (e.id === g.entityId ? ' selected' : '') + '>' + esc(Z.entName(e)) + '</option>'; }).join('') + '</select></label>' +
+      '<fieldset class="zk-members"><legend>' + t('Members') + '</legend>' + S.entities.map(function (e) { return '<label class="zk-cbx"><input type="checkbox" name="m" value="' + e.id + '"' + ((g.memberIds || []).indexOf(e.id) >= 0 ? ' checked' : '') + '> ' + esc(Z.entName(e)) + '</label>'; }).join('') + '</fieldset></form>',
+      '<button class="btn" data-act="closemodal">' + t('Cancel') + '</button><button class="btn primary" data-act="groupsave">' + t('Save') + '</button>');
+  };
+  Z.ACT.groupsave = function () {
+    var f = document.getElementById('vgf'); if (!f.reportValidity()) return;
+    var fd = new FormData(f), ids = fd.getAll('m'), rep = fd.get('rep'); if (ids.indexOf(rep) < 0) ids.unshift(rep);
+    var g = Object.assign({ returns: {} }, VG.doc || {}, { name: fd.get('name').trim(), entityId: rep, memberIds: ids, label: fd.get('name').trim() });
+    Z.save('groups', g).then(function () { Z.closeModal(); Z.toast(t('Saved')); Z.route(); });
+  };
+  Z.ACT.groupret = function () {
+    Z.modal(t('Enter a group return'), '<form id="vgr" class="grid g2">' + Z.fld('period', t('Period'), '', 'text', 'required placeholder="2026-09"') + Z.fld('sales', t('Total sales (box 6)'), '', 'number', 'step="0.01"') + Z.fld('outputVat', t('Output VAT'), '', 'number', 'step="0.01"') + Z.fld('inputVat', t('Input VAT'), '', 'number', 'step="0.01"') + '</form>',
+      '<button class="btn" data-act="closemodal">' + t('Cancel') + '</button><button class="btn primary" data-act="groupretsave">' + t('Save') + '</button>');
+  };
+  Z.ACT.groupretsave = function () {
+    var f = document.getElementById('vgr'); if (!f.reportValidity()) return;
+    var d = Object.fromEntries(new FormData(f)), p = d.period.trim();
+    if (!E.periodRange(p)) return Z.toast(t('Enter the period as 2026-09 or 2026-Q3.'), true);
+    VG.doc.returns = Object.assign({}, VG.doc.returns || {}); VG.doc.returns[p] = { sales: +d.sales || 0, outputVat: +d.outputVat || 0, inputVat: +d.inputVat || 0 };
+    Z.save('groups', VG.doc).then(function () { Z.closeModal(); Z.toast(t('Saved')); Z.route(); });
+  };
+
+  // ================================================================ board tax risk report
+  Z.views.board = function () {
+    var ents = S.entities.filter(function (e) { return e.active !== false; });
+    var get = function (tb, id) { return Z.get(tb, id).catch(function () { return null; }); };
+    return Promise.all([Z.list('disputes').catch(function () { return []; }), Z.list('refunds').catch(function () { return []; })].concat(ents.map(function (e) { return Promise.all([get('statements', e.id + '_soa'), get('registers', e.id + '_reg'), get('corporate', e.id + '_corp_' + Z.today().slice(0, 4)), get('devices', e.id + '_egs')]); }))).then(function (r) {
+      var disp = r[0], refs = r[1], today = Z.today(), V = cfg();
+      var rows = ents.map(function (e, i) {
+        var docs = r[i + 2], xs = S.exercises.filter(function (x) { return x.entityId === e.id; }).sort(function (a, b) { return a.period < b.period ? 1 : -1; }), sm = (xs[0] && xs[0].summary) || {};
+        var vs = Z.taxScore(sm), soa = E.statementRecon(docs[0], xs, disp.filter(function (d) { return d.entityId === e.id; }), V, today), adj = E.adjustments(docs[1], V, today), cit = E.citStatus(docs[2] || {}, V, today), egs = E.egsStatus((docs[3] || {}).list, null, V, today);
+        var dsp = disp.filter(function (d) { return d.entityId === e.id; }).map(function (d) { return E.disputeStatus(d, V, today); }), stake = dsp.reduce(function (s, d) { return s + d.atStake; }, 0);
+        var rf = refs.filter(function (x) { return x.entityId === e.id; }).reduce(function (s, x) { return s + E.refundStatus(x, V, today).outstanding; }, 0);
+        var expo = (sm.vatExposure != null ? sm.vatExposure : sm.exposure || 0) + (sm.whtExposure || 0);
+        return { e: e, period: xs[0] && xs[0].period, score: vs.score, grade: vs.grade, expo: expo, soa: soa.exposure, adj: adj.exposure, rec: adj.recover, stake: stake, refund: rf, cit: cit.exposure, egs: egs.list.filter(function (x) { return x.state === 'expired'; }).length };
+      });
+      var tot = function (k) { return rows.reduce(function (s, x) { return s + (x[k] || 0); }, 0); };
+      var risk = tot('expo') + tot('soa') + tot('adj') + tot('cit');
+      var bars = [['Return and ledger exposure', tot('expo')], ['ZATCA statement', tot('soa')], ['VAT adjustments', tot('adj')], ['Income tax', tot('cit')], ['Open disputes', tot('stake')]];
+      var max = Math.max.apply(null, bars.map(function (b) { return b[1]; }).concat([1]));
+      Z.setMain(head(t('Report'), 'presentation-chart', t('Tax risk report for the board'), t('Every company on one page: readiness, money at risk, disputes, refunds and devices. Print it or save it as PDF for the board pack.'), '<button class="btn primary" data-act="print">' + Z.icon('file-pdf') + ' ' + t('Print / save as PDF') + '</button>') +
+        '<article class="report zk-board"><div class="cover"><div><p style="margin:0;color:#555">' + t('Tax risk report for the board') + '</p><h1>' + esc(Z.orgName()) + '</h1><p style="margin:6px 0 0">' + t('As of') + ' ' + Z.ltr(today) + ', ' + ents.length + ' ' + t('companies') + '</p></div></div>' +
+        '<div class="kpis">' + kpi('shield-warning', fmt(risk), t('Tax at risk (SAR)'), risk ? 'bad' : '') + kpi('gavel', fmt(tot('stake')), t('At stake in open cases (SAR)')) + kpi('hand-coins', fmt(tot('refund') + tot('rec')), t('Owed back to the companies (SAR)'), 'good') + kpi('cpu', tot('egs'), t('Expired e-invoicing devices'), tot('egs') ? 'bad' : '') + '</div>' +
+        '<h2>' + t('Where the risk is') + '</h2><div class="hbars">' + bars.map(function (b, i) { return '<div class="hb" style="--i:' + i + '"><span>' + esc(t(b[0])) + '</span><div class="track"><i style="--w:' + Math.max(1, b[1] / max * 100).toFixed(1) + '%"></i></div><b class="num">' + fmt(b[1]) + '</b></div>'; }).join('') + '</div>' +
+        '<h2>' + t('By company') + '</h2><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Company') + '</th><th>' + t('Latest period') + '</th><th>' + t('Readiness') + '</th><th class="num">' + t('Exposure (SAR)') + '</th><th class="num">' + t('ZATCA statement') + '</th><th class="num">' + t('VAT adjustments') + '</th><th class="num">' + t('Income tax') + '</th><th class="num">' + t('Open disputes') + '</th><th class="num">' + t('Refunds outstanding') + '</th></tr></thead><tbody>' +
+        rows.map(function (x) { return '<tr><td><a href="#/' + S.tax + '/insights/' + x.e.id + '">' + esc(Z.entName(x.e)) + '</a></td><td>' + Z.ltr(x.period || '-') + '</td><td>' + (x.score != null ? Z.pill(x.grade, x.score + '%') : '-') + '</td><td class="num">' + fmt(x.expo) + '</td><td class="num">' + fmt(x.soa) + '</td><td class="num">' + fmt(x.adj) + '</td><td class="num">' + fmt(x.cit) + '</td><td class="num">' + fmt(x.stake) + '</td><td class="num">' + fmt(x.refund) + '</td></tr>'; }).join('') +
+        '<tr class="total"><td colspan="3">' + t('Total') + '</td><td class="num">' + fmt(tot('expo')) + '</td><td class="num">' + fmt(tot('soa')) + '</td><td class="num">' + fmt(tot('adj')) + '</td><td class="num">' + fmt(tot('cit')) + '</td><td class="num">' + fmt(tot('stake')) + '</td><td class="num">' + fmt(tot('refund')) + '</td></tr></tbody></table></div>' +
+        '<p class="faint" style="font-size:12px;margin-top:14px">' + t('Estimates from the checks and the penalty rates in Settings. Not legal advice.') + '</p></article>');
+    });
+  };
+
+  // ================================================================ attachments
+  var TYPES = { pdf: 'application/pdf', png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', csv: 'text/csv', xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', xls: 'application/vnd.ms-excel', docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' };
+  var MAX = 2 * 1024 * 1024;
+  // a strip of files under a record: owner is "table:id"
+  Z.attachHtml = function (owner, entityId) {
+    if (!owner || !entityId) return '';
+    setTimeout(function () { Z.paintAttach(owner); }, 0);
+    return '<div class="zk-att" data-owner="' + esc(owner) + '" data-ent="' + esc(entityId) + '"><span class="faint">' + t('Loading…') + '</span></div>';
+  };
+  Z.paintAttach = function (owner) {
+    var box = document.querySelector('.zk-att[data-owner="' + owner + '"]'); if (!box) return;
+    Z.list('attachments').then(function (all) {
+      box = document.querySelector('.zk-att[data-owner="' + owner + '"]'); if (!box) return;
+      var mine = all.filter(function (a) { return a.owner === owner; });
+      box.innerHTML = '<span class="zk-att-h">' + Z.icon('paperclip') + t('Evidence') + '</span>' + mine.map(function (a) { return '<span class="zk-file"><a href="#" data-act="attget" data-id="' + esc(a.id) + '">' + Z.icon(a.type === 'application/pdf' ? 'file-pdf' : /image/.test(a.type) ? 'image' : 'file-xls') + esc(a.name) + '</a><small>' + Math.max(1, Math.round(a.size / 1024)) + ' KB</small>' + (Z.can('preparer') ? '<button type="button" class="btn ghost small icon" data-act="attdel" data-id="' + esc(a.id) + '" data-owner="' + esc(owner) + '" aria-label="' + esc(t('Remove') + ' ' + a.name) + '">' + Z.icon('x') + '</button>' : '') + '</span>'; }).join('') +
+        (Z.can('preparer') ? '<button type="button" class="btn small" data-act="attadd" data-owner="' + esc(owner) + '">' + Z.icon('upload-simple') + ' ' + t('Attach a file') + '</button>' : '') + (mine.length || Z.can('preparer') ? '' : '<span class="faint">' + t('No files') + '</span>');
+    }).catch(function () { box.innerHTML = ''; });
+  };
+  Z.ACT.attadd = function (el) {
+    var owner = el.dataset.owner, ent = (el.closest('.zk-att') || {}).dataset.ent;
+    var inp = document.createElement('input'); inp.type = 'file'; inp.accept = Object.keys(TYPES).map(function (x) { return '.' + x; }).join(',');
+    inp.onchange = function () {
+      var file = inp.files[0]; if (!file) return;
+      var ext = (file.name.split('.').pop() || '').toLowerCase(), type = TYPES[ext];
+      if (!type) return Z.toast(t('Attach PDF, image, Excel, Word or CSV files.'), true);
+      if (file.size > MAX) return Z.toast(t('Files up to 2 MB can be attached.'), true);
+      var rd = new FileReader();
+      rd.onload = function () {
+        var data = String(rd.result).split(',')[1] || '', id = Z.uid('AT');
+        Z.save('files', { id: id, entityId: ent, data: data }).then(function () {
+          return Z.save('attachments', { id: id, entityId: ent, owner: owner, name: file.name, type: type, size: file.size, label: file.name });
+        }).then(function () { Z.toast(t('File attached')); Z.paintAttach(owner); });
+      };
+      rd.readAsDataURL(file);
+    };
+    inp.click();
+  };
+  Z.ACT.attget = function (el) {
+    Promise.all([Z.get('attachments', el.dataset.id), Z.get('files', el.dataset.id)]).then(function (r) {
+      var a = r[0], f = r[1]; if (!a || !f) return Z.toast(t('This file is no longer available.'), true);
+      var bin = atob(f.data), u8 = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+      // always a download, never shown inline: the type comes from the allow-list
+      var type = Object.keys(TYPES).map(function (k) { return TYPES[k]; }).indexOf(a.type) >= 0 ? a.type : 'application/octet-stream';
+      var url = URL.createObjectURL(new Blob([u8], { type: type })), link = document.createElement('a');
+      link.href = url; link.download = String(a.name || 'file').replace(/[\\/:*?"<>|]/g, '_'); document.body.appendChild(link); link.click();
+      setTimeout(function () { URL.revokeObjectURL(url); link.remove(); }, 500);
+    });
+  };
+  Z.ACT.attdel = function (el) { if (!confirm(t('Remove this file?'))) return; Z.call('remove', { table: 'attachments', id: el.dataset.id }).then(function () { Z.paintAttach(el.dataset.owner); }); };
 })();
 
 </script>

@@ -191,7 +191,7 @@
       Z.fld('receivedOn', t('Received on'), q.receivedOn, 'date', 'required') + Z.fld('dueOn', t('Deadline given by ZATCA'), q.dueOn, 'date', '', t('Leave empty for assessments and decisions: 60 / 30 days are applied.')) +
       Z.fld('amount', t('Amount assessed (SAR)'), q.amount, 'number', 'step="0.01"') + Z.fld('owner', t('Owner'), q.owner, 'text') +
       '<label class="f" style="grid-column:1/-1"><span>' + t('What is requested / assessed') + '</span><textarea name="items">' + esc(q.items || '') + '</textarea></label>' +
-      '<label class="f"><span>' + t('Status') + '</span>' + sel('status', q.status, [['open', 'Open'], ['responded', 'Responded'], ['closed', 'Closed']]) + '</label>' + Z.fld('respondedOn', t('Responded on'), q.respondedOn, 'date') + '</form>',
+      '<label class="f"><span>' + t('Status') + '</span>' + sel('status', q.status, [['open', 'Open'], ['responded', 'Responded'], ['closed', 'Closed']]) + '</label>' + Z.fld('respondedOn', t('Responded on'), q.respondedOn, 'date') + ((q.id && Z.attachHtml && 'requests:' + q.id) ? '<div style="grid-column:1/-1">' + Z.attachHtml((q.id && Z.attachHtml && 'requests:' + q.id), q.entityId) + '</div>' : '') + '</form>',
       (q.id && Z.can('preparer') ? '<button class="btn danger" data-act="delreq" data-id="' + q.id + '">' + t('Delete') + '</button>' : '') + '<button class="btn" data-act="closemodal">' + t('Cancel') + '</button>' + (Z.can('preparer') ? '<button class="btn primary" data-act="savereq">' + t('Save') + '</button>' : ''));
   };
   Z.ACT.savereq = function () {

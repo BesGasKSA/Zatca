@@ -28,14 +28,14 @@ See README.md for the feature map and deployment.
 
 ## Tests
 
-`npm test` — engine (130) + backend (22) + a 600-run random-data stress test
+`npm test` — engine (136) + backend (23) + a 600-run random-data stress test
 (`tests/fuzz.js`: messy values, bad dates, any period since 2018 — no NaN,
 no negative exposure, no crash). `npm run perf` — 20,000 invoices under 4 s.
 With `npm run dev` running, four browser suites drive the real UI in headless
-Chrome: `npm run e2e` (journeys, every page EN/AR/phone, 1,055 checks),
+Chrome: `npm run e2e` (journeys, every page EN/AR/phone, 1,181 checks),
 `e2e:edge` (quarterly/no-WHT/2018, empty exercise, signed-off read-only,
 deletes, broken links), `e2e:security` (script injection through every field),
-`e2e:a11y` (axe-core WCAG 2.1 AA on 105 screens; keep it at zero). Chrome must
+`e2e:a11y` (axe-core WCAG 2.1 AA on 117 screens; keep it at zero). Chrome must
 get an absolute `--user-data-dir`; a relative one silently fails to start.
 
 ## Domain decisions worth remembering
@@ -179,6 +179,25 @@ get an absolute `--user-data-dir`; a relative one silently fails to start.
 - Demo: 12,000 (warehouse 80% use in 2025) + 3,000 (early bad-debt claim) + 30,000 (advance
   declared late) + 1,980 (EUR at 4.05 vs 4.38) + 7,500 (housing below market) = 54,480 to
   pay; 15,000 bad debt to reclaim.
+
+## Wave 3 (2026-10-20): income tax, TP, devices, VAT group, board, attachments, profiles
+
+- `web/ui-corporate.js`. Entity tables: `corporate` (id `<entityId>_corp_<year>`: CIT
+  fields, advance-payment `instalments`, TP `transactions`), `devices` (`<entityId>_egs`,
+  `list`), `groups` (entityId = representative, `memberIds`, `returns[period]`),
+  `profiles` (`<entityId>_<kind>`: header text per field), `attachments` + `files`.
+- `E.citStatus` (20% of the non-Saudi share; advances 25% of last year's tax less WHT
+  when it was SAR 2m+ and the instalment is SAR 500k+, due end of months 6/9/12;
+  1% per full 30 days), `E.tpStatus` (files at SAR 6m, CbCR above 3.2bn, 120 days),
+  `E.egsStatus` (renew 30 days ahead; units in the provider export missing from the
+  register), `E.vatGroupStatus` (group return vs members' summaries). All CIT/TP
+  thresholds are adviser summaries: settings `cit`, `tp`, labelled "verify".
+- Import profiles: `E.profileFrom` / `E.applyProfile` remember a company's column
+  headers per file type; the upload dialog applies them and says so (`.zk-profile`).
+- Attachments: `Z.attachHtml('table:id', entityId)` inside dialogs. Server: type
+  allow-list (`FILE_TYPES`), 2 MB, base64 only, file names cleaned, `files` can never be
+  listed, removing an attachment removes its content. The client only ever downloads
+  (blob + `download`), never renders a file inline.
 
 ## Deployment (backend live since 2026-10-19)
 

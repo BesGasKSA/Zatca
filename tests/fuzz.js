@@ -131,7 +131,10 @@ for (var k = 0; k < 600; k++) {
     var aj = E.adjustments({ capital: [o, pick(JUNK)], baddebts: [o], advances: [o], fx: [o], related: [o] }, {}, '2026-10-20');
     var sr = E.statementRecon({ lines: [o, o, pick(JUNK)], glBalance: pick(JUNK) }, [{ id: 'X', period: '2026-08', summary: { netVat: pick(JUNK), whtTax: pick(JUNK) } }], [o], {}, '2026-10-20');
     var cal = E.complianceCalendar({ entities: [{ id: 'A' }], events: [o], disputes: [o], refunds: [o], from: '2026-01-01', to: '2026-12-31', today: '2026-10-20' });
-    var js = JSON.stringify([aj, sr, cal, E.refundStatus(o, {}, '2026-10-20'), E.disputeStatus(o, {}, '2026-10-20')]);
+    var oc = JSON.parse(JSON.stringify(o)); o.instalments = [oc, pick(JUNK)]; o.transactions = [oc, pick(JUNK)]; o.returns = { '2026-09': oc, x: pick(JUNK) };
+    var w3 = [E.citStatus(o, {}, '2026-10-20'), E.tpStatus(o, {}, '2026-10-20'), E.egsStatus([oc, pick(JUNK)], [pick(JUNK), 'A'], {}, '2026-10-20'), E.vatGroupStatus(o, [{ name: 'A', exercises: [{ period: '2026-09', summary: oc }] }, pick(JUNK)], {}), E.applyProfile([[pick(JUNK), pick(JUNK)]], { a: pick(JUNK) })];
+    w3.slice(0, 2).forEach(function (r) { assert.ok(r.exposure == null || r.exposure >= 0, 'w3 exposure'); });
+    var js = JSON.stringify([aj, sr, cal, w3, E.refundStatus(o, {}, '2026-10-20'), E.disputeStatus(o, {}, '2026-10-20')]);
     assert.ok(!/NaN|Infinity/.test(js), 'no NaN');
     assert.ok(aj.exposure >= 0 && aj.recover >= 0 && sr.exposure >= 0, 'no negative exposure');
   } catch (e) { failures++; if (failures <= 15) console.log('  FAIL account ' + k + ': ' + e.message); }

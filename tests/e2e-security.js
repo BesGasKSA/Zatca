@@ -122,6 +122,14 @@ async function clean(where) {
     await click('[data-act="adjsave"]', 1500);
   }
 
+  await go('#/vat/devices', 1500); await click('.pagehead [data-act="devedit"]', 800);
+  await setVal('#devf [name=name]', X('dev')); await setVal('#devf [name=code]', X('devcode')); await setVal('#devf [name=location]', X('devloc'));
+  await click('[data-act="devsave"]', 1500);
+  await go('#/vat/corporate', 1500);
+  await setVal('#tp-p', X('tpparty')); await setVal('#tp-c', X('tpcountry')); await setVal('#tp-a', '1000'); await click('[data-act="tpadd"]', 1500);
+  await go('#/vat/group', 1500); await click('[data-act="groupnew"]', 800); await setVal('#vgf [name=name]', X('group')); await click('[data-act="groupsave"]', 1500);
+  await go('#/vat/disputes', 1500); await click('[data-act="editdispute"][data-id]', 1200); await click('.zk-att [data-act="attadd"]', 2500); await click('[data-act="closemodal"]', 400);
+
   step = 'users';
   await go('#/vat/users');
   await click('.pagehead [data-act="edituser"]', 800);
@@ -139,7 +147,7 @@ async function clean(where) {
   for (const lang of ['en', 'ar']) {
     await ev("localStorage.setItem('zr_lang','" + lang + "'); return 1"); await send('Page.reload'); await sleep(3000);
     for (const s of ['vat', 'wht']) {
-      for (const v of ['dashboard', 'insights/' + ent, 'entities', 'entity/' + ent, 'entity/' + ent + '/edit', 'requests', 'account/' + ent, 'refunds', 'disputes', 'calendar', 'adjust/' + ent, 'users', 'audit', 'settings', 'annual/' + ent + '/2026']) { await go('#/' + s + '/' + v, 1500); await clean(lang + ' ' + s + ' ' + v); }
+      for (const v of ['dashboard', 'insights/' + ent, 'entities', 'entity/' + ent, 'entity/' + ent + '/edit', 'requests', 'account/' + ent, 'refunds', 'disputes', 'calendar', 'adjust/' + ent, 'corporate/' + ent, 'devices/' + ent, 'group', 'board', 'users', 'audit', 'settings', 'annual/' + ent + '/2026']) { await go('#/' + s + '/' + v, 1500); await clean(lang + ' ' + s + ' ' + v); }
       for (const tab of (s === 'vat' ? VAT : WHT)) { await go('#/' + s + '/ex/' + ex + '/' + tab, 1300); await clean(lang + ' ' + s + ' ex ' + tab); }
       for (const r of ['summary', 'portfolio', 'aging', 'exposure', 'corrections', 'calendar', 'beneficiaries']) { await go('#/' + s + '/reports/' + r, 1800); await clean(lang + ' ' + s + ' report ' + r); }
     }

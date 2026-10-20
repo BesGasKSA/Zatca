@@ -113,6 +113,10 @@ async function audit(label) {
   ok(await ev("return !!document.querySelector('[data-act=\"upsave\"]')"), 'mapping dialog opened');
   ok(await ev("var b = document.querySelector('[data-act=\"upsave\"]'); return b && !b.disabled"), 'required columns mapped automatically');
   await click('[data-act="upsave"]', 2500);
+  ok(await ev("return Z.get('profiles', Z.S.ex.entityId + '_sys_vat').then(function (p) { return !!p && !!p.headers && !!p.headers.invoice; })"), 'column layout saved as an import profile');
+  ok(await click('[data-act="upload"][data-k="sys_vat"]', 2500), 'upload again');
+  ok(await ev("return !!document.querySelector('.zk-profile')"), 'second upload uses the saved layout');
+  await click('[data-act="closemodal"]', 400);
   ok(await ev("return (Z.S.data.sys_vat || []).length === 10"), 'ten invoice rows saved (got ' + await ev("return (Z.S.data.sys_vat || []).length") + ')');
 
   // ---- every tab of the new exercise, both sections
@@ -213,7 +217,7 @@ async function audit(label) {
       await go('#/' + s + '/insights/' + demo.e, 3000); await audit(tag + ' ' + s + ' company 360');
       for (const tab of (s === 'vat' ? VAT : WHT)) { await go('#/' + s + '/ex/' + demo.x + '/' + tab, 1100); await audit(tag + ' ' + s + ' ex ' + tab); }
       for (const r of (s === 'vat' ? RV : RW)) { await go('#/' + s + '/reports/' + r, r === 'beneficiaries' || r === 'aging' ? 2200 : 1000); await audit(tag + ' ' + s + ' report ' + r); }
-      for (const v of ['entities', 'entity/' + demo.e, 'annual/' + demo.e + '/2025', 'requests', 'account/' + demo.e, 'refunds', 'disputes', 'calendar', 'adjust/' + demo.e, 'settings', 'users', 'audit']) { await go('#/' + s + '/' + v, 1500); await audit(tag + ' ' + s + ' ' + v); }
+      for (const v of ['entities', 'entity/' + demo.e, 'annual/' + demo.e + '/2025', 'requests', 'account/' + demo.e, 'refunds', 'disputes', 'calendar', 'adjust/' + demo.e, 'corporate/' + demo.e + '/2026', 'devices/' + demo.e, 'group', 'board', 'settings', 'users', 'audit']) { await go('#/' + s + '/' + v, 1500); await audit(tag + ' ' + s + ' ' + v); }
     }
   }
   await sweep('EN');
@@ -273,6 +277,31 @@ async function audit(label) {
   await click('[data-drill="adj:due"]', 900);
   ok(await ev("var d = document.querySelector('.drawer'); return !!d && d.querySelectorAll('.dr-row').length === 5"), 'VAT to pay drill lists the five items');
   await ev('Z.closeDrawer(true); return 1');
+  step = 'income tax, devices, group, board, attachments';
+  await go('#/vat/corporate/' + demo.e + '/2026', 2000);
+  ok(await ev("var k = document.querySelector('.kpis').innerText; return /840,000\\.00/.test(k) && /550,000\\.00/.test(k) && document.querySelectorAll('.zk-inst-c.st-overdue').length === 1"), 'income tax 840,000.00; the September advance payment is overdue');
+  ok(await ev("return !!document.querySelector('#c-TP2 .tick, #c-TP2') && /6,700,000\\.00/.test(document.querySelector('.zk-gauge').innerText)"), 'transfer pricing threshold gauge');
+  await go('#/vat/devices/' + demo.e, 1800);
+  ok(await ev("return document.querySelectorAll('.zk-dev.st-expired').length === 1 && document.querySelectorAll('.zk-dev').length === 2"), 'the POS device shows an expired CSID');
+  await go('#/vat/group', 1500);
+  await click('[data-act="groupnew"]', 800);
+  await setVal('#vgf [name=name]', 'Test VAT group'); await ev("document.querySelectorAll('#vgf [name=m]').forEach(function (c) { c.checked = true; }); return 1");
+  await click('[data-act="groupsave"]', 1500);
+  await click('[data-act="groupret"]', 800);
+  await setVal('#vgr [name=period]', '2026-08'); await setVal('#vgr [name=sales]', '100'); await setVal('#vgr [name=outputVat]', '15'); await setVal('#vgr [name=inputVat]', '0');
+  await click('[data-act="groupretsave"]', 1500);
+  ok(await ev("return /Test VAT group/.test(document.querySelector('#main').innerText) && document.querySelectorAll('#main table.t tbody tr').length === 1"), 'VAT group set up and its return compared');
+  await go('#/vat/board', 3000);
+  ok(await ev("return document.querySelectorAll('.zk-board tbody tr').length >= 3 && /550,000\\.00/.test(document.querySelector('.zk-board').innerText)"), 'board report lists every company and the income tax risk');
+  await go('#/vat/disputes', 1500);
+  await click('[data-act="editdispute"][data-id]', 1200);
+  ok(await ev("return !!document.querySelector('.zk-att [data-act=attadd]')"), 'evidence strip in the dispute dialog');
+  await click('.zk-att [data-act="attadd"]', 2500);
+  ok(await ev("return document.querySelectorAll('.zk-att .zk-file').length === 1"), 'a file attached to the dispute');
+  ok(await ev("return Z.list('attachments').then(function (l) { return l.length === 1 && l[0].type === 'text/csv' && /^disputes:/.test(l[0].owner); })"), 'attachment stored with its owner and type');
+  await click('.zk-att [data-act="attget"]', 1500);
+  ok(fs.readdirSync(dl).some((f) => /erp-vat-report.*\.csv$/.test(f)), 'attachment downloads');
+  await click('[data-act="closemodal"]', 400);
   step = 'review notes';
   await go('#/vat/ex/' + demo.x + '/vat', 1500);
   await click('[data-act="rvadd"][data-id="V1"]', 800);
@@ -297,7 +326,7 @@ async function audit(label) {
   await ev("localStorage.setItem('zr_lang', 'en'); return 1");
   await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 2, mobile: true });
   await send('Page.reload'); await sleep(3000);
-  for (const h of ['#/vat/dashboard', '#/vat/ex/' + demo.x + '/overview', '#/vat/ex/' + demo.x + '/vat', '#/wht/ex/' + demo.x + '/wht', '#/vat/ex/' + demo.x + '/report', '#/wht/reports/beneficiaries', '#/vat/settings', '#/vat/account', '#/vat/refunds', '#/vat/disputes', '#/vat/calendar', '#/vat/adjust']) { await go(h, 1800); await audit('phone ' + h.split('/').slice(1, 4).join(' ')); }
+  for (const h of ['#/vat/dashboard', '#/vat/ex/' + demo.x + '/overview', '#/vat/ex/' + demo.x + '/vat', '#/wht/ex/' + demo.x + '/wht', '#/vat/ex/' + demo.x + '/report', '#/wht/reports/beneficiaries', '#/vat/settings', '#/vat/account', '#/vat/refunds', '#/vat/disputes', '#/vat/calendar', '#/vat/adjust', '#/vat/corporate', '#/vat/devices', '#/vat/board']) { await go(h, 1800); await audit('phone ' + h.split('/').slice(1, 4).join(' ')); }
   await click('[data-act="menu"]', 600);
   ok(await ev("return getComputedStyle(document.querySelector('.rail')).visibility === 'visible'"), 'menu opens the sidebar on a phone');
 

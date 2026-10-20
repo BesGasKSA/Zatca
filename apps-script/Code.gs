@@ -16,9 +16,12 @@
  */
 
 var REGISTRY_SHEETS = { TENANTS: 'tenants', USERS: 'users', AUDIT: 'audit' };
-var TENANT_TABLES = ['entities', 'exercises', 'datasets', 'rows', 'samples', 'findings', 'checklists', 'settings', 'annual', 'requests', 'statements', 'refunds', 'disputes', 'events', 'registers', 'audit'];
+var TENANT_TABLES = ['entities', 'exercises', 'datasets', 'rows', 'samples', 'findings', 'checklists', 'settings', 'annual', 'requests', 'statements', 'refunds', 'disputes', 'events', 'registers', 'corporate', 'devices', 'groups', 'profiles', 'attachments', 'files', 'audit'];
 // tables that belong to one entity but to no exercise
-var ENTITY_TABLES = { annual: 1, requests: 1, statements: 1, refunds: 1, disputes: 1, events: 1, registers: 1 };
+var ENTITY_TABLES = { annual: 1, requests: 1, statements: 1, refunds: 1, disputes: 1, events: 1, registers: 1, corporate: 1, devices: 1, groups: 1, profiles: 1, attachments: 1, files: 1 };
+// attachments: what a file is (listed); files: its content (fetched one at a time, never listed)
+var FILE_TYPES = { 'application/pdf': 1, 'image/png': 1, 'image/jpeg': 1, 'text/csv': 1, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 1, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 1, 'application/vnd.ms-excel': 1 };
+var FILE_MAX = 2 * 1024 * 1024;
 // tables whose documents hang off an exercise (parentId = exerciseId)
 var CHILD_TABLES = { datasets: 1, rows: 1, samples: 1, findings: 1, checklists: 1 };
 var COLS = ['id', 'parentId', 'entityId', 'label', 'updatedAt', 'updatedBy', 'data'];
@@ -269,6 +272,7 @@ function txt_(v) { return "'" + String(v == null ? '' : v); }
 function list_(s, table, parentId) {
   checkTable_(table);
   if (table === 'audit') need_(s, 'manager');
+  if (table === 'files') throw new Error('forbidden');
   var docs = readTable_(book_(s), table).filter(function (d) {
     if (parentId && d.parentId !== parentId) return false;
     if (table === 'settings') return true;
@@ -325,6 +329,8 @@ function save_(s, table, doc) {
       // annual figures, ZATCA letters, statements of account, refunds, disputes, calendar events
       if (!doc.entityId || !canEntity_(s, doc.entityId) || !readTable_(ss, 'entities', doc.entityId)[0]) throw new Error('forbidden');
       if (prev && prev.entityId !== doc.entityId) throw new Error('forbidden');
+      if (table === 'attachments') checkAttachment_(doc);
+      if (table === 'files') checkFile_(doc);
     } else if (table === 'settings') {
       doc.entityId = '';
     }
@@ -354,6 +360,7 @@ function remove_(s, table, id) {
       });
     }
     if (table === 'datasets') deleteDoc_(ss, 'rows', id);
+    if (table === 'attachments') deleteDoc_(ss, 'files', id);
     deleteDoc_(ss, table, id);
     tenantAudit_(s, 'delete', table, id, d.label || d.name || d.period || '');
   });
@@ -378,6 +385,17 @@ function guardReviews_(s, prev, doc) {
     if (n && n.reply !== o.reply) { o.reply = n.reply; o.repliedBy = s.user.name; o.repliedAt = now_(); }
     return o;
   });
+}
+
+function checkAttachment_(d) {
+  if (!FILE_TYPES[d.type]) throw new Error('bad_file');
+  if (!(+d.size > 0 && +d.size <= FILE_MAX)) throw new Error('file_too_large');
+  d.name = String(d.name || 'file').replace(/[\\/:*?"<>|\u0000-\u001f]/g, '_').slice(0, 160);
+  d.owner = String(d.owner || '').slice(0, 120);
+  if (!/^[a-z]+:[A-Za-z0-9_-]{1,64}$/.test(d.owner)) throw new Error('bad_doc');
+}
+function checkFile_(d) {
+  if (typeof d.data !== 'string' || d.data.length > Math.ceil(FILE_MAX / 3) * 4 + 4 || !/^[A-Za-z0-9+\/]*={0,2}$/.test(d.data)) throw new Error('file_too_large');
 }
 
 function stripMeta_(d) { var o = {}; Object.keys(d).forEach(function (k) { if (k !== 'updatedAt' && k !== 'updatedBy') o[k] = d[k]; }); return o; }
