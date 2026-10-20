@@ -491,6 +491,17 @@
   Z.ACT.delitem = function (el) { S.ex.reconItems = S.ex.reconItems.filter(function (i) { return i.id !== el.dataset.id; }); Z.saveEx().then(Z.changed); };
 
   // ---------------------------------------------------------------- bank
+  // money out grows to the left, money in to the right, each class against the largest
+  function flowBars(classes, sum, lines) {
+    var used = classes.filter(function (k) { return sum[k]; }), max = Math.max.apply(null, used.map(function (k) { return Math.abs(sum[k]); }).concat([1]));
+    return '<div class="zk-div zk-flow">' + used.map(function (k, i) {
+      var v = sum[k], n = lines.filter(function (l) { return l.cls === k; }).length, w = (Math.abs(v) / max * 100).toFixed(1);
+      return '<a class="zk-div-row" href="#" data-act="bankpick" data-k="' + k + '" style="--i:' + i + '"><span class="zk-div-l">' + esc(t(Z.bankClassName(k))) + ' <small class="faint">' + n + '</small></span>' +
+        '<span class="zk-div-rec out"><i style="--w:' + (v < 0 ? w : 0) + '%"></i>' + (v < 0 ? '<b class="num">' + fmt(-v) + '</b>' : '') + '</span><span class="zk-div-axis" aria-hidden="true"></span>' +
+        '<span class="zk-div-pay in"><i style="--w:' + (v > 0 ? w : 0) + '%"></i>' + (v > 0 ? '<b class="num">' + fmt(v) + '</b>' : '') + '</span></a>';
+    }).join('') + '<p class="zk-legend"><span><i class="k-out"></i>' + t('Out') + '</span><span><i class="k-rec"></i>' + t('In') + '</span></p></div>';
+  }
+  Z.ACT.bankpick = function (el) { S.bankFilter = el.dataset.k; S.bankPage = 0; Z.route(); setTimeout(function () { var x = document.querySelector('[data-chg="bankfilter"]'); if (x) x.closest('section').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 400); };
   Z.tabs.bank = function () {
     var B = S.R.bank, sum = B.summary || {}, lk = locked();
     var classes = E.BANK_CLASSES;
@@ -506,7 +517,7 @@
     }).join('');
     var pages = Math.ceil(lines.length / per);
     return '<div class="grid g2" style="align-items:start"><section class="paper area-bank"><header><div><h2>' + t('Where the money went') + '</h2><p>' + t('Bank lines grouped by what they are. Reclassify any line below; the checks update immediately.') + '</p></div></header>' +
-      (B.lines.length ? '<table class="t"><thead><tr><th>' + t('Class') + '</th><th class="num">' + t('Lines') + '</th><th class="num">' + t('In') + '</th><th class="num">' + t('Out') + '</th></tr></thead><tbody>' + sumRows + '</tbody></table>' : '<p class="muted">' + t('Load the bank statements for every account for the full period.') + '</p>') + '</section>' +
+      (B.lines.length ? flowBars(classes, sum, B.lines) : '<p class="muted">' + t('Load the bank statements for every account for the full period.') + '</p>') + (sumRows ? '' : '') + '</section>' +
       '<section class="paper"><header><div><h2>' + t('Why inspectors start with the bank') + '</h2></div></header><p class="muted">' + t('Money received that is not in declared sales is the most common basis for a VAT assessment. Receipts are compared with sales including VAT, adjusted for the change in receivables; payments with purchases, adjusted for payables. VAT and WHT payments are traced to the previous returns, and every foreign transfer must appear in the WHT register.') + '</p></section></div>' +
       '<section class="paper" style="margin-top:18px"><header><div><h2>' + t('Bank checks') + '</h2></div></header>' + B.checks.map(function (c) { return Z.checkHtml(c, Z.exceptionsHtml(c)); }).join('') + '</section>' +
       (B.lines.length ? '<section class="paper flush" style="margin-top:18px"><div style="padding:14px 18px" class="spread"><h2>' + t('Statement lines') + '</h2><select data-chg="bankfilter" style="width:auto" aria-label="' + t('Filter') + '"><option value="">' + t('All classes') + ' (' + B.lines.length + ')</option>' + classes.map(function (k) { var n = B.lines.filter(function (l) { return l.cls === k; }).length; return n ? '<option value="' + k + '"' + (f === k ? ' selected' : '') + '>' + esc(t(Z.bankClassName(k))) + ' (' + n + ')</option>' : ''; }).join('') + '</select></div>' +

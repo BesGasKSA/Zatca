@@ -438,13 +438,21 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   // ---------------------------------------------------------------- entities
   Z.views.entities = function (h) {
     if (h[1] === 'new') return entityForm({ vatFreq: 'monthly', whtRegistered: true, mapping: {} });
+    var cards = S.entities.map(function (e, i) {
+      var exs = S.exercises.filter(function (x) { return x.entityId === e.id; }).sort(function (a, b) { return a.period < b.period ? 1 : -1; });
+      var last = exs[0], ts = Z.taxScore((last || {}).summary || {}), sm = (last || {}).summary || {}, ex = Z.isWht() ? sm.whtExposure || 0 : sm.vatExposure != null ? sm.vatExposure : sm.exposure || 0;
+      var trend = exs.slice(0, 8).reverse().map(function (x) { return Z.taxScore(x.summary || {}).score; });
+      return '<a class="zk-ent" href="#/' + S.tax + '/entity/' + e.id + '" style="--i:' + i + '">' + Z.vring(ts.score, ts.grade, 64) + '<div class="zk-ent-t"><b>' + esc(e.name) + '</b>' + (e.nameAr ? '<span>' + esc(e.nameAr) + '</span>' : '') +
+        '<div class="zk-chips"><span class="zk-chip">' + Z.icon('identification-card') + Z.ltr(e.trn || '-') + '</span>' + (e.trn && !E.validVatNo(e.trn) ? Z.pill('fail', t('Invalid')) : '') + '<span class="zk-chip">' + Z.icon('calendar') + t(cap(e.vatFreq || 'monthly')) + '</span><span class="zk-chip">' + Z.icon('hand-coins') + (e.whtRegistered === false ? t('No WHT') : t('WHT')) + '</span></div></div>' +
+        '<div class="zk-ent-s">' + Z.spark(trend, 130, 36) + '<span class="faint">' + (last ? t('Latest exercise') + ' ' + esc(last.period) : t('None yet')) + '</span>' + (ex ? '<span class="zk-ent-x">' + t('Exposure') + ' <b class="num">' + Z.fmt(ex) + '</b></span>' : '') + '</div></a>';
+    }).join('');
     var rows = S.entities.map(function (e) {
       var exs = S.exercises.filter(function (x) { return x.entityId === e.id; }).sort(function (a, b) { return a.period < b.period ? 1 : -1; });
       var last = exs[0];
       return '<tr class="clickable" data-act="goent" data-id="' + e.id + '"><td><b>' + esc(e.name) + '</b><div class="faint">' + esc(e.nameAr || '') + '</div></td><td class="nowrap">' + esc(e.trn || '') + (e.trn && !E.validVatNo(e.trn) ? ' ' + Z.pill('fail', t('Invalid')) : '') + '</td><td>' + t(cap(e.vatFreq || 'monthly')) + '</td><td>' + (e.whtRegistered === false ? '-' : t('Yes')) + '</td><td>' + (last ? esc(last.period) + ' ' + (last.summary ? Z.pill(last.summary.grade, last.summary.score + '%') : '') : '<span class="faint">' + t('None yet') + '</span>') + '</td></tr>';
     }).join('');
     Z.setMain('<div class="pagehead"><div><h1>' + t('Legal entities') + '</h1><p>' + t('Each VAT-registered company or branch with its own TRN and chart of accounts mapping.') + '</p></div>' + (Z.can('manager') ? '<a class="btn primary" href="#/entities/new">' + t('Add entity') + '</a>' : '') + '</div>' +
-      '<div class="paper flush"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Entity') + '</th><th>' + t('VAT number (TRN)') + '</th><th>' + t('VAT filing') + '</th><th>' + t('WHT') + '</th><th>' + t('Latest exercise') + '</th></tr></thead><tbody>' + (rows || '<tr><td colspan="5" class="empty">' + t('No entities yet.') + '</td></tr>') + '</tbody></table></div></div>');
+      (cards ? '<div class="zk-ents">' + cards + '</div>' : '<section class="paper empty"><i class="ph ph-buildings big" aria-hidden="true"></i><h2>' + t('No entities yet.') + '</h2><p>' + t('Add each VAT-registered company with its TRN to start.') + '</p></section>') + (rows ? '' : ''));
   };
   Z.ACT.goent = function (el) { location.hash = '#/entity/' + el.dataset.id; };
 
@@ -553,14 +561,14 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     list.forEach(function (x, i) {
       var s = x.summary || {}, cx = pad + bw * i + bw / 2;
       var bh = Math.abs(s.netVat || 0) / maxV * (H - 60);
-      bars += '<rect x="' + (cx - bw * 0.28) + '" y="' + (H - 26 - bh) + '" width="' + (bw * 0.56) + '" height="' + bh + '" fill="var(--rule)" rx="2"><title>' + esc(x.period + ': ' + Z.fmt(s.netVat)) + '</title></rect>';
+      bars += '<rect class="cbar s1" style="--i:' + i + '" x="' + (cx - bw * 0.28) + '" y="' + (H - 26 - bh) + '" width="' + (bw * 0.56) + '" height="' + bh + '" rx="4"><title>' + esc(x.period + ': ' + Z.fmt(s.netVat)) + '</title></rect>';
       var sv = Z.taxScore(s).score || 0, y = H - 26 - sv / 100 * (H - 50);
       line += (i ? 'L' : 'M') + cx + ' ' + y;
-      dots += '<circle cx="' + cx + '" cy="' + y + '" r="4" fill="var(--green)"><title>' + esc(x.period + ': ' + sv + '%') + '</title></circle><text x="' + cx + '" y="' + (y - 9) + '" text-anchor="middle" font-size="11" fill="var(--ink)">' + (s.score || 0) + '</text>';
-      bars += '<text x="' + cx + '" y="' + (H - 8) + '" text-anchor="middle" font-size="11" fill="var(--ink-2)">' + esc(x.period.slice(2)) + '</text>';
+      dots += '<circle class="dot" style="--i:' + i + '" cx="' + cx + '" cy="' + y + '" r="4.5"><title>' + esc(x.period + ': ' + sv + '%') + '</title></circle><text class="vl" x="' + cx + '" y="' + (y - 10) + '" text-anchor="middle">' + sv + '%</text>';
+      bars += '<text class="ax" x="' + cx + '" y="' + (H - 8) + '" text-anchor="middle">' + esc(x.period.slice(2)) + '</text>';
     });
-    return '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;height:auto" role="img" aria-label="' + t('Readiness and VAT due over time') + '">' + bars + '<path d="' + line + '" fill="none" stroke="var(--green)" stroke-width="2"/>' + dots + '</svg>' +
-      '<p class="faint" style="font-size:12px">' + t('Line: readiness %. Bars: net VAT due (SAR).') + '</p>';
+    return '<div class="chart zk-trend"><svg direction="ltr" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + t('Readiness and VAT due over time') + '">' + bars + '<path class="ln draw" d="' + line + '"/>' + dots + '</svg>' +
+      '<p class="zk-legend"><span><i class="k-bar"></i>' + t('Net VAT due (SAR)') + '</span><span><i class="k-ln"></i>' + t('Readiness %') + '</span></p></div>';
   }
 
   // ---------------------------------------------------------------- settings
@@ -771,8 +779,15 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   Z.views.audit = function () {
     return Z.list('audit').then(function (docs) {
       docs.sort(function (a, b) { return a.at < b.at ? 1 : -1; });
-      Z.setMain('<div class="pagehead"><div><h1>' + t('Audit trail') + '</h1><p>' + t('Every change, who made it and when. Kept in the organisation\'s own Google Sheet.') + '</p></div></div><div class="paper flush"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('When') + '</th><th>' + t('Who') + '</th><th>' + t('Action') + '</th><th>' + t('Record') + '</th></tr></thead><tbody>' +
-        docs.slice(0, 500).map(function (a) { return '<tr><td class="nowrap">' + esc(String(a.at).slice(0, 19).replace('T', ' ')) + '</td><td>' + esc(a.user) + '</td><td>' + esc(a.action + ' ' + a.table) + '</td><td>' + esc(a.detail) + '</td></tr>'; }).join('') + '</tbody></table></div></div>');
+      var ICO = { entities: 'buildings', exercises: 'clipboard-text', datasets: 'file-arrow-up', findings: 'flag', samples: 'dice-five', checklists: 'list-checks', requests: 'envelope-simple', disputes: 'gavel', refunds: 'hand-coins', statements: 'scales', registers: 'sliders-horizontal', corporate: 'bank', devices: 'cpu', settings: 'gear-six', users: 'users-three', attachments: 'paperclip', events: 'calendar-dots' };
+      var VERB = { save: 'saved', create: 'created', update: 'updated', delete: 'deleted' };
+      var LBL = { entities: 'Company', exercises: 'Exercise', datasets: 'Data file', rows: 'Data rows', findings: 'Finding', samples: 'Sample', checklists: 'Document checklist', requests: 'ZATCA letter', disputes: 'Dispute', refunds: 'Refund', statements: 'Statement of account', registers: 'VAT adjustments', corporate: 'Income tax', devices: 'E-invoicing devices', settings: 'Settings', users: 'User', attachments: 'Attachment', events: 'Calendar deadline', annual: 'Annual reconciliation', groups: 'VAT group', profiles: 'Import layout' };
+      var days = {}, order = [];
+      docs.slice(0, 500).forEach(function (a) { var d = String(a.at).slice(0, 10); if (!days[d]) { days[d] = []; order.push(d); } days[d].push(a); });
+      Z.setMain('<div class="pagehead"><div><h1>' + t('Audit trail') + '</h1><p>' + t('Every change, who made it and when. Kept in the organisation\'s own Google Sheet.') + '</p></div></div>' +
+        (order.length ? '<div class="zk-tl">' + order.map(function (d, gi) { return '<section class="paper zk-tl-day" style="--i:' + gi + '"><h2>' + Z.ltr(d) + ' <span class="faint">' + days[d].length + ' ' + t('changes') + '</span></h2><ol>' + days[d].map(function (a) {
+          return '<li class="zk-tl-it act-' + esc(a.action) + '"><span class="zk-tl-ico">' + Z.icon(ICO[a.table] || 'note-pencil') + '</span><span class="zk-tl-t"><b>' + esc(a.detail || t(LBL[a.table] || a.table)) + '</b><small>' + esc(t(LBL[a.table] || a.table)) + ', ' + esc(t(VERB[a.action] || a.action)) + ' ' + t('by') + ' ' + esc(a.user) + '</small></span><time class="faint">' + esc(String(a.at).slice(11, 16)) + '</time></li>'; }).join('') + '</ol></section>'; }).join('') + '</div>' :
+          '<section class="paper empty"><i class="ph ph-list-checks big" aria-hidden="true"></i><h2>' + t('No changes recorded yet') + '</h2></section>'));
     });
   };
   Z.views.platform = function () {

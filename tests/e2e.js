@@ -151,7 +151,7 @@ async function audit(label) {
 
   step = 'documents';
   await go('#/vat/ex/' + exId + '/checklist');
-  await setVal('[data-chg="cl"][data-f="status"]', 'available'); await sleep(700);
+  await click('[data-act="clst"][data-s="available"]', 900);
   ok(await ev("return Z.S.checklist.items.some(function (x) { return x.status === 'available'; })"), 'document status saved');
 
   step = 'export';

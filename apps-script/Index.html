@@ -1086,6 +1086,104 @@ a.zk-it:hover { background: var(--surface-2); }
 .report { --accent: #0f766e; --accent-soft: #e6f4f1; --accent-line: #a7d8cf; } :root[data-tax="wht"] .report { --accent: #1d4ed8; --accent-soft: #e6edfb; --accent-line: #b4c6f2; }
 .report a { color: var(--accent); }
 
+/* ---------------------------------------------------------------- redesign of the plain screens (zk-) */
+.zk-ring .track { stroke: var(--surface-3, var(--surface-2)); }
+.zk-ring .arc { stroke: var(--fail); animation: ring 1s var(--ease) both; }
+.zk-ring.ready .arc { stroke: var(--pass); } .zk-ring.mostly .arc { stroke: #4d7c0f; } .zk-ring.risk .arc { stroke: var(--warn); }
+.zk-ring text { fill: var(--ink); font-size: 15px; font-weight: 800; font-family: var(--font); }
+.zk-spark .ln { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.zk-spark .ar { fill: var(--accent); opacity: .12; }
+.zk-spark circle { fill: var(--accent); }
+.zk-spark-none { font-size: 12px; }
+.zk-trend .cbar.s1 { fill: var(--accent-line); } .zk-trend .ln { stroke: var(--accent); } .zk-trend .dot { fill: var(--surface); stroke: var(--accent); stroke-width: 2.5; }
+.zk-trend .vl, .zk-run .chart .vl { fill: var(--ink); font-size: 12px; font-weight: 750; font-family: var(--font); }
+.zk-legend .k-bar { width: 12px; height: 10px; border-radius: 3px; background: var(--accent-line); display: inline-block; }
+.zk-legend .k-out { width: 9px; height: 9px; border-radius: 50%; background: var(--ink-3); display: inline-block; }
+/* entities */
+.zk-ents { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 14px; }
+.zk-ent { display: grid; grid-template-columns: auto 1fr auto; gap: 16px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-l); padding: 18px 20px; box-shadow: var(--shadow-1); color: inherit; text-decoration: none; transition: transform .2s var(--ease), box-shadow .2s, border-color .2s; animation: rise .5s var(--ease) both; animation-delay: calc(var(--i, 0) * 60ms); }
+.zk-ent:hover { transform: translateY(-2px); border-color: var(--accent-line); box-shadow: var(--shadow-2, var(--shadow-1)); }
+.zk-ent-t { display: grid; gap: 3px; min-width: 0; } .zk-ent-t > b { font-size: 16px; } .zk-ent-t > span { color: var(--ink-2); font-size: 13px; }
+.zk-ent-s { display: grid; justify-items: end; gap: 4px; font-size: 12px; }
+.zk-ent-x b { color: var(--fail); }
+/* documents */
+.zk-docs-head { display: grid; grid-template-columns: auto 1fr minmax(240px, 340px); gap: 22px; align-items: center; }
+.zk-docs-head h2 { margin: 0 0 4px; } .zk-docs-head p { margin: 2px 0; }
+.zk-docs-areas { display: grid; gap: 8px; }
+.zk-docs-a { display: grid; grid-template-columns: 110px 1fr auto; gap: 10px; align-items: center; font-size: 13px; color: inherit; text-decoration: none; padding: 4px 6px; border-radius: var(--r-s); }
+.zk-docs-a:hover { background: var(--surface-2); }
+.zk-bar { display: block; height: 8px; border-radius: 5px; background: var(--surface-2); overflow: hidden; }
+.zk-bar i { display: block; height: 100%; width: var(--w); background: var(--pass); border-radius: 5px; transform-origin: left; animation: grow-x .8s var(--ease) both; }
+[dir="rtl"] .zk-bar i { transform-origin: right; }
+.zk-bar.bad i { background: var(--fail); }
+.zk-docs { margin-top: 16px; } .zk-docs h2 { margin-bottom: 8px; }
+.zk-docs ul { list-style: none; margin: 0; padding: 0; display: grid; }
+.zk-doc { display: grid; grid-template-columns: minmax(220px, 1.4fr) auto minmax(260px, 1fr); gap: 14px; align-items: center; padding: 10px 6px; border-top: 1px solid var(--line); animation: rise .4s var(--ease) both; animation-delay: calc(min(var(--i, 0), 14) * 25ms); }
+.zk-doc:first-child { border-top: 0; }
+.zk-doc-n { display: flex; gap: 9px; align-items: flex-start; font-size: 13.5px; } .zk-doc-n b { font-weight: 600; } .zk-doc-n i { font-size: 18px; margin-top: 1px; color: var(--fail); }
+.zk-doc.st-available .zk-doc-n i { color: var(--pass); } .zk-doc.st-requested .zk-doc-n i { color: var(--warn); } .zk-doc.st-na .zk-doc-n i { color: var(--ink-3); } .zk-doc.st-na .zk-doc-n b { color: var(--ink-3); }
+.zk-seg { display: inline-flex; background: var(--surface-2); border-radius: 999px; padding: 3px; gap: 2px; }
+.zk-seg button { border: 0; background: transparent; font: inherit; font-size: 12px; font-weight: 650; color: var(--ink-2); padding: 5px 10px; border-radius: 999px; cursor: pointer; min-height: 30px; white-space: nowrap; transition: background .2s, color .2s; }
+.zk-seg button:hover:not([disabled]) { color: var(--ink); }
+.zk-seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgba(15, 26, 38, .14); }
+.zk-doc.st-available .zk-seg button[aria-pressed="true"] { color: var(--pass); } .zk-doc.st-missing .zk-seg button[aria-pressed="true"] { color: var(--fail); } .zk-doc.st-requested .zk-seg button[aria-pressed="true"] { color: var(--warn); }
+.zk-doc-f { display: grid; grid-template-columns: 1fr 1.6fr auto; gap: 6px; align-items: center; }
+input.zk-quiet { border-color: transparent; background: var(--surface-2); min-height: 34px; font-size: 13px; }
+input.zk-quiet:hover { border-color: var(--line-2); } input.zk-quiet:focus { background: var(--surface); }
+/* findings, requests */
+.zk-find { cursor: pointer; } .zk-find::before { background: var(--line-2); }
+.zk-find.sev-critical::before { background: var(--fail); } .zk-find.sev-high::before { background: #ea580c; } .zk-find.sev-medium::before { background: var(--warn); } .zk-find.sev-low::before { background: var(--info); }
+.zk-grid > [role="button"] { cursor: pointer; transition: transform .2s var(--ease), box-shadow .2s, border-color .2s; }
+.zk-grid > [role="button"]:hover { transform: translateY(-2px); border-color: var(--accent-line); }
+.zk-grid > [role="button"]:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.zk-empty { text-align: center; padding: 42px 20px; }
+.zk-empty .big { font-size: 46px; color: var(--accent); opacity: .85; }
+.zk-empty .btn { margin-top: 10px; }
+/* reports */
+.zk-entbars { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.zk-eb { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-m); padding: 14px 16px; box-shadow: var(--shadow-1); color: inherit; text-decoration: none; animation: rise .5s var(--ease) both; animation-delay: calc(var(--i, 0) * 60ms); transition: border-color .2s; }
+.zk-eb:hover { border-color: var(--accent-line); }
+.zk-eb-t { display: grid; gap: 4px; min-width: 0; } .zk-eb-t > span.faint { font-size: 12px; }
+.zk-eb-b { display: grid; grid-template-columns: 120px 1fr auto; gap: 8px; align-items: center; font-size: 12px; } .zk-eb-b small { color: var(--ink-2); }
+.zk-stack { display: flex; height: 18px; border-radius: 6px; overflow: hidden; background: var(--surface-2); margin: 10px 0 4px; }
+.zk-stack.sm { height: 12px; margin: 0; }
+.zk-stack i { display: block; height: 100%; width: var(--w); transform-origin: left; animation: grow-x .8s var(--ease) both; animation-delay: calc(var(--i, 0) * 80ms); }
+.zk-stack i + i { border-inline-start: 2px solid var(--surface); }
+.b-over90, .zk-legend i.b-over90 { background: #991b1b; } .b-d90, .zk-legend i.b-d90 { background: var(--fail); } .b-d60, .zk-legend i.b-d60 { background: #ea580c; }
+.b-d30, .zk-legend i.b-d30 { background: var(--warn); } .b-notDue, .zk-legend i.b-notDue { background: var(--pass); } .b-noDate, .zk-legend i.b-noDate { background: var(--ink-3); }
+.b-q, .zk-legend i.b-q { background: var(--fail); } .b-t, .zk-legend i.b-t { background: #ea580c; } .b-p, .zk-legend i.b-p { background: var(--warn); }
+.zk-legend i[class^="b-"] { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+.zk-xbars { display: grid; gap: 8px; }
+.zk-xb { display: grid; grid-template-columns: minmax(150px, 220px) 1fr auto; gap: 12px; align-items: center; font-size: 13px; color: inherit; text-decoration: none; padding: 6px; border-radius: var(--r-s); animation: rise .45s var(--ease) both; animation-delay: calc(var(--i, 0) * 60ms); }
+.zk-xb:hover { background: var(--surface-2); }
+.zk-fct td.zk-fc { text-align: center; }
+.zk-mk { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 7px; font-size: 11px; font-weight: 800; color: #fff; background: var(--surface-2); vertical-align: middle; }
+.zk-mk.ok { background: var(--pass); } .zk-mk.warn { background: var(--warn); color: #1c1305; } .zk-mk.late { background: var(--fail); } .zk-mk.miss { background: #991b1b; } .zk-mk.wait { background: transparent; border: 2px dashed var(--line-2); }
+.zk-legend .zk-mk { width: 14px; height: 14px; border-radius: 4px; }
+/* bank flow */
+.zk-flow .zk-div-row { grid-template-columns: minmax(150px, 190px) 1fr 2px 1fr; }
+.zk-flow .zk-div-rec.out i { background: var(--ink-3); }
+.zk-flow .zk-div-pay.in i { background: var(--pass); }
+/* audit trail */
+.zk-tl { display: grid; gap: 14px; }
+.zk-tl-day h2 { font-size: 15px; display: flex; gap: 10px; align-items: baseline; margin-bottom: 6px; } .zk-tl-day h2 .faint { font-size: 12.5px; font-weight: 600; }
+.zk-tl-day ol { list-style: none; margin: 0; padding: 0; position: relative; }
+.zk-tl-day ol::before { content: ''; position: absolute; inset-block: 8px; inset-inline-start: 15px; width: 2px; background: var(--line); }
+.zk-tl-it { position: relative; display: grid; grid-template-columns: 32px 1fr auto; gap: 12px; align-items: center; padding: 7px 0; }
+.zk-tl-ico { position: relative; z-index: 1; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); font-size: 15px; }
+.zk-tl-it.act-delete .zk-tl-ico { background: var(--fail-soft); color: var(--fail); }
+.zk-tl-t { display: grid; gap: 1px; min-width: 0; } .zk-tl-t b { font-size: 13.5px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .zk-tl-t small { font-size: 12px; color: var(--ink-2); }
+@media (max-width: 960px) {
+  .zk-ents, .zk-entbars { grid-template-columns: 1fr; }
+  .zk-ent { grid-template-columns: auto 1fr; } .zk-ent-s { grid-column: 1 / -1; justify-items: start; }
+  .zk-docs-head { grid-template-columns: auto 1fr; } .zk-docs-areas { grid-column: 1 / -1; }
+  .zk-doc { grid-template-columns: 1fr; gap: 8px; } .zk-doc-f { grid-template-columns: 1fr 1fr auto; }
+  .zk-seg { overflow-x: auto; max-width: 100%; }
+  .zk-xb, .zk-eb-b { grid-template-columns: 1fr; gap: 4px; }
+  .zk-flow .zk-div-row { grid-template-columns: 1fr 2px 1fr; }
+}
+.zk-eb .zk-bar i { background: var(--accent); } .zk-eb .zk-bar.bad i { background: var(--fail); }
+
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
@@ -1552,6 +1650,9 @@ Object.assign(window.ZI18N, {"Board report":"تقرير المجلس","Income ta
 Object.assign(window.ZI18N, {"Estimates from the checks and the penalty rates in Settings. Not legal advice.":"تقديرات من الفحوصات ونسب الغرامات في الإعدادات. ليست استشارة قانونية."});
 Object.assign(window.ZI18N, {"VAT divided by net, by category":"الضريبة مقسومة على الصافي حسب الفئة","invoices":"فواتير","Standard-rated sales should come out at exactly the VAT rate; anything else means a wrong rate on some invoices.":"يجب أن تساوي المبيعات الخاضعة للنسبة الأساسية نسبة الضريبة تماماً؛ وأي اختلاف يعني نسبة خاطئة في بعض الفواتير.","No earlier periods yet.":"لا توجد فترات سابقة بعد.","Sales by VAT category":"المبيعات حسب فئة الضريبة","Purchases":"المشتريات","Addition":"إضافة","Deduction":"حسم","Additions less deductions":"الإضافات ناقص الحسميات","deductions":"الحسميات","The larger of the two is used.":"يُستخدم الأكبر منهما.","Zakat rate":"نسبة الزكاة","Year type":"نوع السنة","Hijri":"هجرية","Gregorian":"ميلادية","A Gregorian year is 11 days longer than a Hijri one, so the rate is raised by 365/354, except when the base is the adjusted net profit.":"السنة الميلادية أطول من الهجرية بـ 11 يوماً، لذا ترفع النسبة بمعامل 365/354، إلا إذا كان الوعاء هو صافي الربح المعدل.","Base used":"الوعاء المستخدم","Due (120 days later)":"الاستحقاق (بعد 120 يوماً)","Against the ZATCA statement":"مقابل كشف الهيئة","Penalties not booked":"غرامات غير مسجلة","Returns posted at a different amount":"إقرارات سُجلت بمبلغ مختلف","Not explained":"غير مفسر","Enter the GL balance of the ZATCA accounts on this page.":"أدخل رصيد حسابات الهيئة في دفتر الأستاذ في هذه الصفحة.","Who pays income tax and who pays Zakat":"من يدفع ضريبة الدخل ومن يدفع الزكاة","Non-Saudi owners: income tax":"الملاك غير السعوديين: ضريبة الدخل","Saudi and GCC owners: Zakat":"الملاك السعوديون والخليجيون: الزكاة","Income tax rate":"نسبة ضريبة الدخل","Income tax return not filed":"إقرار ضريبة الدخل لم يُقدم","Above the threshold: master file and local file required":"أعلى من الحد: الملف الرئيسي والملف المحلي مطلوبان","Below the threshold for the files":"أقل من حد الملفات","No related-party transactions recorded.":"لا توجد معاملات مع أطراف ذات علاقة مسجلة.","devices":"أجهزة","Seen in the e-invoicing provider export":"ظاهر في تقرير مزود الفوترة الإلكترونية","Add to the register":"أضف إلى السجل","Every unit sending invoices is in the register.":"كل وحدة ترسل فواتير مسجلة.","Group return / members added up":"إقرار المجموعة / مجموع الأعضاء","No group return entered yet.":"لم يُدخل إقرار للمجموعة بعد.","Refunds outstanding and VAT to reclaim":"الاستردادات القائمة والضريبة القابلة للاسترداد","Nothing owed back.":"لا شيء مستحق.","Every device has a valid certificate.":"كل جهاز لديه شهادة سارية.","Standard rated":"خاضعة للنسبة الأساسية","Zero rated":"خاضعة للنسبة الصفرية","Exports":"صادرات","Exempt":"معفاة","Imports":"واردات","Reverse charge":"احتساب عكسي","Sales to citizens":"مبيعات للمواطنين","Capital":"رأس المال","Reserves":"الاحتياطيات","Retained earnings":"الأرباح المبقاة","Provisions":"المخصصات","Long-term financing":"التمويل طويل الأجل","Other additions":"إضافات أخرى","Adjusted net profit":"صافي الربح المعدل","Net fixed assets":"صافي الأصول الثابتة","Long-term investments":"الاستثمارات طويلة الأجل","Accumulated losses":"الخسائر المتراكمة","Other deductions":"حسميات أخرى","Additions":"الإضافات","net":"الصافي","Year end":"نهاية السنة","Filed and paid on":"تاريخ التقديم والسداد","Declared in the return":"المقر في الإقرار","Sales":"المبيعات","Output VAT":"ضريبة المخرجات","due":"الاستحقاق","exercises":"تمارين"});
 Object.assign(window.ZI18N, {"Deviation":"انحراف","Passed":"ناجح","Not tested":"غير مختبر","By attribute tested":"حسب الخاصية المختبرة","Book value less audited value":"القيمة الدفترية ناقص القيمة المراجعة","No misstatement in the items tested.":"لا يوجد خطأ في البنود المختبرة.","Monetary-unit samples project each item's tainting over its sampling interval; other samples scale the misstatement by population over sample value.":"عينات الوحدة النقدية تُسقط نسبة الخطأ لكل بند على فترة المعاينة، والعينات الأخرى تُسقط الخطأ بنسبة قيمة المجتمع إلى قيمة العينة.","items":"بنود"});
+Object.assign(window.ZI18N, {"No WHT":"بدون استقطاع","Add each VAT-registered company with its TRN to start.":"أضف كل شركة مسجلة في ضريبة القيمة المضافة برقمها الضريبي للبدء.","Net VAT due (SAR)":"صافي الضريبة المستحقة (ريال)","Readiness %":"نسبة الجاهزية","changes":"تغييرات","No changes recorded yet":"لا توجد تغييرات مسجلة بعد","Not enough history":"لا يوجد سجل كافٍ","The inspection file":"ملف الفحص","Link to the document":"رابط المستند","No owner":"بدون مسؤول","No findings yet":"لا توجد ملاحظات بعد","How old the open findings are":"عمر الملاحظات المفتوحة","Nothing is waiting to be corrected in this range.":"لا شيء بانتظار التصحيح في هذه الفترة.","Open letters":"خطابات مفتوحة","Assessed in open letters (SAR)":"المبالغ المربوطة في الخطابات المفتوحة (ريال)","No requests recorded":"لا توجد طلبات مسجلة","Where the exposure is":"أين تكمن المخاطر","Exposure from the checks":"المخاطر من الفحوصات","Tax at stake in findings":"الضريبة المعرضة في الملاحظات","Late, no fine yet":"متأخر دون غرامة بعد","Late":"متأخر","letters":"خطابات","saved":"حفظ","created":"أنشأ","updated":"حدّث","deleted":"حذف","entities":"المنشآت","exercises":"التمارين","datasets":"ملفات البيانات","findings":"الملاحظات","samples":"العينات","checklists":"قوائم المستندات","requests":"طلبات الهيئة","disputes":"الاعتراضات","refunds":"الاستردادات","statements":"كشوف الحساب","registers":"سجلات التعديلات","corporate":"ضريبة الدخل","devices":"الأجهزة","settings":"الإعدادات","users":"المستخدمون","attachments":"المرفقات","events":"المواعيد","annual":"التسوية السنوية","groups":"المجموعات","profiles":"تنسيقات الاستيراد"});
+Object.assign(window.ZI18N, {"exercises":"تمارين","findings":"ملاحظات","samples":"عينات"});
+Object.assign(window.ZI18N, {"Company":"الشركة","Exercise":"تمرين","Data file":"ملف بيانات","Data rows":"صفوف البيانات","Finding":"ملاحظة","Sample":"عينة","Document checklist":"قائمة المستندات","ZATCA letter":"خطاب الهيئة","Dispute":"اعتراض","Refund":"استرداد","Statement of account":"كشف الحساب","Income tax":"ضريبة الدخل","User":"مستخدم","Attachment":"مرفق","Calendar deadline":"موعد في التقويم","Annual reconciliation":"التسوية السنوية","Import layout":"تنسيق الاستيراد","by":"بواسطة","saved":"حُفظ","created":"أُنشئ","updated":"حُدّث","deleted":"حُذف"});
 
 </script>
 <script>
@@ -5491,13 +5592,21 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   // ---------------------------------------------------------------- entities
   Z.views.entities = function (h) {
     if (h[1] === 'new') return entityForm({ vatFreq: 'monthly', whtRegistered: true, mapping: {} });
+    var cards = S.entities.map(function (e, i) {
+      var exs = S.exercises.filter(function (x) { return x.entityId === e.id; }).sort(function (a, b) { return a.period < b.period ? 1 : -1; });
+      var last = exs[0], ts = Z.taxScore((last || {}).summary || {}), sm = (last || {}).summary || {}, ex = Z.isWht() ? sm.whtExposure || 0 : sm.vatExposure != null ? sm.vatExposure : sm.exposure || 0;
+      var trend = exs.slice(0, 8).reverse().map(function (x) { return Z.taxScore(x.summary || {}).score; });
+      return '<a class="zk-ent" href="#/' + S.tax + '/entity/' + e.id + '" style="--i:' + i + '">' + Z.vring(ts.score, ts.grade, 64) + '<div class="zk-ent-t"><b>' + esc(e.name) + '</b>' + (e.nameAr ? '<span>' + esc(e.nameAr) + '</span>' : '') +
+        '<div class="zk-chips"><span class="zk-chip">' + Z.icon('identification-card') + Z.ltr(e.trn || '-') + '</span>' + (e.trn && !E.validVatNo(e.trn) ? Z.pill('fail', t('Invalid')) : '') + '<span class="zk-chip">' + Z.icon('calendar') + t(cap(e.vatFreq || 'monthly')) + '</span><span class="zk-chip">' + Z.icon('hand-coins') + (e.whtRegistered === false ? t('No WHT') : t('WHT')) + '</span></div></div>' +
+        '<div class="zk-ent-s">' + Z.spark(trend, 130, 36) + '<span class="faint">' + (last ? t('Latest exercise') + ' ' + esc(last.period) : t('None yet')) + '</span>' + (ex ? '<span class="zk-ent-x">' + t('Exposure') + ' <b class="num">' + Z.fmt(ex) + '</b></span>' : '') + '</div></a>';
+    }).join('');
     var rows = S.entities.map(function (e) {
       var exs = S.exercises.filter(function (x) { return x.entityId === e.id; }).sort(function (a, b) { return a.period < b.period ? 1 : -1; });
       var last = exs[0];
       return '<tr class="clickable" data-act="goent" data-id="' + e.id + '"><td><b>' + esc(e.name) + '</b><div class="faint">' + esc(e.nameAr || '') + '</div></td><td class="nowrap">' + esc(e.trn || '') + (e.trn && !E.validVatNo(e.trn) ? ' ' + Z.pill('fail', t('Invalid')) : '') + '</td><td>' + t(cap(e.vatFreq || 'monthly')) + '</td><td>' + (e.whtRegistered === false ? '-' : t('Yes')) + '</td><td>' + (last ? esc(last.period) + ' ' + (last.summary ? Z.pill(last.summary.grade, last.summary.score + '%') : '') : '<span class="faint">' + t('None yet') + '</span>') + '</td></tr>';
     }).join('');
     Z.setMain('<div class="pagehead"><div><h1>' + t('Legal entities') + '</h1><p>' + t('Each VAT-registered company or branch with its own TRN and chart of accounts mapping.') + '</p></div>' + (Z.can('manager') ? '<a class="btn primary" href="#/entities/new">' + t('Add entity') + '</a>' : '') + '</div>' +
-      '<div class="paper flush"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Entity') + '</th><th>' + t('VAT number (TRN)') + '</th><th>' + t('VAT filing') + '</th><th>' + t('WHT') + '</th><th>' + t('Latest exercise') + '</th></tr></thead><tbody>' + (rows || '<tr><td colspan="5" class="empty">' + t('No entities yet.') + '</td></tr>') + '</tbody></table></div></div>');
+      (cards ? '<div class="zk-ents">' + cards + '</div>' : '<section class="paper empty"><i class="ph ph-buildings big" aria-hidden="true"></i><h2>' + t('No entities yet.') + '</h2><p>' + t('Add each VAT-registered company with its TRN to start.') + '</p></section>') + (rows ? '' : ''));
   };
   Z.ACT.goent = function (el) { location.hash = '#/entity/' + el.dataset.id; };
 
@@ -5606,14 +5715,14 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     list.forEach(function (x, i) {
       var s = x.summary || {}, cx = pad + bw * i + bw / 2;
       var bh = Math.abs(s.netVat || 0) / maxV * (H - 60);
-      bars += '<rect x="' + (cx - bw * 0.28) + '" y="' + (H - 26 - bh) + '" width="' + (bw * 0.56) + '" height="' + bh + '" fill="var(--rule)" rx="2"><title>' + esc(x.period + ': ' + Z.fmt(s.netVat)) + '</title></rect>';
+      bars += '<rect class="cbar s1" style="--i:' + i + '" x="' + (cx - bw * 0.28) + '" y="' + (H - 26 - bh) + '" width="' + (bw * 0.56) + '" height="' + bh + '" rx="4"><title>' + esc(x.period + ': ' + Z.fmt(s.netVat)) + '</title></rect>';
       var sv = Z.taxScore(s).score || 0, y = H - 26 - sv / 100 * (H - 50);
       line += (i ? 'L' : 'M') + cx + ' ' + y;
-      dots += '<circle cx="' + cx + '" cy="' + y + '" r="4" fill="var(--green)"><title>' + esc(x.period + ': ' + sv + '%') + '</title></circle><text x="' + cx + '" y="' + (y - 9) + '" text-anchor="middle" font-size="11" fill="var(--ink)">' + (s.score || 0) + '</text>';
-      bars += '<text x="' + cx + '" y="' + (H - 8) + '" text-anchor="middle" font-size="11" fill="var(--ink-2)">' + esc(x.period.slice(2)) + '</text>';
+      dots += '<circle class="dot" style="--i:' + i + '" cx="' + cx + '" cy="' + y + '" r="4.5"><title>' + esc(x.period + ': ' + sv + '%') + '</title></circle><text class="vl" x="' + cx + '" y="' + (y - 10) + '" text-anchor="middle">' + sv + '%</text>';
+      bars += '<text class="ax" x="' + cx + '" y="' + (H - 8) + '" text-anchor="middle">' + esc(x.period.slice(2)) + '</text>';
     });
-    return '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;height:auto" role="img" aria-label="' + t('Readiness and VAT due over time') + '">' + bars + '<path d="' + line + '" fill="none" stroke="var(--green)" stroke-width="2"/>' + dots + '</svg>' +
-      '<p class="faint" style="font-size:12px">' + t('Line: readiness %. Bars: net VAT due (SAR).') + '</p>';
+    return '<div class="chart zk-trend"><svg direction="ltr" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + t('Readiness and VAT due over time') + '">' + bars + '<path class="ln draw" d="' + line + '"/>' + dots + '</svg>' +
+      '<p class="zk-legend"><span><i class="k-bar"></i>' + t('Net VAT due (SAR)') + '</span><span><i class="k-ln"></i>' + t('Readiness %') + '</span></p></div>';
   }
 
   // ---------------------------------------------------------------- settings
@@ -5824,8 +5933,15 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   Z.views.audit = function () {
     return Z.list('audit').then(function (docs) {
       docs.sort(function (a, b) { return a.at < b.at ? 1 : -1; });
-      Z.setMain('<div class="pagehead"><div><h1>' + t('Audit trail') + '</h1><p>' + t('Every change, who made it and when. Kept in the organisation\'s own Google Sheet.') + '</p></div></div><div class="paper flush"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('When') + '</th><th>' + t('Who') + '</th><th>' + t('Action') + '</th><th>' + t('Record') + '</th></tr></thead><tbody>' +
-        docs.slice(0, 500).map(function (a) { return '<tr><td class="nowrap">' + esc(String(a.at).slice(0, 19).replace('T', ' ')) + '</td><td>' + esc(a.user) + '</td><td>' + esc(a.action + ' ' + a.table) + '</td><td>' + esc(a.detail) + '</td></tr>'; }).join('') + '</tbody></table></div></div>');
+      var ICO = { entities: 'buildings', exercises: 'clipboard-text', datasets: 'file-arrow-up', findings: 'flag', samples: 'dice-five', checklists: 'list-checks', requests: 'envelope-simple', disputes: 'gavel', refunds: 'hand-coins', statements: 'scales', registers: 'sliders-horizontal', corporate: 'bank', devices: 'cpu', settings: 'gear-six', users: 'users-three', attachments: 'paperclip', events: 'calendar-dots' };
+      var VERB = { save: 'saved', create: 'created', update: 'updated', delete: 'deleted' };
+      var LBL = { entities: 'Company', exercises: 'Exercise', datasets: 'Data file', rows: 'Data rows', findings: 'Finding', samples: 'Sample', checklists: 'Document checklist', requests: 'ZATCA letter', disputes: 'Dispute', refunds: 'Refund', statements: 'Statement of account', registers: 'VAT adjustments', corporate: 'Income tax', devices: 'E-invoicing devices', settings: 'Settings', users: 'User', attachments: 'Attachment', events: 'Calendar deadline', annual: 'Annual reconciliation', groups: 'VAT group', profiles: 'Import layout' };
+      var days = {}, order = [];
+      docs.slice(0, 500).forEach(function (a) { var d = String(a.at).slice(0, 10); if (!days[d]) { days[d] = []; order.push(d); } days[d].push(a); });
+      Z.setMain('<div class="pagehead"><div><h1>' + t('Audit trail') + '</h1><p>' + t('Every change, who made it and when. Kept in the organisation\'s own Google Sheet.') + '</p></div></div>' +
+        (order.length ? '<div class="zk-tl">' + order.map(function (d, gi) { return '<section class="paper zk-tl-day" style="--i:' + gi + '"><h2>' + Z.ltr(d) + ' <span class="faint">' + days[d].length + ' ' + t('changes') + '</span></h2><ol>' + days[d].map(function (a) {
+          return '<li class="zk-tl-it act-' + esc(a.action) + '"><span class="zk-tl-ico">' + Z.icon(ICO[a.table] || 'note-pencil') + '</span><span class="zk-tl-t"><b>' + esc(a.detail || t(LBL[a.table] || a.table)) + '</b><small>' + esc(t(LBL[a.table] || a.table)) + ', ' + esc(t(VERB[a.action] || a.action)) + ' ' + t('by') + ' ' + esc(a.user) + '</small></span><time class="faint">' + esc(String(a.at).slice(11, 16)) + '</time></li>'; }).join('') + '</ol></section>'; }).join('') + '</div>' :
+          '<section class="paper empty"><i class="ph ph-list-checks big" aria-hidden="true"></i><h2>' + t('No changes recorded yet') + '</h2></section>'));
     });
   };
   Z.views.platform = function () {
@@ -6157,6 +6273,31 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     kids.slice(0, 14).forEach(function (el, i) { el.classList.remove('enter'); void el.offsetWidth; el.style.setProperty('--d', (i * 40) + 'ms'); el.classList.add('enter'); });
   };
 })();
+
+/* Small charts shared by the redesigned screens: a readiness ring and a sparkline. */
+(function () {
+  'use strict';
+  var esc = Z.esc;
+  Z.vring = function (score, grade, size) {
+    size = size || 56; var r = size / 2 - 5, c = 2 * Math.PI * r, v = Math.max(0, Math.min(100, +score || 0));
+    return '<svg class="zk-ring ' + (grade || 'not') + '" width="' + size + '" height="' + size + '" viewBox="0 0 ' + size + ' ' + size + '" aria-hidden="true"><circle class="track" cx="' + size / 2 + '" cy="' + size / 2 + '" r="' + r + '" fill="none" stroke-width="6"/>' +
+      (score == null ? '' : '<circle class="arc" style="--c:' + c.toFixed(1) + '" cx="' + size / 2 + '" cy="' + size / 2 + '" r="' + r + '" fill="none" stroke-width="6" stroke-linecap="round" stroke-dasharray="' + c.toFixed(1) + '" stroke-dashoffset="' + (c * (1 - v / 100)).toFixed(1) + '" transform="rotate(-90 ' + size / 2 + ' ' + size / 2 + ')"/>') +
+      '<text x="50%" y="50%" dominant-baseline="central" text-anchor="middle">' + (score == null ? '-' : Math.round(v)) + '</text></svg>';
+  };
+  Z.spark = function (vals, w, h) {
+    w = w || 120; h = h || 34; vals = (vals || []).filter(function (v) { return v != null && isFinite(v); });
+    if (vals.length < 2) return '<span class="zk-spark-none faint">' + Z.t('Not enough history') + '</span>';
+    var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals), sp = hi - lo || 1;
+    var pts = vals.map(function (v, i) { return [(i / (vals.length - 1)) * (w - 6) + 3, h - 4 - (v - lo) / sp * (h - 8)]; });
+    var d = 'M' + pts.map(function (p) { return p[0].toFixed(1) + ' ' + p[1].toFixed(1); }).join(' L'), last = pts[pts.length - 1];
+    return '<svg class="zk-spark" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '" direction="ltr" aria-hidden="true"><path class="ar" d="' + d + ' L' + last[0].toFixed(1) + ' ' + h + ' L3 ' + h + ' Z"/><path class="ln" d="' + d + '"/><circle cx="' + last[0].toFixed(1) + '" cy="' + last[1].toFixed(1) + '" r="3"/></svg>';
+  };
+})();
+// clickable cards (role="button" with data-act) answer Enter and Space like buttons
+document.addEventListener('keydown', function (e) {
+  var el = e.target;
+  if ((e.key === 'Enter' || e.key === ' ') && el && el.getAttribute && el.getAttribute('role') === 'button' && el.hasAttribute('data-act') && !/^(A|BUTTON|INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) { e.preventDefault(); el.click(); }
+});
 
 </script>
 <script>
@@ -6653,6 +6794,17 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   Z.ACT.delitem = function (el) { S.ex.reconItems = S.ex.reconItems.filter(function (i) { return i.id !== el.dataset.id; }); Z.saveEx().then(Z.changed); };
 
   // ---------------------------------------------------------------- bank
+  // money out grows to the left, money in to the right, each class against the largest
+  function flowBars(classes, sum, lines) {
+    var used = classes.filter(function (k) { return sum[k]; }), max = Math.max.apply(null, used.map(function (k) { return Math.abs(sum[k]); }).concat([1]));
+    return '<div class="zk-div zk-flow">' + used.map(function (k, i) {
+      var v = sum[k], n = lines.filter(function (l) { return l.cls === k; }).length, w = (Math.abs(v) / max * 100).toFixed(1);
+      return '<a class="zk-div-row" href="#" data-act="bankpick" data-k="' + k + '" style="--i:' + i + '"><span class="zk-div-l">' + esc(t(Z.bankClassName(k))) + ' <small class="faint">' + n + '</small></span>' +
+        '<span class="zk-div-rec out"><i style="--w:' + (v < 0 ? w : 0) + '%"></i>' + (v < 0 ? '<b class="num">' + fmt(-v) + '</b>' : '') + '</span><span class="zk-div-axis" aria-hidden="true"></span>' +
+        '<span class="zk-div-pay in"><i style="--w:' + (v > 0 ? w : 0) + '%"></i>' + (v > 0 ? '<b class="num">' + fmt(v) + '</b>' : '') + '</span></a>';
+    }).join('') + '<p class="zk-legend"><span><i class="k-out"></i>' + t('Out') + '</span><span><i class="k-rec"></i>' + t('In') + '</span></p></div>';
+  }
+  Z.ACT.bankpick = function (el) { S.bankFilter = el.dataset.k; S.bankPage = 0; Z.route(); setTimeout(function () { var x = document.querySelector('[data-chg="bankfilter"]'); if (x) x.closest('section').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 400); };
   Z.tabs.bank = function () {
     var B = S.R.bank, sum = B.summary || {}, lk = locked();
     var classes = E.BANK_CLASSES;
@@ -6668,7 +6820,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     }).join('');
     var pages = Math.ceil(lines.length / per);
     return '<div class="grid g2" style="align-items:start"><section class="paper area-bank"><header><div><h2>' + t('Where the money went') + '</h2><p>' + t('Bank lines grouped by what they are. Reclassify any line below; the checks update immediately.') + '</p></div></header>' +
-      (B.lines.length ? '<table class="t"><thead><tr><th>' + t('Class') + '</th><th class="num">' + t('Lines') + '</th><th class="num">' + t('In') + '</th><th class="num">' + t('Out') + '</th></tr></thead><tbody>' + sumRows + '</tbody></table>' : '<p class="muted">' + t('Load the bank statements for every account for the full period.') + '</p>') + '</section>' +
+      (B.lines.length ? flowBars(classes, sum, B.lines) : '<p class="muted">' + t('Load the bank statements for every account for the full period.') + '</p>') + (sumRows ? '' : '') + '</section>' +
       '<section class="paper"><header><div><h2>' + t('Why inspectors start with the bank') + '</h2></div></header><p class="muted">' + t('Money received that is not in declared sales is the most common basis for a VAT assessment. Receipts are compared with sales including VAT, adjusted for the change in receivables; payments with purchases, adjusted for payables. VAT and WHT payments are traced to the previous returns, and every foreign transfer must appear in the WHT register.') + '</p></section></div>' +
       '<section class="paper" style="margin-top:18px"><header><div><h2>' + t('Bank checks') + '</h2></div></header>' + B.checks.map(function (c) { return Z.checkHtml(c, Z.exceptionsHtml(c)); }).join('') + '</section>' +
       (B.lines.length ? '<section class="paper flush" style="margin-top:18px"><div style="padding:14px 18px" class="spread"><h2>' + t('Statement lines') + '</h2><select data-chg="bankfilter" style="width:auto" aria-label="' + t('Filter') + '"><option value="">' + t('All classes') + ' (' + B.lines.length + ')</option>' + classes.map(function (k) { var n = B.lines.filter(function (l) { return l.cls === k; }).length; return n ? '<option value="' + k + '"' + (f === k ? ' selected' : '') + '>' + esc(t(Z.bankClassName(k))) + ' (' + n + ')</option>' : ''; }).join('') + '</select></div>' +
@@ -6869,16 +7021,24 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     var stOpt = function (v) { return ['available', 'requested', 'missing', 'na'].map(function (s) { return '<option value="' + s + '"' + (v === s ? ' selected' : '') + '>' + t({ available: 'On file', requested: 'Requested', missing: 'Missing', na: 'Not applicable' }[s]) + '</option>'; }).join(''); };
     var mine = items.filter(function (i) { return myArea(i.area); });
     var done = mine.filter(function (i) { return i.status === 'available'; }).length, req = mine.filter(function (i) { return i.status !== 'na'; }).length;
-    return '<p class="muted">' + t('The inspection file: what ZATCA inspectors typically request. Link each document (Google Drive, SharePoint) so it can be produced the same day.') + ' <b>' + done + ' / ' + req + '</b> ' + t('on file') + '.</p>' +
+    var ST = [['available', 'On file', 'check-circle'], ['requested', 'Requested', 'hourglass-medium'], ['missing', 'Missing', 'x-circle'], ['na', 'Not applicable', 'minus-circle']];
+    var pct = req ? Math.round(done / req * 100) : 0;
+    return '<section class="paper zk-docs-head"><div>' + Z.vring(pct, pct >= 85 ? 'ready' : pct >= 60 ? 'mostly' : pct >= 40 ? 'risk' : 'not', 76) + '</div><div><h2>' + t('The inspection file') + '</h2><p class="muted">' + t('The inspection file: what ZATCA inspectors typically request. Link each document (Google Drive, SharePoint) so it can be produced the same day.') + '</p><p><b>' + done + ' / ' + req + '</b> ' + t('on file') + '</p></div>' +
+      '<div class="zk-docs-areas">' + areas.map(function (a) { var l = mine.filter(function (x) { return x.area === a[0] && x.status !== 'na'; }), d = l.filter(function (x) { return x.status === 'available'; }).length; return '<a href="#cl-' + a[0] + '" data-act="cljump" data-a="' + a[0] + '" class="zk-docs-a"><span>' + esc(t(a[1])) + '</span><span class="zk-bar"><i style="--w:' + (l.length ? d / l.length * 100 : 0).toFixed(1) + '%"></i></span><b>' + d + ' / ' + l.length + '</b></a>'; }).join('') + '</div></section>' +
       areas.map(function (a) {
         var list = items.map(function (x, i) { return [x, i]; }).filter(function (p) { return p[0].area === a[0]; });
-        return '<section class="paper flush area-' + (a[0] === 'VAT' || a[0] === 'EINV' ? 'vat' : a[0] === 'BANK' ? 'bank' : a[0] === 'OTHER' ? 'ledger' : 'wht') + '" style="margin-top:16px"><div style="padding:14px 18px"><h2>' + t(a[1]) + '</h2></div><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Document') + '</th><th style="width:150px">' + t('Status') + '</th><th style="width:150px">' + t('Owner') + '</th><th>' + t('Link') + '</th></tr></thead><tbody>' +
-          list.map(function (p) {
-            var x = p[0], i = p[1];
-            return '<tr><td>' + esc(S.lang === 'ar' ? x.ar : x.en) + '</td><td><select data-chg="cl" data-i="' + i + '" data-f="status"' + (lk ? ' disabled' : '') + ' aria-label="' + t('Status') + '">' + stOpt(x.status) + '</select></td><td><input type="text" value="' + esc(x.owner) + '" data-chg="cl" data-i="' + i + '" data-f="owner"' + (lk ? ' disabled' : '') + ' aria-label="' + t('Owner') + '"></td><td><div class="row" style="flex-wrap:nowrap"><input type="url" value="' + esc(x.link) + '" data-chg="cl" data-i="' + i + '" data-f="link" placeholder="https://"' + (lk ? ' disabled' : '') + ' aria-label="' + t('Link') + '">' + (/^https?:\/\//i.test(x.link || '') ? '<a class="btn small ghost" href="' + esc(x.link) + '" target="_blank" rel="noopener noreferrer">' + t('Open') + '</a>' : '') + '</div></td></tr>';
-          }).join('') + '</tbody></table></div></section>';
+        return '<section class="paper zk-docs area-' + (a[0] === 'VAT' || a[0] === 'EINV' ? 'vat' : a[0] === 'BANK' ? 'bank' : a[0] === 'OTHER' ? 'ledger' : 'wht') + '" id="cl-' + a[0] + '"><h2>' + t(a[1]) + '</h2><ul>' +
+          list.map(function (p, k) {
+            var x = p[0], i = p[1], has = /^https?:\/\//i.test(x.link || '');
+            return '<li class="zk-doc st-' + (x.status || 'missing') + '" style="--i:' + k + '"><span class="zk-doc-n">' + Z.icon((ST.filter(function (s) { return s[0] === x.status; })[0] || ST[2])[2]) + '<b>' + esc(S.lang === 'ar' ? x.ar : x.en) + '</b></span>' +
+              '<span class="zk-seg" role="group" aria-label="' + esc(t('Status')) + '">' + ST.map(function (s) { return '<button type="button" data-act="clst" data-i="' + i + '" data-s="' + s[0] + '" aria-pressed="' + (x.status === s[0]) + '"' + (lk ? ' disabled' : '') + '>' + esc(t(s[1])) + '</button>'; }).join('') + '</span>' +
+              '<span class="zk-doc-f"><input type="text" class="zk-quiet" value="' + esc(x.owner) + '" data-chg="cl" data-i="' + i + '" data-f="owner"' + (lk ? ' disabled' : '') + ' aria-label="' + esc(t('Owner')) + '" placeholder="' + esc(t('Owner')) + '">' +
+              '<input type="url" class="zk-quiet" value="' + esc(x.link) + '" data-chg="cl" data-i="' + i + '" data-f="link" placeholder="' + esc(t('Link to the document')) + '"' + (lk ? ' disabled' : '') + ' aria-label="' + esc(t('Link')) + '">' + (has ? '<a class="btn small ghost icon" href="' + esc(x.link) + '" target="_blank" rel="noopener noreferrer" aria-label="' + esc(t('Open') + ' ' + (S.lang === 'ar' ? x.ar : x.en)) + '">' + Z.icon('arrow-square-out') + '</a>' : '') + '</span></li>';
+          }).join('') + '</ul></section>';
       }).join('');
   };
+  Z.ACT.clst = function (el) { var x = S.checklist.items[+el.dataset.i]; x.status = el.dataset.s; Z.save('checklists', S.checklist).then(function () { Z.recompute(); Z.saveSummary(); Z.route(); }); };
+  Z.ACT.cljump = function (el) { var x = document.getElementById('cl-' + el.dataset.a); if (x) x.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
   Z.CHG.cl = function (el) {
     var x = S.checklist.items[+el.dataset.i];
     if (el.dataset.f === 'link' && el.value && !/^https?:\/\//i.test(el.value)) return Z.toast(t('Links must start with https://'), true);
@@ -6896,7 +7056,10 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       return '<tr class="clickable" data-act="editfinding" data-id="' + f.id + '"><td>' + Z.pill(f.severity, t(Z.cap(f.severity))) + '</td><td><b>' + esc(f.title) + '</b><div class="faint" style="font-size:12.5px">' + esc(f.tax) + (f.checkId ? ' · ' + esc(f.checkId) : '') + ' · ' + esc(f.route || '') + '</div></td><td class="num">' + fmt(f.taxImpact) + '</td><td class="num">' + fmt(f.penalty) + '</td><td>' + esc(f.owner || '') + '<div class="faint">' + esc(f.due || '') + '</div></td><td>' + Z.pill(f.status === 'closed' ? 'closed' : f.status === 'in_progress' ? 'review' : 'open', t({ open: 'Open', in_progress: 'In progress', closed: 'Closed' }[f.status] || 'Open')) + '</td></tr>';
     }).join('');
     return '<div class="spread" style="margin-bottom:14px"><div class="kpis" style="flex:1"><div><b>' + list.filter(function (f) { return f.status !== 'closed'; }).length + '</b><span>' + t('Open findings') + '</span></div><div class="' + (tot.tax ? 'bad' : '') + '"><b>' + fmt(tot.tax) + '</b><span>' + t('Tax at stake (SAR)') + '</span></div><div class="' + (tot.pen ? 'bad' : '') + '"><b>' + fmt(tot.pen) + '</b><span>' + t('Estimated penalties (SAR)') + '</span></div></div>' + (lk ? '' : '<button class="btn primary" data-act="editfinding">' + t('Add finding') + '</button>') + '</div>' +
-      '<div class="paper flush"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Severity') + '</th><th>' + t('Finding') + '</th><th class="num">' + t('Tax impact') + '</th><th class="num">' + t('Penalty') + '</th><th>' + t('Owner / due') + '</th><th>' + t('Status') + '</th></tr></thead><tbody>' + (rows || '<tr><td colspan="6" class="empty">' + t('No findings. Raise one from any failed check or test.') + '</td></tr>') + '</tbody></table></div></div>';
+      (list.length ? '<div class="zk-grid">' + list.map(function (f, i) { return '<article class="zk-case zk-find sev-' + esc(f.severity) + (f.status === 'closed' ? ' closed' : '') + '" style="--i:' + i + '" data-act="editfinding" data-id="' + f.id + '" tabindex="0" role="button"><header><div><p class="zk-kind">' + Z.pill(f.severity, t(Z.cap(f.severity))) + ' ' + esc(f.tax) + (f.checkId ? ' · ' + esc(f.checkId) : '') + '</p><h3>' + esc(f.title) + '</h3><p class="faint">' + esc(f.route || '') + '</p></div><b class="num zk-amt">' + fmt(f.taxImpact) + '</b></header>' +
+        '<div class="zk-next"><span>' + t('Penalty') + ' <b class="num">' + fmt(f.penalty) + '</b></span>' + Z.pill(f.status === 'closed' ? 'closed' : f.status === 'in_progress' ? 'review' : 'open', t({ open: 'Open', in_progress: 'In progress', closed: 'Closed' }[f.status] || 'Open')) + '</div>' +
+        '<footer><span class="faint">' + esc(f.owner || t('No owner')) + (f.due ? ', ' + t('due') + ' ' + esc(f.due) : '') + '</span>' + Z.icon('caret-' + (S.lang === 'ar' ? 'left' : 'right')) + '</footer></article>'; }).join('') + '</div>' :
+        '<section class="paper empty zk-empty"><i class="ph ph-flag-checkered big" aria-hidden="true"></i><h2>' + t('No findings yet') + '</h2><p>' + t('No findings. Raise one from any failed check or test.') + '</p>' + (lk ? '' : '<button class="btn primary" data-act="editfinding">' + Z.icon('plus') + ' ' + t('Add finding') + '</button>') + '</section>') + (rows ? '' : '');
   };
   function findCheck(id) {
     var all = S.R.vat.checks.concat(S.R.bank.checks, S.R.wht.checks, S.R.einv.checks, S.R.filing.checks, S.R.other.checks, S.R.analytics.tests);
@@ -7174,18 +7337,29 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   function summary() {
     if (W()) return whtSummary();
     var rows = summaryRows(), tot = rows.reduce(function (a, r) { ['n', 'sales', 'outputVat', 'inputVat', 'netVat', 'whtTax', 'exposure', 'fails', 'signed'].forEach(function (k) { a[k] = (a[k] || 0) + r[k]; }); return a; }, {});
-    return '<section class="paper flush"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Entity') + '</th><th class="num">' + t('Exercises') + '</th><th class="num">' + t('Signed off') + '</th><th class="num">' + t('Sales (box 6)') + '</th><th class="num">' + t('Output VAT') + '</th><th class="num">' + t('Input VAT') + '</th><th class="num">' + t('Net VAT due') + '</th><th class="num">' + t('Failed checks') + '</th><th class="num">' + t('VAT exposure (SAR)') + '</th><th class="num">' + t('Average readiness') + '</th></tr></thead><tbody>' +
+    return entBars(rows, [['netVat', 'Net VAT due'], ['exposure', 'VAT exposure (SAR)']]) + '<section class="paper flush"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Entity') + '</th><th class="num">' + t('Exercises') + '</th><th class="num">' + t('Signed off') + '</th><th class="num">' + t('Sales (box 6)') + '</th><th class="num">' + t('Output VAT') + '</th><th class="num">' + t('Input VAT') + '</th><th class="num">' + t('Net VAT due') + '</th><th class="num">' + t('Failed checks') + '</th><th class="num">' + t('VAT exposure (SAR)') + '</th><th class="num">' + t('Average readiness') + '</th></tr></thead><tbody>' +
       rows.map(function (r) { return '<tr><td><a href="#/entity/' + r.e.id + '">' + esc(Z.entName(r.e)) + '</a></td><td class="num">' + r.n + '</td><td class="num">' + r.signed + '</td><td class="num">' + fmt(r.sales) + '</td><td class="num">' + fmt(r.outputVat) + '</td><td class="num">' + fmt(r.inputVat) + '</td><td class="num">' + fmt(r.netVat) + '</td><td class="num">' + r.fails + '</td><td class="num">' + fmt(r.exposure) + '</td><td class="num">' + (r.avg == null ? '-' : r.avg + '%') + '</td></tr>'; }).join('') +
       '<tr class="total"><td>' + t('Total') + '</td><td class="num">' + (tot.n || 0) + '</td><td class="num">' + (tot.signed || 0) + '</td><td class="num">' + fmt(tot.sales || 0) + '</td><td class="num">' + fmt(tot.outputVat || 0) + '</td><td class="num">' + fmt(tot.inputVat || 0) + '</td><td class="num">' + fmt(tot.netVat || 0) + '</td><td class="num">' + (tot.fails || 0) + '</td><td class="num">' + fmt(tot.exposure || 0) + '</td><td></td></tr></tbody></table></div></section>' +
       '<p class="faint" style="font-size:12.5px">' + t('Totals come from each exercise\'s saved figures. An exercise counts when its period overlaps the range; quarterly filers count in full.') + '</p>';
   }
   function whtSummary() {
-    var rows = summaryRows(), tot = rows.reduce(function (a, r) { ['n', 'signed', 'whtGross', 'whtTax', 'lateDays', 'fails', 'exposure'].forEach(function (k) { a[k] = (a[k] || 0) + r[k]; }); return a; }, {});
+    var rows = summaryRows(), tot = rows.reduce(function (a, r) { ['n', 'signed', 'whtGross', 'whtTax', 'lateDays', 'fails', 'exposure'].forEach(function (k) { a[k] = (a[k] || 0) + r[k]; }); return a; }, {}), pic = entBars(rows, [['whtTax', 'WHT declared'], ['exposure', 'WHT exposure (SAR)']]);
     var cells = function (r) { return '<td class="num">' + (r.n || 0) + '</td><td class="num">' + (r.signed || 0) + '</td><td class="num">' + fmt(r.whtGross || 0) + '</td><td class="num">' + fmt(r.whtTax || 0) + '</td><td class="num">' + (r.whtGross ? Z.r((r.whtTax || 0) / r.whtGross * 100) + '%' : '-') + '</td><td class="num">' + (r.lateDays || 0) + '</td><td class="num">' + (r.fails || 0) + '</td><td class="num">' + fmt(r.exposure || 0) + '</td>'; };
-    return '<section class="paper flush"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Entity') + '</th><th class="num">' + t('Exercises') + '</th><th class="num">' + t('Signed off') + '</th><th class="num">' + t('Paid to non-residents') + '</th><th class="num">' + t('WHT declared') + '</th><th class="num">' + t('Effective rate') + '</th><th class="num">' + t('Days late, total') + '</th><th class="num">' + t('Failed checks') + '</th><th class="num">' + t('WHT exposure (SAR)') + '</th><th class="num">' + t('Average readiness') + '</th></tr></thead><tbody>' +
+    return pic + '<section class="paper flush"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Entity') + '</th><th class="num">' + t('Exercises') + '</th><th class="num">' + t('Signed off') + '</th><th class="num">' + t('Paid to non-residents') + '</th><th class="num">' + t('WHT declared') + '</th><th class="num">' + t('Effective rate') + '</th><th class="num">' + t('Days late, total') + '</th><th class="num">' + t('Failed checks') + '</th><th class="num">' + t('WHT exposure (SAR)') + '</th><th class="num">' + t('Average readiness') + '</th></tr></thead><tbody>' +
       rows.map(function (r) { return '<tr><td><a href="#/entity/' + r.e.id + '">' + esc(Z.entName(r.e)) + '</a></td>' + cells(r) + '<td class="num">' + (r.avg == null ? '-' : r.avg + '%') + '</td></tr>'; }).join('') +
       '<tr class="total"><td>' + t('Total') + '</td>' + cells(tot) + '<td></td></tr></tbody></table></div></section>' +
       '<p class="faint" style="font-size:12.5px">' + t('From the WHT return figures each exercise saved. WHT is monthly; a quarterly VAT exercise carries the three months of WHT inside it.') + '</p>';
+  }
+
+  // one card per company: readiness ring and two bars against the largest company
+  function entBars(rows, keys) {
+    if (!rows.length) return '';
+    var max = {}; keys.forEach(function (k) { max[k[0]] = Math.max.apply(null, rows.map(function (r) { return Math.abs(r[k[0]] || 0); }).concat([1])); });
+    return '<div class="zk-entbars">' + rows.map(function (r, i) {
+      return '<a class="zk-eb" href="#/' + S.tax + '/entity/' + r.e.id + '" style="--i:' + i + '">' + Z.vring(r.avg, r.avg == null ? 'not' : r.avg >= 85 ? 'ready' : r.avg >= 70 ? 'mostly' : r.avg >= 50 ? 'risk' : 'not', 58) +
+        '<div class="zk-eb-t"><b>' + esc(Z.entName(r.e)) + '</b><span class="faint">' + r.n + ' ' + t('exercises') + ', ' + r.signed + ' ' + t('signed off') + '</span>' +
+        keys.map(function (k, j) { return '<span class="zk-eb-b"><small>' + esc(t(k[1])) + '</small><span class="zk-bar' + (j ? ' bad' : '') + '"><i style="--w:' + Math.max(1, Math.abs(r[k[0]] || 0) / max[k[0]] * 100).toFixed(1) + '%"></i></span><b class="num">' + fmt(r[k[0]]) + '</b></span>'; }).join('') + '</div></a>';
+    }).join('') + '</div>';
   }
 
   // ---- WHT by beneficiary: every non-resident paid in the range, once
@@ -7239,8 +7413,12 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   function aging(fs) {
     var b = E.aging(findingsInRange(fs), asOf());
     var strip = '<div class="kpis">' + BUCKETS.map(function (k) { return '<div class="' + (k[2] === 'fail' && b[k[0]].length ? 'bad' : '') + '"><b>' + b[k[0]].length + '</b><span>' + t(k[1]) + '</span></div>'; }).join('') + '</div>';
+    var all = BUCKETS.reduce(function (s, k) { return s + b[k[0]].length; }, 0);
+    strip += all ? '<section class="paper"><h2>' + t('How old the open findings are') + '</h2><div class="zk-stack" role="img" aria-label="' + esc(t('How old the open findings are')) + '">' + BUCKETS.map(function (k, i) { var n = b[k[0]].length; return n ? '<i class="b-' + k[0] + '" style="--w:' + (n / all * 100).toFixed(2) + '%;--i:' + i + '" title="' + esc(t(k[1]) + ': ' + n) + '"></i>' : ''; }).join('') + '</div><p class="zk-legend">' + BUCKETS.map(function (k) { return '<span><i class="b-' + k[0] + '"></i>' + esc(t(k[1])) + '</span>'; }).join('') + '</p></section>' :
+      '<section class="paper empty zk-empty"><i class="ph ph-check-circle big" aria-hidden="true"></i><h2>' + t('No open findings.') + '</h2><p>' + t('Nothing is waiting to be corrected in this range.') + '</p></section>';
     var rows = [];
     BUCKETS.forEach(function (k) { b[k[0]].forEach(function (f) { rows.push('<tr class="clickable" data-act="gofinding" data-ex="' + f.parentId + '"><td>' + Z.pill(k[2], t(k[1])) + '</td><td>' + Z.pill(f.severity, t(Z.cap(f.severity))) + '</td><td><b>' + esc(f.title) + '</b><div class="faint" style="font-size:12.5px">' + esc(exName(f.parentId)) + '</div></td><td class="num">' + fmt(f.taxImpact) + '</td><td class="num">' + fmt(f.penalty) + '</td><td>' + esc(f.owner || '-') + '</td><td class="nowrap">' + esc(f.due || '') + '</td></tr>'); }); });
+    if (!all) return strip;
     return strip + '<section class="paper flush" style="margin-top:16px"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Age') + '</th><th>' + t('Severity') + '</th><th>' + t('Finding') + '</th><th class="num">' + t('Tax impact') + '</th><th class="num">' + t('Penalty') + '</th><th>' + t('Owner') + '</th><th>' + t('Due') + '</th></tr></thead><tbody>' +
       (rows.join('') || '<tr><td colspan="7" class="empty">' + t('No open findings.') + '</td></tr>') + '</tbody></table></div></section>';
   }
@@ -7264,10 +7442,18 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       var cfg = S.settingsDoc ? S.settingsDoc.values : {};
       var rows = qs.map(function (q) { return Object.assign({}, q, E.requestDue(q, cfg, Z.today())); }).sort(function (a, b) { return (a.state === 'closed') - (b.state === 'closed') || String(a.due || '9').localeCompare(String(b.due || '9')); });
       var pill = function (r) { return Z.pill(r.state === 'closed' ? 'pass' : r.state === 'overdue' ? 'fail' : r.state === 'urgent' ? 'risk' : 'na', t({ closed: 'Closed', overdue: 'Overdue', urgent: 'Due within 7 days', open: 'Open' }[r.state])); };
+      S.reqRows = rows;
+      var QI = { information: 'question', visit: 'map-pin', assessment: 'scales', decision: 'gavel' }, open = rows.filter(function (r) { return r.state !== 'closed'; });
+      var kpi = function (icon, val, label, drill, tone) { return '<div class="' + (tone || '') + '" data-drill="' + drill + '">' + Z.icon(icon) + '<b>' + val + '</b><span>' + esc(label) + '</span></div>'; };
+      var cards = rows.map(function (r, i) {
+        return '<article class="zk-case st-' + (r.state === 'urgent' ? 'urgent' : r.state) + (r.state === 'closed' ? ' closed' : '') + '" style="--i:' + i + '" data-act="editreq" data-id="' + r.id + '" tabindex="0" role="button"><header><div><p class="zk-kind">' + Z.icon(QI[r.type] || 'envelope-simple') + ' ' + esc(t((QTYPES.filter(function (x) { return x[0] === r.type; })[0] || [0, r.type])[1])) + ' ' + Z.ltr(r.reference || '') + '</p><h3>' + esc(r.items || r.reference || '') + '</h3><p class="faint">' + esc(Z.entName(Z.entity(r.entityId))) + (r.period ? ', ' + t('period') + ' ' + Z.ltr(r.period) : '') + '</p></div>' + (r.amount ? '<b class="num zk-amt">' + fmt(r.amount) + '</b>' : '') + '</header>' +
+          '<div class="zk-next"><span>' + t('Received') + ' ' + Z.ltr(r.receivedOn || '-') + '</span>' + (Z.dueChip ? Z.dueChip(r.state === 'closed' ? 'closed' : r.state, r.daysLeft, r.due) : '') + '</div><footer><span class="faint">' + esc(r.owner || t('No owner')) + '</span>' + pill(r) + '</footer></article>';
+      }).join('');
       Z.setMain('<div class="pagehead"><div><h1>' + t('ZATCA requests and assessments') + '</h1><p>' + t('Every letter from ZATCA with its deadline: information requests, field visits, assessments (60 days to object) and committee decisions (30 days to appeal).') + '</p></div>' +
         (Z.can('preparer') ? '<button class="btn primary" data-act="editreq">' + t('Record a request') + '</button>' : '') + '</div>' +
-        '<section class="paper flush"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Status') + '</th><th>' + t('Type') + '</th><th>' + t('Entity') + '</th><th>' + t('Reference') + '</th><th>' + t('Received') + '</th><th>' + t('Deadline') + '</th><th class="num">' + t('Amount') + '</th><th>' + t('Owner') + '</th></tr></thead><tbody>' +
-        (rows.map(function (r) { return '<tr class="clickable" data-act="editreq" data-id="' + r.id + '"><td>' + pill(r) + '</td><td>' + esc(t((QTYPES.filter(function (x) { return x[0] === r.type; })[0] || [0, r.type])[1])) + '</td><td>' + esc(Z.entName(Z.entity(r.entityId))) + '</td><td><b>' + esc(r.reference || '') + '</b><div class="faint" style="font-size:12.5px">' + esc(r.items || '') + '</div></td><td class="nowrap">' + Z.ltr(r.receivedOn || '') + '</td><td class="nowrap">' + Z.ltr(r.due || '-') + (r.state !== 'closed' && r.daysLeft != null ? ' <span class="' + (r.daysLeft <= 7 ? 'diff-bad' : 'faint') + '">(' + r.daysLeft + ' ' + t('days') + ')</span>' : '') + '</td><td class="num">' + (r.amount ? fmt(r.amount) : '') + '</td><td>' + esc(r.owner || '') + '</td></tr>'; }).join('') || '<tr><td colspan="8" class="empty">' + t('No requests recorded. When ZATCA writes, record it here so nobody misses the deadline.') + '</td></tr>') + '</tbody></table></div></section>');
+        '<div class="stack"><div class="kpis">' + kpi('envelope-open', open.length, t('Open letters'), 'req:open') + kpi('alarm', rows.filter(function (r) { return r.state === 'urgent'; }).length, t('Due within 7 days'), 'req:urgent', rows.some(function (r) { return r.state === 'urgent'; }) ? 'bad' : '') +
+        kpi('warning', rows.filter(function (r) { return r.state === 'overdue'; }).length, t('Overdue'), 'req:overdue', rows.some(function (r) { return r.state === 'overdue'; }) ? 'bad' : '') + kpi('scales', fmt(open.reduce(function (s, r) { return s + (+r.amount || 0); }, 0)), t('Assessed in open letters (SAR)'), 'req:amount') + '</div>' +
+        (cards ? '<div class="zk-grid">' + cards + '</div>' : '<section class="paper empty zk-empty"><i class="ph ph-envelope-simple big" aria-hidden="true"></i><h2>' + t('No requests recorded') + '</h2><p>' + t('No requests recorded. When ZATCA writes, record it here so nobody misses the deadline.') + '</p></section>') + '</div>');
     });
   };
   Z.ACT.editreq = function (el) {
@@ -7309,7 +7495,9 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       return { e: e, latest: latest, sm: sm, open: open.length, tax: tax, pen: pen };
     });
     var tot = rows.reduce(function (a, r) { return { q: a.q + expo(r.sm), tax: a.tax + r.tax, pen: a.pen + r.pen }; }, { q: 0, tax: 0, pen: 0 });
-    return '<section class="paper flush"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Entity') + '</th><th>' + t('Latest exercise') + '</th><th class="num">' + t('Readiness') + '</th><th class="num">' + (W() ? t('WHT exposure (SAR)') : t('VAT exposure (SAR)')) + '</th><th class="num">' + t('Open findings') + '</th><th class="num">' + t('Tax at stake (SAR)') + '</th><th class="num">' + t('Estimated penalties (SAR)') + '</th></tr></thead><tbody>' +
+    var mx = Math.max.apply(null, rows.map(function (r) { return expo(r.sm) + r.tax + r.pen; }).concat([1]));
+    var pic = '<section class="paper"><h2>' + t('Where the exposure is') + '</h2><div class="zk-xbars">' + rows.map(function (r, i) { var q = expo(r.sm); return '<a class="zk-xb" href="#/' + S.tax + '/insights/' + r.e.id + '" style="--i:' + i + '"><span>' + esc(Z.entName(r.e)) + '</span><span class="zk-stack sm"><i class="b-q" style="--w:' + (q / mx * 100).toFixed(2) + '%" title="' + esc(t('Exposure') + ': ' + fmt(q)) + '"></i><i class="b-t" style="--w:' + (r.tax / mx * 100).toFixed(2) + '%" title="' + esc(t('Tax at stake (SAR)') + ': ' + fmt(r.tax)) + '"></i><i class="b-p" style="--w:' + (r.pen / mx * 100).toFixed(2) + '%" title="' + esc(t('Estimated penalties (SAR)') + ': ' + fmt(r.pen)) + '"></i></span><b class="num">' + fmt(q + r.tax + r.pen) + '</b></a>'; }).join('') + '</div><p class="zk-legend"><span><i class="b-q"></i>' + t('Exposure from the checks') + '</span><span><i class="b-t"></i>' + t('Tax at stake in findings') + '</span><span><i class="b-p"></i>' + t('Estimated penalties') + '</span></p></section>';
+    return pic + '<section class="paper flush"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Entity') + '</th><th>' + t('Latest exercise') + '</th><th class="num">' + t('Readiness') + '</th><th class="num">' + (W() ? t('WHT exposure (SAR)') : t('VAT exposure (SAR)')) + '</th><th class="num">' + t('Open findings') + '</th><th class="num">' + t('Tax at stake (SAR)') + '</th><th class="num">' + t('Estimated penalties (SAR)') + '</th></tr></thead><tbody>' +
       rows.map(function (r) { return '<tr><td><a href="#/entity/' + r.e.id + '">' + esc(Z.entName(r.e)) + '</a></td><td>' + (r.latest ? Z.ltr(r.latest.period) : '-') + '</td><td class="num">' + (sc(r.sm).score != null ? Z.pill(sc(r.sm).grade, sc(r.sm).score + '%') : '-') + '</td><td class="num">' + fmt(expo(r.sm)) + '</td><td class="num">' + r.open + '</td><td class="num">' + fmt(r.tax) + '</td><td class="num">' + fmt(r.pen) + '</td></tr>'; }).join('') +
       '<tr class="total"><td colspan="3">' + t('Total') + '</td><td class="num">' + fmt(tot.q) + '</td><td></td><td class="num">' + fmt(tot.tax) + '</td><td class="num">' + fmt(tot.pen) + '</td></tr></tbody></table></div></section>';
   }
@@ -7319,12 +7507,13 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     var cell = function (x, kind) {
       if (!x) return '<td class="num faint">-</td>';
       var F = x.filing || {}, dl = E.deadlines(x.period), filed = kind === 'vat' ? F.vatFiledOn : F.whtPaidOn || F.whtFiledOn, due = kind === 'vat' ? dl.vat : dl.wht;
-      if (!filed) return '<td class="num">' + Z.tick(Z.today() > due ? 'fail' : 'na', t(Z.today() > due ? 'Not recorded and past due' : 'Not yet recorded')) + '</td>';
-      var late = E.daysBetween(due, filed);
-      return '<td class="num">' + Z.tick(late > 0 ? (kind === 'wht' && late < 30 ? 'warn' : 'fail') : 'pass', late > 0 ? late + ' ' + t('days late') : t('On time')) + '</td>';
+      if (!filed) { var past = Z.today() > due; return '<td class="zk-fc"><span class="zk-mk ' + (past ? 'miss' : 'wait') + '" title="' + esc(t(past ? 'Not recorded and past due' : 'Not yet recorded')) + '" role="img" aria-label="' + esc(t(past ? 'Not recorded and past due' : 'Not yet recorded')) + '">' + (past ? '!' : '') + '</span></td>'; }
+      var late = E.daysBetween(due, filed), st = late > 0 ? (kind === 'wht' && late < 30 ? 'warn' : 'late') : 'ok', lab = late > 0 ? late + ' ' + t('days late') : t('On time');
+      return '<td class="zk-fc"><span class="zk-mk ' + st + '" title="' + esc(lab) + '" role="img" aria-label="' + esc(lab) + '">' + (late > 0 ? late : '') + '</span></td>';
     };
     return '<p class="muted">' + (W() ? t('Each mark is one WHT return: on time, late with no fine (under 30 days), or late or missing past the 10th. Dates come from each exercise\'s Filing & payment tab.') : t('Each mark is one VAT return: on time, or late or missing past the deadline. Dates come from each exercise\'s Filing & payment tab.')) + '</p>' +
-      '<section class="paper flush"><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Entity') + '</th><th>' + t('Return') + '</th>' + ms.map(function (m) { return '<th class="num">' + Z.ltr(m.slice(2)) + '</th>'; }).join('') + '</tr></thead><tbody>' +
+      '<p class="zk-legend"><span><i class="zk-mk ok"></i>' + t('On time') + '</span><span><i class="zk-mk warn"></i>' + t('Late, no fine yet') + '</span><span><i class="zk-mk late"></i>' + t('Late') + '</span><span><i class="zk-mk miss"></i>' + t('Not recorded and past due') + '</span><span><i class="zk-mk wait"></i>' + t('Not yet recorded') + '</span></p>' +
+      '<section class="paper flush"><div class="tbl-wrap"><table class="t zk-fct"><thead><tr><th>' + t('Entity') + '</th><th>' + t('Return') + '</th>' + ms.map(function (m) { return '<th class="num">' + Z.ltr(m.slice(2)) + '</th>'; }).join('') + '</tr></thead><tbody>' +
       ents().map(function (e) {
         var name = '<td><a href="#/entity/' + e.id + '">' + esc(Z.entName(e)) + '</a></td>';
         if (W()) return '<tr>' + name + '<td>' + t('WHT') + '</td>' + ms.map(function (m) { return cell(S.exercises.filter(function (x) { return x.entityId === e.id && (x.period === m || x.period === keyFor(e, m) && +m.slice(5) % 3 === 0); })[0], 'wht'); }).join('') + '</tr>';
@@ -7994,6 +8183,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     if (days === 0) return '<span class="zk-due bad">' + Z.icon('alarm') + t('Due today') + '</span>';
     return '<span class="zk-due' + (days <= 7 ? ' soon' : '') + '">' + Z.icon('calendar-blank') + t('In') + ' ' + days + ' ' + t('days') + ', ' + Z.ltr(due) + '</span>';
   }
+  Z.dueChip = dueChip;
   function steps(list, idx, closed) {
     return '<ol class="zk-steps" aria-label="' + esc(t('Progress')) + '">' + list.map(function (s, i) {
       var st = closed || i < idx ? 'done' : i === idx ? 'cur' : '';
@@ -8141,6 +8331,13 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     }
     if (k === 'expo') return { title: t('Exposure (SAR)'), sub: t('Each difference counted once'), total: rec.exposure, totalLabel: 'SAR', rows: rec.checks.filter(function (c) { return c.exposure; }).map(function (c) { return { label: c.id + ' ' + (ar() ? c.titleAr : c.title), value: c.exposure, tone: 'fail', act: 'gocheck', data: { id: c.id } }; }), empty: t('Nothing exposed.') };
     return null;
+  };
+
+  // the ZATCA requests page cards
+  D.req = function (k) {
+    var rows = (S.reqRows || []).filter(function (r) { return k === 'open' || k === 'amount' ? r.state !== 'closed' : r.state === k; });
+    return { title: { open: t('Open letters'), urgent: t('Due within 7 days'), overdue: t('Overdue'), amount: t('Assessed in open letters (SAR)') }[k], total: k === 'amount' ? rows.reduce(function (s, r) { return s + (+r.amount || 0); }, 0) : rows.length, totalLabel: k === 'amount' ? 'SAR' : t('letters'), money: k === 'amount',
+      rows: rows.map(function (r) { return { label: r.reference || r.items, sub: entName(r.entityId) + (r.due ? ', ' + t('Deadline') + ' ' + r.due : ''), value: k === 'amount' ? +r.amount || 0 : Math.abs(r.daysLeft || 0), display: k === 'amount' ? null : r.daysLeft == null ? '-' : r.daysLeft < 0 ? -r.daysLeft + ' ' + t('days late') : r.daysLeft + ' ' + t('days'), tone: r.state === 'overdue' ? 'fail' : r.state === 'urgent' ? 'warn' : '', act: 'editreq', data: { id: r.id } }; }), empty: t('Nothing here.') };
   };
 
   // ================================================================ refunds

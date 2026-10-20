@@ -26,6 +26,7 @@
     if (days === 0) return '<span class="zk-due bad">' + Z.icon('alarm') + t('Due today') + '</span>';
     return '<span class="zk-due' + (days <= 7 ? ' soon' : '') + '">' + Z.icon('calendar-blank') + t('In') + ' ' + days + ' ' + t('days') + ', ' + Z.ltr(due) + '</span>';
   }
+  Z.dueChip = dueChip;
   function steps(list, idx, closed) {
     return '<ol class="zk-steps" aria-label="' + esc(t('Progress')) + '">' + list.map(function (s, i) {
       var st = closed || i < idx ? 'done' : i === idx ? 'cur' : '';
@@ -173,6 +174,13 @@
     }
     if (k === 'expo') return { title: t('Exposure (SAR)'), sub: t('Each difference counted once'), total: rec.exposure, totalLabel: 'SAR', rows: rec.checks.filter(function (c) { return c.exposure; }).map(function (c) { return { label: c.id + ' ' + (ar() ? c.titleAr : c.title), value: c.exposure, tone: 'fail', act: 'gocheck', data: { id: c.id } }; }), empty: t('Nothing exposed.') };
     return null;
+  };
+
+  // the ZATCA requests page cards
+  D.req = function (k) {
+    var rows = (S.reqRows || []).filter(function (r) { return k === 'open' || k === 'amount' ? r.state !== 'closed' : r.state === k; });
+    return { title: { open: t('Open letters'), urgent: t('Due within 7 days'), overdue: t('Overdue'), amount: t('Assessed in open letters (SAR)') }[k], total: k === 'amount' ? rows.reduce(function (s, r) { return s + (+r.amount || 0); }, 0) : rows.length, totalLabel: k === 'amount' ? 'SAR' : t('letters'), money: k === 'amount',
+      rows: rows.map(function (r) { return { label: r.reference || r.items, sub: entName(r.entityId) + (r.due ? ', ' + t('Deadline') + ' ' + r.due : ''), value: k === 'amount' ? +r.amount || 0 : Math.abs(r.daysLeft || 0), display: k === 'amount' ? null : r.daysLeft == null ? '-' : r.daysLeft < 0 ? -r.daysLeft + ' ' + t('days late') : r.daysLeft + ' ' + t('days'), tone: r.state === 'overdue' ? 'fail' : r.state === 'urgent' ? 'warn' : '', act: 'editreq', data: { id: r.id } }; }), empty: t('Nothing here.') };
   };
 
   // ================================================================ refunds

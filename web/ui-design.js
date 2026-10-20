@@ -295,3 +295,28 @@
     kids.slice(0, 14).forEach(function (el, i) { el.classList.remove('enter'); void el.offsetWidth; el.style.setProperty('--d', (i * 40) + 'ms'); el.classList.add('enter'); });
   };
 })();
+
+/* Small charts shared by the redesigned screens: a readiness ring and a sparkline. */
+(function () {
+  'use strict';
+  var esc = Z.esc;
+  Z.vring = function (score, grade, size) {
+    size = size || 56; var r = size / 2 - 5, c = 2 * Math.PI * r, v = Math.max(0, Math.min(100, +score || 0));
+    return '<svg class="zk-ring ' + (grade || 'not') + '" width="' + size + '" height="' + size + '" viewBox="0 0 ' + size + ' ' + size + '" aria-hidden="true"><circle class="track" cx="' + size / 2 + '" cy="' + size / 2 + '" r="' + r + '" fill="none" stroke-width="6"/>' +
+      (score == null ? '' : '<circle class="arc" style="--c:' + c.toFixed(1) + '" cx="' + size / 2 + '" cy="' + size / 2 + '" r="' + r + '" fill="none" stroke-width="6" stroke-linecap="round" stroke-dasharray="' + c.toFixed(1) + '" stroke-dashoffset="' + (c * (1 - v / 100)).toFixed(1) + '" transform="rotate(-90 ' + size / 2 + ' ' + size / 2 + ')"/>') +
+      '<text x="50%" y="50%" dominant-baseline="central" text-anchor="middle">' + (score == null ? '-' : Math.round(v)) + '</text></svg>';
+  };
+  Z.spark = function (vals, w, h) {
+    w = w || 120; h = h || 34; vals = (vals || []).filter(function (v) { return v != null && isFinite(v); });
+    if (vals.length < 2) return '<span class="zk-spark-none faint">' + Z.t('Not enough history') + '</span>';
+    var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals), sp = hi - lo || 1;
+    var pts = vals.map(function (v, i) { return [(i / (vals.length - 1)) * (w - 6) + 3, h - 4 - (v - lo) / sp * (h - 8)]; });
+    var d = 'M' + pts.map(function (p) { return p[0].toFixed(1) + ' ' + p[1].toFixed(1); }).join(' L'), last = pts[pts.length - 1];
+    return '<svg class="zk-spark" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '" direction="ltr" aria-hidden="true"><path class="ar" d="' + d + ' L' + last[0].toFixed(1) + ' ' + h + ' L3 ' + h + ' Z"/><path class="ln" d="' + d + '"/><circle cx="' + last[0].toFixed(1) + '" cy="' + last[1].toFixed(1) + '" r="3"/></svg>';
+  };
+})();
+// clickable cards (role="button" with data-act) answer Enter and Space like buttons
+document.addEventListener('keydown', function (e) {
+  var el = e.target;
+  if ((e.key === 'Enter' || e.key === ' ') && el && el.getAttribute && el.getAttribute('role') === 'button' && el.hasAttribute('data-act') && !/^(A|BUTTON|INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) { e.preventDefault(); el.click(); }
+});
