@@ -16,7 +16,7 @@
     var figs = c.status === 'na' ? '<span>' + t('Needs') + ': <b>' + esc(t(c.missing || '')) + '</b></span>' :
       (c.aLabel ? '<span>' + esc(t(c.aLabel)) + ': <b>' + (/Expired|Devices|Members/.test(c.aLabel) ? Z.count(c.a) : fmt(c.a)) + '</b></span>' : '') + (c.bLabel ? '<span>' + esc(t(c.bLabel)) + ': <b>' + fmt(c.b) + '</b></span>' : '') + (c.exposure ? '<span class="d fail">' + t('Exposure') + ': <b>' + fmt(c.exposure) + '</b></span>' : '');
     var list = (c.exceptions && c.exceptions.list) || [];
-    return '<div class="check" id="c-' + c.id + '">' + Z.tick(c.status) + '<div><h3>' + esc(c.id) + ' · ' + esc(ar() ? c.titleAr : c.title) + '</h3><div class="figs">' + figs + '</div>' +
+    return '<div class="check st-' + c.status + '" id="c-' + c.id + '">' + Z.tick(c.status) + '<div><h3>' + esc(c.id) + ' · ' + esc(ar() ? c.titleAr : c.title) + '</h3><div class="figs">' + figs + '</div>' +
       (c.note ? '<p class="faint" style="font-size:12.5px;margin:4px 0 0">' + esc(ar() && c.noteAr ? c.noteAr : t(c.note)) + '</p>' : '') + (list.length ? '<details><summary>' + t('Show the items') + ' (' + list.length + ')</summary>' + Z.rowsTable(list) + '</details>' : '') + '</div><div class="acts"></div></div>';
   }
   var yes = function (v) { return v === true || v === 'yes'; };

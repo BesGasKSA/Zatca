@@ -1184,6 +1184,33 @@ input.zk-quiet:hover { border-color: var(--line-2); } input.zk-quiet:focus { bac
 }
 .zk-eb .zk-bar i { background: var(--accent); } .zk-eb .zk-bar.bad i { background: var(--fail); }
 
+/* ---------------------------------------------------------------- redesign, part 2: check lists and settings */
+.zk-chk { margin: 2px 0 14px; display: grid; gap: 10px; }
+.zk-chk-bar { display: flex; height: 10px; border-radius: 6px; overflow: hidden; background: var(--surface-2); }
+.zk-chk-bar i { display: block; height: 100%; width: var(--w); transform-origin: left; animation: grow-x .8s var(--ease) both; animation-delay: calc(var(--i, 0) * 90ms); }
+[dir="rtl"] .zk-chk-bar i { transform-origin: right; }
+.zk-chk-bar i + i { border-inline-start: 2px solid var(--surface); }
+.zk-chk-bar .s-fail { background: var(--fail); } .zk-chk-bar .s-warn { background: var(--warn); } .zk-chk-bar .s-pass { background: var(--pass); } .zk-chk-bar .s-na { background: var(--line-2); }
+.zk-chk-row { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; font-size: 13px; color: var(--ink-2); }
+.zk-chk-n b { font-size: 16px; font-weight: 800; color: var(--ink); } .zk-chk-n b.c-fail { color: var(--fail); } .zk-chk-n b.c-warn { color: var(--warn); } .zk-chk-n b.c-pass { color: var(--pass); }
+.zk-chk-f { display: inline-flex; gap: 6px; margin-inline-start: auto; flex-wrap: wrap; }
+.zk-chk-f .zk-fchip { min-height: 32px; padding: 4px 12px; font-size: 12.5px; }
+section[data-f="bad"] .check.st-pass, section[data-f="bad"] .check.st-na, section[data-f="ok"] .check:not(.st-pass) { display: none; }
+.check.st-fail, .check.st-warn { position: relative; }
+.zk-expl { margin-top: 8px; }
+.zk-expl > summary { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; list-style: none; font-size: 12.5px; font-weight: 650; color: var(--accent); padding: 4px 10px; border-radius: 999px; background: var(--accent-soft); }
+.zk-expl > summary::-webkit-details-marker { display: none; }
+.zk-expl[open] > summary { background: transparent; padding-inline: 0; color: var(--ink-2); }
+.zk-expl textarea { margin-top: 6px; animation: rise .3s var(--ease) both; }
+.zk-set { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 18px; align-items: start; }
+.zk-setnav { position: sticky; top: 76px; display: grid; gap: 2px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-m); padding: 8px; box-shadow: var(--shadow-1); }
+.zk-setnav a { display: flex; gap: 9px; align-items: center; padding: 7px 10px; border-radius: var(--r-s); color: var(--ink-2); text-decoration: none; font-size: 13px; font-weight: 600; transition: background .2s, color .2s; }
+.zk-setnav a:hover, .zk-setnav a.on { background: var(--accent-soft); color: var(--accent); }
+.zk-set-h { display: flex; gap: 9px; align-items: center; margin-bottom: 12px; }
+.zk-set-h i { color: var(--accent); font-size: 20px; }
+.zk-set section { scroll-margin-top: 80px; }
+@media (max-width: 1100px) { .zk-set { grid-template-columns: 1fr; } .zk-setnav { position: static; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); } }
+
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
@@ -1653,6 +1680,7 @@ Object.assign(window.ZI18N, {"Deviation":"انحراف","Passed":"ناجح","Not
 Object.assign(window.ZI18N, {"No WHT":"بدون استقطاع","Add each VAT-registered company with its TRN to start.":"أضف كل شركة مسجلة في ضريبة القيمة المضافة برقمها الضريبي للبدء.","Net VAT due (SAR)":"صافي الضريبة المستحقة (ريال)","Readiness %":"نسبة الجاهزية","changes":"تغييرات","No changes recorded yet":"لا توجد تغييرات مسجلة بعد","Not enough history":"لا يوجد سجل كافٍ","The inspection file":"ملف الفحص","Link to the document":"رابط المستند","No owner":"بدون مسؤول","No findings yet":"لا توجد ملاحظات بعد","How old the open findings are":"عمر الملاحظات المفتوحة","Nothing is waiting to be corrected in this range.":"لا شيء بانتظار التصحيح في هذه الفترة.","Open letters":"خطابات مفتوحة","Assessed in open letters (SAR)":"المبالغ المربوطة في الخطابات المفتوحة (ريال)","No requests recorded":"لا توجد طلبات مسجلة","Where the exposure is":"أين تكمن المخاطر","Exposure from the checks":"المخاطر من الفحوصات","Tax at stake in findings":"الضريبة المعرضة في الملاحظات","Late, no fine yet":"متأخر دون غرامة بعد","Late":"متأخر","letters":"خطابات","saved":"حفظ","created":"أنشأ","updated":"حدّث","deleted":"حذف","entities":"المنشآت","exercises":"التمارين","datasets":"ملفات البيانات","findings":"الملاحظات","samples":"العينات","checklists":"قوائم المستندات","requests":"طلبات الهيئة","disputes":"الاعتراضات","refunds":"الاستردادات","statements":"كشوف الحساب","registers":"سجلات التعديلات","corporate":"ضريبة الدخل","devices":"الأجهزة","settings":"الإعدادات","users":"المستخدمون","attachments":"المرفقات","events":"المواعيد","annual":"التسوية السنوية","groups":"المجموعات","profiles":"تنسيقات الاستيراد"});
 Object.assign(window.ZI18N, {"exercises":"تمارين","findings":"ملاحظات","samples":"عينات"});
 Object.assign(window.ZI18N, {"Company":"الشركة","Exercise":"تمرين","Data file":"ملف بيانات","Data rows":"صفوف البيانات","Finding":"ملاحظة","Sample":"عينة","Document checklist":"قائمة المستندات","ZATCA letter":"خطاب الهيئة","Dispute":"اعتراض","Refund":"استرداد","Statement of account":"كشف الحساب","Income tax":"ضريبة الدخل","User":"مستخدم","Attachment":"مرفق","Calendar deadline":"موعد في التقويم","Annual reconciliation":"التسوية السنوية","Import layout":"تنسيق الاستيراد","by":"بواسطة","saved":"حُفظ","created":"أُنشئ","updated":"حُدّث","deleted":"حُذف"});
+Object.assign(window.ZI18N, {"Real estate and Zakat":"العقارات والزكاة","Disputes and refunds":"الاعتراضات والاستردادات","Income tax, transfer pricing and devices":"ضريبة الدخل وأسعار التحويل والأجهزة","Excise, Zakat fines and keywords":"الانتقائية وغرامات الزكاة والكلمات المفتاحية","Settings sections":"أقسام الإعدادات","Corrections and e-invoicing":"التصحيحات والفوترة الإلكترونية","Income tax and devices":"ضريبة الدخل والأجهزة","Excise and keywords":"الانتقائية والكلمات المفتاحية","Penalties":"الغرامات","Bank classification":"تصنيف البنك","Score weights":"أوزان التقييم","passed":"ناجحة","to review":"للمراجعة","failed":"فاشلة","waiting for data":"بانتظار البيانات","All":"الكل","Needs attention":"تحتاج متابعة","Passed":"ناجحة","Add an explanation for the inspector":"أضف تفسيراً للفاحص","Explanation for the inspector":"تفسير للفاحص"});
 
 </script>
 <script>
@@ -5726,21 +5754,23 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   }
 
   // ---------------------------------------------------------------- settings
+  Z.ACT.setjump = function (el) { var x = document.getElementById('set-' + el.dataset.s); if (!x) return; x.scrollIntoView({ behavior: 'smooth', block: 'start' }); document.querySelectorAll('.zk-setnav a').forEach(function (a) { a.classList.toggle('on', a === el); }); };
   Z.views.settings = function () {
     var V = S.settings, P = V.penalties;
     var whtRows = E.WHT_TYPES.map(function (w) { return '<tr><td>' + esc(S.lang === 'ar' ? w[2] : w[1]) + '</td><td style="width:120px"><input type="number" step="0.01" min="0" max="100" name="wht_' + w[0] + '" value="' + Z.r(V.whtRates[w[0]] * 100) + '" aria-label="' + esc(w[1]) + '"></td></tr>'; }).join('');
     var bank = Object.keys(V.bankRules).map(function (k) { return '<label class="f"><span>' + esc(t(Z.bankClassName(k))) + '</span><input type="text" name="bank_' + k + '" value="' + esc(V.bankRules[k]) + '"></label>'; }).join('');
     Z.setMain('<div class="pagehead"><div><h1>' + t('Settings') + '</h1><p>' + t('Rules and thresholds for every entity in this organisation. Tax rates and penalties are editable because regulations change - verify them against current ZATCA rules.') + '</p></div></div>' +
+      '<div class="zk-set"><nav class="zk-setnav" aria-label="' + esc(t('Settings sections')) + '">' + [['org', 'Organisation', 'buildings'], ['tol', 'Matching tolerance', 'scales'], ['cor', 'Corrections and e-invoicing', 'pencil-simple-line'], ['re', 'Real estate and Zakat', 'house-line'], ['disp', 'Disputes and refunds', 'gavel'], ['adj', 'VAT adjustments', 'sliders-horizontal'], ['cit', 'Income tax and devices', 'bank'], ['exc', 'Excise and keywords', 'drop'], ['wht', 'Withholding tax rates', 'hand-coins'], ['pen', 'Penalties', 'warning'], ['bank', 'Bank classification', 'bank'], ['w', 'Score weights', 'gauge']].map(function (x) { return '<a href="#" data-act="setjump" data-s="' + x[0] + '">' + Z.icon(x[2]) + '<span>' + esc(t(x[1])) + '</span></a>'; }).join('') + '</nav>' +
       '<form id="setf" class="stack">' +
-      '<section class="paper"><h2 style="margin-bottom:12px">' + t('Organisation') + '</h2><div class="grid g2">' + fld('orgName', t('Organisation name'), S.tenant.name) +
+      '<section class="paper" id="set-org"><h2 class="zk-set-h">' + Z.icon('buildings') + t('Organisation') + '</h2><div class="grid g2">' + fld('orgName', t('Organisation name'), S.tenant.name) +
       (S.api.mode === 'cloud' && S.tenant.spreadsheetUrl ? '<div class="f"><span class="muted" style="font-size:13px">' + t('Your data') + '</span><p><a href="' + esc(S.tenant.spreadsheetUrl) + '" target="_blank" rel="noopener">' + t('Open the Google Sheet that stores this organisation') + '</a></p></div>' : '') + '</div></section>' +
-      '<section class="paper"><h2 style="margin-bottom:12px">' + t('Matching tolerance') + '</h2><div class="grid g4">' +
+      '<section class="paper" id="set-tol"><h2 class="zk-set-h">' + Z.icon('scales') + t('Matching tolerance') + '</h2><div class="grid g4">' +
       fld('tolAbs', t('Pass if difference ≤ (SAR)'), V.tolAbs, 'number', 'step="0.01" min="0"') + fld('tolPct', t('Warn if within % of base'), Z.r(V.tolPct * 100), 'number', 'step="0.01" min="0"') +
       fld('tolWarnAbs', t('…and at most (SAR)'), V.tolWarnAbs, 'number', 'step="1" min="0"') + fld('materiality', t('Materiality (SAR)'), V.materiality, 'number', 'step="1" min="0"') +
       fld('vatRate', t('VAT standard rate %'), Z.r(V.vatRate * 100), 'number', 'step="0.01"') + fld('vatCorrectionThreshold', t('Amended return above (SAR)'), V.vatCorrectionThreshold, 'number') +
       '<label class="f"><span>' + t('Read TB VAT accounts as') + '</span><select name="glBasis"><option value="movement"' + (V.glBasis === 'movement' ? ' selected' : '') + '>' + t('Net movement') + '</option><option value="gross"' + (V.glBasis === 'gross' ? ' selected' : '') + '>' + t('Gross side (credits for output, debits for input)') + '</option></select><small>' + t('Used only when no GL detail is loaded.') + '</small></label>' +
       fld('settlementKeywords', t('Settlement journal keywords'), V.settlementKeywords, 'text', '', t('GL lines with these words are left out of VAT account movement.')) + '</div></section>' +
-      '<section class="paper"><h2 style="margin-bottom:12px">' + t('Corrections, e-invoicing and input VAT rules') + '</h2><div class="grid g3">' +
+      '<section class="paper" id="set-cor"><h2 class="zk-set-h">' + Z.icon('pencil-simple-line') + t('Corrections, e-invoicing and input VAT rules') + '</h2><div class="grid g3">' +
       fld('vatCorrectionThreshold', t('Amend the original return at or above (SAR)'), V.vatCorrectionThreshold, 'number', 'step="1"', t('VAT IR Art. 63: SAR 15,000 since 23 June 2023.')) +
       fld('correctionNotifyDays', t('Days to notify ZATCA of a material error'), V.correctionNotifyDays, 'number', 'step="1"') +
       fld('refundMin', t('Minimum refund application (SAR)'), V.refundMin, 'number', 'step="1"') +
@@ -5750,23 +5780,28 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       fld('gift_annualCap', t('Gift relief annual cap (SAR)'), V.giftRelief.annualCap, 'number', 'step="1"') +
       fld('trend_salesDropPct', t('Flag a sales drop above (%)'), V.trend.salesDropPct, 'number', 'step="1"') +
       fld('trend_inputJumpPct', t('Flag an input VAT rise above (%)'), V.trend.inputJumpPct, 'number', 'step="1"') +
+'</div></section><section class="paper" id="set-re"><h2 class="zk-set-h">' + Z.icon('house-line') + t('Real estate and Zakat') + '</h2><div class="grid g3">' +
       fld('rett_rate', t('RETT rate %'), Z.r(V.rett.rate * 100), 'number', 'step="0.01"') + fld('rett_latePctPerMonth', t('RETT late payment % per month'), Z.r(V.rett.latePctPerMonth * 100), 'number', 'step="0.01"', t('Sources report 2% under the current law; verify.')) +
       fld('rettd_dueDays', t('RETT due within (days of the transaction)'), V.rett.dueDays, 'number', 'step="1"') +
       fld('zakat_dueDays', t('Zakat return due (days after year end)'), V.zakat.dueDays, 'number', 'step="1"') +
+'</div></section><section class="paper" id="set-disp"><h2 class="zk-set-h">' + Z.icon('gavel') + t('Disputes and refunds') + '</h2><div class="grid g3">' +
       fld('disp_objectionDays', t('Days to object to an assessment'), V.disputes.objectionDays, 'number', 'step="1"') +
       fld('disp_appealDays', t('Days to appeal a committee decision'), V.disputes.appealDays, 'number', 'step="1"') +
       fld('disp_escalateDays', t('Days to escalate a rejected objection to the GSTC'), V.disputes.escalateDays, 'number', 'step="1"', t('Adviser summaries; verify.')) +
       fld('disp_zatcaDecisionDays', t('Days ZATCA has to decide an objection'), V.disputes.zatcaDecisionDays, 'number', 'step="1"', t('Adviser summaries; verify.')) +
       fld('rfd_payDays', t('Days ZATCA has to pay an approved refund'), V.refunds.payDays, 'number', 'step="1"', t('Adviser summaries; verify.')) +
       fld('rfd_infoResponseDays', t('Working days to answer a refund document request'), V.refunds.infoResponseDays, 'number', 'step="1"', t('Adviser summaries; verify.')) +
+'</div></section><section class="paper" id="set-adj"><h2 class="zk-set-h">' + Z.icon('sliders-horizontal') + t('VAT adjustments') + '</h2><div class="grid g3">' +
       fld('cap_immovableYears', t('Capital asset adjustment period, buildings (years)'), V.capitalAssets.immovableYears, 'number', 'step="1"') +
       fld('cap_movableYears', t('Capital asset adjustment period, other assets (years)'), V.capitalAssets.movableYears, 'number', 'step="1"') +
       fld('bd_minMonths', t('Bad-debt relief: months overdue'), V.badDebt.minMonths, 'number', 'step="1"', t('Adviser summaries; verify.')) +
       fld('adv_invoiceDays', t('Advance payments: invoice within (days after month end)'), V.advances.invoiceDays, 'number', 'step="1"', t('Adviser summaries; verify.')) +
       fld('fx_usdPeg', t('SAR per US dollar (peg)'), V.fx.usdPeg, 'number', 'step="0.0001"') +
+'</div></section><section class="paper" id="set-cit"><h2 class="zk-set-h">' + Z.icon('bank') + t('Income tax, transfer pricing and devices') + '</h2><div class="grid g3">' +
       fld('cit_rate', t('Income tax rate on the non-Saudi share'), V.cit.rate, 'number', 'step="0.01"') + fld('cit_advanceThreshold', t('Advance payments when last year\'s tax reached (SAR)'), V.cit.advanceThreshold, 'number', 'step="1"', t('Adviser summaries; verify.')) +
       fld('cit_minInstalment', t('No advance payment under (SAR)'), V.cit.minInstalment, 'number', 'step="1"', t('Adviser summaries; verify.')) + fld('tp_fileThreshold', t('Transfer pricing files from (SAR)'), V.tp.fileThreshold, 'number', 'step="1"', t('Adviser summaries; verify.')) +
       fld('tp_cbcrThreshold', t('Country-by-country report above group revenue (SAR)'), V.tp.cbcrThreshold, 'number', 'step="1"', t('Adviser summaries; verify.')) + fld('egs_renewDays', t('Renew device certificates this many days ahead'), V.egs.renewDays, 'number', 'step="1"') +
+'</div></section><section class="paper" id="set-exc"><h2 class="zk-set-h">' + Z.icon('drop') + t('Excise, Zakat fines and keywords') + '</h2><div class="grid g3">' +
       fld('zakatp_latePctPer30Days', t('Zakat late fine % per 30 days (estimate)'), Z.r(V.zakat.latePctPer30Days * 100), 'number', 'step="0.01"') +
       fld('sugar_mid', t('Sweetened drinks 5-7.99 g sugar: SAR per litre'), V.sugarTiers.tiers[1][2], 'number', 'step="0.01"') +
       fld('sugar_high', t('Sweetened drinks 8 g sugar or more: SAR per litre'), V.sugarTiers.tiers[2][2], 'number', 'step="0.01"', t('Per-litre tiers since 1 Jan 2026; under 5 g and sugar-free pay nothing.')) +
@@ -5774,14 +5809,14 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       fld('exc_ecig', t('Excise: e-cigarettes and liquids %'), Z.r(V.exciseRates.ecig * 100), 'number', 'step="1"') + fld('exc_sweetened', t('Excise: sweetened drinks % (before 2026)'), Z.r(V.exciseRates.sweetened * 100), 'number', 'step="1"') + '</div>' +
       '<label class="f" style="margin-top:12px"><span>' + t('Marketplace payout keywords (bank descriptions)') + '</span><input type="text" name="marketplaceKeywords" value="' + esc(V.marketplace.payoutKeywords) + '"></label>' +
       '<label class="f" style="margin-top:12px"><span>' + t('Blocked input VAT keywords') + '</span><textarea name="blockedKeywords">' + esc(V.blockedKeywords) + '</textarea><small>' + t('Matched against purchase descriptions, accounts and supplier names (VAT IR Art. 50).') + '</small></label></section>' +
-      '<section class="paper area-wht"><h2>' + t('Withholding tax rates') + '</h2><p class="muted">' + t('Statutory rates for payments to non-residents. Lower treaty rates are accepted when the line is marked as treaty relief with a certificate.') + '</p><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Payment type') + '</th><th>%</th></tr></thead><tbody>' + whtRows + '</tbody></table></div></section>' +
-      '<section class="paper"><h2 style="margin-bottom:12px">' + t('Penalties used for exposure estimates') + '</h2><div class="grid g3">' +
+      '<section class="paper area-wht" id="set-wht"><h2 class="zk-set-h">' + Z.icon('hand-coins') + t('Withholding tax rates') + '</h2><p class="muted">' + t('Statutory rates for payments to non-residents. Lower treaty rates are accepted when the line is marked as treaty relief with a certificate.') + '</p><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Payment type') + '</th><th>%</th></tr></thead><tbody>' + whtRows + '</tbody></table></div></section>' +
+      '<section class="paper" id="set-pen"><h2 class="zk-set-h">' + Z.icon('warning') + t('Penalties used for exposure estimates') + '</h2><div class="grid g3">' +
       fld('pen_vatErrorPct', t('Incorrect VAT return - % of difference'), Z.r(P.vatErrorPct * 100), 'number', 'step="0.1"') + fld('pen_vatLatePaymentPctPerMonth', t('VAT late payment - % per month'), Z.r(P.vatLatePaymentPctPerMonth * 100), 'number', 'step="0.1"') +
       fld('pen_whtLatePctPer30Days', t('WHT late payment - % per 30 days'), Z.r(P.whtLatePctPer30Days * 100), 'number', 'step="0.1"') + fld('pen_vatLateFilingMinPct', t('VAT late filing - minimum %'), Z.r(P.vatLateFilingMinPct * 100), 'number') +
       fld('pen_vatLateFilingMaxPct', t('VAT late filing - maximum %'), Z.r(P.vatLateFilingMaxPct * 100), 'number') + fld('pen_invoiceViolationMax', t('Tax invoice violation - maximum (SAR)'), P.invoiceViolationMax, 'number') + '</div></section>' +
-      '<section class="paper area-bank"><h2>' + t('Bank line classification') + '</h2><p class="muted">' + t('Comma-separated words found in a bank line\'s description. You can still reclassify any line by hand.') + '</p><div class="grid g2" style="margin-top:12px">' + bank + '</div></section>' +
-      '<section class="paper"><h2>' + t('Readiness score weights') + '</h2><div class="grid g3" style="margin-top:12px">' + Object.keys(V.weights).map(function (k) { return fld('w_' + k, t(Z.partName(k)), V.weights[k], 'number', 'min="0" step="1"'); }).join('') + '</div></section>' +
-      (Z.can('manager') ? '<div class="row end"><button class="btn primary" type="submit">' + t('Save settings') + '</button></div>' : '') + '</form>' +
+      '<section class="paper area-bank" id="set-bank"><h2 class="zk-set-h">' + Z.icon('bank') + t('Bank line classification') + '</h2><p class="muted">' + t('Comma-separated words found in a bank line\'s description. You can still reclassify any line by hand.') + '</p><div class="grid g2" style="margin-top:12px">' + bank + '</div></section>' +
+      '<section class="paper" id="set-w"><h2 class="zk-set-h">' + Z.icon('gauge') + t('Readiness score weights') + '</h2><div class="grid g3" style="margin-top:12px">' + Object.keys(V.weights).map(function (k) { return fld('w_' + k, t(Z.partName(k)), V.weights[k], 'number', 'min="0" step="1"'); }).join('') + '</div></section>' +
+      (Z.can('manager') ? '<div class="row end"><button class="btn primary" type="submit">' + t('Save settings') + '</button></div>' : '') + '</form></div>' +
       '<section class="paper" style="margin-top:18px"><h2>' + t('Storage') + '</h2>' + storageBox() + '</section>');
     document.getElementById('setf').addEventListener('submit', function (ev) {
       ev.preventDefault();
@@ -6299,6 +6334,38 @@ document.addEventListener('keydown', function (e) {
   if ((e.key === 'Enter' || e.key === ' ') && el && el.getAttribute && el.getAttribute('role') === 'button' && el.hasAttribute('data-act') && !/^(A|BUTTON|INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) { e.preventDefault(); el.click(); }
 });
 
+/* Every list of checks gets a summary bar: how many passed, need a look or failed,
+   drawn as one segmented bar, with chips to show only what needs attention. */
+(function () {
+  'use strict';
+  var t = Z.t;
+  function stOf(el) { var m = /\bst-(pass|warn|fail|na)\b/.exec(el.className); if (m) return m[1]; var k = el.querySelector('.tick'); return k ? (/\b(pass|warn|fail|na)\b/.exec(k.className) || [])[1] || 'na' : 'na'; }
+  function enhance() {
+    var main = document.getElementById('main'); if (!main) return;
+    [].forEach.call(main.querySelectorAll('section'), function (sec) {
+      if (sec.getAttribute('data-chk')) return;
+      var checks = [].filter.call(sec.querySelectorAll('.check'), function (c) { return c.closest('section') === sec && c.id; });
+      if (checks.length < 3) return;
+      sec.setAttribute('data-chk', '1');
+      var n = { pass: 0, warn: 0, fail: 0, na: 0 }; checks.forEach(function (c) { var s = stOf(c); c.classList.add('st-' + s); n[s]++; });
+      var tot = checks.length, bad = n.fail + n.warn;
+      var seg = ['fail', 'warn', 'pass', 'na'].map(function (k, i) { return n[k] ? '<i class="s-' + k + '" style="--w:' + (n[k] / tot * 100).toFixed(2) + '%;--i:' + i + '"></i>' : ''; }).join('');
+      var box = document.createElement('div'); box.className = 'zk-chk';
+      box.innerHTML = '<div class="zk-chk-bar" role="img" aria-label="' + Z.esc(n.pass + ' ' + t('passed') + ', ' + n.warn + ' ' + t('to review') + ', ' + n.fail + ' ' + t('failed') + ', ' + n.na + ' ' + t('waiting for data')) + '">' + seg + '</div>' +
+        '<div class="zk-chk-row"><span class="zk-chk-n"><b class="c-fail">' + n.fail + '</b> ' + t('failed') + '</span><span class="zk-chk-n"><b class="c-warn">' + n.warn + '</b> ' + t('to review') + '</span><span class="zk-chk-n"><b class="c-pass">' + n.pass + '</b> ' + t('passed') + '</span>' + (n.na ? '<span class="zk-chk-n"><b>' + n.na + '</b> ' + t('waiting for data') + '</span>' : '') +
+        '<span class="zk-chk-f" role="group" aria-label="' + Z.esc(t('Show')) + '">' + [['all', t('All') + ' ' + tot], ['bad', t('Needs attention') + ' ' + bad], ['ok', t('Passed') + ' ' + n.pass]].map(function (f) { return '<button type="button" class="zk-fchip' + (f[0] === 'all' ? ' on' : '') + '" aria-pressed="' + (f[0] === 'all') + '" data-act="chkf" data-f="' + f[0] + '">' + Z.esc(f[1]) + '</button>'; }).join('') + '</span></div>';
+      var head = sec.querySelector(':scope > header'); if (head) head.insertAdjacentElement('afterend', box); else sec.insertBefore(box, checks[0]);
+    });
+  }
+  Z.ACT.chkf = function (el) {
+    var sec = el.closest('section'); if (!sec) return;
+    sec.setAttribute('data-f', el.dataset.f);
+    [].forEach.call(el.parentNode.children, function (b) { var on = b === el; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
+  };
+  var pend = null;
+  new MutationObserver(function () { if (pend) return; pend = setTimeout(function () { pend = null; enhance(); }, 30); }).observe(document.documentElement, { childList: true, subtree: true });
+})();
+
 </script>
 <script>
 /* The inspection exercise workspace: loading, the readiness overview, data
@@ -6646,9 +6713,11 @@ document.addEventListener('keydown', function (e) {
     var figs = c.status === 'na' ? '<span>' + t('Needs') + ': <b>' + esc(t(c.missing || '')) + '</b>' + (c.missingHint ? ' - ' + esc(t(c.missingHint)) : '') + '</span>'
       : (c.aLabel ? '<span>' + esc(t(c.aLabel)) + ': <b>' + fmt(c.a, /^(Exceptions|Days late|Lines without)/.test(c.aLabel) ? 0 : 2) + '</b></span>' : '') + (c.bLabel ? '<span>' + esc(t(c.bLabel)) + ': <b>' + fmt(c.b) + '</b></span>' : '') +
         (c.diff != null && c.bLabel ? '<span class="d ' + c.status + '">' + t('Difference') + ': <b>' + fmt(c.diff) + '</b></span>' : '') + (c.exposure ? '<span class="d fail">' + t('Exposure') + ': <b>' + fmt(c.exposure) + '</b></span>' : '') + (c.source ? '<span class="faint">' + esc(c.source) + '</span>' : '');
-    return '<div class="check" id="c-' + c.id + '">' + Z.tick(c.status) + '<div><h3>' + esc(c.id) + ' · ' + esc(Z.tt(c, 'title')) + '</h3><div class="figs">' + figs + '</div>' +
-      (c.note ? '<p class="faint" style="font-size:12.5px;margin:4px 0 0">' + esc(S.lang === 'ar' && c.noteAr ? c.noteAr : t(c.note)) + '</p>' : '') + (extra || '') +
-      (c.status !== 'pass' && c.status !== 'na' || note ? '<textarea data-chg="cnote" data-id="' + c.id + '" placeholder="' + esc(t('Explanation for the inspector (what causes the difference, evidence reference)')) + '"' + (lk ? ' disabled' : '') + '>' + esc(note) + '</textarea>' : '') +
+    // the explanation folds away until it is written or asked for
+    var expl = c.status !== 'pass' && c.status !== 'na' || note ? '<details class="zk-expl"' + (note ? ' open' : '') + '><summary>' + Z.icon(note ? 'note' : 'note-pencil') + (note ? t('Explanation for the inspector') : t('Add an explanation for the inspector')) + '</summary>' +
+      '<textarea data-chg="cnote" data-id="' + c.id + '" aria-label="' + esc(t('Explanation for the inspector')) + '" placeholder="' + esc(t('Explanation for the inspector (what causes the difference, evidence reference)')) + '"' + (lk ? ' disabled' : '') + '>' + esc(note) + '</textarea></details>' : '';
+    return '<div class="check st-' + c.status + '" id="c-' + c.id + '">' + Z.tick(c.status) + '<div><h3>' + esc(c.id) + ' · ' + esc(Z.tt(c, 'title')) + '</h3><div class="figs">' + figs + '</div>' +
+      (c.note ? '<p class="faint" style="font-size:12.5px;margin:4px 0 0">' + esc(S.lang === 'ar' && c.noteAr ? c.noteAr : t(c.note)) + '</p>' : '') + (extra || '') + expl +
       (Z.reviewHtml ? Z.reviewHtml(c.id) : '') +
       '</div><div class="acts">' + (c.status === 'fail' || c.status === 'warn' ? (lk ? '' : '<button class="btn small" data-act="raise" data-id="' + c.id + '">' + t('Raise finding') + '</button>') : '') + (Z.reviewButton ? Z.reviewButton(c.id) : '') + '</div></div>';
   };
@@ -8200,7 +8269,7 @@ document.addEventListener('keydown', function (e) {
       (c.aLabel ? '<span>' + esc(t(c.aLabel)) + ': <b>' + fmt(c.a, /Returns|Periods/.test(c.aLabel) ? 0 : 2) + '</b></span>' : '') + (c.bLabel ? '<span>' + esc(t(c.bLabel)) + ': <b>' + fmt(c.b) + '</b></span>' : '') +
       (c.diff != null ? '<span class="d ' + c.status + '">' + t('Difference') + ': <b>' + fmt(c.diff) + '</b></span>' : '') + (c.exposure ? '<span class="d fail">' + t('Exposure') + ': <b>' + fmt(c.exposure) + '</b></span>' : '');
     var list = (c.exceptions && c.exceptions.list) || [];
-    return '<div class="check" id="c-' + c.id + '">' + Z.tick(c.status) + '<div><h3>' + esc(c.id) + ' · ' + esc(ar() ? c.titleAr : c.title) + '</h3><div class="figs">' + figs + '</div>' +
+    return '<div class="check st-' + c.status + '" id="c-' + c.id + '">' + Z.tick(c.status) + '<div><h3>' + esc(c.id) + ' · ' + esc(ar() ? c.titleAr : c.title) + '</h3><div class="figs">' + figs + '</div>' +
       (c.note ? '<p class="faint" style="font-size:12.5px;margin:4px 0 0">' + esc(ar() && c.noteAr ? c.noteAr : t(c.note)) + '</p>' : '') +
       (list.length ? '<details><summary>' + t('Show the items') + ' (' + list.length + ')</summary>' + Z.rowsTable(list) + '</details>' : '') + '</div><div class="acts"></div></div>';
   }
@@ -8765,7 +8834,7 @@ document.addEventListener('keydown', function (e) {
     var figs = c.status === 'na' ? '<span>' + t('Needs') + ': <b>' + esc(t(c.missing || '')) + '</b></span>' :
       (c.aLabel ? '<span>' + esc(t(c.aLabel)) + ': <b>' + (/Expired|Devices|Members/.test(c.aLabel) ? Z.count(c.a) : fmt(c.a)) + '</b></span>' : '') + (c.bLabel ? '<span>' + esc(t(c.bLabel)) + ': <b>' + fmt(c.b) + '</b></span>' : '') + (c.exposure ? '<span class="d fail">' + t('Exposure') + ': <b>' + fmt(c.exposure) + '</b></span>' : '');
     var list = (c.exceptions && c.exceptions.list) || [];
-    return '<div class="check" id="c-' + c.id + '">' + Z.tick(c.status) + '<div><h3>' + esc(c.id) + ' · ' + esc(ar() ? c.titleAr : c.title) + '</h3><div class="figs">' + figs + '</div>' +
+    return '<div class="check st-' + c.status + '" id="c-' + c.id + '">' + Z.tick(c.status) + '<div><h3>' + esc(c.id) + ' · ' + esc(ar() ? c.titleAr : c.title) + '</h3><div class="figs">' + figs + '</div>' +
       (c.note ? '<p class="faint" style="font-size:12.5px;margin:4px 0 0">' + esc(ar() && c.noteAr ? c.noteAr : t(c.note)) + '</p>' : '') + (list.length ? '<details><summary>' + t('Show the items') + ' (' + list.length + ')</summary>' + Z.rowsTable(list) + '</details>' : '') + '</div><div class="acts"></div></div>';
   }
   var yes = function (v) { return v === true || v === 'yes'; };

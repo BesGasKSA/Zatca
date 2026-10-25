@@ -1170,3 +1170,30 @@ input.zk-quiet:hover { border-color: var(--line-2); } input.zk-quiet:focus { bac
   .zk-flow .zk-div-row { grid-template-columns: 1fr 2px 1fr; }
 }
 .zk-eb .zk-bar i { background: var(--accent); } .zk-eb .zk-bar.bad i { background: var(--fail); }
+
+/* ---------------------------------------------------------------- redesign, part 2: check lists and settings */
+.zk-chk { margin: 2px 0 14px; display: grid; gap: 10px; }
+.zk-chk-bar { display: flex; height: 10px; border-radius: 6px; overflow: hidden; background: var(--surface-2); }
+.zk-chk-bar i { display: block; height: 100%; width: var(--w); transform-origin: left; animation: grow-x .8s var(--ease) both; animation-delay: calc(var(--i, 0) * 90ms); }
+[dir="rtl"] .zk-chk-bar i { transform-origin: right; }
+.zk-chk-bar i + i { border-inline-start: 2px solid var(--surface); }
+.zk-chk-bar .s-fail { background: var(--fail); } .zk-chk-bar .s-warn { background: var(--warn); } .zk-chk-bar .s-pass { background: var(--pass); } .zk-chk-bar .s-na { background: var(--line-2); }
+.zk-chk-row { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; font-size: 13px; color: var(--ink-2); }
+.zk-chk-n b { font-size: 16px; font-weight: 800; color: var(--ink); } .zk-chk-n b.c-fail { color: var(--fail); } .zk-chk-n b.c-warn { color: var(--warn); } .zk-chk-n b.c-pass { color: var(--pass); }
+.zk-chk-f { display: inline-flex; gap: 6px; margin-inline-start: auto; flex-wrap: wrap; }
+.zk-chk-f .zk-fchip { min-height: 32px; padding: 4px 12px; font-size: 12.5px; }
+section[data-f="bad"] .check.st-pass, section[data-f="bad"] .check.st-na, section[data-f="ok"] .check:not(.st-pass) { display: none; }
+.check.st-fail, .check.st-warn { position: relative; }
+.zk-expl { margin-top: 8px; }
+.zk-expl > summary { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; list-style: none; font-size: 12.5px; font-weight: 650; color: var(--accent); padding: 4px 10px; border-radius: 999px; background: var(--accent-soft); }
+.zk-expl > summary::-webkit-details-marker { display: none; }
+.zk-expl[open] > summary { background: transparent; padding-inline: 0; color: var(--ink-2); }
+.zk-expl textarea { margin-top: 6px; animation: rise .3s var(--ease) both; }
+.zk-set { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 18px; align-items: start; }
+.zk-setnav { position: sticky; top: 76px; display: grid; gap: 2px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-m); padding: 8px; box-shadow: var(--shadow-1); }
+.zk-setnav a { display: flex; gap: 9px; align-items: center; padding: 7px 10px; border-radius: var(--r-s); color: var(--ink-2); text-decoration: none; font-size: 13px; font-weight: 600; transition: background .2s, color .2s; }
+.zk-setnav a:hover, .zk-setnav a.on { background: var(--accent-soft); color: var(--accent); }
+.zk-set-h { display: flex; gap: 9px; align-items: center; margin-bottom: 12px; }
+.zk-set-h i { color: var(--accent); font-size: 20px; }
+.zk-set section { scroll-margin-top: 80px; }
+@media (max-width: 1100px) { .zk-set { grid-template-columns: 1fr; } .zk-setnav { position: static; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); } }

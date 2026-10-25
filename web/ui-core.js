@@ -572,21 +572,23 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
   }
 
   // ---------------------------------------------------------------- settings
+  Z.ACT.setjump = function (el) { var x = document.getElementById('set-' + el.dataset.s); if (!x) return; x.scrollIntoView({ behavior: 'smooth', block: 'start' }); document.querySelectorAll('.zk-setnav a').forEach(function (a) { a.classList.toggle('on', a === el); }); };
   Z.views.settings = function () {
     var V = S.settings, P = V.penalties;
     var whtRows = E.WHT_TYPES.map(function (w) { return '<tr><td>' + esc(S.lang === 'ar' ? w[2] : w[1]) + '</td><td style="width:120px"><input type="number" step="0.01" min="0" max="100" name="wht_' + w[0] + '" value="' + Z.r(V.whtRates[w[0]] * 100) + '" aria-label="' + esc(w[1]) + '"></td></tr>'; }).join('');
     var bank = Object.keys(V.bankRules).map(function (k) { return '<label class="f"><span>' + esc(t(Z.bankClassName(k))) + '</span><input type="text" name="bank_' + k + '" value="' + esc(V.bankRules[k]) + '"></label>'; }).join('');
     Z.setMain('<div class="pagehead"><div><h1>' + t('Settings') + '</h1><p>' + t('Rules and thresholds for every entity in this organisation. Tax rates and penalties are editable because regulations change - verify them against current ZATCA rules.') + '</p></div></div>' +
+      '<div class="zk-set"><nav class="zk-setnav" aria-label="' + esc(t('Settings sections')) + '">' + [['org', 'Organisation', 'buildings'], ['tol', 'Matching tolerance', 'scales'], ['cor', 'Corrections and e-invoicing', 'pencil-simple-line'], ['re', 'Real estate and Zakat', 'house-line'], ['disp', 'Disputes and refunds', 'gavel'], ['adj', 'VAT adjustments', 'sliders-horizontal'], ['cit', 'Income tax and devices', 'bank'], ['exc', 'Excise and keywords', 'drop'], ['wht', 'Withholding tax rates', 'hand-coins'], ['pen', 'Penalties', 'warning'], ['bank', 'Bank classification', 'bank'], ['w', 'Score weights', 'gauge']].map(function (x) { return '<a href="#" data-act="setjump" data-s="' + x[0] + '">' + Z.icon(x[2]) + '<span>' + esc(t(x[1])) + '</span></a>'; }).join('') + '</nav>' +
       '<form id="setf" class="stack">' +
-      '<section class="paper"><h2 style="margin-bottom:12px">' + t('Organisation') + '</h2><div class="grid g2">' + fld('orgName', t('Organisation name'), S.tenant.name) +
+      '<section class="paper" id="set-org"><h2 class="zk-set-h">' + Z.icon('buildings') + t('Organisation') + '</h2><div class="grid g2">' + fld('orgName', t('Organisation name'), S.tenant.name) +
       (S.api.mode === 'cloud' && S.tenant.spreadsheetUrl ? '<div class="f"><span class="muted" style="font-size:13px">' + t('Your data') + '</span><p><a href="' + esc(S.tenant.spreadsheetUrl) + '" target="_blank" rel="noopener">' + t('Open the Google Sheet that stores this organisation') + '</a></p></div>' : '') + '</div></section>' +
-      '<section class="paper"><h2 style="margin-bottom:12px">' + t('Matching tolerance') + '</h2><div class="grid g4">' +
+      '<section class="paper" id="set-tol"><h2 class="zk-set-h">' + Z.icon('scales') + t('Matching tolerance') + '</h2><div class="grid g4">' +
       fld('tolAbs', t('Pass if difference ≤ (SAR)'), V.tolAbs, 'number', 'step="0.01" min="0"') + fld('tolPct', t('Warn if within % of base'), Z.r(V.tolPct * 100), 'number', 'step="0.01" min="0"') +
       fld('tolWarnAbs', t('…and at most (SAR)'), V.tolWarnAbs, 'number', 'step="1" min="0"') + fld('materiality', t('Materiality (SAR)'), V.materiality, 'number', 'step="1" min="0"') +
       fld('vatRate', t('VAT standard rate %'), Z.r(V.vatRate * 100), 'number', 'step="0.01"') + fld('vatCorrectionThreshold', t('Amended return above (SAR)'), V.vatCorrectionThreshold, 'number') +
       '<label class="f"><span>' + t('Read TB VAT accounts as') + '</span><select name="glBasis"><option value="movement"' + (V.glBasis === 'movement' ? ' selected' : '') + '>' + t('Net movement') + '</option><option value="gross"' + (V.glBasis === 'gross' ? ' selected' : '') + '>' + t('Gross side (credits for output, debits for input)') + '</option></select><small>' + t('Used only when no GL detail is loaded.') + '</small></label>' +
       fld('settlementKeywords', t('Settlement journal keywords'), V.settlementKeywords, 'text', '', t('GL lines with these words are left out of VAT account movement.')) + '</div></section>' +
-      '<section class="paper"><h2 style="margin-bottom:12px">' + t('Corrections, e-invoicing and input VAT rules') + '</h2><div class="grid g3">' +
+      '<section class="paper" id="set-cor"><h2 class="zk-set-h">' + Z.icon('pencil-simple-line') + t('Corrections, e-invoicing and input VAT rules') + '</h2><div class="grid g3">' +
       fld('vatCorrectionThreshold', t('Amend the original return at or above (SAR)'), V.vatCorrectionThreshold, 'number', 'step="1"', t('VAT IR Art. 63: SAR 15,000 since 23 June 2023.')) +
       fld('correctionNotifyDays', t('Days to notify ZATCA of a material error'), V.correctionNotifyDays, 'number', 'step="1"') +
       fld('refundMin', t('Minimum refund application (SAR)'), V.refundMin, 'number', 'step="1"') +
@@ -596,23 +598,28 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       fld('gift_annualCap', t('Gift relief annual cap (SAR)'), V.giftRelief.annualCap, 'number', 'step="1"') +
       fld('trend_salesDropPct', t('Flag a sales drop above (%)'), V.trend.salesDropPct, 'number', 'step="1"') +
       fld('trend_inputJumpPct', t('Flag an input VAT rise above (%)'), V.trend.inputJumpPct, 'number', 'step="1"') +
+'</div></section><section class="paper" id="set-re"><h2 class="zk-set-h">' + Z.icon('house-line') + t('Real estate and Zakat') + '</h2><div class="grid g3">' +
       fld('rett_rate', t('RETT rate %'), Z.r(V.rett.rate * 100), 'number', 'step="0.01"') + fld('rett_latePctPerMonth', t('RETT late payment % per month'), Z.r(V.rett.latePctPerMonth * 100), 'number', 'step="0.01"', t('Sources report 2% under the current law; verify.')) +
       fld('rettd_dueDays', t('RETT due within (days of the transaction)'), V.rett.dueDays, 'number', 'step="1"') +
       fld('zakat_dueDays', t('Zakat return due (days after year end)'), V.zakat.dueDays, 'number', 'step="1"') +
+'</div></section><section class="paper" id="set-disp"><h2 class="zk-set-h">' + Z.icon('gavel') + t('Disputes and refunds') + '</h2><div class="grid g3">' +
       fld('disp_objectionDays', t('Days to object to an assessment'), V.disputes.objectionDays, 'number', 'step="1"') +
       fld('disp_appealDays', t('Days to appeal a committee decision'), V.disputes.appealDays, 'number', 'step="1"') +
       fld('disp_escalateDays', t('Days to escalate a rejected objection to the GSTC'), V.disputes.escalateDays, 'number', 'step="1"', t('Adviser summaries; verify.')) +
       fld('disp_zatcaDecisionDays', t('Days ZATCA has to decide an objection'), V.disputes.zatcaDecisionDays, 'number', 'step="1"', t('Adviser summaries; verify.')) +
       fld('rfd_payDays', t('Days ZATCA has to pay an approved refund'), V.refunds.payDays, 'number', 'step="1"', t('Adviser summaries; verify.')) +
       fld('rfd_infoResponseDays', t('Working days to answer a refund document request'), V.refunds.infoResponseDays, 'number', 'step="1"', t('Adviser summaries; verify.')) +
+'</div></section><section class="paper" id="set-adj"><h2 class="zk-set-h">' + Z.icon('sliders-horizontal') + t('VAT adjustments') + '</h2><div class="grid g3">' +
       fld('cap_immovableYears', t('Capital asset adjustment period, buildings (years)'), V.capitalAssets.immovableYears, 'number', 'step="1"') +
       fld('cap_movableYears', t('Capital asset adjustment period, other assets (years)'), V.capitalAssets.movableYears, 'number', 'step="1"') +
       fld('bd_minMonths', t('Bad-debt relief: months overdue'), V.badDebt.minMonths, 'number', 'step="1"', t('Adviser summaries; verify.')) +
       fld('adv_invoiceDays', t('Advance payments: invoice within (days after month end)'), V.advances.invoiceDays, 'number', 'step="1"', t('Adviser summaries; verify.')) +
       fld('fx_usdPeg', t('SAR per US dollar (peg)'), V.fx.usdPeg, 'number', 'step="0.0001"') +
+'</div></section><section class="paper" id="set-cit"><h2 class="zk-set-h">' + Z.icon('bank') + t('Income tax, transfer pricing and devices') + '</h2><div class="grid g3">' +
       fld('cit_rate', t('Income tax rate on the non-Saudi share'), V.cit.rate, 'number', 'step="0.01"') + fld('cit_advanceThreshold', t('Advance payments when last year\'s tax reached (SAR)'), V.cit.advanceThreshold, 'number', 'step="1"', t('Adviser summaries; verify.')) +
       fld('cit_minInstalment', t('No advance payment under (SAR)'), V.cit.minInstalment, 'number', 'step="1"', t('Adviser summaries; verify.')) + fld('tp_fileThreshold', t('Transfer pricing files from (SAR)'), V.tp.fileThreshold, 'number', 'step="1"', t('Adviser summaries; verify.')) +
       fld('tp_cbcrThreshold', t('Country-by-country report above group revenue (SAR)'), V.tp.cbcrThreshold, 'number', 'step="1"', t('Adviser summaries; verify.')) + fld('egs_renewDays', t('Renew device certificates this many days ahead'), V.egs.renewDays, 'number', 'step="1"') +
+'</div></section><section class="paper" id="set-exc"><h2 class="zk-set-h">' + Z.icon('drop') + t('Excise, Zakat fines and keywords') + '</h2><div class="grid g3">' +
       fld('zakatp_latePctPer30Days', t('Zakat late fine % per 30 days (estimate)'), Z.r(V.zakat.latePctPer30Days * 100), 'number', 'step="0.01"') +
       fld('sugar_mid', t('Sweetened drinks 5-7.99 g sugar: SAR per litre'), V.sugarTiers.tiers[1][2], 'number', 'step="0.01"') +
       fld('sugar_high', t('Sweetened drinks 8 g sugar or more: SAR per litre'), V.sugarTiers.tiers[2][2], 'number', 'step="0.01"', t('Per-litre tiers since 1 Jan 2026; under 5 g and sugar-free pay nothing.')) +
@@ -620,14 +627,14 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       fld('exc_ecig', t('Excise: e-cigarettes and liquids %'), Z.r(V.exciseRates.ecig * 100), 'number', 'step="1"') + fld('exc_sweetened', t('Excise: sweetened drinks % (before 2026)'), Z.r(V.exciseRates.sweetened * 100), 'number', 'step="1"') + '</div>' +
       '<label class="f" style="margin-top:12px"><span>' + t('Marketplace payout keywords (bank descriptions)') + '</span><input type="text" name="marketplaceKeywords" value="' + esc(V.marketplace.payoutKeywords) + '"></label>' +
       '<label class="f" style="margin-top:12px"><span>' + t('Blocked input VAT keywords') + '</span><textarea name="blockedKeywords">' + esc(V.blockedKeywords) + '</textarea><small>' + t('Matched against purchase descriptions, accounts and supplier names (VAT IR Art. 50).') + '</small></label></section>' +
-      '<section class="paper area-wht"><h2>' + t('Withholding tax rates') + '</h2><p class="muted">' + t('Statutory rates for payments to non-residents. Lower treaty rates are accepted when the line is marked as treaty relief with a certificate.') + '</p><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Payment type') + '</th><th>%</th></tr></thead><tbody>' + whtRows + '</tbody></table></div></section>' +
-      '<section class="paper"><h2 style="margin-bottom:12px">' + t('Penalties used for exposure estimates') + '</h2><div class="grid g3">' +
+      '<section class="paper area-wht" id="set-wht"><h2 class="zk-set-h">' + Z.icon('hand-coins') + t('Withholding tax rates') + '</h2><p class="muted">' + t('Statutory rates for payments to non-residents. Lower treaty rates are accepted when the line is marked as treaty relief with a certificate.') + '</p><div class="tbl-wrap"><table class="t"><thead><tr><th>' + t('Payment type') + '</th><th>%</th></tr></thead><tbody>' + whtRows + '</tbody></table></div></section>' +
+      '<section class="paper" id="set-pen"><h2 class="zk-set-h">' + Z.icon('warning') + t('Penalties used for exposure estimates') + '</h2><div class="grid g3">' +
       fld('pen_vatErrorPct', t('Incorrect VAT return - % of difference'), Z.r(P.vatErrorPct * 100), 'number', 'step="0.1"') + fld('pen_vatLatePaymentPctPerMonth', t('VAT late payment - % per month'), Z.r(P.vatLatePaymentPctPerMonth * 100), 'number', 'step="0.1"') +
       fld('pen_whtLatePctPer30Days', t('WHT late payment - % per 30 days'), Z.r(P.whtLatePctPer30Days * 100), 'number', 'step="0.1"') + fld('pen_vatLateFilingMinPct', t('VAT late filing - minimum %'), Z.r(P.vatLateFilingMinPct * 100), 'number') +
       fld('pen_vatLateFilingMaxPct', t('VAT late filing - maximum %'), Z.r(P.vatLateFilingMaxPct * 100), 'number') + fld('pen_invoiceViolationMax', t('Tax invoice violation - maximum (SAR)'), P.invoiceViolationMax, 'number') + '</div></section>' +
-      '<section class="paper area-bank"><h2>' + t('Bank line classification') + '</h2><p class="muted">' + t('Comma-separated words found in a bank line\'s description. You can still reclassify any line by hand.') + '</p><div class="grid g2" style="margin-top:12px">' + bank + '</div></section>' +
-      '<section class="paper"><h2>' + t('Readiness score weights') + '</h2><div class="grid g3" style="margin-top:12px">' + Object.keys(V.weights).map(function (k) { return fld('w_' + k, t(Z.partName(k)), V.weights[k], 'number', 'min="0" step="1"'); }).join('') + '</div></section>' +
-      (Z.can('manager') ? '<div class="row end"><button class="btn primary" type="submit">' + t('Save settings') + '</button></div>' : '') + '</form>' +
+      '<section class="paper area-bank" id="set-bank"><h2 class="zk-set-h">' + Z.icon('bank') + t('Bank line classification') + '</h2><p class="muted">' + t('Comma-separated words found in a bank line\'s description. You can still reclassify any line by hand.') + '</p><div class="grid g2" style="margin-top:12px">' + bank + '</div></section>' +
+      '<section class="paper" id="set-w"><h2 class="zk-set-h">' + Z.icon('gauge') + t('Readiness score weights') + '</h2><div class="grid g3" style="margin-top:12px">' + Object.keys(V.weights).map(function (k) { return fld('w_' + k, t(Z.partName(k)), V.weights[k], 'number', 'min="0" step="1"'); }).join('') + '</div></section>' +
+      (Z.can('manager') ? '<div class="row end"><button class="btn primary" type="submit">' + t('Save settings') + '</button></div>' : '') + '</form></div>' +
       '<section class="paper" style="margin-top:18px"><h2>' + t('Storage') + '</h2>' + storageBox() + '</section>');
     document.getElementById('setf').addEventListener('submit', function (ev) {
       ev.preventDefault();

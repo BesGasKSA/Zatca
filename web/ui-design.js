@@ -320,3 +320,35 @@ document.addEventListener('keydown', function (e) {
   var el = e.target;
   if ((e.key === 'Enter' || e.key === ' ') && el && el.getAttribute && el.getAttribute('role') === 'button' && el.hasAttribute('data-act') && !/^(A|BUTTON|INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) { e.preventDefault(); el.click(); }
 });
+
+/* Every list of checks gets a summary bar: how many passed, need a look or failed,
+   drawn as one segmented bar, with chips to show only what needs attention. */
+(function () {
+  'use strict';
+  var t = Z.t;
+  function stOf(el) { var m = /\bst-(pass|warn|fail|na)\b/.exec(el.className); if (m) return m[1]; var k = el.querySelector('.tick'); return k ? (/\b(pass|warn|fail|na)\b/.exec(k.className) || [])[1] || 'na' : 'na'; }
+  function enhance() {
+    var main = document.getElementById('main'); if (!main) return;
+    [].forEach.call(main.querySelectorAll('section'), function (sec) {
+      if (sec.getAttribute('data-chk')) return;
+      var checks = [].filter.call(sec.querySelectorAll('.check'), function (c) { return c.closest('section') === sec && c.id; });
+      if (checks.length < 3) return;
+      sec.setAttribute('data-chk', '1');
+      var n = { pass: 0, warn: 0, fail: 0, na: 0 }; checks.forEach(function (c) { var s = stOf(c); c.classList.add('st-' + s); n[s]++; });
+      var tot = checks.length, bad = n.fail + n.warn;
+      var seg = ['fail', 'warn', 'pass', 'na'].map(function (k, i) { return n[k] ? '<i class="s-' + k + '" style="--w:' + (n[k] / tot * 100).toFixed(2) + '%;--i:' + i + '"></i>' : ''; }).join('');
+      var box = document.createElement('div'); box.className = 'zk-chk';
+      box.innerHTML = '<div class="zk-chk-bar" role="img" aria-label="' + Z.esc(n.pass + ' ' + t('passed') + ', ' + n.warn + ' ' + t('to review') + ', ' + n.fail + ' ' + t('failed') + ', ' + n.na + ' ' + t('waiting for data')) + '">' + seg + '</div>' +
+        '<div class="zk-chk-row"><span class="zk-chk-n"><b class="c-fail">' + n.fail + '</b> ' + t('failed') + '</span><span class="zk-chk-n"><b class="c-warn">' + n.warn + '</b> ' + t('to review') + '</span><span class="zk-chk-n"><b class="c-pass">' + n.pass + '</b> ' + t('passed') + '</span>' + (n.na ? '<span class="zk-chk-n"><b>' + n.na + '</b> ' + t('waiting for data') + '</span>' : '') +
+        '<span class="zk-chk-f" role="group" aria-label="' + Z.esc(t('Show')) + '">' + [['all', t('All') + ' ' + tot], ['bad', t('Needs attention') + ' ' + bad], ['ok', t('Passed') + ' ' + n.pass]].map(function (f) { return '<button type="button" class="zk-fchip' + (f[0] === 'all' ? ' on' : '') + '" aria-pressed="' + (f[0] === 'all') + '" data-act="chkf" data-f="' + f[0] + '">' + Z.esc(f[1]) + '</button>'; }).join('') + '</span></div>';
+      var head = sec.querySelector(':scope > header'); if (head) head.insertAdjacentElement('afterend', box); else sec.insertBefore(box, checks[0]);
+    });
+  }
+  Z.ACT.chkf = function (el) {
+    var sec = el.closest('section'); if (!sec) return;
+    sec.setAttribute('data-f', el.dataset.f);
+    [].forEach.call(el.parentNode.children, function (b) { var on = b === el; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
+  };
+  var pend = null;
+  new MutationObserver(function () { if (pend) return; pend = setTimeout(function () { pend = null; enhance(); }, 30); }).observe(document.documentElement, { childList: true, subtree: true });
+})();
