@@ -19,6 +19,19 @@ function setup() {
   Logger.log('Registry: ' + reg.getUrl() + '\nPlatform admins: ' + admins.join(', ') + '\nReminder trigger installed.');
 }
 
+// Run from the Apps Script editor (only the script's owner can open it): opens a
+// company and writes its key to the log. On the website choose "Join your company
+// with its key" and enter it; the first person to join becomes that company's owner.
+// Name it with the OWNER_COMPANY_NAME script property (default "Platform owner").
+function createOwnerCompany() {
+  var me = ''; try { me = Session.getEffectiveUser().getEmail(); } catch (e) {}
+  var t = platformCreate_({ user: { id: 'editor', email: me || 'editor' } }, { name: prop_('OWNER_COMPANY_NAME') || 'Platform owner', contact: me });
+  Logger.log('Company: ' + t.name);
+  Logger.log('Key: ' + t.joinKey);
+  Logger.log('On the website choose "Join your company with its key" and enter the key.');
+  return t.joinKey;
+}
+
 function installTriggers() {
   ScriptApp.getProjectTriggers().forEach(function (t) {
     if (t.getHandlerFunction() === 'monthlyReminder') ScriptApp.deleteTrigger(t);

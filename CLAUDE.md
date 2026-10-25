@@ -201,10 +201,13 @@ get an absolute `--user-data-dir`; a relative one silently fails to start.
 
 ## SaaS model (2026-10-25)
 
-- Only platform owners (emails in the `SUPER_ADMINS` script property) open companies:
-  `platformTenantCreate` makes the company's own spreadsheet and a unique 12-character
-  `joinKey` (`XXXX-XXXX-XXXX`, no look-alike characters). `signup` is refused with
-  `signup_closed` for anyone else unless `OPEN_SIGNUP=true`.
+- **Nobody opens an organisation from the website, the platform owner included**
+  (`signup` → `signup_closed` unless `OPEN_SIGNUP=true`; the sign-in page has no link).
+  The owner wants to be the only one who creates companies; never reopen this.
+  Platform owners (emails in `SUPER_ADMINS`) create companies on the Platform page
+  (`platformTenantCreate`: the company's own spreadsheet + a unique 12-character
+  `joinKey`, `XXXX-XXXX-XXXX`, no look-alike characters). For their own account they
+  run `createOwnerCompany()` in the Apps Script editor (logs the key) and join with it.
 - People join with `join` (companyKey, name, email, password). The first to join becomes
   the company owner (`*` access, data sheet shared); later joiners are viewers with no
   company access until the owner ticks it. Wrong keys lock like wrong passwords (5 per

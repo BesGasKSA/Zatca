@@ -53,6 +53,7 @@ var ctx = {
   PropertiesService: { getScriptProperties: function () { return { getProperty: function (k) { return props[k] == null ? null : props[k]; }, setProperty: function (k, v) { props[k] = v; } }; } },
   CacheService: { getScriptCache: function () { return { get: function (k) { return cache[k] || null; }, put: function (k, v) { cache[k] = v; }, remove: function (k) { delete cache[k]; } }; } },
   LockService: { getScriptLock: function () { return { waitLock: function () {}, releaseLock: function () {} }; } },
+  Logger: { log: function () {} },
   Utilities: {
     getUuid: function () { return crypto.randomUUID(); },
     computeDigest: function (alg, s) { return Array.from(crypto.createHash('sha256').update(s, 'utf8').digest()); },
@@ -83,8 +84,14 @@ var A, B, ROOT, KA, KB, ent, ex, ent2;
 t('only the platform owner can open an organisation; everyone else is refused', function () {
   props.SUPER_ADMINS = 'root@platform.sa';
   err(call({ action: 'signup', orgName: 'Sneaky Co', name: 'S', email: 'sneaky@x.sa', password: 'long-enough-pw' }), 'signup_closed');
-  ROOT = ok(call({ action: 'signup', orgName: 'Platform', name: 'Root', email: 'root@platform.sa', password: 'root-password-1' }));
-  assert.strictEqual(ROOT.platform, true);
+  err(call({ action: 'signup', orgName: 'Claimed', name: 'R', email: 'root@platform.sa', password: 'long-enough-pw' }), 'signup_closed');  // not even with the platform owner's email
+  // the owner opens their own company from the editor and joins it with the key
+  var key = ctx.createOwnerCompany();
+  ROOT = ok(call({ action: 'join', companyKey: key, name: 'Root', email: 'root@platform.sa', password: 'root-password-1' }));
+  assert.strictEqual(ROOT.platform, true); assert.strictEqual(ROOT.user.role, 'owner');
+  props.OPEN_SIGNUP = 'true';
+  ok(call({ action: 'signup', orgName: 'Opened', name: 'O', email: 'open@x.sa', password: 'long-enough-pw' }));
+  delete props.OPEN_SIGNUP;
 });
 t('the platform owner creates companies, each with its own sheet and a unique key', function () {
   var a = ok(call({ action: 'platformTenantCreate', token: ROOT.token, tenant: { name: 'Alpha Co', contact: 'aisha@alpha.sa' } })).tenant;
@@ -126,8 +133,8 @@ t('a new key stops the old one; only the platform owner can issue it or list com
   KA = nk;
 });
 t('weak password and duplicate email refused', function () {
-  err(call({ action: 'signup', orgName: 'X', email: 'root@platform.sa', password: 'short' }), 'weak_password');
-  err(call({ action: 'signup', orgName: 'X', email: 'ROOT@platform.sa', password: 'long-enough-pw' }), 'email_taken');
+  err(call({ action: 'join', companyKey: KB, name: 'X', email: 'x3@x.sa', password: 'short' }), 'weak_password');
+  err(call({ action: 'join', companyKey: KB, name: 'X', email: 'ROOT@platform.sa', password: 'long-enough-pw' }), 'email_taken');
 });
 t('login: right password works, wrong one does not', function () {
   ok(call({ action: 'login', email: 'aisha@alpha.sa', password: 'correct-horse-1' }));
@@ -320,7 +327,7 @@ t('platform admin can list and suspend tenants', function () {
   err(call({ action: 'platformTenants', token: A.token }), 'forbidden');
   props.SUPER_ADMINS = 'root@platform.sa,aisha@alpha.sa';
   var ts = ok(call({ action: 'platformTenants', token: A.token })).tenants;
-  assert.strictEqual(ts.length, 4, 'platform, Alpha, Beta and the formula-named company');
+  assert.strictEqual(ts.length, 5, 'platform, the opened test company, Alpha, Beta and the formula-named company');
   var beta = ts.filter(function (x) { return x.name === 'Beta Co'; })[0];
   ok(call({ action: 'platformTenantStatus', token: A.token, id: beta.id, status: 'suspended' }));
   err(call({ action: 'me', token: B.token }), 'tenant_suspended');

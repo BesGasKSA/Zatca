@@ -4,7 +4,8 @@
  * SaaS model: the platform owner (an email in the SUPER_ADMINS script property)
  * creates each customer company. Every company gets its own spreadsheet and a
  * unique company key; the company's people join with that key (the first one in
- * becomes the company owner). Open sign-up is off unless OPEN_SIGNUP=true.
+ * becomes the company owner). Nobody can open an organisation from the website
+ * (unless the OPEN_SIGNUP script property is set to true).
  *
  * Multi-tenant storage on Google Sheets:
  *   - one REGISTRY spreadsheet (script property REGISTRY_ID) holds tenants,
@@ -122,8 +123,9 @@ function route_(req) {
 function signup_(req) {
   var email = normEmail_(req.email), org = String(req.orgName || '').trim();
   if (!email || !org) throw new Error('missing_fields');
-  // only the platform owner opens an organisation this way; customers join with a key
-  if (!isSuper_(email) && prop_('OPEN_SIGNUP') !== 'true') throw new Error('signup_closed');
+  // No one opens an organisation from the website: the platform owner creates companies
+  // (Platform page, or createOwnerCompany() in the editor) and people join with the key.
+  if (prop_('OPEN_SIGNUP') !== 'true') throw new Error('signup_closed');
   if (String(req.password || '').length < 10) throw new Error('weak_password');
   return withLock_(function () {
     if (regRows_(REGISTRY_SHEETS.USERS).some(function (u) { return u.email === email; })) throw new Error('email_taken');

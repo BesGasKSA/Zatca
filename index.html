@@ -5392,7 +5392,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       '<label class="row" style="gap:8px;margin:2px 0 4px;font-size:14px"><input type="checkbox" name="remember" value="1" checked style="width:auto"> ' + t('Keep me signed in on this device') + '</label>' +
       '<button class="btn primary" type="submit">' + (mode === 'login' ? t('Sign in') : mode === 'join' ? t('Join my company') : t('Open organisation')) + '</button></form>' +
       '<p class="muted" style="margin-top:18px">' + (mode === 'login' ? t('First time here?') + ' <a href="#" data-act="authmode" data-m="join">' + t('Join your company with its key') + '</a>' : '<a href="#" data-act="authmode" data-m="login">' + t('I already have an account') + '</a>') + '</p>' +
-      (mode === 'login' ? '<p class="faint" style="font-size:12.5px"><a href="#" data-act="authmode" data-m="signup">' + t('Platform owner: open an organisation') + '</a></p>' : '') +
+
       '<p class="faint" style="font-size:13px">' + t('Want to look around first?') + ' <a href="#" data-act="localmode">' + t('Try it on this device with demo data') + '</a></p></div></section></div>';
     document.getElementById('authf').addEventListener('submit', function (e) {
       e.preventDefault();
