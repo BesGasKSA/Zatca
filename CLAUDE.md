@@ -28,7 +28,7 @@ See README.md for the feature map and deployment.
 
 ## Tests
 
-`npm test` — engine (136) + backend (23) + a 600-run random-data stress test
+`npm test` — engine (136) + backend (27) + a 600-run random-data stress test
 (`tests/fuzz.js`: messy values, bad dates, any period since 2018 — no NaN,
 no negative exposure, no crash). `npm run perf` — 20,000 invoices under 4 s.
 With `npm run dev` running, four browser suites drive the real UI in headless
@@ -198,6 +198,21 @@ get an absolute `--user-data-dir`; a relative one silently fails to start.
   allow-list (`FILE_TYPES`), 2 MB, base64 only, file names cleaned, `files` can never be
   listed, removing an attachment removes its content. The client only ever downloads
   (blob + `download`), never renders a file inline.
+
+## SaaS model (2026-10-25)
+
+- Only platform owners (emails in the `SUPER_ADMINS` script property) open companies:
+  `platformTenantCreate` makes the company's own spreadsheet and a unique 12-character
+  `joinKey` (`XXXX-XXXX-XXXX`, no look-alike characters). `signup` is refused with
+  `signup_closed` for anyone else unless `OPEN_SIGNUP=true`.
+- People join with `join` (companyKey, name, email, password). The first to join becomes
+  the company owner (`*` access, data sheet shared); later joiners are viewers with no
+  company access until the owner ticks it. Wrong keys lock like wrong passwords (5 per
+  email, 200 a time window overall). `platformTenantKey` issues a new key; the old stops.
+- The key is shown to platform owners (Platform page) and to the company owner (Users
+  page) only: `tenantFor_` adds it for role owner. Companies created before keys existed
+  get one from the Platform page ("New key").
+- Every password field gets a show/hide eye (`.zk-pw`, `ui-design.js`).
 
 ## Deployment (backend live since 2026-10-19)
 

@@ -1,6 +1,11 @@
 /**
  * Tax Inspection Readiness — Google Apps Script backend.
  *
+ * SaaS model: the platform owner (an email in the SUPER_ADMINS script property)
+ * creates each customer company. Every company gets its own spreadsheet and a
+ * unique company key; the company's people join with that key (the first one in
+ * becomes the company owner). Open sign-up is off unless OPEN_SIGNUP=true.
+ *
  * Multi-tenant storage on Google Sheets:
  *   - one REGISTRY spreadsheet (script property REGISTRY_ID) holds tenants,
  *     users and the platform audit trail;
@@ -73,12 +78,13 @@ function route_(req) {
   if (!a) throw new Error('missing_action');
   if (a === 'ping') return { ok: true };
   if (a === 'signup') return signup_(req);
+  if (a === 'join') return join_(req);
   if (a === 'login') return login_(req);
 
   var s = session_(req.token);
   var out;
   switch (a) {
-    case 'me': out = { user: publicUser_(s.user), tenant: publicTenant_(s.tenant) }; break;
+    case 'me': out = { user: publicUser_(s.user), tenant: tenantFor_(s.user, s.tenant), platform: isSuper_(s.user.email) }; break;
     case 'list': out = { docs: list_(s, req.table, req.parentId) }; break;
     case 'get': out = { doc: get_(s, req.table, req.id) }; break;
     case 'save': out = { doc: save_(s, req.table, req.doc) }; break;
@@ -89,7 +95,17 @@ function route_(req) {
     case 'changePassword': changePassword_(s, req.oldPassword, req.newPassword); out = {}; break;
     case 'tenantSave': need_(s, 'owner'); out = { tenant: publicTenant_(tenantSave_(s, req.tenant)) }; break;
     case 'shareSheet': need_(s, 'owner'); out = { shared: shareWith_(book_(s), s.user.email, s.tenant.id, s.user.id), url: publicTenant_(s.tenant).spreadsheetUrl }; break;
-    case 'platformTenants': if (!isSuper_(s.user.email)) throw new Error('forbidden'); out = { tenants: regRows_(REGISTRY_SHEETS.TENANTS).map(publicTenant_), registryUrl: 'https://docs.google.com/spreadsheets/d/' + prop_('REGISTRY_ID') }; break;
+    case 'platformTenants':
+      if (!isSuper_(s.user.email)) throw new Error('forbidden');
+      var users = regRows_(REGISTRY_SHEETS.USERS);
+      out = { tenants: regRows_(REGISTRY_SHEETS.TENANTS).map(function (x) {
+        var mine = users.filter(function (u) { return u.tenantId === x.id; });
+        return Object.assign(publicTenant_(x), { joinKey: x.joinKey || '', users: mine.length, owners: mine.filter(function (u) { return u.role === 'owner'; }).map(function (u) { return u.email; }), contact: x.contact || '', lastLoginAt: mine.reduce(function (m, u) { return (u.lastLoginAt || '') > m ? u.lastLoginAt : m; }, '') });
+      }), registryUrl: 'https://docs.google.com/spreadsheets/d/' + prop_('REGISTRY_ID') }; break;
+    case 'platformTenantCreate': if (!isSuper_(s.user.email)) throw new Error('forbidden'); out = { tenant: platformCreate_(s, req.tenant || {}) }; break;
+    case 'platformTenantKey':
+      if (!isSuper_(s.user.email)) throw new Error('forbidden');
+      out = { tenant: withLock_(function () { var x = regFind_(REGISTRY_SHEETS.TENANTS, req.id); if (!x) throw new Error('not_found'); x.joinKey = newJoinKey_(); regUpsert_(REGISTRY_SHEETS.TENANTS, x); regAudit_('tenant_key', x.id, s.user.id, ''); return Object.assign(publicTenant_(x), { joinKey: x.joinKey }); }) }; break;
     case 'platformTenantStatus':
       if (!isSuper_(s.user.email)) throw new Error('forbidden');
       var t = regFind_(REGISTRY_SHEETS.TENANTS, req.id); if (!t) throw new Error('not_found');
@@ -106,6 +122,8 @@ function route_(req) {
 function signup_(req) {
   var email = normEmail_(req.email), org = String(req.orgName || '').trim();
   if (!email || !org) throw new Error('missing_fields');
+  // only the platform owner opens an organisation this way; customers join with a key
+  if (!isSuper_(email) && prop_('OPEN_SIGNUP') !== 'true') throw new Error('signup_closed');
   if (String(req.password || '').length < 10) throw new Error('weak_password');
   return withLock_(function () {
     if (regRows_(REGISTRY_SHEETS.USERS).some(function (u) { return u.email === email; })) throw new Error('email_taken');
@@ -113,7 +131,7 @@ function signup_(req) {
     initTenantBook_(ss);
     var folderId = prop_('TENANT_FOLDER_ID');
     if (folderId) { try { DriveApp.getFileById(ss.getId()).moveTo(DriveApp.getFolderById(folderId)); } catch (e) {} }
-    var tenant = { id: uid_('T'), name: org, spreadsheetId: ss.getId(), plan: 'standard', status: 'active', createdAt: now_() };
+    var tenant = { id: uid_('T'), name: org, spreadsheetId: ss.getId(), plan: 'standard', status: 'active', createdAt: now_(), joinKey: newJoinKey_() };
     regUpsert_(REGISTRY_SHEETS.TENANTS, tenant);
     var salt = uid_('S');
     var user = { id: uid_('U'), tenantId: tenant.id, email: email, name: String(req.name || email), role: 'owner', entityIds: ['*'],
@@ -123,7 +141,67 @@ function signup_(req) {
     // through this script's checks). On by default; SHARE_SHEET_WITH_OWNER=false turns it off.
     if (prop_('SHARE_SHEET_WITH_OWNER') !== 'false') shareWith_(ss, email, tenant.id, user.id);
     regAudit_('signup', tenant.id, user.id, org);
-    return { ok: true, token: issueToken_(user, tenant, !!req.remember), user: publicUser_(user), tenant: publicTenant_(tenant) };
+    return { ok: true, token: issueToken_(user, tenant, !!req.remember), user: publicUser_(user), tenant: tenantFor_(user, tenant), platform: isSuper_(email) };
+  });
+}
+
+// ---------------------------------------------------------------- companies and their keys
+// 12 characters from an alphabet without look-alikes (no 0/O, 1/I/L): about 10^17 keys.
+var KEY_ABC = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+function newJoinKey_() {
+  var taken = {}; regRows_(REGISTRY_SHEETS.TENANTS).forEach(function (x) { if (x.joinKey) taken[x.joinKey] = 1; });
+  for (var tries = 0; tries < 20; tries++) {
+    var bytes = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, Utilities.getUuid() + Utilities.getUuid() + Date.now()), k = '';
+    for (var i = 0; i < 12; i++) k += KEY_ABC[((bytes[i] % 256) + 256) % 256 % KEY_ABC.length] + (i === 3 || i === 7 ? '-' : '');
+    if (!taken[k]) return k;
+  }
+  throw new Error('server_error');
+}
+function normKey_(k) { var c = String(k || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); return c.length === 12 ? c.slice(0, 4) + '-' + c.slice(4, 8) + '-' + c.slice(8) : ''; }
+// the company owner sees the key to invite colleagues; nobody else does
+function tenantFor_(u, t) { var o = publicTenant_(t); if (u.role === 'owner') o.joinKey = t.joinKey || ''; return o; }
+
+function platformCreate_(s, t) {
+  var name = String(t.name || '').trim().slice(0, 120);
+  if (!name) throw new Error('missing_fields');
+  return withLock_(function () {
+    var ss = SpreadsheetApp.create('Inspection Ready — ' + name);
+    initTenantBook_(ss);
+    var folderId = prop_('TENANT_FOLDER_ID');
+    if (folderId) { try { DriveApp.getFileById(ss.getId()).moveTo(DriveApp.getFolderById(folderId)); } catch (e) {} }
+    var tenant = { id: uid_('T'), name: name, spreadsheetId: ss.getId(), plan: String(t.plan || 'standard').slice(0, 30), status: 'active', createdAt: now_(), createdBy: s.user.email,
+      joinKey: newJoinKey_(), contact: normEmail_(t.contact).slice(0, 120) };
+    regUpsert_(REGISTRY_SHEETS.TENANTS, tenant);
+    regAudit_('tenant_created', tenant.id, s.user.id, name);
+    return Object.assign(publicTenant_(tenant), { joinKey: tenant.joinKey, users: 0, owners: [], contact: tenant.contact });
+  });
+}
+
+// A person joins their company with its key. The first one becomes its owner (and
+// gets the data sheet shared); later ones start with no company access until the owner
+// grants it. Wrong keys are limited like wrong passwords.
+function join_(req) {
+  var email = normEmail_(req.email), key = normKey_(req.companyKey), name = String(req.name || '').trim().slice(0, 120);
+  if (!email || !name) throw new Error('missing_fields');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('bad_email');
+  if (String(req.password || '').length < 10) throw new Error('weak_password');
+  var cache = CacheService.getScriptCache(), fk = 'jfail_' + Utilities.base64EncodeWebSafe(email).slice(0, 200), fails = +(cache.get(fk) || 0);
+  var gk = 'jfail_all', gfails = +(cache.get(gk) || 0);
+  if (fails >= MAX_FAILS || gfails >= 200) throw new Error('too_many_attempts');
+  return withLock_(function () {
+    var t = key && regRows_(REGISTRY_SHEETS.TENANTS).filter(function (x) { return x.joinKey === key; })[0];
+    if (!t) { cache.put(fk, String(fails + 1), LOCK_SEC); cache.put(gk, String(gfails + 1), 600); regAudit_('join_failed', '', '', email); Utilities.sleep(400); throw new Error('bad_company_key'); }
+    if (t.status === 'suspended') throw new Error('tenant_suspended');
+    var all = regRows_(REGISTRY_SHEETS.USERS);
+    if (all.some(function (u) { return u.email === email; })) throw new Error('email_taken');
+    var first = !all.some(function (u) { return u.tenantId === t.id; }), salt = uid_('S');
+    var user = { id: uid_('U'), tenantId: t.id, email: email, name: name, role: first ? 'owner' : 'viewer', entityIds: first ? ['*'] : [],
+      salt: salt, pw: hashPw_(req.password, salt), active: true, createdAt: now_(), joinedWithKey: true };
+    regUpsert_(REGISTRY_SHEETS.USERS, user);
+    if (first && prop_('SHARE_SHEET_WITH_OWNER') !== 'false') { try { shareWith_(SpreadsheetApp.openById(t.spreadsheetId), email, t.id, user.id); } catch (e) {} }
+    cache.remove(fk);
+    regAudit_('join', t.id, user.id, first ? 'owner' : 'member');
+    return { ok: true, token: issueToken_(user, t, !!req.remember), user: publicUser_(user), tenant: tenantFor_(user, t), platform: isSuper_(email) };
   });
 }
 
@@ -147,7 +225,7 @@ function login_(req) {
   cache.remove(key);
   u.lastLoginAt = now_(); regUpsert_(REGISTRY_SHEETS.USERS, u);
   regAudit_('login', t.id, u.id, '');
-  return { ok: true, token: issueToken_(u, t, !!req.remember), user: publicUser_(u), tenant: publicTenant_(t) };
+  return { ok: true, token: issueToken_(u, t, !!req.remember), user: publicUser_(u), tenant: tenantFor_(u, t), platform: isSuper_(email) };
 }
 
 function session_(token) {

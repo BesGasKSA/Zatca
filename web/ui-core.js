@@ -70,7 +70,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     weak_password: 'Use at least 10 characters for the password.', forbidden: 'Your role does not allow this.',
     exercise_closed: 'This exercise is signed off. A manager must reopen it before changes.', open_review_notes: 'Clear every review note before signing off.', auth_required: 'Your session ended. Sign in again.',
     tenant_suspended: 'This organisation is suspended. Contact the platform administrator.', cloud_only: 'Available when connected to the Google Sheets backend.',
-    missing_fields: 'Fill in every field.', too_many_attempts: 'Too many wrong passwords. Try again in 15 minutes.', bad_email: 'Enter a valid email address.', server_error: 'The server hit an error. Try again; if it repeats, check the Apps Script logs.'
+    missing_fields: 'Fill in every field.', signup_closed: 'Organisations are opened by the platform owner. Ask for your company key and choose Join your company.', bad_company_key: 'That company key is not valid. Check it with whoever sent it.', too_many_attempts: 'Too many wrong passwords. Try again in 15 minutes.', bad_email: 'Enter a valid email address.', server_error: 'The server hit an error. Try again; if it repeats, check the Apps Script logs.'
   };
   Z.call = function (action, payload) {
     return S.api.call(action, payload).catch(function (e) {
@@ -137,7 +137,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
 
   function start(r) {
     return (r.user ? Promise.resolve(r) : S.api.call('me')).then(function (me) {
-      S.user = me.user; S.tenant = me.tenant;
+      S.user = me.user; S.tenant = me.tenant; S.platform = !!me.platform;
       return Promise.all([Z.list('entities'), Z.list('exercises'), Z.get('settings', 'tenant')]);
     }).then(function (x) {
       S.entities = x[0].sort(function (a, b) { return a.name < b.name ? -1 : 1; });
@@ -176,14 +176,16 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     document.body.innerHTML = '<div class="auth"><section class="side"><div class="brand">' + logo() + '<div><b>Inspection Ready</b><span>' + t('VAT & WHT inspection readiness') + '</span></div></div>' +
       '<div><h1>' + t('Be ready the day ZATCA asks.') + '</h1><p style="margin-top:12px;color:#cfe5dc">' + t('A monthly inspection exercise for every legal entity: reconcile, sample, document, sign off.') + '</p></div>' +
       '<ul>' + pts.map(function (p) { return '<li>' + Z.icon('check-circle') + '<span>' + esc(p) + '</span></li>'; }).join('') + '</ul></section>' +
-      '<section class="form"><div><div class="spread" style="margin-bottom:22px"><h2>' + (mode === 'login' ? t('Sign in') : t('Create your organisation')) + '</h2><button class="btn ghost small" data-act="lang">' + (S.lang === 'ar' ? 'English' : 'العربية') + '</button></div>' +
+      '<section class="form"><div><div class="spread" style="margin-bottom:22px"><h2>' + (mode === 'login' ? t('Sign in') : mode === 'join' ? t('Join your company') : t('Open an organisation')) + '</h2><button class="btn ghost small" data-act="lang">' + (S.lang === 'ar' ? 'English' : 'العربية') + '</button></div>' +
       '<form id="authf" class="grid">' +
-      (mode === 'signup' ? '<label class="f"><span>' + t('Organisation name') + '</span><input type="text" name="orgName" required autocomplete="organization"></label><label class="f"><span>' + t('Your name') + '</span><input type="text" name="name" required autocomplete="name"></label>' : '') +
+      (mode === 'join' ? '<p class="muted" style="margin:-8px 0 4px">' + t('Your company received a key when it was set up. Ask your administrator for it.') + '</p><label class="f"><span>' + t('Company key') + '</span><input type="text" name="companyKey" required autocomplete="off" spellcheck="false" dir="ltr" placeholder="XXXX-XXXX-XXXX" class="zk-keyin" maxlength="20"></label><label class="f"><span>' + t('Your name') + '</span><input type="text" name="name" required autocomplete="name"></label>' : '') +
+      (mode === 'signup' ? '<p class="muted" style="margin:-8px 0 4px">' + t('For the platform owner only. Companies join with their key.') + '</p><label class="f"><span>' + t('Organisation name') + '</span><input type="text" name="orgName" required autocomplete="organization"></label><label class="f"><span>' + t('Your name') + '</span><input type="text" name="name" required autocomplete="name"></label>' : '') +
       '<label class="f"><span>' + t('Email') + '</span><input type="email" name="email" required autocomplete="email"></label>' +
-      '<label class="f"><span>' + t('Password') + '</span><input type="password" name="password" required minlength="' + (mode === 'signup' ? 10 : 1) + '" autocomplete="' + (mode === 'signup' ? 'new-password' : 'current-password') + '">' + (mode === 'signup' ? '<small>' + t('At least 10 characters.') + '</small>' : '') + '</label>' +
+      '<label class="f"><span>' + t('Password') + '</span><input type="password" name="password" required minlength="' + (mode !== 'login' ? 10 : 1) + '" autocomplete="' + (mode !== 'login' ? 'new-password' : 'current-password') + '">' + (mode !== 'login' ? '<small>' + t('At least 10 characters.') + '</small>' : '') + '</label>' +
       '<label class="row" style="gap:8px;margin:2px 0 4px;font-size:14px"><input type="checkbox" name="remember" value="1" checked style="width:auto"> ' + t('Keep me signed in on this device') + '</label>' +
-      '<button class="btn primary" type="submit">' + (mode === 'login' ? t('Sign in') : t('Create organisation')) + '</button></form>' +
-      '<p class="muted" style="margin-top:18px">' + (mode === 'login' ? t('New here?') + ' <a href="#" data-act="authmode" data-m="signup">' + t('Create an organisation') + '</a>' : '<a href="#" data-act="authmode" data-m="login">' + t('I already have an account') + '</a>') + '</p>' +
+      '<button class="btn primary" type="submit">' + (mode === 'login' ? t('Sign in') : mode === 'join' ? t('Join my company') : t('Open organisation')) + '</button></form>' +
+      '<p class="muted" style="margin-top:18px">' + (mode === 'login' ? t('First time here?') + ' <a href="#" data-act="authmode" data-m="join">' + t('Join your company with its key') + '</a>' : '<a href="#" data-act="authmode" data-m="login">' + t('I already have an account') + '</a>') + '</p>' +
+      (mode === 'login' ? '<p class="faint" style="font-size:12.5px"><a href="#" data-act="authmode" data-m="signup">' + t('Platform owner: open an organisation') + '</a></p>' : '') +
       '<p class="faint" style="font-size:13px">' + t('Want to look around first?') + ' <a href="#" data-act="localmode">' + t('Try it on this device with demo data') + '</a></p></div></section></div>';
     document.getElementById('authf').addEventListener('submit', function (e) {
       e.preventDefault();
@@ -305,7 +307,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
     [['settings', t('Settings'), 'gear-six', 'manager'], ['users', t('Users'), 'users-three', 'owner'], ['audit', t('Audit trail'), 'list-checks', 'manager']].forEach(function (i) {
       if (Z.can(i[3])) h += nav('#/' + tx + '/' + i[0], i[1], i[2], view === i[0]);
     });
-    if (S.api.mode === 'cloud') h += nav('#/' + tx + '/platform', t('Platform'), 'globe-hemisphere-east', view === 'platform');
+    if (S.api.mode === 'cloud' && S.platform) h += nav('#/' + tx + '/platform', t('Platform'), 'globe-hemisphere-east', view === 'platform');
     h += '<div class="group">' + t('Help and data') + '</div>';
     if (S.api.mode === 'cloud' && S.tenant && S.tenant.spreadsheetUrl) h += nav(esc(S.tenant.spreadsheetUrl), t('Google Sheet (your data)'), 'table', false, true);
     h += nav('https://besgasksa.github.io/Zatca/Inspection-Ready-Guide.pdf', t('User guide (PDF)'), 'book-open-text', false, true);
@@ -731,6 +733,7 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
       Z.setMain('<div class="pagehead"><div><p class="eyebrow">' + t('Organisation') + '</p><h1>' + t('Users and company access') + '</h1><p>' + t('Tick a box to let a person work on a company. Owner: everything. Manager: settings and sign-off. Preparer: uploads, checks, samples and findings. Viewer: read only.') + '</p></div>' +
         '<button class="btn primary" data-act="edituser">' + Z.icon('user-plus') + ' ' + t('Add user') + '</button></div>' +
         (demo ? '<div class="paper note">' + Z.icon('info') + ' ' + t('Demo mode: you can set up users and access to try it, but they cannot sign in. Connect the Google Sheets backend to invite your team.') + '</div>' : '') +
+        (!demo && S.tenant && S.tenant.joinKey ? '<section class="paper zk-keycard"><span class="zk-ten-ico">' + Z.icon('key') + '</span><div><h2>' + t('Invite your colleagues') + '</h2><p class="muted" style="margin:2px 0 8px">' + t('Share this company key. People who join with it start with no access; tick their companies below to let them in.') + '</p><div class="zk-key"><span class="zk-key-l">' + t('Company key') + '</span><code dir="ltr">' + esc(S.tenant.joinKey) + '</code><button type="button" class="btn small" data-act="copykey" data-k="' + esc(S.tenant.joinKey) + '">' + Z.icon('copy') + ' ' + t('Copy') + '</button></div></div></section>' : '') +
         '<div class="stack"><div class="kpis">' +
         '<div>' + Z.icon('users-three') + '<b>' + active.length + '</b><span>' + t('Active users') + '</span></div>' +
         '<div>' + Z.icon('buildings') + '<b>' + ents.length + '</b><span>' + t('Companies') + '</span></div>' +
@@ -797,11 +800,59 @@ var Z = window.Z = { S: {}, ACT: {}, CHG: {}, views: {} };
           '<section class="paper empty"><i class="ph ph-list-checks big" aria-hidden="true"></i><h2>' + t('No changes recorded yet') + '</h2></section>'));
     });
   };
+  // ---------------------------------------------------------------- platform: the companies using the service
+  // Only platform owners (SUPER_ADMINS) see this. Each company gets its own Google Sheet
+  // and a key its people use to join; the first one in becomes the company owner.
   Z.views.platform = function () {
     return Z.call('platformTenants').then(function (r) {
-      Z.setMain('<div class="pagehead"><div><h1>' + t('Platform - organisations') + '</h1><p>' + t('Every tenant has its own Google Sheet.') + '</p></div>' + (r.registryUrl ? '<a class="btn" href="' + esc(r.registryUrl) + '" target="_blank" rel="noopener noreferrer">' + t('Open the Registry sheet') + ' ↗</a>' : '') + '</div><div class="paper flush"><table class="t"><thead><tr><th>' + t('Organisation') + '</th><th>' + t('Created') + '</th><th>' + t('Status') + '</th><th></th></tr></thead><tbody>' +
-        r.tenants.map(function (x) { return '<tr><td><b>' + esc(x.name) + '</b><div><a href="' + esc(x.spreadsheetUrl) + '" target="_blank" rel="noopener">' + t('Sheet') + '</a></div></td><td>' + esc(String(x.createdAt).slice(0, 10)) + '</td><td>' + Z.pill(x.status === 'active' ? 'pass' : 'fail', t(cap(x.status))) + '</td><td><button class="btn small" data-act="tstatus" data-id="' + x.id + '" data-s="' + (x.status === 'active' ? 'suspended' : 'active') + '">' + (x.status === 'active' ? t('Suspend') : t('Reactivate')) + '</button></td></tr>'; }).join('') + '</tbody></table></div>');
+      S.tenants = r.tenants;
+      var list = r.tenants.slice().sort(function (x, y) { return String(y.createdAt).localeCompare(String(x.createdAt)); });
+      var act = list.filter(function (x) { return x.status === 'active'; }).length, people = list.reduce(function (s2, x) { return s2 + (x.users || 0); }, 0), waiting = list.filter(function (x) { return !x.users; }).length;
+      var kpi = function (icon, v, label, drill, tone) { return '<div class="' + (tone || '') + '" data-drill="' + drill + '">' + Z.icon(icon) + '<b>' + v + '</b><span>' + esc(label) + '</span></div>'; };
+      var cards = list.map(function (x, i) {
+        return '<article class="zk-ten st-' + esc(x.status) + '" style="--i:' + i + '"><header><span class="zk-ten-ico">' + Z.icon('buildings') + '</span><div><h3>' + esc(x.name) + '</h3><p class="faint">' + t('Created') + ' ' + Z.ltr(String(x.createdAt || '').slice(0, 10)) + (x.contact ? ', ' + esc(x.contact) : '') + '</p></div>' +
+          Z.pill(x.status === 'active' ? 'pass' : 'fail', t(cap(x.status))) + '</header>' +
+          '<div class="zk-key"><span class="zk-key-l">' + t('Company key') + '</span><code dir="ltr">' + esc(x.joinKey || '-') + '</code><button type="button" class="btn small" data-act="copykey" data-k="' + esc(x.joinKey || '') + '">' + Z.icon('copy') + ' ' + t('Copy') + '</button></div>' +
+          '<div class="zk-ten-f"><span>' + Z.icon('users-three') + ' <b>' + Z.count(x.users || 0) + '</b> ' + t('people') + '</span><span>' + Z.icon('crown-simple') + ' ' + (x.owners && x.owners.length ? esc(x.owners.join(', ')) : '<span class="faint">' + t('No owner yet: share the key') + '</span>') + '</span>' +
+          (x.lastLoginAt ? '<span class="faint">' + t('Last sign-in') + ' ' + Z.ltr(String(x.lastLoginAt).slice(0, 10)) + '</span>' : '') + '</div>' +
+          '<footer><a class="btn small ghost" href="' + esc(x.spreadsheetUrl) + '" target="_blank" rel="noopener noreferrer">' + Z.icon('table') + ' ' + t('Data sheet') + '</a><button class="btn small ghost" data-act="tkey" data-id="' + esc(x.id) + '">' + Z.icon('arrows-clockwise') + ' ' + t('New key') + '</button>' +
+          '<button class="btn small' + (x.status === 'active' ? ' danger' : '') + '" data-act="tstatus" data-id="' + esc(x.id) + '" data-s="' + (x.status === 'active' ? 'suspended' : 'active') + '">' + (x.status === 'active' ? t('Suspend') : t('Reactivate')) + '</button></footer></article>';
+      }).join('');
+      Z.setMain('<div class="pagehead"><div><p class="eyebrow">' + Z.icon('globe-hemisphere-east') + ' ' + t('Platform') + '</p><h1>' + t('Companies using Inspection Ready') + '</h1><p>' + t('Only you can open a company. Each one gets its own Google Sheet and a company key; send the key to the company, and its people join with it. The first person to join becomes the company owner.') + '</p></div>' +
+        '<div class="row">' + (r.registryUrl ? '<a class="btn" href="' + esc(r.registryUrl) + '" target="_blank" rel="noopener noreferrer">' + Z.icon('table') + ' ' + t('Registry sheet') + '</a>' : '') + '<button class="btn primary" data-act="tnew">' + Z.icon('plus') + ' ' + t('New company') + '</button></div></div>' +
+        '<div class="stack"><div class="kpis">' + kpi('buildings', list.length, t('Companies'), 'plat:all') + kpi('check-circle', act, t('Active'), 'plat:active', 'good') + kpi('users-three', people, t('People signed up'), 'plat:people') + kpi('hourglass-medium', waiting, t('Waiting for their first user'), 'plat:waiting', waiting ? 'bad' : '') + '</div>' +
+        (cards ? '<div class="zk-tens">' + cards + '</div>' : '<section class="paper empty zk-empty"><i class="ph ph-buildings big" aria-hidden="true"></i><h2>' + t('No companies yet') + '</h2><p>' + t('Create the first company and send it its key.') + '</p><button class="btn primary" data-act="tnew">' + t('New company') + '</button></section>') + '</div>');
     }).catch(function () { Z.setMain('<div class="paper empty"><h2>' + t('Platform administrators only') + '</h2><p>' + t('Add your email to the SUPER_ADMINS script property to manage tenants.') + '</p></div>'); });
+  };
+  Z.ACT.tnew = function () {
+    Z.modal(t('New company'), '<form id="tnf" class="grid"><label class="f"><span>' + t('Company name') + '</span><input type="text" name="name" required maxlength="120"></label>' +
+      '<label class="f"><span>' + t('Contact email (optional)') + '</span><input type="email" name="contact"></label><p class="faint" style="font-size:12.5px">' + t('A new Google Sheet is created for this company only. You get its key straight away.') + '</p></form>',
+      '<button class="btn" data-act="closemodal">' + t('Cancel') + '</button><button class="btn primary" data-act="tcreate">' + t('Create company') + '</button>');
+  };
+  Z.ACT.tcreate = function (el) {
+    var f = document.getElementById('tnf'); if (!f.reportValidity()) return;
+    el.disabled = true;
+    Z.call('platformTenantCreate', { tenant: Object.fromEntries(new FormData(f)) }).then(function (r) {
+      Z.modal(t('Company created'), '<div class="zk-created"><i class="ph ph-check-circle big" aria-hidden="true"></i><h3>' + esc(r.tenant.name) + '</h3><p>' + t('Send this key to the company. Their people open the site, choose "Join your company" and enter it.') + '</p>' +
+        '<div class="zk-key big"><code dir="ltr">' + esc(r.tenant.joinKey) + '</code><button type="button" class="btn primary" data-act="copykey" data-k="' + esc(r.tenant.joinKey) + '">' + Z.icon('copy') + ' ' + t('Copy') + '</button></div></div>',
+        '<button class="btn primary" data-act="closemodal">' + t('Done') + '</button>');
+      Z.route();
+    }).catch(function () { el.disabled = false; });
+  };
+  Z.ACT.tkey = function (el) {
+    if (!confirm(t('Issue a new key? The old key stops working; people already in the company are not affected.'))) return;
+    Z.call('platformTenantKey', { id: el.dataset.id }).then(function (r) { Z.toast(t('New key') + ': ' + r.tenant.joinKey); Z.route(); });
+  };
+  Z.ACT.copykey = function (el) {
+    var k = el.dataset.k; if (!k) return;
+    var done = function () { Z.toast(t('Key copied')); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(k).then(done, function () { prompt(t('Copy the key'), k); });
+    else prompt(t('Copy the key'), k);
+  };
+  (Z.DRILL = Z.DRILL || {}).plat = function (k) {
+    var l = (S.tenants || []).filter(function (x) { return k === 'all' || k === 'people' || (k === 'active' ? x.status === 'active' : !x.users); });
+    return { title: { all: t('Companies'), active: t('Active'), people: t('People signed up'), waiting: t('Waiting for their first user') }[k], money: false, total: k === 'people' ? l.reduce(function (s2, x) { return s2 + (x.users || 0); }, 0) : l.length, totalLabel: k === 'people' ? t('people') : t('companies'),
+      rows: l.map(function (x) { return { label: x.name, sub: (x.joinKey || '') + (x.owners && x.owners.length ? ', ' + x.owners.join(', ') : ''), value: x.users || 0, display: Z.count(x.users || 0) + ' ' + t('people'), tone: x.status === 'active' ? (x.users ? 'pass' : 'warn') : 'fail' }; }), empty: t('Nothing here.') };
   };
   Z.ACT.tstatus = function (el) { Z.call('platformTenantStatus', { id: el.dataset.id, status: el.dataset.s }).then(Z.route); };
 

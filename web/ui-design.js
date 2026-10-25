@@ -225,7 +225,7 @@
 
   // ---------------------------------------------------------------- breakdown drawer
   // spec: { title, sub, total, totalLabel, money, rows: [{ label, sub, value, display, href, act, tone, data }], note, empty }
-  Z.DRILL = {};
+  Z.DRILL = Z.DRILL || {};
   var lastFocus = null;
   Z.drawer = function (spec) {
     Z.closeDrawer(true);
@@ -351,4 +351,25 @@ document.addEventListener('keydown', function (e) {
   };
   var pend = null;
   new MutationObserver(function () { if (pend) return; pend = setTimeout(function () { pend = null; enhance(); }, 30); }).observe(document.documentElement, { childList: true, subtree: true });
+})();
+
+/* Every password field gets an eye button that shows or hides what was typed. */
+(function () {
+  'use strict';
+  function add(inp) {
+    if (inp.dataset.eye) return; inp.dataset.eye = '1';
+    var wrap = document.createElement('span'); wrap.className = 'zk-pw';
+    inp.parentNode.insertBefore(wrap, inp); wrap.appendChild(inp);
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'zk-eye'; b.setAttribute('aria-pressed', 'false'); b.setAttribute('aria-label', Z.t('Show password'));
+    b.innerHTML = '<i class="ph ph-eye" aria-hidden="true"></i>';
+    b.addEventListener('click', function () {
+      var show = inp.type === 'password'; inp.type = show ? 'text' : 'password';
+      b.setAttribute('aria-pressed', String(show)); b.setAttribute('aria-label', Z.t(show ? 'Hide password' : 'Show password'));
+      b.innerHTML = '<i class="ph ph-' + (show ? 'eye-slash' : 'eye') + '" aria-hidden="true"></i>'; inp.focus();
+    });
+    wrap.appendChild(b);
+  }
+  function scan() { [].forEach.call(document.querySelectorAll('input[type=password]:not([data-eye])'), add); }
+  new MutationObserver(scan).observe(document.documentElement, { childList: true, subtree: true });
+  scan();
 })();

