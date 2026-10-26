@@ -1,7 +1,7 @@
 // node tools/serve.js [dir] [port] — static dev server that never lets the browser cache.
 var http = require('http'), fs = require('fs'), path = require('path');
 var root = path.resolve(process.argv[2] || 'web'), port = +(process.argv[3] || 5180);
-var TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' };
+var TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.webmanifest': 'application/manifest+json', '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' };
 http.createServer(function (req, res) {
   var p = decodeURIComponent(req.url.split('?')[0]);
   var f = path.join(root, p === '/' ? 'index.html' : p);

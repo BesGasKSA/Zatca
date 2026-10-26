@@ -1219,3 +1219,8 @@ section[data-f="bad"] .check.st-pass, section[data-f="bad"] .check.st-na, sectio
 .zk-eye:hover { color: var(--ink); } .zk-eye:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 .zk-keycard { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; }
 @media (max-width: 960px) { .zk-tens { grid-template-columns: 1fr; } }
+
+/* installed app */
+.zk-install-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); font-size: 12.5px; }
+.zk-ios { display: grid; gap: 10px; padding-inline-start: 22px; font-size: 14px; } .zk-ios i { color: var(--accent); }
+@media (display-mode: standalone) { .banner { display: none; } }

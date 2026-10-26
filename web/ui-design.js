@@ -373,3 +373,36 @@ document.addEventListener('keydown', function (e) {
   new MutationObserver(scan).observe(document.documentElement, { childList: true, subtree: true });
   scan();
 })();
+
+/* Installed app: registers the service worker on the hosted site and offers an
+   "Install app" button where the browser allows it (Chrome, Edge, Android). On iPhone
+   and iPad, Safari has no install prompt, so the button explains Share > Add to Home Screen. */
+(function () {
+  'use strict';
+  var t = Z.t, deferred = null;
+  var hosted = /^https:$/.test(location.protocol) || /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+  var standalone = function () { return (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true; };
+  var ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (hosted && 'serviceWorker' in navigator && !window.google) {
+    window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
+  }
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferred = e; paint(); });
+  window.addEventListener('appinstalled', function () { deferred = null; paint(); Z.toast && Z.toast(t('Inspection Ready is installed')); });
+  function can() { return !standalone() && (deferred || (ios && hosted)); }
+  function btn(cls) { return '<button type="button" class="' + cls + ' zk-install" data-act="installapp">' + Z.icon('download-simple') + '<span>' + t('Install app') + '</span></button>'; }
+  function paint() {
+    var on = can();
+    document.querySelectorAll('.zk-install').forEach(function (b) { if (!on) b.remove(); });
+    if (!on) return;
+    var foot = document.querySelector('.rail .foot-acts');
+    if (foot && !foot.querySelector('.zk-install')) foot.insertAdjacentHTML('afterbegin', btn('btn small ghost'));
+    var auth = document.querySelector('.auth .form > div');
+    if (auth && !auth.querySelector('.zk-install')) auth.insertAdjacentHTML('beforeend', '<div class="zk-install-row">' + btn('btn small') + '<span class="faint">' + t('Opens in its own window, like a desktop or phone app.') + '</span></div>');
+  }
+  Z.ACT.installapp = function () {
+    if (deferred) { var d = deferred; deferred = null; d.prompt(); d.userChoice.then(function () { paint(); }); return; }
+    Z.modal(t('Install on iPhone or iPad'), '<ol class="zk-ios"><li>' + t('Open this page in Safari.') + '</li><li>' + t('Tap the Share button') + ' ' + Z.icon('export') + '</li><li>' + t('Choose Add to Home Screen, then Add.') + '</li></ol><p class="faint">' + t('Inspection Ready then opens from your home screen in its own window.') + '</p>',
+      '<button class="btn primary" data-act="closemodal">' + t('Done') + '</button>');
+  };
+  new MutationObserver(function () { if (can()) paint(); }).observe(document.documentElement, { childList: true, subtree: true });
+})();

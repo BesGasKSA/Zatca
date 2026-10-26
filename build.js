@@ -21,8 +21,12 @@ function out(rel, content) {
   fs.mkdirSync(path.dirname(f), { recursive: true });
   fs.writeFileSync(f, content);
 }
-out('apps-script/Index.html', html);
+out('apps-script/Index.html', html.replace(/<!--pwa-->[\s\S]*?<!--\/pwa-->\n?/, ''));
 out('dist/index.html', html);
+// installable web app: manifest, service worker and icons sit beside every hosted copy
+var PWA = ['manifest.webmanifest', 'sw.js'].concat(fs.readdirSync(path.join(W, 'icons')).map(function (f) { return 'icons/' + f; }));
+function pwaTo(base) { PWA.forEach(function (f) { var dst = path.join(__dirname, base, f); fs.mkdirSync(path.dirname(dst), { recursive: true }); fs.copyFileSync(path.join(W, f), dst); }); }
+pwaTo('dist');
 
 var deploy = {};
 try { deploy = JSON.parse(fs.readFileSync(path.join(__dirname, 'deploy.json'), 'utf8')); } catch (e) {}
@@ -34,5 +38,6 @@ if (deploy.apiUrl) {
   out('docs/.nojekyll', '');
   out('index.html', pages);
   out('.nojekyll', '');
+  pwaTo('docs'); pwaTo('.');
 }
 console.log('built apps-script/Index.html, dist/index.html' + (deploy.apiUrl ? ', docs/index.html (Pages → ' + deploy.apiUrl.slice(0, 60) + '…)' : '') + ' — ' + Math.round(html.length / 1024) + ' KB');

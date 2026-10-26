@@ -217,6 +217,18 @@ get an absolute `--user-data-dir`; a relative one silently fails to start.
   get one from the Platform page ("New key").
 - Every password field gets a show/hide eye (`.zk-pw`, `ui-design.js`).
 
+## Installable web app (2026-10-26)
+
+- `web/manifest.webmanifest`, `web/sw.js`, `web/icons/` (made by `tools/make-icons.js`).
+  `build.js` copies them beside every hosted copy (repo root, `docs/`, `dist/`) and strips
+  the `<!--pwa-->` head block from the Apps Script copy, which cannot be installed.
+- The service worker is network-first for pages (every visit gets the latest release) and
+  never touches other origins: the backend and tax data are never cached. Bump `CACHE`
+  in `sw.js` only if the shell files change name.
+- `ui-design.js` registers it on https/localhost, shows "Install app" (sidebar foot and
+  sign-in) when Chrome/Edge fire `beforeinstallprompt`, and on iPhone/iPad explains
+  Share > Add to Home Screen. Scratchpad check: `Page.getInstallabilityErrors` is empty.
+
 ## Deployment (backend live since 2026-10-19)
 
 The ids and URLs live in `deploy.json` (read by `build.js`). The Google
